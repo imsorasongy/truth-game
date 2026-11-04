@@ -520,6 +520,10 @@ html, body { height: 100%; overflow: hidden; }
 /* 법정: 우리 측 반론 */
 .court .log .log-line.rebut:last-child { border-color: var(--win); }
 
+/* 폰 게임: 스크롤 막대는 숨기고 손가락으로만 넘긴다 */
+* { scrollbar-width: none; -ms-overflow-style: none; }
+*::-webkit-scrollbar { display: none; width: 0; height: 0; }
+
 </style>
 
 <div id="backdrop" aria-hidden="true"></div>
