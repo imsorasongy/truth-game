@@ -524,6 +524,12 @@ html, body { height: 100%; overflow: hidden; }
 * { scrollbar-width: none; -ms-overflow-style: none; }
 *::-webkit-scrollbar { display: none; width: 0; height: 0; }
 
+/* 막대 숨김이 안 먹는 폰 대비: 넘기는 칸을 화면 오른쪽 밖으로 조금 넓혀 막대가 잘려 나가게 */
+#app.vn { overflow: hidden; }
+.vn-bottom { right: -24px !important; padding-right: 34px !important; }
+.vn.show-log .vn-bottom { padding-right: 34px !important; }
+.ev-drawer { right: -24px; padding-right: 38px; }
+
 </style>
 
 <div id="backdrop" aria-hidden="true"></div>
