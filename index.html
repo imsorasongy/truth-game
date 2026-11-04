@@ -514,6 +514,12 @@ html, body { height: 100%; overflow: hidden; }
 .vn.show-log .scene { visibility: hidden; }
 .vn.show-log .vn-bottom { --fs: 1 !important; }
 
+/* 글자 크기는 화면마다 바꾸지 않고 대화 기록 크기로 통일, 넘치면 대화창을 위아래로 넘긴다 */
+.vn-bottom { overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+.vn .vn-bottom { --fs: 1 !important; }
+/* 법정: 우리 측 반론 */
+.court .log .log-line.rebut:last-child { border-color: var(--win); }
+
 </style>
 
 <div id="backdrop" aria-hidden="true"></div>
@@ -13454,8 +13460,7 @@ function screenFee(extra) {
     ${C.confessed && c.truth === "hiding" ? `<div class="evlist"><div class="ev card-k"><div class="ev-name">${esc(c.confessionCard.name)}</div><div class="ev-desc">${esc(c.confessionCard.desc)}</div></div></div>` : ""}
     <div class="feebox">
       <div><div class="eyebrow">수임료 제시</div>
-      <div class="market">비슷한 사건 시세 착수금 <b>${won(marketFee(c))}</b> · 성공보수 <b>${won(marketBonus(c))}</b><br>명성 덕분에 시세보다 약 ${Math.round((mult * (1 + office().up) - 1) * 100)}% 더 받을 여지가 있습니다. 의뢰인 형편에 따라 다릅니다. 성공보수는 이겨야만 받습니다.</div></div>
-      ${has("sec") ? secHint(c) : ""}
+      <div class="market">비슷한 사건 시세 착수금 <b>${won(marketFee(c))}</b> · 성공보수 <b>${won(marketBonus(c))}</b></div></div>
       <div class="feerow"><span class="lbl">착수금</span><button data-adj="F" data-d="-1" aria-label="착수금 내리기">−</button>
         <span class="amt"><input id="offerF" inputmode="numeric" value="${C.offerF.toLocaleString()}"><span class="unit">만원</span></span>
         <button data-adj="F" data-d="1" aria-label="착수금 올리기">+</button></div>
@@ -13550,6 +13555,8 @@ function screenTrial() {
 const MIN = -8, MAX = 10;
 const pct = s => Math.max(0, Math.min(100, (s - MIN) / (MAX - MIN) * 100));
 
+// 받침 있으면 '을', 없으면 '를'
+const josaEul = w => { const ch = (w.match(/[가-힣](?=[^가-힣]*$)/) || [""])[0]; return ch && (ch.charCodeAt(0) - 0xac00) % 28 ? "을" : "를"; };
 function runTrial() {
   const c = C.c;
   const steps = [];
@@ -13564,16 +13571,17 @@ function runTrial() {
     const hit = c.truth === "hiding" && cs.includes("k") ? C.sub.has("k") && cs.includes(C.arg) : cs.some(id => C.sub.has(id) || id === C.arg);
     // 거짓 의뢰인 사건의 결정타는 막지 못하면 그대로 패소
     const power = c.truth === "liar" && o.power >= 5 ? 12 : o.power;
-    // 막았다면 무엇으로 막았는지(증거·털어놓은 사실·주장) 함께 보여 준다
-    let by = "";
+    steps.push({ ava: isCrim(c) ? "pros" : "opp", cls: "opp", who: "상대방 반박", text: `${o.name} — ${o.desc}`, d: hit ? 0 : -power, dTxt: hit ? "" : null });
+    // 막았다면 우리 측이 그 자리에서 증거·털어놓은 사실·주장을 내밀며 반론한다
     if (hit) {
-      const names = cs.filter(id => C.sub.has(id) || id === C.arg).map(id =>
-        id === "k" ? `털어놓은 사실 「${c.confessionCard.name}」`
-        : id === C.arg ? `주장 「${c.arguments.find(a => a.id === id).text}」`
-        : `증거 「${(c.evidence.find(e => e.id === id) || {}).name}」`);
-      by = ` ▶ 막은 것: ${names.join(", ")}`;
+      const ids = cs.filter(id => C.sub.has(id) || id === C.arg);
+      const evNames = ids.filter(id => id !== "k" && id !== C.arg).map(id => (c.evidence.find(e => e.id === id) || {}).name).filter(Boolean);
+      const lines = [];
+      if (ids.includes("k")) lines.push(`그 점은 저희가 먼저 밝힙니다. 「${c.confessionCard.name}」입니다.`);
+      if (evNames.length) lines.push(`우리 측 증거 ${evNames.map(n => `「${n}」`).join(", ")}${josaEul(evNames[evNames.length - 1])} 보십시오.`);
+      if (ids.includes(C.arg)) { const t = c.arguments.find(a => a.id === C.arg).text; lines.push(/[.!?]$/.test(t) ? t : t + "."); }
+      steps.push({ img: heroOf().img, cls: "ours rebut", who: "우리 측 반론", text: `이의 있습니다! ${lines.join(" ")}`, d: 0, dTxt: "막아냄" });
     }
-    steps.push({ ava: isCrim(c) ? "pros" : "opp", cls: hit ? "null" : "opp", who: hit ? "상대방 반박 · 막아냄" : "상대방 반박", text: `${o.name} — ${o.desc}${by}`, d: hit ? 0 : -power });
   });
   const r = Math.random();
   const noise = r < 0.2 ? -1 : r > 0.8 ? 1 : 0;
@@ -13599,10 +13607,10 @@ function runTrial() {
   const step = () => {
     if (i >= steps.length) return judgeCloseUp(fast, () => verdict(score));
     const s = steps[i++]; score += s.d;
-    const dTxt = s.d > 0 ? `+${s.d}` : s.d < 0 ? `−${-s.d}` : "±0";
-    logEl.insertAdjacentHTML("beforeend", `<div class="log-line ${s.cls} ${s.ava ? "has-ava" : ""}">${s.ava ? `<div class="ava"><img src="assets/${s.ava}.webp" alt=""></div>` : ""}<div><span class="who">${esc(s.who)}</span>${esc(s.text)}</div><span class="d ${s.d > 0 ? "pos" : s.d < 0 ? "neg" : "zero"}">${dTxt}</span></div>`);
+    const dTxt = s.dTxt != null ? s.dTxt : s.d > 0 ? `+${s.d}` : s.d < 0 ? `−${-s.d}` : "±0";
+    logEl.insertAdjacentHTML("beforeend", `<div class="log-line ${s.cls} ${s.ava || s.img ? "has-ava" : ""}">${s.ava || s.img ? `<div class="ava"><img src="${s.img || `assets/${s.ava}.webp`}" alt=""></div>` : ""}<div><span class="who">${esc(s.who)}</span>${esc(s.text)}</div><span class="d ${s.d > 0 ? "pos" : s.d < 0 ? "neg" : "zero"}">${dTxt}</span></div>`);
     tilt();
-    if (s.cls === "opp") slam("반박!", "bad"); else if (s.who.includes("막아냄")) slam("막아냄!", "good");
+    if (s.cls === "opp") slam("반박!", "bad"); else if (s.cls.includes("rebut")) slam("이의 있음!", "good");
     if (!fast) logEl.lastElementChild.scrollIntoView({ block: "nearest", behavior: "smooth" });
     timer = setTimeout(step, fast ? 0 : 900);
   };
@@ -13895,7 +13903,7 @@ function show(html, dockHtml, scene = "office", track) {
     // 상대가 반박할 때 상대 얼굴이 흔들리게
     new MutationObserver(() => {
       const last = app.querySelector(".log .log-line:last-child");
-      if (last && last.classList.contains("opp")) { app.classList.remove("hit"); void app.offsetWidth; app.classList.add("hit"); }
+      if (last && (last.classList.contains("opp") || last.classList.contains("rebut"))) { app.classList.remove("hit"); void app.offsetWidth; app.classList.add("hit"); }
     }).observe(app.querySelector("#log"), { childList: true });
   } else {
     app.classList.add("panel");
@@ -13932,11 +13940,8 @@ function fitBottom() {
     sc.style.top = top + "px"; sc.style.width = sc.style.height = size + "px"; sc.style.maxHeight = "none";
     bt.style.top = (top + size + 40) + "px"; bt.style.bottom = "8px";
     app.classList.toggle("compact", size < 150);
-    // 글자 배율: 넘치면 0.8배까지 줄이고, 남으면 1.3배까지 키운다(말풍선 안 스크롤 없이)
-    let fsv = 1; bt.style.setProperty("--fs", fsv);
-    const fits = () => bt.scrollHeight <= bt.clientHeight + 1;
-    if (!fits()) { while (fsv > 0.8 && !fits()) { fsv = +(fsv - 0.05).toFixed(2); bt.style.setProperty("--fs", fsv); } }
-    else { while (fsv < 1.3) { const nx = +(fsv + 0.05).toFixed(2); bt.style.setProperty("--fs", nx); if (!fits()) { bt.style.setProperty("--fs", fsv); break; } fsv = nx; } }
+    // 글자 크기는 대화 기록과 같게 고정, 넘치면 아래 대화창을 넘겨 본다
+    bt.style.setProperty("--fs", 1);
     // 아래가 비면 지난 문답을 최근 것부터 더 보여 준다(넘치기 직전까지)
     const talk = bt.querySelector(".talk");
     if (talk && !showLog) {
