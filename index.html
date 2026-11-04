@@ -13333,7 +13333,7 @@ function screenConsult() {
   on("[data-q]", e => {
     C.asked.push(+e.currentTarget.dataset.q);
     const y = window.scrollY; screenConsult(); window.scrollTo({ top: y });
-    const talkEl = document.getElementById("talk"); talkEl.lastElementChild.scrollIntoView({ block: "center", behavior: REDUCED ? "auto" : "smooth" });
+    const talkEl = document.getElementById("talk"); if (!app.classList.contains("vn")) talkEl.lastElementChild.scrollIntoView({ block: "center", behavior: REDUCED ? "auto" : "smooth" });
   });
   on("[data-ev]", e => {
     const id = e.currentTarget.dataset.ev; C.opened[id] = !C.opened[id];
@@ -13946,6 +13946,8 @@ function fitBottom() {
     app.classList.toggle("compact", size < 150);
     // 글자 크기는 대화 기록과 같게 고정, 넘치면 아래 대화창을 넘겨 본다
     bt.style.setProperty("--fs", 1);
+    // 대화창은 항상 맨 위(가장 최근 대사)부터 보이게
+    if (!showLog) bt.scrollTop = 0;
     // 아래가 비면 지난 문답을 최근 것부터 더 보여 준다(넘치기 직전까지)
     const talk = bt.querySelector(".talk");
     if (talk && !showLog) {
