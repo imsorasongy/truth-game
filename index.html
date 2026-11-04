@@ -13950,10 +13950,10 @@ function fitBottom() {
     bt.style.top = "auto"; bt.style.bottom = "auto";
     const need = bt.offsetHeight;                       // 대사·질문의 실제 높이
     // 의뢰인 그림 크기는 화면 폭에 따라서만 정하고 대화 내용과 상관없이 고정
-    const size = Math.max(170, Math.min(230, app.clientWidth * 0.6));
+    const size = Math.round(Math.max(170, Math.min(230, app.clientWidth * 0.6)) * 0.75);
     sc.style.top = top + "px"; sc.style.width = sc.style.height = size + "px"; sc.style.maxHeight = "none";
     bt.style.top = (top + size + 40) + "px"; bt.style.bottom = "8px";
-    app.classList.toggle("compact", size < 150);
+    app.classList.toggle("compact", size < 100);
     // 글자 크기는 대화 기록과 같게 고정, 넘치면 아래 대화창을 넘겨 본다
     bt.style.setProperty("--fs", 1);
     // 대화창은 항상 맨 위(가장 최근 대사)부터 보이게
