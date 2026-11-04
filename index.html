@@ -13843,7 +13843,7 @@ function screenEnding() {
 const tabsEl = document.createElement("nav");
 tabsEl.id = "tabs";
 document.body.appendChild(tabsEl);
-let showLog = false, showEv = false, lastCaseKey = null;
+let showLog = false, showEv = false, lastCaseKey = null, sizeKey = null, sizeVal = 0;
 const TAB_ICON = {
   ev: '<svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5"/></svg>',
   log: '<svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg>',
@@ -13949,7 +13949,8 @@ function fitBottom() {
     const top = (hud.getBoundingClientRect().bottom || 60) - appTop + 6;
     bt.style.top = "auto"; bt.style.bottom = "auto";
     const need = bt.offsetHeight;                       // 대사·질문의 실제 높이
-    const size = Math.max(170, Math.min(260, app.clientWidth * 0.6, H - top - 40 - need - 8));
+    // 의뢰인 그림 크기는 화면 폭에 따라서만 정하고 대화 내용과 상관없이 고정
+    const size = Math.max(170, Math.min(230, app.clientWidth * 0.6));
     sc.style.top = top + "px"; sc.style.width = sc.style.height = size + "px"; sc.style.maxHeight = "none";
     bt.style.top = (top + size + 40) + "px"; bt.style.bottom = "8px";
     app.classList.toggle("compact", size < 150);
