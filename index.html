@@ -346,8 +346,8 @@ html[data-scene^="end"] #backdrop::after { background: linear-gradient(180deg, #
 @keyframes tutglow { 0%, 100% { box-shadow: 0 0 0 2px #e8c36a, 0 0 10px 2px #e8c36a66; } 50% { box-shadow: 0 0 0 3px #ffe08a, 0 0 22px 6px #ffd76a99; } }
 .cutin { position: fixed; inset: 0; z-index: 25; display: flex; align-items: center; pointer-events: none; }
 .ci-band { position: relative; width: 100%; height: 150px; display: flex; align-items: center; gap: 14px; padding: 0 18px; overflow: hidden; }
-.cutin.us .ci-band { background: linear-gradient(100deg, #0b2a5ae6, #1b4fa0e6 60%, #0b2a5ae6); animation: ciL 1.2s cubic-bezier(.2,.9,.3,1) forwards; }
-.cutin.opp .ci-band { flex-direction: row-reverse; background: linear-gradient(260deg, #5a0b0be6, #a01b1be6 60%, #5a0b0be6); animation: ciR 1.2s cubic-bezier(.2,.9,.3,1) forwards; }
+.cutin.us .ci-band { background: linear-gradient(100deg, #0b2a5ae6, #1b4fa0e6 60%, #0b2a5ae6); animation: ciL var(--ci, 1.2s) cubic-bezier(.2,.9,.3,1) forwards; }
+.cutin.opp .ci-band { flex-direction: row-reverse; background: linear-gradient(260deg, #5a0b0be6, #a01b1be6 60%, #5a0b0be6); animation: ciR var(--ci, 1.2s) cubic-bezier(.2,.9,.3,1) forwards; }
 .ci-face { width: 128px; height: 128px; flex: none; border-radius: 10px; overflow: hidden; border: 3px solid #fff; box-shadow: 0 6px 20px #000a; }
 .ci-face img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 15%; display: block; }
 .ci-txt { font-family: var(--f-display); font-size: clamp(34px, 11vw, 54px); color: #fff; text-shadow: 0 3px 0 #000, 0 0 18px #000; transform: rotate(-4deg); white-space: nowrap; }
@@ -13966,9 +13966,9 @@ function runTrial() {
     };
     if (!fast && (rebut || big)) {
       busy = true;
-      cutIn(rebut ? heroOf().img : `assets/${s.ava}.webp`, rebut ? "이의 있음!" : "반박!", rebut ? "us" : "opp");
-      if (rebut) { flash("white"); sfx("sting"); }
-      timer = setTimeout(run, 1200);
+      cutIn(rebut ? heroOf().img : `assets/${s.ava}.webp`, rebut ? "이의 있음!" : "반박!", rebut ? "us" : "opp", rebut ? 1500 : 1200);
+      if (rebut) flash("white");
+      timer = setTimeout(run, rebut ? 1500 : 1200);
     } else run();
   };
   const tapNext = e => { if (fast || busy || e.target.closest("button")) return; clearTimeout(timer); step(); };
@@ -13979,12 +13979,13 @@ function runTrial() {
 
 let actx = null;
 const zoneOf = sc => sc >= 3 ? 2 : sc >= 1 ? 1 : 0;
-function cutIn(img, txt, side) {
+function cutIn(img, txt, side, ms = 1200) {
   const ov = document.createElement("div");
   ov.className = "cutin " + side;
+  ov.style.setProperty("--ci", ms + "ms");
   ov.innerHTML = `<div class="ci-band"><div class="ci-face"><img src="${img}" alt=""></div><div class="ci-txt">${txt}</div></div>`;
   document.body.appendChild(ov);
-  setTimeout(() => ov.remove(), 1220);
+  setTimeout(() => ov.remove(), ms + 20);
 }
 function flash(color) {
   const f = document.createElement("div");
@@ -13993,7 +13994,7 @@ function flash(color) {
   setTimeout(() => f.remove(), 420);
 }
 function shakeAll() { app.classList.remove("quake"); void app.offsetWidth; app.classList.add("quake"); }
-// 효과음: 반론은 위로 치솟는 '쨍', 반박에 맞으면 낮은 '쿵'
+// 효과음: 반박에 맞으면 낮은 '쿵'
 function sfx(kind) {
   if (!soundOn) return;
   try {
@@ -14005,8 +14006,7 @@ function sfx(kind) {
       g.gain.setValueAtTime(vol, t + at); g.gain.exponentialRampToValueAtTime(0.001, t + at + dur);
       o.connect(g).connect(actx.destination); o.start(t + at); o.stop(t + at + dur + 0.02);
     };
-    if (kind === "sting") { tone("square", 520, 1040, 0.16, 0.12); tone("square", 780, 1560, 0.22, 0.09, 0.06); }
-    else { tone("sine", 140, 45, 0.35, 0.6); tone("triangle", 90, 40, 0.3, 0.3); }
+    tone("sine", 140, 45, 0.35, 0.6); tone("triangle", 90, 40, 0.3, 0.3);
   } catch (e) {}
 }
 // 판결 직전: 판사 얼굴을 크게 띄우고 의사봉 소리
