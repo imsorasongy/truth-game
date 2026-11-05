@@ -451,7 +451,7 @@ html, body { height: 100%; overflow: hidden; }
 .dock .wrap { padding-block: 14px 8px; }
 
 /* 아래 탭 */
-#tabs { position: fixed; left: 0; right: 0; bottom: 0; margin: 0 auto; max-width: 480px; z-index: 8; display: grid; grid-template-columns: repeat(4, 1fr); height: calc(62px + env(safe-area-inset-bottom, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); background: #0d0806f5; border-top: 1px solid #c9a24a44; }
+#tabs { position: fixed; left: 0; right: 0; bottom: 0; margin: 0 auto; max-width: 480px; z-index: 8; display: grid; grid-template-columns: repeat(5, 1fr); height: calc(62px + env(safe-area-inset-bottom, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); background: #0d0806f5; border-top: 1px solid #c9a24a44; }
 #tabs .tab { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11px; color: var(--muted); background: none; border: none; }
 #tabs .tab svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 #tabs .tab.on { color: var(--brass); }
@@ -14510,6 +14510,8 @@ function staffOf(k) {
 }
 const hired = id => !!S && Object.keys(STAFF_PICKS).some(k => (staffOf(k) || {}).id === id);
 const staffFace = k => `assets/staff/${(staffOf(k) || STAFF_PICKS[k][0]).face}.webp`;
+// 사무실 관리에서 돌아갈 곳: 장부에서 들어오면 장부, 아래 탭에서 들어오면 손님 목록·장부
+let officeBack = null;
 function screenOffice() {
   const cur = office(), nx = nextOffice(), full = staffCount() >= capacity();
   const moveBox = nx ? `<div class="pn ${canMove() ? "on" : ""}">
@@ -14537,12 +14539,12 @@ function screenOffice() {
     ${moveBox}
     <div class="section-head"><span class="eyebrow">직원</span><span class="eyebrow">정원 ${staffCount()} / ${capacity()}</span></div>
     <div class="stack">${staff}</div>`,
-    `<button class="btn primary" id="backLedger">장부로 돌아가기</button>`);
+    `<button class="btn primary" id="backLedger">${officeBack ? "돌아가기" : "장부로 돌아가기"}</button>`);
   on("#move", () => { S.money -= nx.cost; S.office = (S.office || 0) + 1; S.moveNote = false; save(); screenOffice(); });
   on("[data-hire]", e => screenHire(e.currentTarget.dataset.hire));
   on("[data-fire]", e => { S.staff[e.currentTarget.dataset.fire] = false; save(); screenOffice(); });
   on("[data-seat]", e => staffPop(e.currentTarget.dataset.seat));
-  on("#backLedger", screenDayEnd);
+  on("#backLedger", () => { const b = officeBack || screenDayEnd; officeBack = null; b(); });
 }
 
 // 사무실 그림의 직원 얼굴을 누르면: 고용한 직원은 정보 카드, 빈자리는 후보 고르기
@@ -14647,7 +14649,7 @@ function screenDayEnd() {
     <button class="btn ghost" id="toOffice">사무실 관리</button>
     <p class="note">다음 달 예상 손님 ${visitorRange(S.rep).join("~")}명 · 수임료 배율 ×${feeMult(S.rep).toFixed(2)}</p>`,
     `<button class="btn primary" id="nextDay">다음 달로</button>`);
-  on("#toOffice", screenOffice);
+  on("#toOffice", () => { officeBack = null; screenOffice(); });
   on("#nextDay", () => { S.day++; S.moveNote = false; planDay(); save(); monthFlip(screenDayIntro); });
 }
 
@@ -14725,6 +14727,7 @@ const TAB_ICON = {
   ev: '<svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5"/></svg>',
   log: '<svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg>',
   arc: '<svg viewBox="0 0 24 24"><path d="M3 7h6l2 2h10v10H3z"/></svg>',
+  ofc: '<svg viewBox="0 0 24 24"><path d="M4 21V5l8-3 8 3v16"/><path d="M9 21v-5h6v5M8 9h2M14 9h2M8 13h2M14 13h2"/></svg>',
   snd: '<svg viewBox="0 0 24 24"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>'
 };
 function renderHud() {
@@ -14739,7 +14742,7 @@ function renderHud() {
 }
 function renderTabs() {
   const hasEv = !!app.querySelector(".ev-drawer"), hasTalk = !!app.querySelector(".log-drawer");
-  const items = [["ev", "증거", hasEv], ["log", "대화 기록", hasTalk], ["arc", "갤러리", !C], ["snd", soundOn ? "음악 켬" : "음악 끔", true]];
+  const items = [["ev", "증거", hasEv], ["log", "대화 기록", hasTalk], ["arc", "갤러리", !C], ["ofc", "사무실", !C && !!S], ["snd", soundOn ? "음악 켬" : "음악 끔", true]];
   tabsEl.innerHTML = items.map(([k, l, ok]) => `<button class="tab ${ok ? "" : "off"} ${(k === "ev" && showEv) || (k === "log" && showLog) ? "on" : ""}" data-tab="${k}" ${ok ? "" : "disabled"}>${TAB_ICON[k]}<span>${l}</span></button>`).join("");
   tabsEl.querySelectorAll("[data-tab]").forEach(b => b.addEventListener("click", () => {
     const k = b.dataset.tab;
@@ -14751,6 +14754,7 @@ function renderTabs() {
     }
     if (k === "ev" || k === "log") { app.classList.toggle("show-ev", showEv); app.classList.toggle("show-logd", showLog); }
     if (k === "arc") return screenArchive(() => monthDone() ? screenDayEnd() : screenDayIntro());
+    if (k === "ofc") { officeBack = () => monthDone() ? screenDayEnd() : screenDayIntro(); return screenOffice(); }
     if (k === "snd") toggleSound();
     renderTabs();
   }));
