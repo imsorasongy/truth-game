@@ -14538,7 +14538,7 @@ function screenOffice() {
   const cur = office(), nx = nextOffice();
   // 직원 얼굴은 그림 맨 아래 줄에. 주인공 얼굴(그림 높이 33~46%)이 그 위에 오도록 보여 줄 부분을 맞춘다
   const banner = `<div class="ofc-banner" style="background-image:url('${sceneImage("office")}')">
-      <div class="ofc-name" id="firmEdit" role="button">${esc(S.firm || "")} ✎<small>${esc(cur.name)}</small></div>
+      <div class="ofc-name" id="firmEdit" role="button">${esc(S.firm || "")}<small>${esc(cur.name)}</small></div>
     <div class="ofc-staff">${STAFF.map(s => `<div class="ofc-seat ${has(s.key) ? "on" : ""}" data-seat="${s.key}" role="button"><img src="${staffFace(s.key)}" alt=""><span>${staffOf(s.key) ? esc(staffOf(s.key).name) : s.name}</span></div>`).join("")}</div></div>`;
   // 사무실은 이름만 두 칸. 누르면 자세한 내용
   const tile = (lbl, o, extra = "") => `<button class="pn ofc-tile ${extra}" data-ofc="${OFFICES.indexOf(o)}"><span class="eyebrow">${lbl}</span><span class="pn-name">${esc(o.name)}</span></button>`;
