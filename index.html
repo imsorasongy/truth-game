@@ -13650,23 +13650,26 @@ function planDay() {
   S.rumorShown = S.rumor || 0; S.rumor = 0;
   // 들어오는 사건 규모는 사무실이 정한다
   const tiers = office().tiers, maxTier = Math.max(...tiers), fits = c => tiers.includes(c.tier);
-  let pool = CASES.filter(c => fits(c) && !S.played.includes(c.id));
-  if (pool.length < n) {
-    // 다 본 사건은 다시 섞어 넣는다
+  // 1순위: 어느 판에서도 상담해 본 적 없는 사건, 2순위: 이번 판에 안 본 사건, 그것도 없으면 다시 섞기
+  const seen = seenLoad();
+  if (CASES.filter(c => fits(c) && !S.played.includes(c.id)).length < n)
     S.played = S.played.filter(id => !CASES.some(c => fits(c) && c.id === id));
-    pool = CASES.filter(c => fits(c) && !S.played.includes(c.id));
-  }
+  const fresh1 = CASES.filter(c => fits(c) && !S.played.includes(c.id) && !seen.has(c.id));
+  const fresh2 = CASES.filter(c => fits(c) && !S.played.includes(c.id) && seen.has(c.id));
   const weight = c => c.tier === maxTier ? 3 : c.tier === maxTier - 1 ? 2 : 1;
   const picks = [];
-  while (picks.length < n && pool.length) {
-    const total = pool.reduce((a, c) => a + weight(c), 0);
-    let r = Math.random() * total, i = 0;
-    for (; i < pool.length; i++) { r -= weight(pool[i]); if (r <= 0) break; }
-    picks.push(pool.splice(Math.min(i, pool.length - 1), 1)[0].id);
+  for (const pool of [fresh1, fresh2]) {
+    while (picks.length < n && pool.length) {
+      const total = pool.reduce((a, c) => a + weight(c), 0);
+      let r = Math.random() * total, i = 0;
+      for (; i < pool.length; i++) { r -= weight(pool[i]); if (r <= 0) break; }
+      picks.push(pool.splice(Math.min(i, pool.length - 1), 1)[0].id);
+    }
   }
   // 사무장이 따로 데려오는 손님
   const extra = (count, ok, w = () => 1) => {
-    let pl = CASES.filter(c => ok(c) && !picks.includes(c.id) && !S.played.includes(c.id));
+    let pl = CASES.filter(c => ok(c) && !picks.includes(c.id) && !S.played.includes(c.id) && !seen.has(c.id));
+    if (!pl.length) pl = CASES.filter(c => ok(c) && !picks.includes(c.id) && !S.played.includes(c.id));
     if (!pl.length) pl = CASES.filter(c => ok(c) && !picks.includes(c.id));
     for (let k = 0; k < count && pl.length; k++) {
       const tot = pl.reduce((a, c) => a + w(c), 0); let r = Math.random() * tot, j = 0;
@@ -13729,6 +13732,10 @@ function screenDayIntro() {
 // 사건 갤러리: 이긴 사건을 분류별로 모은다(새 게임을 시작해도 남는다)
 const GAL_KEY = "lawyer-game-gallery";
 function galLoad() { try { return JSON.parse(localStorage.getItem(GAL_KEY)) || {}; } catch (e) { return {}; } }
+// 상담해 본 사건: 새 게임을 해도 남아서, 다음 판에는 안 해 본 사건부터 나온다
+const SEEN_KEY = "lawyer-game-seen";
+function seenLoad() { try { return new Set(JSON.parse(localStorage.getItem(SEEN_KEY)) || []); } catch (e) { return new Set(); } }
+function seenAdd(id) { const v = seenLoad(); if (v.has(id)) return; v.add(id); try { localStorage.setItem(SEEN_KEY, JSON.stringify([...v])); } catch (e) {} }
 function galAdd(id, info) { const g = galLoad(); if (!g[id]) { g[id] = info; try { localStorage.setItem(GAL_KEY, JSON.stringify(g)); } catch (e) {} } }
 const GROUPS = ["계약·금전", "손해배상", "부동산·임대차", "노동", "가사·상속", "행정", "형사 · 재산범죄", "형사 · 폭력·교통", "형사 · 그 밖의 범죄"];
 function groupOf(c) {
@@ -13795,6 +13802,7 @@ function tutRefresh() {
 document.addEventListener("click", () => setTimeout(tutRefresh, 80), true);
 function startCase(id) {
   const c = BY_ID[id];
+  if (id !== TUT_ID) seenAdd(id);
   C = { c, wallet: id === TUT_ID ? 1.2 : 0.8 + Math.random() * 0.6, suspOrder: shuffle([0, 1, 2]), argOrder: shuffle(c.arguments.map((_, i) => i)), asked: [], opened: {}, verdict: null, susp: null, confessed: false, haggled: false, offerF: null, offerB: null, fee: 0, bonus: 0, flagged: false, left: false, sub: new Set(), arg: null };
   screenConsult();
 }
