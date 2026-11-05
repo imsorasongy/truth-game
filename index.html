@@ -774,7 +774,7 @@ window.CASES.push(
   ],
   opponent: [
     { id: "o1", name: "대면 작성 주장", desc: "\"피고가 직원 앞에서 직접 서명했습니다.\"", power: 3, counters: ["e2", "e1", "e3", "a1"] },
-    { id: "o2", name: "표현대리 주장", desc: "\"원고로서는 피고가 처남에게 대리권을 주었다고 믿을 만했습니다.\"", power: 3, counters: ["a1", "a3"], half: ["e4"] }
+    { id: "o2", name: "표현대리 주장", desc: "\"원고로서는 피고가 처남에게 대리권을 주었다고 믿을 만했습니다.\"", power: 3, counters: ["a1"], half: ["e4", "a3"] }
   ],
   outcomes: {
     win: "원고의 청구를 기각한다.",
@@ -1309,12 +1309,12 @@ window.CASES.push(
   arguments: [
     { id: "a1", text: "포장 영상과 택배 중량을 보면 피고인은 카메라를 정상적으로 보냈다", value: 2 },
     { id: "a2", text: "고소인이 물건을 바꿔치기했을 가능성이 있다", value: 0 },
-    { id: "a3", text: "설령 배송에 문제가 있었더라도 피고인에게 처음부터 속일 고의는 없었다", value: 2 }
+    { id: "a3", text: "설령 배송에 문제가 있었더라도 피고인에게 처음부터 속일 고의는 없었다", value: 0 }
   ],
   opponent: [
     { id: "o1", name: "고소인 진술", desc: "\"피해자가 상자를 열자 벽돌이 나왔습니다.\"", power: 2, counters: ["e2", "e1"] },
     { id: "o2", name: "벽돌 사진", desc: "택배 상자 안에 벽돌이 든 사진. \"피해자가 받은 상자에는 카메라 대신 벽돌이 들어 있었습니다.\"", power: 2, counters: ["e1", "e2"] },
-    { id: "o3", name: "편취 고의", desc: "\"피고인은 돈을 받고도 환불을 거절했습니다. 처음부터 속일 생각이었습니다.\"", power: 2, counters: ["a1", "a3"], half: ["e2", "e1"] }
+    { id: "o3", name: "편취 고의", desc: "\"피고인은 돈을 받고도 환불을 거절했습니다. 처음부터 속일 생각이었습니다.\"", power: 2, counters: ["a1"], half: ["a3", "e2", "e1"] }
   ],
   outcomes: {
     win: "피고인은 무죄.",
@@ -2291,13 +2291,13 @@ window.CASES.push(
   confessionCard: null,
   arguments: [
     { id: "a1", text: "자녀 본인이 청구인과 살기를 원한다", value: 0 },
-    { id: "a2", text: "상대방은 재혼 뒤 자녀를 제대로 돌보지 않는다", value: 1 },
+    { id: "a2", text: "상대방은 재혼 뒤 자녀를 제대로 돌보지 않는다", value: 0 },
     { id: "a3", text: "자녀의 복리를 위해 양육자를 청구인으로 변경해야 한다", value: 2 }
   ],
   opponent: [
     { id: "o1", name: "환경 안정 주장", desc: "\"자녀는 3년 동안 지금 학교에 잘 적응해 왔습니다.\"", power: 2, counters: ["e2"] },
     { id: "o2", name: "경제력 의문", desc: "\"청구인은 이혼 당시 월세방에 살던 사람입니다.\"", power: 2, counters: ["e3"] },
-    { id: "o3", name: "현상 유지 주장", desc: "\"양육자를 바꾸면 자녀가 다시 흔들립니다. 지금 양육 환경을 유지해야 합니다.\"", power: 3, counters: ["a2", "a3"], half: ["e1", "e2"] }
+    { id: "o3", name: "현상 유지 주장", desc: "\"양육자를 바꾸면 자녀가 다시 흔들립니다. 지금 양육 환경을 유지해야 합니다.\"", power: 3, counters: ["a3"], half: ["a2", "e1", "e2"] }
   ],
   outcomes: {
     win: "1. 사건본인의 양육자를 청구인으로 변경한다. 2. 상대방은 청구인에게 사건본인의 양육비로 이 심판 확정일부터 사건본인이 성년에 이르기 전날까지 월 80만 원씩을 매월 말일에 지급하라.",
@@ -2525,14 +2525,14 @@ window.CASES.push(
   confession: null,
   confessionCard: null,
   arguments: [
-    { id: "a1", text: "피고 보험사가 근거 없이 원고 과실을 부풀려 합의를 압박했다", value: 1 },
+    { id: "a1", text: "피고 보험사가 근거 없이 원고 과실을 부풀려 합의를 압박했다", value: 0 },
     { id: "a2", text: "원고는 배달 일을 할 수 없게 됐으므로 정년까지의 수입을 배상받아야 한다", value: 0 },
     { id: "a3", text: "상대 차량의 신호위반이 이 사고의 유일한 원인이다", value: 2 }
   ],
   opponent: [
     { id: "o1", name: "과속 주장", desc: "\"오토바이가 과속으로 교차로에 들어왔습니다.\"", power: 3, counters: ["e2", "e1"] },
     { id: "o2", name: "소득 축소 주장", desc: "\"배달 수입은 들쭉날쭉하니 일용노임으로 계산해야 합니다.\"", power: 2, counters: ["e4"] },
-    { id: "o3", name: "과실상계 주장", desc: "\"원고도 교차로에 들어설 때 좌우를 살폈어야 합니다. 원고에게도 과실이 있습니다.\"", power: 3, counters: ["a1", "a3"], half: ["e1", "e2"] }
+    { id: "o3", name: "과실상계 주장", desc: "\"원고도 교차로에 들어설 때 좌우를 살폈어야 합니다. 원고에게도 과실이 있습니다.\"", power: 3, counters: ["a3"], half: ["e1", "e2"] }
   ],
   outcomes: {
     win: "피고는 원고에게 3억 2,000만 원 및 이에 대하여 이 사건 사고일부터 이 판결 선고일까지 연 5%, 그다음 날부터 다 갚는 날까지 연 12%의 비율로 계산한 돈을 지급하라.",
@@ -5781,7 +5781,7 @@ window.CASES.push(
   confession: null,
   confessionCard: null,
   arguments: [
-    { id: "a1", text: "영상 속 피고인의 손은 차에 전혀 닿지 않았다", value: 1 },
+    { id: "a1", text: "영상 속 피고인의 손은 차에 전혀 닿지 않았다", value: 0 },
     { id: "a2", text: "주차 시비는 이미 원만히 끝나 피고인에게는 범행 동기가 없다", value: 0 },
     { id: "a3", text: "흠집 안쪽에 녹이 슬어 있어 그날 생긴 흠이 아니다", value: 2 }
   ],
@@ -5901,7 +5901,7 @@ window.CASES.push(
   confession: null,
   confessionCard: null,
   arguments: [
-    { id: "a1", text: "피고인 집 베란다에는 안전망이 있어 화분이 떨어질 수 없다", value: 2 },
+    { id: "a1", text: "피고인 집 베란다에는 안전망이 있어 화분이 떨어질 수 없다", value: 1 },
     { id: "a2", text: "피해자의 부상은 가벼운 타박상에 그친다", value: 1 },
     { id: "a3", text: "3층과 5층은 같은 줄이어서 떨어진 위치만으로는 몇 층 화분인지 알 수 없다", value: 2 }
   ],
@@ -6184,7 +6184,7 @@ window.CASES.push(
   arguments: [
     { id: "a1", text: "피고인도 집값 하락의 피해자다", value: 1 },
     { id: "a2", text: "계약 뒤에 받은 대출은 다른 세입자 보증금을 돌려주기 위한 것이었다", value: 2 },
-    { id: "a3", text: "보증금은 시세의 70%로 처음부터 깡통전세가 아니었다", value: 2 }
+    { id: "a3", text: "보증금은 시세의 70%로 처음부터 깡통전세가 아니었다", value: 1 }
   ],
   opponent: [
     { id: "o1", name: "세입자 진술", desc: "\"피고인은 처음부터 돌려줄 돈도 없이 계약했습니다.\"", power: 2, counters: ["e1", "a3"] },
