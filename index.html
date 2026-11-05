@@ -368,12 +368,13 @@ html[data-scene^="end"] #backdrop::after { background: linear-gradient(180deg, #
 @keyframes zw { 0% { box-shadow: 0 0 0 0 #8fdc9f; } 30% { box-shadow: 0 0 18px 6px #8fdc9fcc; } 100% { box-shadow: 0 0 0 0 transparent; } }
 @keyframes zl { 0% { box-shadow: 0 0 0 0 #ff7a66; } 30% { box-shadow: 0 0 18px 6px #ff7a66cc; } 100% { box-shadow: 0 0 0 0 transparent; } }
 .ofc-banner { position: relative; aspect-ratio: 16 / 10; border-radius: 10px; overflow: hidden; border: 2px solid #c9a24a66; background-size: cover; background-position: center 30%; box-shadow: 0 8px 22px #000a; flex: none; }
-.ofc-banner::after { content: ""; position: absolute; inset: 0; background: linear-gradient(#0000 40%, #000c); }
+.ofc-banner::after { content: ""; position: absolute; inset: 0; background: linear-gradient(#000a, #0000 35%); }
 .ofc-name { position: absolute; left: 12px; top: 10px; z-index: 1; font-family: var(--f-display); font-size: 18px; color: #fff; text-shadow: 0 2px 8px #000; display: flex; flex-direction: column; }
 .ofc-name small { font-family: inherit; font-size: 12px; color: #e8d6b0; }
-.ofc-staff { position: absolute; left: 8px; right: 8px; bottom: 8px; z-index: 1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.ofc-wrap { display: flex; flex-direction: column; gap: 8px; flex: none; }
+.ofc-staff { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 8px 6px; border-radius: 10px; background: #1f150fd1; border: 1px solid #c9a24a33; }
 .ofc-seat { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-.ofc-seat img { width: 100%; max-width: 72px; aspect-ratio: 1; object-fit: cover; object-position: 50% 12%; border-radius: 50%; border: 2px solid #c9a24a55; background: #1a120d; filter: grayscale(1) brightness(.45); }
+.ofc-seat img { width: 100%; max-width: 60px; aspect-ratio: 1; object-fit: cover; object-position: 50% 12%; border-radius: 50%; border: 2px solid #c9a24a55; background: #1a120d; filter: grayscale(1) brightness(.45); }
 .ofc-seat.on img { filter: none; border-color: var(--brass); box-shadow: 0 0 12px #c9a24a88; }
 .ofc-seat span { font-size: 11px; color: #cdbb98; text-shadow: 0 1px 4px #000; }
 .ofc-seat.on span { color: #fff; }
@@ -13587,7 +13588,7 @@ const HOWTO = [
     "재판 중 화면을 누르면 다음으로 넘어갑니다."]],
   ["5. 명성과 사무실", [
     "이기면 명성이 오르고(사건 규모 ★·★★·★★★에 따라 +2·+3·+4), 지면 그만큼 깎입니다.",
-    "사무실마다 명성 상한이 있습니다(40·60·80·100). 더 오르려면 사무실을 옮겨야 합니다.",
+    "사무실마다 명성 상한이 있습니다(30·50·75·100). 더 오르려면 사무실을 옮겨야 합니다.",
     "큰 사무실일수록 큰 사건이 들어오고 더 많이 맡을 수 있습니다. 명성과 이전 비용이 되면 달 말 장부 화면의 '사무실 관리'에서 옮깁니다.",
     "직원은 사무장·비서·고용 변호사·조사원 네 자리입니다. 자리마다 후보 3명 중 한 명을 뽑고, 사람마다 특기가 다릅니다.",
     "명성 100이면 엔딩입니다."]],
@@ -14430,10 +14431,10 @@ function monoOpener(c, res) {
 /* ---------- 사무실·직원 ---------- */
 const OFFICES = [
   // 사무실이 맡을 수 있는 사건 규모(tiers)와 한 달 수임 한도(cap)를 정한다
-  { name: "동네 상가 2층", need: 0, cost: 0, rent: 150, live: 300, guests: 0, up: 0, tiers: [1], cap: 4, repCap: 40 },
-  { name: "역세권 오피스", need: 30, cost: 1000, rent: 350, live: 400, guests: 2, up: 0.1, tiers: [1, 2], cap: 5, repCap: 60 },
-  { name: "서초동 법조타운", need: 55, cost: 4000, rent: 800, live: 550, guests: 4, up: 0.2, tiers: [1, 2, 3], cap: 6, repCap: 80 },
-  { name: "강남 빌딩 한 층", need: 80, cost: 10000, rent: 2000, live: 800, guests: 6, up: 0.3, tiers: [2, 3], cap: 8, repCap: 100 }
+  { name: "동네 상가 2층", need: 0, cost: 0, rent: 150, live: 300, guests: 0, up: 0, tiers: [1], cap: 4, repCap: 30 },
+  { name: "역세권 오피스", need: 30, cost: 1000, rent: 350, live: 400, guests: 2, up: 0.1, tiers: [1, 2], cap: 5, repCap: 50 },
+  { name: "서초동 법조타운", need: 50, cost: 4000, rent: 800, live: 550, guests: 4, up: 0.2, tiers: [1, 2, 3], cap: 6, repCap: 75 },
+  { name: "강남 빌딩 한 층", need: 75, cost: 10000, rent: 2000, live: 800, guests: 6, up: 0.3, tiers: [2, 3], cap: 8, repCap: 100 }
 ];
 const STAFF = [
   { key: "mgr", name: "사무장", pay: 450, desc: "매달 손님 +1~2" },
@@ -14495,10 +14496,11 @@ function screenOffice() {
       ${who ? `<button class="mini" data-fire="${s.key}">내보내기</button>` : dim ? `<span class="note">정원 초과</span>` : `<button class="mini gold" data-hire="${s.key}">고용</button>`}</div>
       <div class="note">${who ? `${who.desc} · <span class='pos'>근무 중</span>` : "후보 3명"}</div></div></div>`;
   }).join("");
-  const banner = `<div class="ofc-banner" style="background-image:url('${sceneImage("office")}')">
+  // 사무실 그림은 가리지 않고, 직원 얼굴은 그림 아래 한 줄로
+  const banner = `<div class="ofc-wrap"><div class="ofc-banner" style="background-image:url('${sceneImage("office")}')">
       <div class="ofc-name">${esc(S.firm || "")}<small>${esc(cur.name)}</small></div>
-      <div class="ofc-staff">${STAFF.map(s => `<div class="ofc-seat ${has(s.key) ? "on" : ""}"><img src="${staffFace(s.key)}" alt=""><span>${s.name}</span></div>`).join("")}</div>
-    </div>`;
+    </div>
+    <div class="ofc-staff">${STAFF.map(s => `<div class="ofc-seat ${has(s.key) ? "on" : ""}"><img src="${staffFace(s.key)}" alt=""><span>${staffOf(s.key) ? esc(staffOf(s.key).name) : s.name}</span></div>`).join("")}</div></div>`;
   show(`<div><div class="eyebrow">자금 ${won(S.money)} · 월 고정비 ${won(monthlyCost())}</div><h2>사무실 관리</h2></div>
     ${banner}
     <div class="pn"><div class="eyebrow">지금 사무실</div><div class="pn-name">${esc(cur.name)}</div>
