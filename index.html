@@ -390,6 +390,10 @@ html[data-scene^="end"] #backdrop::after { background: linear-gradient(180deg, #
 .talk.refs-talk { display: none; }
 .vn.show-log .talk.refs-talk { display: flex; }
 .ofc-seat { cursor: pointer; }
+.ofc-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; flex: none; }
+.ofc-tile { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left; font: inherit; color: inherit; cursor: pointer; }
+.ofc-tile .pn-name { font-size: 17px; }
+.sp-row.need { color: #e8a37a; }
 .staff-pop { position: fixed; inset: 0; z-index: 26; display: flex; align-items: center; justify-content: center; padding: 20px; background: #000a; animation: fadein .2s; }
 .sp-card { width: min(100%, 320px); background: #1f150f; border: 1px solid var(--brass); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; align-items: center; gap: 8px; box-shadow: 0 14px 36px #000c; }
 .sp-face { width: 120px; height: 120px; border-radius: 50%; overflow: hidden; border: 3px solid var(--brass); background: #1a120d; }
@@ -14464,7 +14468,7 @@ const OFFICES = [
   { name: "동네 상가 2층", need: 0, cost: 0, rent: 150, live: 300, guests: 0, up: 0, tiers: [1], cap: 4, repCap: 30 },
   { name: "역세권 오피스", need: 30, cost: 1000, rent: 350, live: 400, guests: 2, up: 0.1, tiers: [1, 2], cap: 5, repCap: 50 },
   { name: "서초동 법조타운", need: 50, cost: 4000, rent: 800, live: 550, guests: 4, up: 0.2, tiers: [1, 2, 3], cap: 6, repCap: 75 },
-  { name: "강남 빌딩 한 층", need: 75, cost: 10000, rent: 2000, live: 800, guests: 6, up: 0.3, tiers: [2, 3], cap: 7, repCap: 100 }
+  { name: "강남 빌딩", need: 75, cost: 10000, rent: 2000, live: 800, guests: 6, up: 0.3, tiers: [2, 3], cap: 7, repCap: 100 }
 ];
 const STAFF = [
   { key: "mgr", name: "사무장", pay: 450, desc: "매달 손님 +1~2" },
@@ -14513,37 +14517,39 @@ const staffFace = k => `assets/staff/${(staffOf(k) || STAFF_PICKS[k][0]).face}.w
 // 사무실 관리에서 돌아갈 곳: 장부에서 들어오면 장부, 아래 탭에서 들어오면 손님 목록·장부
 let officeBack = null;
 function screenOffice() {
-  const cur = office(), nx = nextOffice(), full = staffCount() >= capacity();
-  const moveBox = nx ? `<div class="pn ${canMove() ? "on" : ""}">
-      <div class="pn-top"><span class="eyebrow">다음 단계</span>${canMove() ? `<span class="pill ok">이전 가능</span>` : ""}</div>
-      <div class="pn-name">${esc(nx.name)}</div>
-      <div class="note">이전 비용 ${won(nx.cost)} · 월세 ${won(nx.rent)} · 생활비 ${won(nx.live)} · 직원 정원 ${OFFICES.indexOf(nx) + 1}명<br>사건 규모 ${tierTxt(nx.tiers)} · 한 달 수임 ${nx.cap}건 · 명성 상한 ${nx.repCap} · 수임료 +${Math.round(nx.up * 100)}%</div>
-      ${canMove() ? `<button class="btn" id="move">${won(nx.cost)} 내고 이전</button>`
-        : `<div class="note need">${S.rep < nx.need ? `명성 ${nx.need} 필요 (지금 ${S.rep})` : `자금 ${won(nx.cost)} 필요`}</div>`}
-    </div>` : `<div class="pn"><div class="note">가장 좋은 사무실입니다.</div></div>`;
-  const staff = STAFF.map(s => {
-    const who = staffOf(s.key), dim = !who && full;
-    return `<div class="pn staff-row ${dim ? "dim" : ""} ${who ? "on" : ""}"><div class="sf"><img src="${staffFace(s.key)}" alt=""></div><div>
-      <div class="pn-top"><span><b>${who ? `${esc(who.name)} ${s.name}` : s.name}</b>${who ? ` · 월 ${won(who.pay)}` : ""}</span>
-      ${who ? `<button class="mini" data-fire="${s.key}">내보내기</button>` : dim ? `<span class="note">정원 초과</span>` : `<button class="mini gold" data-hire="${s.key}">고용</button>`}</div>
-      <div class="note">${who ? `${who.desc} · <span class='pos'>근무 중</span>` : "후보 3명"}</div></div></div>`;
-  }).join("");
+  const cur = office(), nx = nextOffice();
   // 직원 얼굴은 그림 맨 아래 줄에. 주인공 얼굴(그림 높이 33~46%)이 그 위에 오도록 보여 줄 부분을 맞춘다
   const banner = `<div class="ofc-banner" style="background-image:url('${sceneImage("office")}')">
       <div class="ofc-name">${esc(S.firm || "")}<small>${esc(cur.name)}</small></div>
     <div class="ofc-staff">${STAFF.map(s => `<div class="ofc-seat ${has(s.key) ? "on" : ""}" data-seat="${s.key}" role="button"><img src="${staffFace(s.key)}" alt=""><span>${staffOf(s.key) ? esc(staffOf(s.key).name) : s.name}</span></div>`).join("")}</div></div>`;
+  // 사무실은 이름만 두 칸. 누르면 자세한 내용
+  const tile = (lbl, o, extra = "") => `<button class="pn ofc-tile ${extra}" data-ofc="${OFFICES.indexOf(o)}"><span class="eyebrow">${lbl}</span><span class="pn-name">${esc(o.name)}</span></button>`;
   show(`<div><div class="eyebrow">자금 ${won(S.money)} · 월 고정비 ${won(monthlyCost())}</div><h2>사무실 관리</h2></div>
     ${banner}
-    <div class="pn"><div class="eyebrow">지금 사무실</div><div class="pn-name">${esc(cur.name)}</div>
-      <div class="note">월세 ${won(cur.rent)} · 생활비 ${won(cur.live)} · 직원 정원 ${capacity()}명<br>사건 규모 ${tierTxt(cur.tiers)} · 한 달 수임 ${cur.cap}건 · 명성 상한 ${cur.repCap}${cur.up ? ` · 수임료 +${Math.round(cur.up * 100)}%` : ""}</div></div>
-    ${moveBox}
-`,
+    <div class="ofc-tiles">${tile("지금 사무실", cur)}${nx ? tile(canMove() ? "다음 단계 · 이전 가능" : "다음 단계", nx, canMove() ? "on" : "") : `<div class="pn ofc-tile"><span class="eyebrow">다음 단계</span><span class="note">가장 좋은 사무실</span></div>`}</div>`,
     `<button class="btn primary" id="backLedger">${officeBack ? "돌아가기" : "장부로 돌아가기"}</button>`);
-  on("#move", () => { S.money -= nx.cost; S.office = (S.office || 0) + 1; S.moveNote = false; save(); screenOffice(); });
-  on("[data-hire]", e => screenHire(e.currentTarget.dataset.hire));
-  on("[data-fire]", e => { S.staff[e.currentTarget.dataset.fire] = false; save(); screenOffice(); });
+  on("[data-ofc]", e => officePop(+e.currentTarget.dataset.ofc));
   on("[data-seat]", e => staffPop(e.currentTarget.dataset.seat));
   on("#backLedger", () => { const b = officeBack || screenDayEnd; officeBack = null; b(); });
+}
+function officePop(i) {
+  const o = OFFICES[i], isCur = i === (S.office || 0), isNext = i === (S.office || 0) + 1;
+  const ov = document.createElement("div");
+  ov.className = "staff-pop";
+  const need = isNext && !canMove() ? `<div class="sp-row need">${S.rep < o.need ? `명성 ${o.need} 필요 (지금 ${S.rep})` : `자금 ${won(o.cost)} 필요`}</div>` : "";
+  ov.innerHTML = `<div class="sp-card"><div class="sp-name">${esc(o.name)} <small>${isCur ? "지금 사무실" : "다음 단계"}</small></div>
+    ${isNext ? `<div class="sp-row">이전 비용 ${won(o.cost)}</div>` : ""}
+    <div class="sp-row">월세 ${won(o.rent)} · 생활비 ${won(o.live)}</div>
+    <div class="sp-row">직원 정원 ${i + 1}명 · 한 달 수임 ${o.cap}건</div>
+    <div class="sp-row">사건 규모 ${tierTxt(o.tiers)} · 명성 상한 ${o.repCap}${o.up ? ` · 수임료 +${Math.round(o.up * 100)}%` : ""}</div>
+    ${need}
+    <div class="row2">${isNext && canMove() ? `<button class="btn primary" id="opMove">${won(o.cost)} 내고 이전</button>` : ""}<button class="btn ghost" id="opClose">닫기</button></div></div>`;
+  document.body.appendChild(ov);
+  const close = () => ov.remove();
+  ov.addEventListener("click", e => { if (e.target === ov) close(); });
+  ov.querySelector("#opClose").onclick = close;
+  const mv = ov.querySelector("#opMove");
+  if (mv) mv.onclick = () => { close(); S.money -= o.cost; S.office = (S.office || 0) + 1; S.moveNote = false; save(); screenOffice(); };
 }
 
 // 사무실 그림의 직원 얼굴을 누르면: 고용한 직원은 정보 카드, 빈자리는 후보 고르기
