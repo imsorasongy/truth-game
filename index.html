@@ -367,14 +367,14 @@ html[data-scene^="end"] #backdrop::after { background: linear-gradient(180deg, #
 .gauge.zw { animation: zw 1s ease-out; } .gauge.zl { animation: zl 1s ease-out; }
 @keyframes zw { 0% { box-shadow: 0 0 0 0 #8fdc9f; } 30% { box-shadow: 0 0 18px 6px #8fdc9fcc; } 100% { box-shadow: 0 0 0 0 transparent; } }
 @keyframes zl { 0% { box-shadow: 0 0 0 0 #ff7a66; } 30% { box-shadow: 0 0 18px 6px #ff7a66cc; } 100% { box-shadow: 0 0 0 0 transparent; } }
-.ofc-banner { position: relative; aspect-ratio: 16 / 10; border-radius: 10px; overflow: hidden; border: 2px solid #c9a24a66; background-size: cover; background-position: center 30%; box-shadow: 0 8px 22px #000a; flex: none; }
-.ofc-banner::after { content: ""; position: absolute; inset: 0; background: linear-gradient(#000a, #0000 35%); }
+.ofc-banner { position: relative; aspect-ratio: 16 / 11; border-radius: 10px; overflow: hidden; border: 2px solid #c9a24a66; background-size: cover; background-position: center 39%; box-shadow: 0 8px 22px #000a; flex: none; }
+.ofc-banner::after { content: ""; position: absolute; inset: 0; background: linear-gradient(#000a, #0000 28%, #0000 66%, #000d); }
 .ofc-name { position: absolute; left: 12px; top: 10px; z-index: 1; font-family: var(--f-display); font-size: 18px; color: #fff; text-shadow: 0 2px 8px #000; display: flex; flex-direction: column; }
 .ofc-name small { font-family: inherit; font-size: 12px; color: #e8d6b0; }
-.ofc-wrap { display: flex; flex-direction: column; gap: 8px; flex: none; }
-.ofc-staff { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 8px 6px; border-radius: 10px; background: #1f150fd1; border: 1px solid #c9a24a33; }
+
+.ofc-staff { position: absolute; left: 6px; right: 6px; bottom: 5px; z-index: 1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
 .ofc-seat { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-.ofc-seat img { width: 100%; max-width: 60px; aspect-ratio: 1; object-fit: cover; object-position: 50% 12%; border-radius: 50%; border: 2px solid #c9a24a55; background: #1a120d; filter: grayscale(1) brightness(.45); }
+.ofc-seat img { width: 100%; max-width: 46px; aspect-ratio: 1; object-fit: cover; object-position: 50% 12%; border-radius: 50%; border: 2px solid #c9a24a55; background: #1a120d; filter: grayscale(1) brightness(.45); }
 .ofc-seat.on img { filter: none; border-color: var(--brass); box-shadow: 0 0 12px #c9a24a88; }
 .ofc-seat span { font-size: 11px; color: #cdbb98; text-shadow: 0 1px 4px #000; }
 .ofc-seat.on span { color: #fff; }
@@ -14496,10 +14496,9 @@ function screenOffice() {
       ${who ? `<button class="mini" data-fire="${s.key}">내보내기</button>` : dim ? `<span class="note">정원 초과</span>` : `<button class="mini gold" data-hire="${s.key}">고용</button>`}</div>
       <div class="note">${who ? `${who.desc} · <span class='pos'>근무 중</span>` : "후보 3명"}</div></div></div>`;
   }).join("");
-  // 사무실 그림은 가리지 않고, 직원 얼굴은 그림 아래 한 줄로
-  const banner = `<div class="ofc-wrap"><div class="ofc-banner" style="background-image:url('${sceneImage("office")}')">
+  // 직원 얼굴은 그림 맨 아래 줄에. 주인공 얼굴(그림 높이 33~46%)이 그 위에 오도록 보여 줄 부분을 맞춘다
+  const banner = `<div class="ofc-banner" style="background-image:url('${sceneImage("office")}')">
       <div class="ofc-name">${esc(S.firm || "")}<small>${esc(cur.name)}</small></div>
-    </div>
     <div class="ofc-staff">${STAFF.map(s => `<div class="ofc-seat ${has(s.key) ? "on" : ""}"><img src="${staffFace(s.key)}" alt=""><span>${staffOf(s.key) ? esc(staffOf(s.key).name) : s.name}</span></div>`).join("")}</div></div>`;
   show(`<div><div class="eyebrow">자금 ${won(S.money)} · 월 고정비 ${won(monthlyCost())}</div><h2>사무실 관리</h2></div>
     ${banner}
