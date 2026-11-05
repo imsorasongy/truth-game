@@ -769,12 +769,12 @@ window.CASES.push(
   confessionCard: null,
   arguments: [
     { id: "a1", text: "보증서의 서명은 주채무자가 피고 몰래 한 것이고 피고의 서명이 아니다", value: 2 },
-    { id: "a2", text: "피고가 서명한 보증 서면이 없으므로 보증은 효력이 없다", value: 2 },
+    { id: "a2", text: "피고가 서명한 보증 서면이 없으므로 보증은 효력이 없다", value: 1 },
     { id: "a3", text: "원고는 보증인 본인의 의사를 확인하지 않은 잘못이 있다", value: 1 }
   ],
   opponent: [
     { id: "o1", name: "대면 작성 주장", desc: "\"피고가 직원 앞에서 직접 서명했습니다.\"", power: 3, counters: ["e2", "e1", "e3", "a1"] },
-    { id: "o2", name: "표현대리 주장", desc: "\"원고로서는 피고가 처남에게 대리권을 주었다고 믿을 만했습니다.\"", power: 3, counters: ["a1", "a3"] }
+    { id: "o2", name: "표현대리 주장", desc: "\"원고로서는 피고가 처남에게 대리권을 주었다고 믿을 만했습니다.\"", power: 3, counters: ["a1", "a3"], half: ["e4"] }
   ],
   outcomes: {
     win: "원고의 청구를 기각한다.",
@@ -881,7 +881,7 @@ window.CASES.push(
   evidence: [
     { id: "e1", name: "간호기록지", desc: "시술 후 시간대별 간호 기록", detail: "오후 2시·4시·6시 '복부 팽만, 심한 통증 호소' 기록. 영상 검사 지시는 밤 8시가 처음이다.", value: 2 },
     { id: "e2", name: "진료기록 감정서", desc: "의료분쟁조정중재원 감정서", detail: "'천공 의심 시 즉시 영상 검사가 필요했다'는 문장이 있다.", value: 1 },
-    { id: "e3", name: "응급 CT 판독지", desc: "밤 8시 CT 결과", detail: "'S상결장 천공, 복강 내 유리 공기 다량'이라고 적혀 있다.", value: 1 },
+    { id: "e3", name: "응급 CT 판독지", desc: "밤 8시 CT 결과", detail: "'S상결장 천공, 복강 내 유리 공기 다량'이라고 적혀 있다.", value: 0 },
     { id: "e4", name: "건강검진 결과표", desc: "사망 6개월 전 검진 결과", detail: "당화혈색소 정상 범위, 그 밖에 특이 소견 없음.", value: 0 }
   ],
   suspicions: ["동의서에 서명한 사실을 숨겼다", "아버지가 의사 지시를 따르지 않았다", "병원 위로금을 이미 받았다"],
@@ -896,7 +896,7 @@ window.CASES.push(
     { id: "a3", text: "피고는 천공 위험과 대처 방법을 충분히 설명하지 않았다", value: 1 }
   ],
   opponent: [
-    { id: "o1", name: "불가항력 합병증 주장", desc: "\"천공은 주의를 다해도 일정 비율로 생기는 합병증입니다.\"", power: 4, counters: ["a1"] },
+    { id: "o1", name: "불가항력 합병증 주장", desc: "\"천공은 주의를 다해도 일정 비율로 생기는 합병증입니다.\"", power: 4, counters: ["a1"], half: ["e1", "e2"] },
     { id: "o2", name: "기저질환 기여 주장", desc: "\"망인은 고령에 당뇨까지 있어 회복이 어려웠습니다.\"", power: 2, counters: ["e4"] },
     { id: "o3", name: "병원 자체 소견서", desc: "\"경과 관찰은 의학적으로 적정했습니다.\"", power: 2, counters: ["e2"] }
   ],
@@ -1308,13 +1308,13 @@ window.CASES.push(
   confessionCard: null,
   arguments: [
     { id: "a1", text: "포장 영상과 택배 중량을 보면 피고인은 카메라를 정상적으로 보냈다", value: 2 },
-    { id: "a2", text: "고소인이 물건을 바꿔치기했을 가능성이 있다", value: 1 },
+    { id: "a2", text: "고소인이 물건을 바꿔치기했을 가능성이 있다", value: 0 },
     { id: "a3", text: "설령 배송에 문제가 있었더라도 피고인에게 처음부터 속일 고의는 없었다", value: 2 }
   ],
   opponent: [
     { id: "o1", name: "고소인 진술", desc: "\"피해자가 상자를 열자 벽돌이 나왔습니다.\"", power: 2, counters: ["e2", "e1"] },
     { id: "o2", name: "벽돌 사진", desc: "택배 상자 안에 벽돌이 든 사진. \"피해자가 받은 상자에는 카메라 대신 벽돌이 들어 있었습니다.\"", power: 2, counters: ["e1", "e2"] },
-    { id: "o3", name: "편취 고의", desc: "\"피고인은 돈을 받고도 환불을 거절했습니다. 처음부터 속일 생각이었습니다.\"", power: 2, counters: ["a1", "a3"] }
+    { id: "o3", name: "편취 고의", desc: "\"피고인은 돈을 받고도 환불을 거절했습니다. 처음부터 속일 생각이었습니다.\"", power: 2, counters: ["a1", "a3"], half: ["e2", "e1"] }
   ],
   outcomes: {
     win: "피고인은 무죄.",
@@ -2297,7 +2297,7 @@ window.CASES.push(
   opponent: [
     { id: "o1", name: "환경 안정 주장", desc: "\"자녀는 3년 동안 지금 학교에 잘 적응해 왔습니다.\"", power: 2, counters: ["e2"] },
     { id: "o2", name: "경제력 의문", desc: "\"청구인은 이혼 당시 월세방에 살던 사람입니다.\"", power: 2, counters: ["e3"] },
-    { id: "o3", name: "현상 유지 주장", desc: "\"양육자를 바꾸면 자녀가 다시 흔들립니다. 지금 양육 환경을 유지해야 합니다.\"", power: 2, counters: ["a2", "a3"] }
+    { id: "o3", name: "현상 유지 주장", desc: "\"양육자를 바꾸면 자녀가 다시 흔들립니다. 지금 양육 환경을 유지해야 합니다.\"", power: 3, counters: ["a2", "a3"], half: ["e1", "e2"] }
   ],
   outcomes: {
     win: "1. 사건본인의 양육자를 청구인으로 변경한다. 2. 상대방은 청구인에게 사건본인의 양육비로 이 심판 확정일부터 사건본인이 성년에 이르기 전날까지 월 80만 원씩을 매월 말일에 지급하라.",
@@ -2516,7 +2516,7 @@ window.CASES.push(
     { id: "e1", name: "교차로 CCTV", desc: "SUV가 빨간불에 교차로 진입", detail: "의뢰인 오토바이는 앞차 뒤에서 천천히 출발한다.", value: 1 },
     { id: "e2", name: "도로교통공단 분석서", desc: "사고 직전 오토바이 속도 시속 28km", detail: "제한속도 50km 구간.", value: 2 },
     { id: "e3", name: "장해진단서", desc: "노동능력상실률 45%", detail: "영구 장해 소견. 사고 전 진료 기록 없음.", value: 1 },
-    { id: "e4", name: "종합소득세 신고서", desc: "연 소득 4,600만 원", detail: "세무서 접수 도장이 찍혀 있다.", value: 1 }
+    { id: "e4", name: "종합소득세 신고서", desc: "연 소득 4,600만 원", detail: "세무서 접수 도장이 찍혀 있다.", value: 0 }
   ],
   suspicions: ["사고 당시 과속했다", "헬멧을 쓰지 않았다", "소득을 부풀렸다"],
   hiddenIndex: null,
@@ -2532,7 +2532,7 @@ window.CASES.push(
   opponent: [
     { id: "o1", name: "과속 주장", desc: "\"오토바이가 과속으로 교차로에 들어왔습니다.\"", power: 3, counters: ["e2", "e1"] },
     { id: "o2", name: "소득 축소 주장", desc: "\"배달 수입은 들쭉날쭉하니 일용노임으로 계산해야 합니다.\"", power: 2, counters: ["e4"] },
-    { id: "o3", name: "과실상계 주장", desc: "\"원고도 교차로에 들어설 때 좌우를 살폈어야 합니다. 원고에게도 과실이 있습니다.\"", power: 3, counters: ["a1", "a3"] }
+    { id: "o3", name: "과실상계 주장", desc: "\"원고도 교차로에 들어설 때 좌우를 살폈어야 합니다. 원고에게도 과실이 있습니다.\"", power: 3, counters: ["a1", "a3"], half: ["e1", "e2"] }
   ],
   outcomes: {
     win: "피고는 원고에게 3억 2,000만 원 및 이에 대하여 이 사건 사고일부터 이 판결 선고일까지 연 5%, 그다음 날부터 다 갚는 날까지 연 12%의 비율로 계산한 돈을 지급하라.",
@@ -2662,7 +2662,7 @@ window.CASES.push(
     { id: "a3", text: "원고는 인수 때 차량 상태를 함께 확인하지 않았으므로 손해배상을 구할 수 없다", value: 2 }
   ],
   opponent: [
-    { id: "o1", name: "주차장 CCTV 영상", desc: "반납 전날 강릉 숙소 주차장 영상. \"피고가 후진하다 기둥을 들이받는 장면입니다.\"", power: 5, counters: ["a2"] },
+    { id: "o1", name: "주차장 CCTV 영상", desc: "반납 전날 강릉 숙소 주차장 영상. \"피고가 후진하다 기둥을 들이받는 장면입니다.\"", power: 5, counters: ["a2"], half: ["e1"] },
     { id: "o2", name: "휴차료 청구", desc: "\"피고는 수리 기간 열흘 치 휴차료 120만 원도 부담해야 합니다.\"", power: 1, counters: ["e4", "a2"] }
   ],
   outcomes: {
@@ -3330,7 +3330,7 @@ window.CASES.push(
     { id: "a3", text: "함께 쓰기로 하고 산 물건이므로 피고인에게는 속일 생각이 없었다", value: 2 }
   ],
   opponent: [
-    { id: "o1", name: "경찰 자백 진술", desc: "\"피고인은 경찰에서 룸메이트가 잘 때 지문으로 폰을 열어 결제했다고 자백했습니다.\"", power: 5, counters: ["a1"] },
+    { id: "o1", name: "경찰 자백 진술", desc: "\"피고인은 경찰에서 룸메이트가 잘 때 지문으로 폰을 열어 결제했다고 자백했습니다.\"", power: 5, counters: ["a1"], half: ["e4"] },
     { id: "o2", name: "룸메이트 엄벌 탄원", desc: "\"피고인은 돈도 갚지 않고 연락을 끊었습니다.\"", power: 1, counters: ["e1"] }
   ],
   outcomes: {
@@ -3571,7 +3571,7 @@ window.CASES.push(
     { id: "a3", text: "영장에 없는 자택에서 압수한 물건은 증거로 쓸 수 없다", value: 1 }
   ],
   opponent: [
-    { id: "o1", name: "서명 연습지", desc: "피고인 자택 서재에서 나온 종이. 작은아버지 서명을 수십 번 따라 쓴 흔적.", power: 5, counters: ["a3"] },
+    { id: "o1", name: "서명 연습지", desc: "피고인 자택 서재에서 나온 종이. 작은아버지 서명을 수십 번 따라 쓴 흔적.", power: 5, counters: ["a3"], half: ["e1"] },
     { id: "o2", name: "피해 금액", desc: "\"피고인은 피해자 땅을 담보로 3억 원을 대출받았습니다.\"", power: 1, counters: ["e4"] }
   ],
   outcomes: {
@@ -3613,7 +3613,7 @@ window.CASES.push(
   opponent: [
     { id: "o1", name: "피고인 계정 접속 기록", desc: "\"유출된 자료는 모두 피고인 계정으로 내려받은 것입니다.\"", power: 2, counters: ["e2", "e1", "e3"] },
     { id: "o2", name: "브로커 진술", desc: "\"브로커는 병원 쪽 사람에게서 자료를 받았다고 진술했습니다.\"", power: 2, counters: ["e1"] },
-    { id: "o3", name: "협력업체 사장과의 관계", desc: "\"피고인과 업체 사장은 대학 동기입니다.\"", power: 2, counters: ["a3"] }
+    { id: "o3", name: "협력업체 사장과의 관계", desc: "\"피고인과 업체 사장은 대학 동기입니다.\"", power: 3, counters: ["a3"], half: ["e3", "a2"] }
   ],
   outcomes: {
     win: "피고인은 무죄.",
@@ -3939,7 +3939,7 @@ window.CASES.push(
     { id: "a3", text: "광고와 다른 조망은 중대한 하자이므로 계약 목적을 이룰 수 없다", value: 2 }
   ],
   opponent: [
-    { id: "o1", name: "조망 비보장 확인서", desc: "\"원고가 계약 당일 '조망은 보장되지 않는다'는 확인서에 서명했습니다.\"", power: 5, counters: ["a1"] },
+    { id: "o1", name: "조망 비보장 확인서", desc: "\"원고가 계약 당일 '조망은 보장되지 않는다'는 확인서에 서명했습니다.\"", power: 5, counters: ["a1"], half: ["e1"] },
     { id: "o2", name: "중도금 연체 주장", desc: "\"원고가 중도금을 늦게 냈으니 원고도 계약을 어겼습니다.\"", power: 2, counters: ["e2"] }
   ],
   outcomes: {
@@ -4059,7 +4059,7 @@ window.CASES.push(
     { id: "a3", text: "실제 매출이 예상의 절반에도 못 미치므로 피고가 손실을 배상해야 한다", value: 2 }
   ],
   opponent: [
-    { id: "o1", name: "예상매출 산정서·브로커 진술", desc: "\"원고는 월 2,500만 원으로 적힌 산정서에 서명했습니다. 5천 얘기는 외부 브로커가 한 말입니다.\"", power: 5, counters: ["a2"] },
+    { id: "o1", name: "예상매출 산정서·브로커 진술", desc: "\"원고는 월 2,500만 원으로 적힌 산정서에 서명했습니다. 5천 얘기는 외부 브로커가 한 말입니다.\"", power: 5, counters: ["a2"], half: ["e1", "e2"] },
     { id: "o2", name: "가맹금 소진 주장", desc: "\"가맹금은 교육과 개점 지원에 다 썼습니다.\"", power: 2, counters: ["e2", "a2"] }
   ],
   outcomes: {
@@ -5484,13 +5484,13 @@ window.CASES.push(
   confession: null,
   confessionCard: null,
   arguments: [
-    { id: "a1", text: "아이들 사이의 일이라도 부모는 도의상 사과하고 배상해야 한다", value: 1 },
-    { id: "a2", text: "가해 학생에게 형사처벌이 필요할 만큼 심각한 폭력이다", value: 1 },
+    { id: "a1", text: "아이들 사이의 일이라도 부모는 도의상 사과하고 배상해야 한다", value: 0 },
+    { id: "a2", text: "가해 학생에게 형사처벌이 필요할 만큼 심각한 폭력이다", value: 0 },
     { id: "a3", text: "석 달간 괴롭힘을 막지 못한 가해 학생 부모는 감독의무 위반 책임을 진다", value: 2 }
   ],
   opponent: [
     { id: "o1", name: "쌍방 폭행 주장", desc: "\"원고 아들도 때렸습니다. 서로 싸운 것입니다.\"", power: 2, counters: ["e1"] },
-    { id: "o2", name: "감독의무 다함 주장", desc: "\"피고들은 아이를 충분히 지도했습니다. 학교 안에서 벌어진 일입니다.\"", power: 3, counters: ["a3"] }
+    { id: "o2", name: "감독의무 다함 주장", desc: "\"피고들은 아이를 충분히 지도했습니다. 학교 안에서 벌어진 일입니다.\"", power: 3, counters: ["a3"], half: ["e3"] }
   ],
   outcomes: {
     win: "피고들은 연대하여 원고 ○○○에게 12,000,000원, 원고 신미경에게 5,000,000원 및 각 이에 대하여 이 사건 소장 부본 송달 다음 날부터 다 갚는 날까지 연 12%의 비율로 계산한 돈을 지급하라.",
@@ -5597,7 +5597,7 @@ window.CASES.push(
   ],
   evidence: [
     { id: "e1", name: "계좌이체 내역", desc: "주최자 개인 계좌로 280만 원", detail: "받는 사람이 업체가 아니라 주최자 본인 이름이다.", value: 2 },
-    { id: "e2", name: "공구 모집 글", desc: "\"한우 1+ 세트, 명절 전 배송 보장\"", detail: "'입금은 제 계좌로'라고 적혀 있다.", value: 1 },
+    { id: "e2", name: "공구 모집 글", desc: "\"한우 1+ 세트, 명절 전 배송 보장\"", detail: "'입금은 제 계좌로'라고 적혀 있다.", value: 0 },
     { id: "e3", name: "단톡방 캡처", desc: "\"늦어져서 죄송해요, 환불 순서대로 해 드릴게요\"", detail: "주최자 본인 계정. 날짜는 명절 이틀 전.", value: 1 },
     { id: "e4", name: "피해자 명단", desc: "카페 회원 32명 피해 금액 정리", detail: "회원별 이름과 입금액이 적혀 있다.", value: 0 }
   ],
@@ -5614,7 +5614,7 @@ window.CASES.push(
     { id: "a3", text: "카페 운영자도 공동구매를 방치한 책임이 있다", value: 1 }
   ],
   opponent: [
-    { id: "o1", name: "같은 피해자 주장", desc: "\"공급업체가 잠적했습니다. 피고 역시 돈을 떼인 피해자입니다.\"", power: 3, counters: ["a2"] },
+    { id: "o1", name: "같은 피해자 주장", desc: "\"공급업체가 잠적했습니다. 피고 역시 돈을 떼인 피해자입니다.\"", power: 3, counters: ["a2"], half: ["e1"] },
     { id: "o2", name: "환불 약속 부인", desc: "\"피고는 환불을 약속한 적이 없습니다.\"", power: 2, counters: ["e3"] }
   ],
   outcomes: {
@@ -5781,14 +5781,14 @@ window.CASES.push(
   confession: null,
   confessionCard: null,
   arguments: [
-    { id: "a1", text: "영상 속 피고인의 손은 차에 전혀 닿지 않았다", value: 2 },
-    { id: "a2", text: "주차 시비는 이미 원만히 끝나 피고인에게는 범행 동기가 없다", value: 1 },
+    { id: "a1", text: "영상 속 피고인의 손은 차에 전혀 닿지 않았다", value: 1 },
+    { id: "a2", text: "주차 시비는 이미 원만히 끝나 피고인에게는 범행 동기가 없다", value: 0 },
     { id: "a3", text: "흠집 안쪽에 녹이 슬어 있어 그날 생긴 흠이 아니다", value: 2 }
   ],
   opponent: [
     { id: "o1", name: "아파트 CCTV", desc: "피고인이 차 옆을 지나간 직후 흠집이 발견됐다는 기록", power: 2, counters: ["e1"] },
     { id: "o2", name: "주차 시비", desc: "\"피고인은 전날 피해자와 다툰 뒤 앙심을 품었습니다.\"", power: 2, counters: ["e2"] },
-    { id: "o3", name: "차주 진술", desc: "\"그 전날까지 차는 멀쩡했습니다.\"", power: 3, counters: ["a3"] }
+    { id: "o3", name: "차주 진술", desc: "\"그 전날까지 차는 멀쩡했습니다.\"", power: 3, counters: ["a3"], half: ["e3"] }
   ],
   outcomes: {
     win: "피고인은 무죄.",
@@ -5890,7 +5890,7 @@ window.CASES.push(
   evidence: [
     { id: "e1", name: "베란다 사진", desc: "의뢰인 집 베란다와 난간 안전망", detail: "다육 화분 열두 개가 받침대에 그대로 있고, 난간 바깥에 촘촘한 그물이 쳐져 있다.", value: 2 },
     { id: "e2", name: "깨진 화분 사진", desc: "현장에 떨어진 화분 조각", detail: "철쭉 줄기와 큼직한 플라스틱 화분이다. 의뢰인 집에는 없는 종류다.", value: 1 },
-    { id: "e3", name: "이웃 진술서", desc: "4층 주민의 확인서", detail: "\"사고 다음 날 아침 5층에서 화분을 옮기는 소리를 들었습니다.\"", value: 1 },
+    { id: "e3", name: "이웃 진술서", desc: "4층 주민의 확인서", detail: "\"사고 다음 날 아침 5층에서 화분을 옮기는 소리를 들었습니다.\"", value: 0 },
     { id: "e4", name: "다육이 구입 영수증", desc: "꽃시장 영수증 몇 장", detail: "다육이 구입 내역만 있다.", value: 0 }
   ],
   suspicions: ["떨어진 화분이 사실 의뢰인 것이다", "5층 주민과 사이가 나쁘다", "사고 뒤 화분을 치웠다"],
@@ -5908,7 +5908,7 @@ window.CASES.push(
   opponent: [
     { id: "o1", name: "피해자 진술", desc: "\"피해자는 3층 창가 쪽에서 무언가 떨어지는 것을 봤다고 진술했습니다.\"", power: 2, counters: ["e1"] },
     { id: "o2", name: "경비원 진술", desc: "\"경비원은 3층에 사는 피고인이 베란다에서 화분을 많이 키운다고 진술했습니다.\"", power: 2, counters: ["e2", "e3"] },
-    { id: "o3", name: "낙하 지점", desc: "\"화분은 정확히 3층 바로 아래 떨어졌습니다.\"", power: 3, counters: ["a3"] }
+    { id: "o3", name: "낙하 지점", desc: "\"화분은 정확히 3층 바로 아래 떨어졌습니다.\"", power: 3, counters: ["a3"], half: ["e2", "e3"] }
   ],
   outcomes: {
     win: "피고인은 무죄.",
@@ -6170,7 +6170,7 @@ window.CASES.push(
   ],
   evidence: [
     { id: "e1", name: "계약 당시 등기부", desc: "근저당 없음, 시세 1억 7천", detail: "보증금이 시세의 70% 수준이다. 계약 당시에는 담보 대출이 하나도 없다.", value: 2 },
-    { id: "e2", name: "중개사무소 확인서", desc: "매도 의뢰와 매수자 계약 파기 경위", detail: "매수자가 계약 사흘 전 대출이 안 나와 파기했다는 내용이다.", value: 1 },
+    { id: "e2", name: "중개사무소 확인서", desc: "매도 의뢰와 매수자 계약 파기 경위", detail: "매수자가 계약 사흘 전 대출이 안 나와 파기했다는 내용이다.", value: 0 },
     { id: "e3", name: "다른 세입자 반환 내역", desc: "다른 세 집의 보증금 정상 반환 기록", detail: "세 집 모두 이사 날 맞춰 계좌로 돌려줬다.", value: 1 },
     { id: "e4", name: "대출 상담 기록", desc: "본인 아파트 담보대출 상담서", detail: "상담만 했고 대출은 아직 나오지 않았다.", value: 0 }
   ],
@@ -6189,7 +6189,7 @@ window.CASES.push(
   opponent: [
     { id: "o1", name: "세입자 진술", desc: "\"피고인은 처음부터 돌려줄 돈도 없이 계약했습니다.\"", power: 2, counters: ["e1", "a3"] },
     { id: "o2", name: "여러 채 보유", desc: "\"피고인은 빌라 네 채를 가지고 같은 수법을 썼을 것입니다.\"", power: 2, counters: ["e3"] },
-    { id: "o3", name: "계약 석 달 뒤 근저당", desc: "\"피고인은 보증금을 받자마자 집을 담보로 돈을 빼 갔습니다.\"", power: 3, counters: ["a2"] }
+    { id: "o3", name: "계약 석 달 뒤 근저당", desc: "\"피고인은 보증금을 받자마자 집을 담보로 돈을 빼 갔습니다.\"", power: 3, counters: ["a2"], half: ["e3"] }
   ],
   outcomes: {
     win: "피고인은 무죄.",
@@ -7672,7 +7672,7 @@ window.CASES.push(
   ],
   opponent: [
     { id: "o1", name: "특약 기재 주장", desc: "\"계약서 특약에 근저당 말소 조건을 적었습니다.\"", power: 2, counters: ["e1", "a2"] },
-    { id: "o2", name: "구두 설명 주장", desc: "\"피고는 말로 다 설명했습니다.\"", power: 2, counters: ["a2"] }
+    { id: "o2", name: "구두 설명 주장", desc: "\"피고는 말로 다 설명했습니다.\"", power: 3, counters: ["a2"], half: ["e1"] }
   ],
   outcomes: {
     win: "피고들은 공동하여 원고에게 40,000,000원 및 이에 대하여 소장 부본 송달 다음 날부터 다 갚는 날까지 연 12%의 비율로 계산한 돈을 지급하라.",
@@ -7906,7 +7906,7 @@ window.CASES.push(
     { q: "수익 배분은 처음 그대로예요?", a: "아뇨, 공지 하나 띄우고 7:3을 5:5로 바꿨어요. 동의한 적 없어요." }
   ],
   evidence: [
-    { id: "e1", name: "연재계약서", desc: "월 정산, 매월 10일 지급", detail: "'정산금을 2개월 이상 지급하지 않으면 작가는 계약을 해지할 수 있다'는 조항이 있다.", value: 2 },
+    { id: "e1", name: "연재계약서", desc: "월 정산, 매월 10일 지급", detail: "'정산금을 2개월 이상 지급하지 않으면 작가는 계약을 해지할 수 있다'는 조항이 있다.", value: 1 },
     { id: "e2", name: "통장 입금 내역", desc: "6월부터 플랫폼 입금 0원", detail: "5월까지는 매달 10일에 꼬박꼬박 들어왔다.", value: 2 },
     { id: "e3", name: "수익배분 변경 공지", desc: "\"8월부터 정산 비율을 5:5로 조정합니다\"", detail: "작가 개별 동의를 받는다는 말이 없다.", value: 1 },
     { id: "e4", name: "독자 댓글 캡처", desc: "\"작가님 언제 돌아오세요ㅠㅠ\" 댓글 200개", detail: "마지막 회차 아래에 달린 댓글들이다.", value: 0 }
@@ -7924,7 +7924,7 @@ window.CASES.push(
     { id: "a3", text: "플랫폼이 정산금을 두 달 넘게 주지 않아 작가가 계약서대로 해지했으니 위약금을 낼 의무가 없다", value: 2 }
   ],
   opponent: [
-    { id: "o1", name: "무단 연재 중단", desc: "\"예고 없이 연재를 끊었으니 위약금을 내야 합니다.\"", power: 3, counters: ["a3"] },
+    { id: "o1", name: "무단 연재 중단", desc: "\"예고 없이 연재를 끊었으니 위약금을 내야 합니다.\"", power: 3, counters: ["a3"], half: ["e1", "e2"] },
     { id: "o2", name: "시스템 오류 주장", desc: "\"정산 지연은 시스템 오류였고 곧 지급할 예정이었습니다.\"", power: 2, counters: ["e1", "e2"] }
   ],
   outcomes: {
@@ -8156,7 +8156,7 @@ window.CASES.push(
     { q: "아이는 지금 괜찮아요?", a: "사흘 입원하고 나았습니다. 그래도 그 생각만 하면 손이 떨려요." }
   ],
   evidence: [
-    { id: "e1", name: "처방전 사본", desc: "소아용 해열 시럽, 1회 5ml", detail: "소아과 의사 서명과 아이 이름·나이가 적혀 있다.", value: 2 },
+    { id: "e1", name: "처방전 사본", desc: "소아용 해열 시럽, 1회 5ml", detail: "소아과 의사 서명과 아이 이름·나이가 적혀 있다.", value: 1 },
     { id: "e2", name: "약봉투·남은 약 사진", desc: "약국 이름이 찍힌 약봉투와 알약", detail: "봉투에 '성인 1회 1정'이라고 인쇄돼 있다.", value: 2 },
     { id: "e3", name: "응급실 진료기록", desc: "약물 과다 복용 의심, 3일 입원", detail: "치료비 영수증 280만 원이 붙어 있다.", value: 1 },
     { id: "e4", name: "CCTV 거절 문자", desc: "\"개인정보 문제로 영상 제공은 어렵습니다\"", detail: "거절 이유만 적혀 있다.", value: 0 }
@@ -8174,7 +8174,7 @@ window.CASES.push(
     { id: "a3", text: "어린아이가 입원해 겪은 고통에 대한 위자료가 인정돼야 한다", value: 1 }
   ],
   opponent: [
-    { id: "o1", name: "복용 과실 주장", desc: "\"보호자가 용량을 잘못 먹인 것입니다.\"", power: 3, counters: ["a1"] },
+    { id: "o1", name: "복용 과실 주장", desc: "\"보호자가 용량을 잘못 먹인 것입니다.\"", power: 3, counters: ["a1"], half: ["e1", "e2"] },
     { id: "o2", name: "치료비 과다 주장", desc: "\"사흘 입원은 지나칩니다.\"", power: 2, counters: ["e3"] }
   ],
   outcomes: {
@@ -8300,7 +8300,7 @@ window.CASES.push(
   ],
   opponent: [
     { id: "o1", name: "민원인 진술서", desc: "\"민원인은 원고가 반말로 소리를 질렀다고 진술했습니다.\"", power: 2, counters: ["e1", "e2"] },
-    { id: "o2", name: "징계 재량 주장", desc: "\"품위 유지 위반은 징계권자 재량입니다.\"", power: 3, counters: ["a2"] }
+    { id: "o2", name: "징계 재량 주장", desc: "\"품위 유지 위반은 징계권자 재량입니다.\"", power: 3, counters: ["a2"], half: ["e1"] }
   ],
   outcomes: {
     win: "피고가 20○○. ○. ○. 원고에게 한 정직 2개월 처분을 취소한다.",
@@ -8323,7 +8323,7 @@ window.CASES.push(
     { q: "대표는 뭐래요?", a: "조금만 기다려 달라고만 합니다. 벌써 반년쨉니다." }
   ],
   evidence: [
-    { id: "e1", name: "투자계약서", desc: "1억 원 투자, 대표이사 이해관계인 연대책임", detail: "'주된 사업 변경은 투자자 사전 서면 동의'라고 적혀 있다.", value: 2 },
+    { id: "e1", name: "투자계약서", desc: "1억 원 투자, 대표이사 이해관계인 연대책임", detail: "'주된 사업 변경은 투자자 사전 서면 동의'라고 적혀 있다.", value: 1 },
     { id: "e2", name: "법인 계좌 내역", desc: "투자금 입금 다음 주 6,000만 원 출금", detail: "받는 사람이 대표 개인 대출이 있는 저축은행이다.", value: 2 },
     { id: "e3", name: "사업 전환 기사", desc: "\"게임사, 코인 거래 플랫폼으로 전환\"", detail: "대표 인터뷰가 실려 있다. 투자자 동의 얘기는 없다.", value: 1 },
     { id: "e4", name: "회사 IR 자료", desc: "투자 유치 때 받은 사업 소개서", detail: "매출 전망 그래프와 사업 소개가 전부다.", value: 0 }
@@ -8341,7 +8341,7 @@ window.CASES.push(
     { id: "a3", text: "투자금을 대표 개인 빚을 갚는 데 쓴 것은 사기와 다를 바 없다", value: 0 }
   ],
   opponent: [
-    { id: "o1", name: "배당가능이익 부족 주장", desc: "\"회사에 이익이 없어 상환할 수 없습니다.\"", power: 3, counters: ["a2"] },
+    { id: "o1", name: "배당가능이익 부족 주장", desc: "\"회사에 이익이 없어 상환할 수 없습니다.\"", power: 3, counters: ["a2"], half: ["e1"] },
     { id: "o2", name: "이사회 의결 주장", desc: "\"사업 변경은 이사회 의결을 거쳤습니다.\"", power: 2, counters: ["e1"] }
   ],
   outcomes: {
@@ -8549,7 +8549,7 @@ window.CASES.push(
     { id: "a3", text: "처방량이 그대로이니 돈과 처방 사이에 대가 관계가 없다", value: 1 }
   ],
   opponent: [
-    { id: "o1", name: "영업사원 수첩", desc: "\"권 원장 월 250 현금, 강연은 형식\"이라고 적힌 수첩. \"강연료는 명목일 뿐입니다.\"", power: 5, counters: ["a2"] },
+    { id: "o1", name: "영업사원 수첩", desc: "\"권 원장 월 250 현금, 강연은 형식\"이라고 적힌 수첩. \"강연료는 명목일 뿐입니다.\"", power: 5, counters: ["a2"], half: ["e3"] },
     { id: "o2", name: "대가성 주장", desc: "\"처방을 계속 유지해 준 대가입니다.\"", power: 2, counters: ["e4"] }
   ],
   outcomes: {
@@ -8573,7 +8573,7 @@ window.CASES.push(
     { q: "검찰이 뭘 근거로 하나요?", a: "금액이 너무 비슷하다는 것, 둘 다 같은 협회 임원이라는 것. 그게 다예요." }
   ],
   evidence: [
-    { id: "e1", name: "투찰가 산정 자료", desc: "표준 단가 프로그램 출력본", detail: "기본값 그대로 계산하면 상대 업체 금액과 거의 같은 숫자가 나온다.", value: 2 },
+    { id: "e1", name: "투찰가 산정 자료", desc: "표준 단가 프로그램 출력본", detail: "기본값 그대로 계산하면 상대 업체 금액과 거의 같은 숫자가 나온다.", value: 1 },
     { id: "e2", name: "통화 내역", desc: "1년치 통신사 통화·문자 내역", detail: "상대 업체 대표 번호가 한 번도 없다.", value: 2 },
     { id: "e3", name: "동종 입찰 통계", desc: "최근 3년 관급 조경공사 투찰가 분포", detail: "업체 간 0.1% 안쪽 차이가 전체의 40%가 넘는다.", value: 1 },
     { id: "e4", name: "협회 단체사진", desc: "상대 업체 대표와 함께 찍힌 사진", detail: "300명이 넘게 찍힌 연말 행사 사진이다.", value: 0 }
@@ -8591,7 +8591,7 @@ window.CASES.push(
     { id: "a3", text: "입찰의 공정을 해칠 위험이 전혀 없었다", value: 0 }
   ],
   opponent: [
-    { id: "o1", name: "투찰가 근소 차이", desc: "\"0.1% 차이는 짜지 않고는 나올 수 없습니다.\"", power: 3, counters: ["a1"] },
+    { id: "o1", name: "투찰가 근소 차이", desc: "\"0.1% 차이는 짜지 않고는 나올 수 없습니다.\"", power: 3, counters: ["a1"], half: ["e1"] },
     { id: "o2", name: "협회 임원 관계", desc: "\"두 사람은 같은 협회 임원입니다.\"", power: 2, counters: ["e2"] }
   ],
   outcomes: {
@@ -8674,7 +8674,7 @@ window.CASES.push(
     { id: "a3", text: "원본 파일이 없는 캡처는 증거로 쓸 수 없다", value: 1 }
   ],
   opponent: [
-    { id: "o1", name: "위챗 대화 캡처", desc: "\"환율 좋게 2%만 받을게요\"라는 대화. \"피고인은 환치기 영업을 했습니다.\"", power: 5, counters: ["a3"] },
+    { id: "o1", name: "위챗 대화 캡처", desc: "\"환율 좋게 2%만 받을게요\"라는 대화. \"피고인은 환치기 영업을 했습니다.\"", power: 5, counters: ["a3"], half: ["e3"] },
     { id: "o2", name: "송금 기록", desc: "\"1년간 3억 원을 해외로 보냈습니다.\"", power: 2, counters: ["e4", "a2"] }
   ],
   outcomes: {
@@ -8699,7 +8699,7 @@ window.CASES.push(
   ],
   evidence: [
     { id: "e1", name: "차용증 3장", desc: "5년간 3건, 각 500만~1,000만 원, 연 10%", detail: "빌린 사람이 모두 의뢰인의 오랜 친구·친척이다.", value: 2 },
-    { id: "e2", name: "차용인 사실확인서", desc: "\"친구라 빌려줬고 독촉도 없었다\"", detail: "세 사람이 따로따로 썼다.", value: 2 },
+    { id: "e2", name: "차용인 사실확인서", desc: "\"친구라 빌려줬고 독촉도 없었다\"", detail: "세 사람이 따로따로 썼다.", value: 1 },
     { id: "e3", name: "휴대폰 문자 내역", desc: "의뢰인 휴대폰 문자 전체", detail: "대출 광고나 홍보 문자가 한 건도 없다.", value: 1 },
     { id: "e4", name: "땅 경계 다툼 내용증명", desc: "고소인이 보낸 내용증명", detail: "땅 경계 침범을 따지는 내용이다.", value: 0 }
   ],
@@ -8716,7 +8716,7 @@ window.CASES.push(
     { id: "a3", text: "피고인은 법정 최고이자율보다 훨씬 낮은 이자를 받았다", value: 1 }
   ],
   opponent: [
-    { id: "o1", name: "반복 대부 주장", desc: "\"이자를 받고 여러 번 빌려줬으니 대부업입니다.\"", power: 3, counters: ["a2"] },
+    { id: "o1", name: "반복 대부 주장", desc: "\"이자를 받고 여러 번 빌려줬으니 대부업입니다.\"", power: 3, counters: ["a2"], half: ["e1", "e2"] },
     { id: "o2", name: "고소인 진술", desc: "\"고소인은 피고인이 동네에서 돈놀이로 유명하다고 진술했습니다.\"", power: 2, counters: ["e1"] }
   ],
   outcomes: {
@@ -8926,12 +8926,12 @@ window.CASES.push(
   confessionCard: null,
   arguments: [
     { id: "a1", text: "체험 계약은 한 달로 끝났고, 해지 통지 뒤의 광고는 주문 없이 돌린 것이다", value: 2 },
-    { id: "a2", text: "광고 효과가 없었으니 광고비를 낼 이유가 없다", value: 1 },
+    { id: "a2", text: "광고 효과가 없었으니 광고비를 낼 이유가 없다", value: 0 },
     { id: "a3", text: "1,200만 원은 체험 요금에 비해 지나치게 많으니 감액해야 한다", value: 1 }
   ],
   opponent: [
     { id: "o1", name: "연장 합의 주장", desc: "\"체험 뒤 자동으로 정식 계약이 되는 조건이었습니다.\"", power: 2, counters: ["e2"] },
-    { id: "o2", name: "광고 집행 보고서", desc: "\"넉 달 동안 광고를 실제로 돌렸고 보고서도 매달 보냈습니다.\"", power: 3, counters: ["a1"] }
+    { id: "o2", name: "광고 집행 보고서", desc: "\"넉 달 동안 광고를 실제로 돌렸고 보고서도 매달 보냈습니다.\"", power: 3, counters: ["a1"], half: ["e1"] }
   ],
   outcomes: {
     win: "원고의 청구를 기각한다.",
@@ -10209,7 +10209,7 @@ window.CASES.push(
     { id: "a3", text: "피고인은 판돈에서 떼어 간 돈이 없어 영리 목적이 없었다", value: 2 }
   ],
   opponent: [
-    { id: "o1", name: "압수 현금통·수첩", desc: "\"수첩에 판마다 '고리'가 적혀 있고 현금통에 47만 원이 있었습니다.\"", power: 5, counters: ["a1"] },
+    { id: "o1", name: "압수 현금통·수첩", desc: "\"수첩에 판마다 '고리'가 적혀 있고 현금통에 47만 원이 있었습니다.\"", power: 5, counters: ["a1"], half: ["e3"] },
     { id: "o2", name: "손님 진술", desc: "\"손님들은 밤마다 도박판이 열렸다고 진술했습니다.\"", power: 2, counters: ["e2"] }
   ],
   outcomes: {
@@ -10327,7 +10327,7 @@ window.CASES.push(
     { id: "a3", text: "피해 차량 영상은 원본이 아닌 편집본이라 증거로 쓸 수 없다", value: 2 }
   ],
   opponent: [
-    { id: "o1", name: "피해 차량 블랙박스", desc: "\"피고인 차가 앞으로 들어와 급정거하는 장면이 찍혀 있습니다.\"", power: 5, counters: ["a3"] },
+    { id: "o1", name: "피해 차량 블랙박스", desc: "\"피고인 차가 앞으로 들어와 급정거하는 장면이 찍혀 있습니다.\"", power: 5, counters: ["a3"], half: ["e3"] },
     { id: "o2", name: "피해자 진술", desc: "\"피해자는 피고인이 아무 이유 없이 앞을 막고 급정거했다고 진술했습니다.\"", power: 2, counters: ["e4", "a2"] }
   ],
   outcomes: {
@@ -10441,13 +10441,13 @@ window.CASES.push(
   confession: null,
   confessionCard: null,
   arguments: [
-    { id: "a1", text: "피고인은 평생 농사를 지으며 불 한 번 낸 적이 없다", value: 1 },
+    { id: "a1", text: "피고인은 평생 농사를 지으며 불 한 번 낸 적이 없다", value: 0 },
     { id: "a2", text: "피고인은 불을 끄려고 달려간 사람이다", value: 2 },
     { id: "a3", text: "불은 옆 밭 소각 더미에서 시작돼 번져 온 것이다", value: 2 }
   ],
   opponent: [
     { id: "o1", name: "등산객 진술", desc: "\"등산객은 노인 한 사람이 불 옆에 서 있는 것을 봤다고 진술했습니다.\"", power: 2, counters: ["e1", "a2"] },
-    { id: "o2", name: "불탄 자리 측량도", desc: "\"불탄 자리가 피고인 밭 경계에 바로 붙어 있습니다.\"", power: 3, counters: ["a3"] }
+    { id: "o2", name: "불탄 자리 측량도", desc: "\"불탄 자리가 피고인 밭 경계에 바로 붙어 있습니다.\"", power: 3, counters: ["a3"], half: ["e2"] }
   ],
   outcomes: {
     win: "피고인은 무죄.",
@@ -12195,7 +12195,7 @@ window.CASES.push(
     { id: "a3", text: "피고의 앱 보안은 누구나 뚫을 수 있을 만큼 허술했다", value: 1 }
   ],
   opponent: [
-    { id: "o1", name: "인증 로그·사기범 녹취", desc: "원고 휴대폰으로 인증번호가 입력된 기록과 사기범 통화 녹취. \"원고가 직접 인증번호를 알려 줬습니다.\"", power: 5, counters: ["a2"] },
+    { id: "o1", name: "인증 로그·사기범 녹취", desc: "원고 휴대폰으로 인증번호가 입력된 기록과 사기범 통화 녹취. \"원고가 직접 인증번호를 알려 줬습니다.\"", power: 5, counters: ["a2"], half: ["e1", "e4"] },
     { id: "o2", name: "정상 거래 주장", desc: "\"이체 한도 안의 정상 거래였습니다.\"", power: 2, counters: ["e4", "e1", "a2"] }
   ],
   outcomes: {
@@ -12928,7 +12928,7 @@ window.CASES.push(
   ],
   evidence: [
     { id: "e1", name: "식약처 수입허가증", desc: "모델 'US-300', 재작년 허가", detail: "'전원·언어 사양 변경 모델 포함'이라는 문구가 있다.", value: 2 },
-    { id: "e2", name: "제조사 확인서", desc: "\"US-300K는 한국 전원·한글 메뉴만 바꾼 같은 제품\"", detail: "제조사 품질책임자 서명과 회로도 비교표가 붙어 있다.", value: 2 },
+    { id: "e2", name: "제조사 확인서", desc: "\"US-300K는 한국 전원·한글 메뉴만 바꾼 같은 제품\"", detail: "제조사 품질책임자 서명과 회로도 비교표가 붙어 있다.", value: 1 },
     { id: "e3", name: "식약처 질의 회신", desc: "\"사양 변경 범위 안이면 별도 허가 불필요\"", detail: "통관 보류 일주일 뒤 날짜다.", value: 1 },
     { id: "e4", name: "병원 납품 계약서", desc: "대학병원에 3대 납품", detail: "납품한 기기도 같은 US-300K다.", value: 0 }
   ],
@@ -12945,7 +12945,7 @@ window.CASES.push(
     { id: "a3", text: "US-300K는 허가받은 제품과 같은 기기라 미허가 수입이 아니다", value: 2 }
   ],
   opponent: [
-    { id: "o1", name: "모델명 상이 주장", desc: "\"모델명이 다르면 다른 제품입니다.\"", power: 3, counters: ["a1", "a3"] },
+    { id: "o1", name: "모델명 상이 주장", desc: "\"모델명이 다르면 다른 제품입니다.\"", power: 3, counters: ["a1", "a3"], half: ["e1", "e2", "e3"] },
     { id: "o2", name: "유통 위험 주장", desc: "\"피고인은 이미 병원에 팔아 위험을 퍼뜨렸습니다.\"", power: 2, counters: ["e2"] }
   ],
   outcomes: {
@@ -14002,8 +14002,20 @@ function runTrial() {
     const hit = c.truth === "hiding" && cs.includes("k") ? C.sub.has("k") && cs.includes(C.arg) : cs.some(id => C.sub.has(id) || id === C.arg);
     // 거짓 의뢰인 사건의 결정타는 막지 못하면 그대로 패소
     const power = c.truth === "liar" && o.power >= 5 ? 12 : o.power;
+    // 일부 막음(o.half): 반박을 절반만 깎아 낸다
+    const used = id => C.sub.has(id) || id === C.arg;
+    const half = !hit && (o.half || []).some(used);
     const say = oppSay(o);
-    steps.push({ ava: isCrim(c) ? "pros" : "opp", cls: "opp", who: isCrim(c) ? "검사" : "상대 대리인", text: say.text, note: say.note, d: hit ? 0 : -power, dTxt: hit ? "" : null });
+    steps.push({ ava: isCrim(c) ? "pros" : "opp", cls: "opp", who: isCrim(c) ? "검사" : "상대 대리인", text: say.text, note: say.note, d: hit ? 0 : half ? -Math.ceil(power / 2) : -power, dTxt: hit ? "" : null });
+    if (half) {
+      const ids = o.half.filter(used);
+      const evNames = ids.filter(id => id !== "k" && id !== C.arg).map(id => (id === "k" ? c.confessionCard : c.evidence.find(e => e.id === id) || {}).name).filter(Boolean);
+      const lines = [];
+      if (ids.includes("k")) lines.push(`그 점은 저희가 먼저 밝힌 부분입니다.`);
+      if (evNames.length) lines.push(`적어도 그 일부는 저희가 제출한 ${evNames.map(n => `「${n}」`).join(", ")}${josaEul(evNames[evNames.length - 1])} 보시면 사실과 다릅니다.`);
+      if (ids.includes(C.arg)) lines.push(`앞서 말씀드린 대로, ${formal(c.arguments.find(a => a.id === C.arg).text)}.`);
+      steps.push({ img: heroOf().img, cls: "ours rebut", who: "우리 측 반론", text: `이의 있습니다! ${lines.join(" ")}`, d: 0, dTxt: "일부 막음" });
+    }
     // 막았다면 우리 측이 그 자리에서 증거·털어놓은 사실·주장을 내밀며 반론한다
     if (hit) {
       const ids = cs.filter(id => C.sub.has(id) || id === C.arg);
