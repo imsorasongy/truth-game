@@ -335,7 +335,11 @@ html[data-scene^="end"] #backdrop::after { background: linear-gradient(180deg, #
 .v-act { display: flex; flex-direction: column; gap: 4px; }
 .visitor.dim { opacity: .6; }
 .gal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 6px; }
-.gal-sec { display: flex; flex-direction: column; gap: 6px; }
+.gal-tabs { display: flex; flex: none; gap: 6px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+.gal-tabs::-webkit-scrollbar { display: none; }
+.gal-tab { flex: none; display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 6px 10px; border-radius: 8px; border: 1px solid #c9a24a44; background: #140d09cc; color: #c9b593; font: inherit; font-size: 13px; cursor: pointer; white-space: nowrap; }
+.gal-tab small { font-size: 11px; opacity: .7; }
+.gal-tab.on { background: var(--brass); color: #1a120c; border-color: var(--brass); }
 .gal-t { position: relative; aspect-ratio: 3 / 4; border-radius: 8px; overflow: hidden; border: 1px solid #c9a24a55; background: #2a1d14; padding: 0; cursor: pointer; }
 .gal-t img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 12%; }
 .gal-t span { position: absolute; left: 0; right: 0; bottom: 0; padding: 2px 3px; font-size: 10px; line-height: 1.3; color: #f1e6cf; background: #000c; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -13438,7 +13442,7 @@ function groupOf(c) {
   if (/손해배상|사고|과실|물림|명예훼손|초상권|식중독|부작용|학대|파손|훼손|분실|감염|낙상|침해|유출|해킹|유실|과오|제조물|설명의무/.test(t)) return "손해배상";
   return "계약·금전";
 }
-function screenArchive(back, openId) {
+function screenArchive(back, openId, tab) {
   const g = galLoad();
   (S && S.archive || []).forEach(a => { if (!g[a.id]) g[a.id] = { m: a.m, money: a.money }; });
   const got = CASES.filter(c => g[c.id]).length;
@@ -13446,18 +13450,20 @@ function screenArchive(back, openId) {
   const detail = sel ? `<div class="file gal-open"><div class="gal-head"><div class="portrait">${portrait(sel)}</div>
       <div><div class="vn">${esc(sel.client.name)} · ${esc(sel.category)}</div><div class="vm">${caseNo(sel)} · <b class="pos">${resultLabel(sel, "win")}</b>${g[openId].money ? ` · 수임료 ${won(g[openId].money)}` : ""}</div></div></div>
       <div class="file-body"><div class="judgment"><div class="lbl">주문</div>${esc(sel.outcomes.win)}</div><p class="note">${esc(sel.epilogue)}</p></div></div>` : "";
-  const secs = GROUPS.map(gr => {
-    const list = CASES.filter(c => groupOf(c) === gr);
-    const n = list.filter(c => g[c.id]).length;
-    return `<div class="gal-sec"><div class="section-head"><span class="eyebrow">${gr}</span><span class="eyebrow">${n} / ${list.length}</span></div>
-      <div class="gal-grid">${list.map(c => g[c.id]
+  const cur = tab || (sel ? groupOf(sel) : GROUPS[0]);
+  const tabs = `<div class="gal-tabs">${GROUPS.map(gr => {
+    const list = CASES.filter(c => groupOf(c) === gr), n = list.filter(c => g[c.id]).length;
+    return `<button class="gal-tab ${gr === cur ? "on" : ""}" data-gt="${gr}">${gr.replace(" · ", "·")}<small>${n}/${list.length}</small></button>`;
+  }).join("")}</div>`;
+  const list = CASES.filter(c => groupOf(c) === cur);
+  const secs = `<div class="gal-grid">${list.map(c => g[c.id]
         ? `<button class="gal-t ${sel === c ? "on" : ""}" data-g="${c.id}">${portrait(c)}<span>${esc(c.category)}</span></button>`
-        : `<div class="gal-t lock">?</div>`).join("")}</div></div>`;
-  }).join("");
+        : `<div class="gal-t lock">?</div>`).join("")}</div>`;
   show(`<div><div class="eyebrow">모은 사건 ${got} / ${CASES.length}</div><h2>사건 갤러리</h2></div>
-    ${detail}${secs}`,
+    ${tabs}${detail}${secs}`,
     `<button class="btn primary" id="archBack">돌아가기</button>`, S && S.ended && back === screenEnding ? "end-top" : "office");
-  on("[data-g]", e => screenArchive(back, e.currentTarget.dataset.g));
+  on("[data-g]", e => screenArchive(back, e.currentTarget.dataset.g, cur));
+  on("[data-gt]", e => screenArchive(back, null, e.currentTarget.dataset.gt));
   on("#archBack", back);
   if (sel) app.scrollTop = 0;
 }
@@ -13871,8 +13877,8 @@ function runTrial() {
     tilt();
     if (s.cls === "opp") slam("반박!", "bad"); else if (s.cls.includes("rebut")) slam("이의 있음!", "good");
     if (!fast) logEl.lastElementChild.scrollIntoView({ block: "nearest", behavior: "smooth" });
-    // 글 길이만큼 읽을 시간을 준다(우리 측 반론은 최소 3초). 화면을 누르면 바로 다음으로
-    const wait = Math.min(7000, Math.max(s.cls.includes("rebut") ? 3000 : 1300, 600 + s.text.length * 70));
+    // 글 길이만큼 읽을 시간(1초에 25자 꼴, 우리 측 반론은 최소 1.8초). 화면을 누르면 바로 다음으로
+    const wait = Math.min(4000, Math.max(s.cls.includes("rebut") ? 1800 : 900, 300 + s.text.length * 40));
     timer = setTimeout(step, fast ? 0 : wait);
   };
   const tapNext = e => { if (fast || e.target.closest("button")) return; clearTimeout(timer); step(); };
