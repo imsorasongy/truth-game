@@ -13479,7 +13479,7 @@ function toggleSound() {
 // 장면 배경: 사무실은 단계별(1·4단계와 엔딩은 주인공 성별에 맞춘 그림), 법정은 고정
 const heroKey = () => ((S || load() || {}).hero) || "m";
 function sceneImage(name) {
-  if (name === "court") return "assets/bg-court.webp";
+  if (name === "court") return "assets/court-2.webp";
   if (name === "end-top") return `assets/end-top-${heroKey()}.jpg`;
   if (name === "end-close") return `assets/end-close-${heroKey()}.jpg`;
   if (!S) return "assets/bg-office.webp";
