@@ -14537,8 +14537,7 @@ function screenOffice() {
     <div class="pn"><div class="eyebrow">지금 사무실</div><div class="pn-name">${esc(cur.name)}</div>
       <div class="note">월세 ${won(cur.rent)} · 생활비 ${won(cur.live)} · 직원 정원 ${capacity()}명<br>사건 규모 ${tierTxt(cur.tiers)} · 한 달 수임 ${cur.cap}건 · 명성 상한 ${cur.repCap}${cur.up ? ` · 수임료 +${Math.round(cur.up * 100)}%` : ""}</div></div>
     ${moveBox}
-    <div class="section-head"><span class="eyebrow">직원</span><span class="eyebrow">정원 ${staffCount()} / ${capacity()}</span></div>
-    <div class="stack">${staff}</div>`,
+`,
     `<button class="btn primary" id="backLedger">${officeBack ? "돌아가기" : "장부로 돌아가기"}</button>`);
   on("#move", () => { S.money -= nx.cost; S.office = (S.office || 0) + 1; S.moveNote = false; save(); screenOffice(); });
   on("[data-hire]", e => screenHire(e.currentTarget.dataset.hire));
@@ -14566,9 +14565,11 @@ function staffPop(k) {
 // 고용: 그 직무의 후보 3명 중 한 명을 고른다
 function screenHire(k) {
   const role = STAFF.find(s => s.key === k);
-  show(`<div><div class="eyebrow">${role.name} 고용</div><h2>누구를 뽑을까</h2></div>
+  const full = staffCount() >= capacity();
+  show(`<div><div class="eyebrow">${role.name} 고용 · 직원 정원 ${staffCount()} / ${capacity()}</div><h2>누구를 뽑을까</h2></div>
+    ${full ? `<div class="pn warn">정원이 찼습니다. 다른 직원을 내보내거나 더 큰 사무실로 옮겨야 합니다.</div>` : ""}
     <div class="stack">${STAFF_PICKS[k].map(x => `<div class="pn staff-row on"><div class="sf"><img src="assets/staff/${x.face}.webp" alt=""></div><div>
-      <div class="pn-top"><span><b>${esc(x.name)}</b> · 월 ${won(x.pay)}</span><button class="mini gold" data-pick="${x.id}">고용</button></div>
+      <div class="pn-top"><span><b>${esc(x.name)}</b> · 월 ${won(x.pay)}</span><button class="mini gold" data-pick="${x.id}" ${full ? "disabled" : ""}>고용</button></div>
       <div class="note">${x.desc}</div></div></div>`).join("")}</div>`,
     `<button class="btn ghost" id="hireBack">돌아가기</button>`);
   on("[data-pick]", e => { S.staff = S.staff || {}; S.staff[k] = e.currentTarget.dataset.pick; save(); screenOffice(); });
