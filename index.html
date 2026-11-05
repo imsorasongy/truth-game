@@ -344,6 +344,23 @@ html[data-scene^="end"] #backdrop::after { background: linear-gradient(180deg, #
 .tut p b { color: var(--brass); }
 .tut-glow { position: relative; animation: tutglow 1.3s ease-in-out infinite; border-radius: 8px; }
 @keyframes tutglow { 0%, 100% { box-shadow: 0 0 0 2px #e8c36a, 0 0 10px 2px #e8c36a66; } 50% { box-shadow: 0 0 0 3px #ffe08a, 0 0 22px 6px #ffd76a99; } }
+.cutin { position: fixed; inset: 0; z-index: 25; display: flex; align-items: center; pointer-events: none; }
+.ci-band { position: relative; width: 100%; height: 150px; display: flex; align-items: center; gap: 14px; padding: 0 18px; overflow: hidden; }
+.cutin.us .ci-band { background: linear-gradient(100deg, #0b2a5ae6, #1b4fa0e6 60%, #0b2a5ae6); animation: ciL .8s cubic-bezier(.2,.9,.3,1) forwards; }
+.cutin.opp .ci-band { flex-direction: row-reverse; background: linear-gradient(260deg, #5a0b0be6, #a01b1be6 60%, #5a0b0be6); animation: ciR .8s cubic-bezier(.2,.9,.3,1) forwards; }
+.ci-face { width: 128px; height: 128px; flex: none; border-radius: 10px; overflow: hidden; border: 3px solid #fff; box-shadow: 0 6px 20px #000a; }
+.ci-face img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 15%; display: block; }
+.ci-txt { font-family: var(--f-display); font-size: clamp(34px, 11vw, 54px); color: #fff; text-shadow: 0 3px 0 #000, 0 0 18px #000; transform: rotate(-4deg); white-space: nowrap; }
+@keyframes ciL { 0% { transform: translateX(-100%) skewY(-4deg); } 18%, 80% { transform: translateX(0) skewY(-4deg); } 100% { transform: translateX(100%) skewY(-4deg); opacity: 0; } }
+@keyframes ciR { 0% { transform: translateX(100%) skewY(4deg); } 18%, 80% { transform: translateX(0) skewY(4deg); } 100% { transform: translateX(-100%) skewY(4deg); opacity: 0; } }
+.flash { position: fixed; inset: 0; z-index: 24; pointer-events: none; animation: flash .42s ease-out forwards; }
+.flash.white { background: #fff; } .flash.red { background: #ff2a1a; }
+@keyframes flash { 0% { opacity: .75; } 100% { opacity: 0; } }
+#app.quake { animation: quake .5s; }
+@keyframes quake { 10%, 50%, 90% { transform: translate(-7px, 3px); } 30%, 70% { transform: translate(7px, -3px); } }
+.gauge.zw { animation: zw 1s ease-out; } .gauge.zl { animation: zl 1s ease-out; }
+@keyframes zw { 0% { box-shadow: 0 0 0 0 #8fdc9f; } 30% { box-shadow: 0 0 18px 6px #8fdc9fcc; } 100% { box-shadow: 0 0 0 0 transparent; } }
+@keyframes zl { 0% { box-shadow: 0 0 0 0 #ff7a66; } 30% { box-shadow: 0 0 18px 6px #ff7a66cc; } 100% { box-shadow: 0 0 0 0 transparent; } }
 .closeup, .flip { position: fixed; inset: 0; z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: #0d0806e6; animation: fadein .25s; }
 .closeup.out, .flip.out { opacity: 0; transition: opacity .3s; }
 .closeup-face { width: min(220px, 60vw); aspect-ratio: 1; border-radius: 50%; overflow: hidden; border: 4px solid var(--brass); animation: zoom 1.5s ease-out; }
@@ -13922,24 +13939,77 @@ function runTrial() {
     el.textContent = txt; el.className = "slam show " + cls;
     setTimeout(() => { el.className = "slam"; }, 700);
   };
+  // 연출: 대사 타자, 반론 때 우리 변호사 컷인·흰 섬광, 큰 반박 때 상대 컷인·붉은 섬광·흔들림, 구간이 바뀌면 게이지가 빛남
+  let busy = false, typing = null, zone = zoneOf(0);
+  const finishType = () => { if (typing) { typing.el.textContent = typing.full; clearInterval(typing.t); typing = null; } };
   const step = () => {
+    finishType();
     if (i >= steps.length) { app.removeEventListener("click", tapNext); return judgeCloseUp(fast, () => verdict(score)); }
-    const s = steps[i++]; score += s.d;
-    const dTxt = s.dTxt != null ? s.dTxt : s.d > 0 ? `+${s.d}` : s.d < 0 ? `−${-s.d}` : "±0";
-    logEl.insertAdjacentHTML("beforeend", `<div class="log-line ${s.cls} ${s.ava || s.img ? "has-ava" : ""}">${s.ava || s.img ? `<div class="ava"><img src="${s.img || `assets/${s.ava}.webp`}" alt=""></div>` : ""}<div><span class="who">${esc(s.who)}</span>${esc(s.text)}</div><span class="d ${s.d > 0 ? "pos" : s.d < 0 ? "neg" : "zero"}">${dTxt}</span></div>`);
-    tilt();
-    if (s.cls === "opp") slam("반박!", "bad"); else if (s.cls.includes("rebut")) slam("이의 있음!", "good");
-    if (!fast) logEl.lastElementChild.scrollIntoView({ block: "nearest", behavior: "smooth" });
-    // 글 길이만큼 읽을 시간(1초에 25자 꼴, 우리 측 반론은 최소 1.8초). 화면을 누르면 바로 다음으로
-    const wait = Math.min(4000, Math.max(s.cls.includes("rebut") ? 1800 : 900, 300 + s.text.length * 40));
-    timer = setTimeout(step, fast ? 0 : wait);
+    const s = steps[i++];
+    const rebut = s.cls.includes("rebut"), big = s.cls === "opp" && s.d <= -4;
+    const run = () => {
+      busy = false; score += s.d;
+      const dTxt = s.dTxt != null ? s.dTxt : s.d > 0 ? `+${s.d}` : s.d < 0 ? `−${-s.d}` : "±0";
+      logEl.insertAdjacentHTML("beforeend", `<div class="log-line ${s.cls} ${s.ava || s.img ? "has-ava" : ""}">${s.ava || s.img ? `<div class="ava"><img src="${s.img || `assets/${s.ava}.webp`}" alt=""></div>` : ""}<div><span class="who">${esc(s.who)}</span><span class="tx"></span></div><span class="d ${s.d > 0 ? "pos" : s.d < 0 ? "neg" : "zero"}">${dTxt}</span></div>`);
+      const tx = logEl.lastElementChild.querySelector(".tx");
+      if (fast) tx.textContent = s.text;
+      else { const ch = [...s.text]; let n = 0; typing = { el: tx, full: s.text, t: setInterval(() => { tx.textContent = ch.slice(0, ++n).join(""); if (n >= ch.length) finishType(); }, 18) }; }
+      tilt();
+      const z = zoneOf(score);
+      if (!fast && z !== zone) { const g = document.querySelector(".gauge"); g.classList.remove("zw", "zl"); void g.offsetWidth; g.classList.add(z > zone ? "zw" : "zl"); }
+      zone = z;
+      if (s.cls === "opp") { slam("반박!", "bad"); if (!fast && s.d < 0) { flash("red"); sfx("thud"); if (big) shakeAll(); } }
+      else if (rebut) slam("이의 있음!", "good");
+      if (!fast) logEl.lastElementChild.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      // 글 길이만큼 읽을 시간(1초에 25자 꼴, 우리 측 반론은 최소 1.8초). 화면을 누르면 바로 다음으로
+      const wait = Math.min(4000, Math.max(rebut ? 1800 : 900, 300 + s.text.length * 40));
+      timer = setTimeout(step, fast ? 0 : wait);
+    };
+    if (!fast && (rebut || big)) {
+      busy = true;
+      cutIn(rebut ? heroOf().img : `assets/${s.ava}.webp`, rebut ? "이의 있음!" : "반박!", rebut ? "us" : "opp");
+      if (rebut) { flash("white"); sfx("sting"); }
+      timer = setTimeout(run, 800);
+    } else run();
   };
-  const tapNext = e => { if (fast || e.target.closest("button")) return; clearTimeout(timer); step(); };
+  const tapNext = e => { if (fast || busy || e.target.closest("button")) return; clearTimeout(timer); step(); };
   app.addEventListener("click", tapNext);
-  on("#skip", () => { fast = true; clearTimeout(timer); app.removeEventListener("click", tapNext); step(); });
+  on("#skip", () => { fast = true; busy = false; clearTimeout(timer); document.querySelectorAll(".cutin, .flash").forEach(x => x.remove()); app.removeEventListener("click", tapNext); step(); });
   timer = setTimeout(step, fast ? 0 : 500);
 }
 
+let actx = null;
+const zoneOf = sc => sc >= 3 ? 2 : sc >= 1 ? 1 : 0;
+function cutIn(img, txt, side) {
+  const ov = document.createElement("div");
+  ov.className = "cutin " + side;
+  ov.innerHTML = `<div class="ci-band"><div class="ci-face"><img src="${img}" alt=""></div><div class="ci-txt">${txt}</div></div>`;
+  document.body.appendChild(ov);
+  setTimeout(() => ov.remove(), 820);
+}
+function flash(color) {
+  const f = document.createElement("div");
+  f.className = "flash " + color;
+  document.body.appendChild(f);
+  setTimeout(() => f.remove(), 420);
+}
+function shakeAll() { app.classList.remove("quake"); void app.offsetWidth; app.classList.add("quake"); }
+// 효과음: 반론은 위로 치솟는 '쨍', 반박에 맞으면 낮은 '쿵'
+function sfx(kind) {
+  if (!soundOn) return;
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    const t = actx.currentTime;
+    const tone = (type, f0, f1, dur, vol, at = 0) => {
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = type; o.frequency.setValueAtTime(f0, t + at); o.frequency.exponentialRampToValueAtTime(f1, t + at + dur);
+      g.gain.setValueAtTime(vol, t + at); g.gain.exponentialRampToValueAtTime(0.001, t + at + dur);
+      o.connect(g).connect(actx.destination); o.start(t + at); o.stop(t + at + dur + 0.02);
+    };
+    if (kind === "sting") { tone("square", 520, 1040, 0.16, 0.12); tone("square", 780, 1560, 0.22, 0.09, 0.06); }
+    else { tone("sine", 140, 45, 0.35, 0.6); tone("triangle", 90, 40, 0.3, 0.3); }
+  } catch (e) {}
+}
 // 판결 직전: 판사 얼굴을 크게 띄우고 의사봉 소리
 function judgeCloseUp(fast, done) {
   if (fast || REDUCED) { gavel(); return done(); }
@@ -13951,7 +14021,6 @@ function judgeCloseUp(fast, done) {
   setTimeout(() => { ov.classList.add("out"); setTimeout(() => { ov.remove(); done(); }, 300); }, 1500);
 }
 // 의사봉 소리: 브라우저에서 합성한 짧은 '땅, 땅'
-let actx = null;
 function gavel() {
   if (!soundOn) return;
   try {
