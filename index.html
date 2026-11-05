@@ -336,6 +336,14 @@ html[data-scene^="end"] #backdrop::after { background: linear-gradient(180deg, #
 @keyframes fadeout { to { opacity: 0; } }
 .cover.end-cover { min-height: 100%; justify-content: flex-end; gap: 14px; padding-top: 52vh; }
 .cover.end-cover h1 { font-size: clamp(36px, 10vw, 56px); }
+.tut { display: grid; grid-template-columns: 44px 1fr; gap: 10px; align-items: start; background: #2a1d10f0; border: 1px solid var(--brass); border-radius: 10px; padding: 10px 12px; box-shadow: 0 0 0 1px #c9a24a33, 0 6px 18px #000a; animation: fadein .4s; }
+.tut .ava { width: 44px; height: 44px; border-radius: 50%; overflow: hidden; border: 2px solid var(--brass); background: #ddd; }
+.tut .ava img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 15%; display: block; }
+.tut .who { font-size: 12px; color: var(--brass); margin-bottom: 3px; }
+.tut p { margin: 0; font-size: 14.5px; line-height: 1.65; color: #f1e6cf; }
+.tut p b { color: var(--brass); }
+.tut-glow { position: relative; animation: tutglow 1.3s ease-in-out infinite; border-radius: 8px; }
+@keyframes tutglow { 0%, 100% { box-shadow: 0 0 0 2px #e8c36a, 0 0 10px 2px #e8c36a66; } 50% { box-shadow: 0 0 0 3px #ffe08a, 0 0 22px 6px #ffd76a99; } }
 .closeup, .flip { position: fixed; inset: 0; z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: #0d0806e6; animation: fadein .25s; }
 .closeup.out, .flip.out { opacity: 0; transition: opacity .3s; }
 .closeup-face { width: min(220px, 60vw); aspect-ratio: 1; border-radius: 50%; overflow: hidden; border: 4px solid var(--brass); animation: zoom 1.5s ease-out; }
@@ -13492,6 +13500,10 @@ function screenArchive(back, openId, tab) {
 }
 
 /* ---------- 상담 ---------- */
+/* ---------- 첫 사건 튜토리얼: 첫 재판을 마칠 때까지 주인공이 직접 할 일을 말한다 ---------- */
+const tutOn = () => !!S && trials() === 0;
+const tut = html => tutOn() ? `<div class="tut"><div class="ava"><img src="${heroOf().img}" alt=""></div><div><div class="who">${esc(S.name || heroOf().name)} 변호사</div><p>${html}</p></div></div>` : "";
+const glow = sel => { if (tutOn()) setTimeout(() => document.querySelectorAll(sel).forEach(el => el.classList.add("tut-glow")), 80); };
 function startCase(id) {
   const c = BY_ID[id];
   C = { c, wallet: 0.8 + Math.random() * 0.6, suspOrder: shuffle([0, 1, 2]), argOrder: shuffle(c.arguments.map((_, i) => i)), asked: [], opened: {}, verdict: null, susp: null, confessed: false, haggled: false, offerF: null, offerB: null, fee: 0, bonus: 0, flagged: false, left: false, sub: new Set(), arg: null };
@@ -13564,7 +13576,13 @@ function screenConsult() {
     .concat(C.asked.map(i => `<div class="me-row"><div class="bubble me">${esc(c.questions[i].q)}</div><div class="ava me-ava"><img src="${heroOf().img}" alt=""></div></div><div class="bubble">${esc(c.questions[i].a)}</div>`)).join("");
   const qs = c.questions.map((q, i) => C.asked.includes(i) ? "" :
     `<button class="btn" data-q="${i}" ${left <= 0 ? "disabled" : ""}>${esc(q.q)}</button>`).join("");
+  const opened = Object.values(C.opened).some(Boolean);
+  const tip = C.asked.length === 0
+    ? "먼저 의뢰인이 가져온 증거부터 보자. 아래 <b>증거</b> 탭을 누르면 증거 카드가 나오고, 카드를 누르면 자세한 내용이 보인다. 그다음은 질문. 질문은 세 번뿐이니 의뢰인 말과 증거가 어긋나는 데를 골라 물어보자."
+    : left > 0 ? "대답을 증거와 맞춰 보자. 어긋나는 데가 있으면 거기에 숨긴 사실이나 거짓말이 있다. 질문이 남았으면 더 물어봐도 되고, 다 들었으면 아래 <b>판단 내리기</b>."
+    : "질문은 끝났다. 들은 말과 증거를 맞춰 보고 아래 <b>판단 내리기</b>를 누르자.";
   show(`${clientCard(c)}
+    ${tut(tip)}
     <div class="talk" id="talk">${talk}</div>
     <div class="stack">
       <div class="section-head"><span class="eyebrow">질문하기</span><span class="eyebrow">남은 기회 <b>${left}</b>${has("assoc") ? " · 고용 변호사" : ""}</span></div>
@@ -13585,17 +13603,21 @@ function screenConsult() {
     const y = window.scrollY; screenConsult(); window.scrollTo({ top: y });
   });
   on("#judge", screenJudge);
+  if (C.asked.length === 0 && !opened) glow('#tabs [data-tab="ev"], .evlist');
+  else if (C.asked.length === 0) glow("[data-q]");
+  else glow("#judge");
 }
 
 /* ---------- 판단 ---------- */
 function screenJudge() {
   const c = C.c;
   show(`${clientCard(c)}
+    ${tut("셋 중 하나다. 말과 증거가 다 맞으면 <b>진실</b>. 증거에는 있는데 의뢰인이 말하지 않은 게 있으면 <b>숨김</b>. 증거와 정면으로 다른 말을 했으면 <b>거짓</b>. 숨긴 걸 맞히면 털어놓고 재판에 낼 카드가 하나 생긴다. 거짓을 맞히면 불리한 증거에 '위험' 표시가 붙는다. 대신 진실한 사람을 의심하면 화가 나서 떠날 수 있다.")}
     <div><div class="eyebrow">판단</div><h2>이 의뢰인은…</h2></div>
     <div class="stack" id="choices">
-      <button class="btn" data-v="honest">진실을 말하고 있다<small>그대로 믿고 진행합니다</small></button>
-      <button class="btn" data-v="hiding">숨기는 게 있다<small>무엇을 숨기는지 짚어 묻습니다. 틀리면 기분이 상해 떠날 수 있습니다</small></button>
-      <button class="btn" data-v="liar">거짓말을 하고 있다<small>무엇이 거짓인지 짚어 따집니다. 진실한 사람이면 떠나 버립니다</small></button>
+      <button class="btn" data-v="honest">진실을 말하고 있다</button>
+      <button class="btn" data-v="hiding">숨기는 게 있다</button>
+      <button class="btn" data-v="liar">거짓말을 하고 있다</button>
     </div>
     <button class="btn ghost" id="back">상담으로 돌아가기</button>`);
   on("[data-v]", e => {
@@ -13609,6 +13631,7 @@ function screenJudge() {
 function screenSuspect() {
   const c = C.c;
   show(`${clientCard(c)}
+    ${tut("의뢰인이 말하지 않은 사실을 고르자. 증거에는 나오는데 의뢰인이 쏙 뺀 이야기가 답이다.")}
     <div><div class="eyebrow">숨기는 게 있다</div><h2>무엇을 숨기고 있나</h2></div>
     <div class="stack">${C.suspOrder.map(i => `<button class="btn" data-s="${i}">${esc(c.suspicions[i])}</button>`).join("")}</div>
     <button class="btn ghost" id="back">다시 생각하기</button>`);
@@ -13620,6 +13643,7 @@ function screenLie() {
   const c = C.c, lies = c.lies || [];
   if (!C.lieOrder) C.lieOrder = shuffle(lies.map((_, i) => i));
   show(`${clientCard(c)}
+    ${tut("의뢰인이 한 말 가운데 증거와 정면으로 어긋나는 것을 고르자.")}
     <div><div class="eyebrow">거짓말을 하고 있다</div><h2>무엇이 거짓말인가</h2></div>
     <div class="stack">${C.lieOrder.map(i => `<button class="btn" data-l="${i}">${esc(lies[i])}</button>`).join("")}</div>
     <button class="btn ghost" id="back">다시 생각하기</button>`);
@@ -13716,6 +13740,9 @@ function screenFee(extra) {
   if (extra) talk.push(extra);
   const fx = C.fxOnce ? (C.confessed ? "confess" : "") : ""; C.fxOnce = false;
   show(`${clientCard(c, fx)}
+    ${tut(C.haggled
+      ? "깎자고 한다. 받아들이려면 바뀐 금액 그대로 <b>이 금액으로 제시</b>를 누르면 된다. 금액을 고쳐 한 번 더 불러도 되지만, 그래도 비싸면 이번엔 그냥 떠난다."
+      : "이제 수임료다. <b>착수금</b>은 사건을 맡을 때 바로 받는 돈이고, <b>성공보수</b>는 이겼을 때 받는 돈이다. 일부만 이기면 성공보수는 절반, 지면 못 받는다. 처음 금액은 비슷한 사건 시세에 내 명성과 사무실을 얹은 값이다. 의뢰인 형편에 비해 비싸면 깎자고 맞제안을 하고, 너무 비싸면 그냥 떠난다. 형편이 어려운 사람은 착수금을, 여유 있는 사람은 성공보수를 더 부담스러워한다. −·+ 로 고치거나 숫자를 직접 넣을 수 있다. 첫 사건이니 이대로 불러 보자.")}
     <div class="talk">${talk.join("")}</div>
     ${C.card ? `<div class="evlist"><div class="ev card-k"><div class="ev-name">${esc(c.confessionCard.name)}</div><div class="ev-desc">${esc(c.confessionCard.desc)}</div></div></div>` : ""}
     <div class="feebox">
@@ -13740,6 +13767,7 @@ function screenFee(extra) {
     document.getElementById("offer" + k).value = C["offer" + k].toLocaleString();
   });
   on("#propose", () => { sync(); propose(); });
+  glow(".feebox, #propose");
   on("#refuse", () => {
     S.refused++;
     finishCase("refused", { rep: 0, money: 0 });
@@ -13821,7 +13849,8 @@ function screenTrial() {
   }).join("");
   const args = C.argOrder.map(i => c.arguments[i]).map(a => `<label class="arg pick"><input type="radio" name="arg" id="arg-${esc(a.id)}" data-arg="${esc(a.id)}" ${C.arg === a.id ? "checked" : ""}><span>${esc(a.text)}</span></label>`).join("");
   show(`${trialHead(c)}
-    <div class="stack"><div class="section-head"><span class="eyebrow">제출할 증거 고르기</span><span class="eyebrow">${has("inv") ? (C.inv ? "조사원 뒷조사 끝" : "조사원 뒷조사 1회") : "불리한 건 빼도 됩니다"}</span></div>
+    ${tut("재판 준비다. 증거는 처음에 전부 내는 걸로 체크되어 있다. 우리에게 불리한 증거는 눌러서 체크를 풀어 빼자. 그다음 주장을 하나 고르고 <b>변론 시작</b>. 상대가 반박하면 우리가 낸 증거나 주장 중 맞는 것으로 막는다. 못 막으면 그만큼 밀린다. 재판 중에는 화면을 누르면 빨리 넘어간다.")}
+    <div class="stack"><div class="section-head"><span class="eyebrow">제출할 증거 고르기</span>${has("inv") ? `<span class="eyebrow">${C.inv ? "조사원 뒷조사 끝" : "조사원 뒷조사 1회"}</span>` : ""}</div>
       <div class="evlist">${evs}</div></div>
     <div class="stack"><div class="eyebrow">주장 하나 고르기</div>${args}</div>`,
     `<button class="btn primary" id="plead" ${C.arg ? "" : "disabled"}>변론 시작</button>`, "court");
@@ -13837,6 +13866,7 @@ function screenTrial() {
     C.inv = e.currentTarget.dataset.inv; const y = window.scrollY; screenTrial(); window.scrollTo({ top: y });
   }));
   on("#plead", runTrial);
+  glow(".evlist, .arg");
 }
 
 /* ---------- 재판 진행 ---------- */
