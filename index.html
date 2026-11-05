@@ -334,6 +334,15 @@ html[data-scene^="end"] #backdrop::after { background: linear-gradient(180deg, #
 @keyframes flip { from { transform: rotateX(-90deg); opacity: 0; } to { transform: rotateX(0); opacity: 1; } }
 .v-act { display: flex; flex-direction: column; gap: 4px; }
 .visitor.dim { opacity: .6; }
+.gal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 6px; }
+.gal-sec { display: flex; flex-direction: column; gap: 6px; }
+.gal-t { position: relative; aspect-ratio: 3 / 4; border-radius: 8px; overflow: hidden; border: 1px solid #c9a24a55; background: #2a1d14; padding: 0; cursor: pointer; }
+.gal-t img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 12%; }
+.gal-t span { position: absolute; left: 0; right: 0; bottom: 0; padding: 2px 3px; font-size: 10px; line-height: 1.3; color: #f1e6cf; background: #000c; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gal-t.lock { display: grid; place-items: center; cursor: default; color: #6b5640; font-size: 20px; background: #140d09cc; border-color: #c9a24a22; }
+.gal-t.on { outline: 2px solid var(--brass); }
+.gal-open .gal-head { display: grid; grid-template-columns: 56px 1fr; gap: 10px; align-items: center; padding: 10px 12px 0; }
+.gal-open .gal-head .portrait { width: 56px; height: 56px; }
 .file { background: #1f150fd1; border: 1px solid #c9a24a33; border-radius: 10px; }
 .file summary { display: grid; grid-template-columns: 44px 1fr; gap: 10px; align-items: center; padding: 8px 12px; cursor: pointer; list-style: none; }
 .file summary::-webkit-details-marker { display: none; }
@@ -12883,9 +12892,134 @@ window.CASES.push(
 
 </script>
 <script>
+// 숨김·거짓 메뉴에서 같은 사실을 가리키는 보기: 숨김 사건은 거짓 보기 번호, 거짓 사건은 숨김 보기 번호와 털어놓은 사실 카드
+window.MIRROR = {"a02":{"mirror":1},
+"a03":{"mirror":0,"card":{"id":"k","name":"기성고 비율 인정","desc":"7할만 하고 손 뗀 사실을 밝히고 그만큼만 청구","value":1}},
+"a05":{"mirror":0,"card":{"id":"k","name":"투자 송금 인정","desc":"리딩방 권유로 보낸 돈임을 밝히고 기망 취소로 반환 청구","value":1}},
+"a09":{"mirror":0,"card":{"id":"k","name":"침수 고지 인정","desc":"'바닥만 젖었다'는 말을 듣고 산 사실을 먼저 밝힌다","value":1}},
+"a11":{"mirror":0,"card":{"id":"k","name":"주식 투자 인정","desc":"주주임을 인정하고 주식매수청구권으로 대금 청구","value":1}},
+"a15":{"mirror":1,"card":{"id":"k","name":"월세 연체 인정","desc":"석 달 연체를 인정하고 권리금 대신 시설비를 청구","value":1}},
+"b03":{"mirror":0,"card":{"id":"k","name":"가져간 사실 인정","desc":"가져간 건 인정하고 압수 절차의 위법만 다툰다","value":1}},
+"b04":{"mirror":1},
+"b06":{"mirror":0,"card":{"id":"k","name":"직접 작성 인정","desc":"직접 쓴 글임을 밝히고 비방 목적이 없었음을 다툰다","value":1}},
+"b08":{"mirror":0,"card":{"id":"k","name":"처남 회사 인지 인정","desc":"알고 판 건 인정하고 장부의 증거능력을 다툰다","value":1}},
+"b10":{"mirror":0,"card":{"id":"k","name":"허위 고소 자백","desc":"정산이 끝난 걸 알았다고 자백하고 형 면제를 구한다","value":1}},
+"b15":{"mirror":0,"card":{"id":"k","name":"폭로 발언 인정","desc":"발언은 인정하고 몰래 한 녹음의 증거능력을 다툰다","value":1}},
+"c02":{"mirror":0,"card":{"id":"k","name":"두 달 수강 인정","desc":"두 달 다닌 건 인정하고 남은 기간 수강료만 청구","value":1}},
+"c06":{"mirror":0,"card":{"id":"k","name":"초기 단시간 근무 인정","desc":"처음 2년은 주 2회였음을 밝히고 최근 1년치만 청구","value":1}},
+"c08":{"mirror":2},
+"c09":{"mirror":0,"card":{"id":"k","name":"폭행 사실 인정","desc":"때린 건 인정하고 서면 통지 없는 해고의 무효를 다툰다","value":1}},
+"c11":{"mirror":0,"card":{"id":"k","name":"처남 임차인 인정","desc":"주선 서류는 접고 건물주의 사전 거절만으로 다툰다","value":1}},
+"c13":{"mirror":0,"card":{"id":"k","name":"아파트 공동재산 인정","desc":"아파트는 나누고 상가 임대료 기여만 비율에 반영","value":1}},
+"d02":{"mirror":2},
+"d03":{"mirror":0,"card":{"id":"k","name":"후진 사고 인정","desc":"기둥에 박은 건 인정하고 자차 면책 범위로 정리","value":1}},
+"d05":{"mirror":0,"card":{"id":"k","name":"3천만 원 약정 인정","desc":"사본을 고친 걸 밝히고 원래 3,000만 원만 청구","value":1}},
+"d08":{"mirror":0,"card":{"id":"k","name":"밭 임차 인정","desc":"밭은 빌린 땅임을 인정하고 마당 부분만 청구","value":1}},
+"d11":{"mirror":0,"card":{"id":"k","name":"원본 별도 옵션 인정","desc":"원본 청구는 접고 보정본 하자만 환불 청구","value":1}},
+"e02":{"mirror":0,"card":{"id":"k","name":"문자 발송 인정","desc":"직접 보낸 건 인정하고 해악 고지가 아님을 다툰다","value":1}},
+"e05":{"mirror":1},
+"e06":{"mirror":0,"card":{"id":"k","name":"몰래 결제 인정","desc":"잘 때 결제한 건 인정하고 경찰 자백의 증거능력을 다툰다","value":1}},
+"e08":{"mirror":0,"card":{"id":"k","name":"반복 방문 인정","desc":"여덟 번 간 건 인정하고 참여 없는 포렌식을 다툰다","value":1}},
+"e09":{"mirror":0},
+"e12":{"mirror":0,"card":{"id":"k","name":"대리 서명 인정","desc":"서명은 인정하고 영장 밖 압수의 증거능력을 다툰다","value":1}},
+"f03":{"mirror":0,"card":{"id":"k","name":"먼저 꺼낸 파혼 인정","desc":"먼저 '없던 일로 하자' 한 걸 밝히고 준비 비용 분담만 청구","value":1}},
+"f05":{"mirror":0,"card":{"id":"k","name":"통지서 수령 인정","desc":"10월 말 통지서 수령은 인정하고 모자란 날수만 청구","value":1}},
+"f08":{"mirror":0,"card":{"id":"k","name":"조망 확인서 서명 인정","desc":"조망 비보장 확인서 서명은 인정하고 입주 지연으로만 해제","value":1}},
+"f11":{"mirror":0,"card":{"id":"k","name":"브로커 발언 인정","desc":"5천은 브로커 말임을 밝히고 정보공개서 지연 교부만 다툼","value":1}},
+"g03":{"mirror":0,"card":{"id":"k","name":"직접 광고 인정","desc":"광고 3건 4,800만 원은 공제하고 남은 정산금만 청구","value":1}},
+"g06":{"mirror":0,"card":{"id":"k","name":"차명 매매 인정","desc":"아내 명의 매매는 인정하고 법 시행 전 매매임을 다툼","value":1}},
+"g07":{"mirror":0,"card":{"id":"k","name":"미팅 취소 인정","desc":"취소 메일을 받은 건 밝히고 지연 보상금·실비만 청구","value":1}},
+"g08":{"mirror":0},
+"g13":{"mirror":0,"card":{"id":"k","name":"매크로 사용 인정","desc":"매크로 사용은 인정하고 쓰지 않은 캐시 환불만 청구","value":1}},
+"h03":{"mirror":0,"card":{"id":"k","name":"설계 변경 인정","desc":"설계 변경·기성금 미지급은 인정하고 기성고 정산만 구함","value":1}},
+"h05":{"mirror":0,"card":{"id":"k","name":"현금 변제액 정정","desc":"현금은 2백뿐임을 밝히고 남은 빚 변제 조건부 말소 청구","value":1}},
+"h09":{"mirror":0,"card":{"id":"k","name":"매출 감소 원인 인정","desc":"매출 감소는 공사 탓이 아님을 인정하고 소음 위자료만 청구","value":1}},
+"h11":{"mirror":0,"card":{"id":"k","name":"앓은 기간 정정","desc":"이틀 앓은 것을 밝히고 치료비와 위자료만 청구","value":1}},
+"h14":{"mirror":0,"card":{"id":"k","name":"집 세탁 인정","desc":"집에서 빨아 줄어든 걸 인정하고 잃어버린 벨트값만 청구","value":1}},
+"h17":{"mirror":0,"card":{"id":"k","name":"은행 감면 인정","desc":"4천 감면을 밝히고 실제 낸 6천 기준 3천만 원만 구상","value":1}},
+"h20":{"mirror":0,"card":{"id":"k","name":"인스타 게시 동의 인정","desc":"인스타 게시 동의는 인정하고 전단지 무단 사용만 다툼","value":1}},
+"h23":{"mirror":0,"card":{"id":"k","name":"여섯 달 미납 인정","desc":"여섯 달 미납을 인정하고 실제로 부은 돈만 반환 청구","value":1}},
+"i02":{"mirror":0,"card":{"id":"k","name":"병을 휘두른 사실 인정","desc":"병을 휘두른 건 인정하고 먼저 덤빈 손님을 막은 것이라 주장","value":1}},
+"i07":{"mirror":0,"card":{"id":"k","name":"접촉 인지 인정","desc":"흠을 보고 간 건 인정하고 가벼운 접촉·전액 배상을 다툼","value":1}},
+"i08":{"mirror":0,"card":{"id":"k","name":"중고 구입 주장 철회","desc":"중고 구입 주장은 접고 영장 없는 압수의 위법만 다툼","value":1}},
+"i09":{"mirror":0,"card":{"id":"k","name":"아는 사이 인정","desc":"아는 사이임을 인정하고 통화 기록의 증거능력만 다툼","value":1}},
+"i12":{"mirror":0,"card":{"id":"k","name":"사후 사례금 인정","desc":"재계약 뒤 받은 사례금임을 밝히고 사전 청탁은 없었다고 다툼","value":1}},
+"i13":{"mirror":0},
+"i16":{"mirror":0,"card":{"id":"k","name":"악성 코드 삽입 인정","desc":"직접 넣은 건 인정하고 참여권 없는 포렌식 결과를 다툼","value":1}},
+"i20":{"mirror":0,"card":{"id":"k","name":"위조품 인식 인정","desc":"짝퉁인 줄 안 건 인정하고 별건 압수 카톡의 증거능력만 다툼","value":1}},
+"i23":{"mirror":0,"card":{"id":"k","name":"직접 증축 인정","desc":"직접 지은 건 인정하고 공소시효 완성을 다툼","value":1}},
+"j06":{"mirror":2,"card":{"id":"k","name":"독촉장 수령 인정","desc":"8개월 전 독촉장 받은 건 인정. 빚은 이미 시효로 사라졌다.","value":1}},
+"j08":{"mirror":2},
+"j09":{"mirror":0,"card":{"id":"k","name":"주소 대필 인정","desc":"주소는 내가 써 넣었음을 인정하고 사인증여로 다툰다.","value":1}},
+"j12":{"mirror":2,"card":{"id":"k","name":"주간 고정근무 인정","desc":"야간수당은 빼고, 기본급 표가 남녀로 갈린 점만 다툰다.","value":1}},
+"j15":{"mirror":0,"card":{"id":"k","name":"첫해 근무시간 인정","desc":"첫해 주 14시간은 인정하고 15시간 넘긴 기간만 청구한다.","value":1}},
+"j18":{"mirror":1,"card":{"id":"k","name":"이사지원금 수령 인정","desc":"300만 원 받은 건 인정. 만료된 보증금 반환만 청구한다.","value":1}},
+"j21":{"mirror":0,"card":{"id":"k","name":"서면결의 서명 인정","desc":"서명은 인정. 다만 증액 근거를 공개받지 못한 채 찍었다.","value":1}},
+"j24":{"mirror":2,"card":{"id":"k","name":"곰팡이 경위 인정","desc":"입주 때 깨끗했음은 인정하고 누수 미수리만 내세운다.","value":1}},
+"k03":{"mirror":1,"card":{"id":"k","name":"기계 고장 인정","desc":"지연이 기계 고장 탓임은 인정하고 지체상금 감액만 구한다.","value":1}},
+"k05":{"mirror":0,"card":{"id":"k","name":"기사 보고 구매 인정","desc":"기사 보고 산 건 인정. 이전엔 응하되 손해는 없다고 다툰다.","value":1}},
+"k08":{"mirror":2,"card":{"id":"k","name":"탑승 진입 인정","desc":"타고 들어간 건 인정. 횡단보도 앞에서 안 선 차 책임을 묻는다.","value":1}},
+"k11":{"mirror":0,"card":{"id":"k","name":"신분증 미확인 인정","desc":"신분증을 못 본 건 인정하고 처분이 지나치게 무겁다고 다툰다.","value":1}},
+"k12":{"mirror":2},
+"k16":{"mirror":1,"card":{"id":"k","name":"결제 업무 인정","desc":"결제 마케팅을 맡은 건 인정. 대가 없는 약정이라 무효다.","value":1}},
+"k19":{"mirror":0,"card":{"id":"k","name":"형식 강연 인정","desc":"강연이 두세 번뿐임은 인정하고 수첩의 증거능력만 다툰다.","value":1}},
+"k21":{"mirror":1},
+"k22":{"mirror":2,"card":{"id":"k","name":"송금 대행 인정","desc":"남의 돈을 대신 보낸 건 인정하고 캡처의 증거능력만 다툰다.","value":1}},
+"k24":{"mirror":0},
+"k25":{"mirror":1,"card":{"id":"k","name":"심사 없음 인지 인정","desc":"심사 없는 제품인 걸 안 건 인정. 표현은 일반 화장품 범위다.","value":1}},
+"l02":{"mirror":0,"card":{"id":"k","name":"차용금 수령 인정","desc":"3천 받고 이자 낸 건 인정. 갚은 1천만큼만 집행을 막는다.","value":1}},
+"l04":{"mirror":0,"card":{"id":"k","name":"일부 변제 인정","desc":"4년 전 200 보낸 건 인정. 3년 넘은 이자만 시효로 다툰다.","value":1}},
+"l07":{"mirror":1,"card":{"id":"k","name":"신축 불가 인지 인정","desc":"알고 산 건 인정. 계약금을 포기하고 해제했으니 잔금은 없다.","value":1}},
+"l10":{"mirror":1,"card":{"id":"k","name":"계약금만 낸 것 인정","desc":"낸 돈은 계약금 3천뿐임을 인정하고 그 돈만 돌려받는다.","value":1}},
+"l13":{"mirror":0,"card":{"id":"k","name":"사용 허락 인정","desc":"쓰라고 한 건 인정. 비워 달라 한 2년 전부터 사용료만 받는다.","value":1}},
+"l16":{"mirror":0,"card":{"id":"k","name":"직접 개통 인정","desc":"직접 개통한 건 인정. 해지 신청 뒤 요금 80만 원만 다툰다.","value":1}},
+"l18":{"mirror":0,"card":{"id":"k","name":"남편 카드 구입 인정","desc":"남편 카드로 산 건 인정. 부부 공유물이니 내 몫을 먼저 받는다.","value":1}},
+"l19":{"mirror":2},
+"m01":{"mirror":0,"card":{"id":"k","name":"창고 상차 가담 인정","desc":"새벽 1시 창고에서 싣는 것만 거들었고 공사장엔 없었다","value":1}},
+"m05":{"mirror":1,"card":{"id":"k","name":"들러리 견적 인정","desc":"견적 두 장은 맞춰 받았지만 공사비는 감정가 범위 안이다","value":1}},
+"m07":{"mirror":1,"card":{"id":"k","name":"원금 보장 발언 인정","desc":"원금 책임을 말했지만 돈은 아는 사람들에게서만 받았다","value":1}},
+"m09":{"mirror":1,"card":{"id":"k","name":"고리 수수 인정","desc":"월세 때문에 판마다 한 장씩 뗐지만 판은 깔지 않았다","value":1}},
+"m12":{"mirror":0,"card":{"id":"k","name":"급정거 1회 인정","desc":"화가 나 한 번 급정거했을 뿐 겁만 주려 했다는 진술","value":1}},
+"m16":{"mirror":2},
+"m17":{"mirror":1,"card":{"id":"k","name":"봉투 이틀 보관 인정","desc":"봉투를 들고 나왔다가 이틀 뒤 스스로 돌려준 사실","value":1}},
+"m21":{"mirror":0,"card":{"id":"k","name":"직접 고용 인정","desc":"직접 뽑아 현금으로 월급 줬지만 등록증은 실제로 확인했다","value":1}},
+"m24":{"mirror":2,"card":{"id":"k","name":"통지서 수령 인정","desc":"통지서는 받았지만 어머니 수술과 겹쳐 미뤘다는 경위","value":1}},
+"n01":{"mirror":2},
+"n03":{"mirror":0,"card":{"id":"k","name":"실내 흡연 인정","desc":"방에서 피운 건 인정하고 6년 지난 도배 감가만 다툼","value":1}},
+"n05":{"mirror":1},
+"n07":{"mirror":1,"card":{"id":"k","name":"간병 출입 인정","desc":"동거가 아닌 넉 달 간병임을 밝히고 보탠 2천만 원만 청구","value":1}},
+"n10":{"mirror":2,"card":{"id":"k","name":"외출 중 부상 인정","desc":"멍은 외출 때 생긴 것으로 인정하고 억제대 사용만 다툼","value":1}},
+"n13":{"mirror":0,"card":{"id":"k","name":"욕실 공사 인정","desc":"공사 사실은 인정하고 관리소가 한 달 미룬 몫만 청구","value":1}},
+"n16":{"mirror":1,"card":{"id":"k","name":"주식 투자 인정","desc":"4천은 주식에 쓴 것으로 인정하고 생활비 1천만 나눔 청구","value":1}},
+"n19":{"mirror":2,"card":{"id":"k","name":"새벽 휴식 인정","desc":"새벽 2시간 잔 것은 빼고 나머지 야간수당만 청구","value":1}},
+"n23":{"mirror":0},
+"n25":{"mirror":0,"card":{"id":"k","name":"식당 계속 운영 인정","desc":"식당 수입이 그대로임을 밝히고 성년 자녀 몫만 감액 청구","value":1}},
+"o03":{"mirror":0,"card":{"id":"k","name":"권리 양도 인정","desc":"200만 원에 권리를 넘긴 건 맞다. 다투는 건 이름을 지운 것뿐이다.","value":1}},
+"o07":{"mirror":0,"card":{"id":"k","name":"사칭 전화 통화 인정","desc":"사칭 전화에 속아 인증번호를 줬다. 은행의 이상거래 방치만 다툰다.","value":1}},
+"o08":{"mirror":0},
+"o09":{"mirror":1,"card":{"id":"k","name":"사용 중 파손 인정","desc":"사흘 쓰다 떨어뜨린 것은 인정한다. 배터리 성능 차이만 청구한다.","value":1}},
+"o11":{"mirror":2},
+"o13":{"mirror":2,"card":{"id":"k","name":"승낙서 대리 작성 인정","desc":"두 집 외 승낙서는 직접 꾸몄다. 30년 통행로라 승낙 없이도 도로다.","value":1}},
+"o16":{"mirror":1,"card":{"id":"k","name":"가공 매출 인정","desc":"친척 카드로 긁은 1,200만 원은 빼 달라. 나머지는 진짜 주문이다.","value":1}},
+"o20":{"mirror":0,"card":{"id":"k","name":"모임 참석 인정","desc":"강남 모임엔 갔다. 인상 얘기는 오갔지만 시기·폭을 정한 적은 없다.","value":1}},
+"o21":{"mirror":2,"card":{"id":"k","name":"휴대폰 판매 인정","desc":"업자에게 다섯 대 넘기고 150만 원 받은 사실을 먼저 밝힌다.","value":1}},
+"o23":{"mirror":1}};
+
+</script>
+<script>
 (() => {
 const CASES = (window.CASES || []).filter(c => c && c.id);
 const BY_ID = Object.fromEntries(CASES.map(c => [c.id, c]));
+// 같은 사실을 다른 메뉴로 짚어도 털어놓게 한다(숨김 사건 → 거짓 보기, 거짓 사건 → 숨김 보기와 털어놓은 사실 카드)
+Object.entries(window.MIRROR || {}).forEach(([id, m]) => {
+  const c = BY_ID[id]; if (!c) return;
+  c.mirror = m.mirror;
+  if (c.truth === "liar" && m.card) {
+    c.confessionCard = m.card;
+    const killer = c.opponent.reduce((a, o) => (o.power > a.power ? o : a), c.opponent[0]);
+    if (killer && !(killer.counters || []).includes("k")) killer.counters = (killer.counters || []).concat("k");
+  }
+});
 const KEY = "lawyer-game-v3";
 const app = document.getElementById("app");
 const hud = document.getElementById("hud");
@@ -13178,12 +13312,13 @@ function planDay() {
   const [lo, hi] = visitorRange(S.rep);
   const n = Math.max(1, lo + Math.floor(Math.random() * (hi - lo + 1)) + office().guests + (has("mgr") ? 1 + Math.floor(Math.random() * 2) : 0) - (S.rumor || 0));
   S.rumorShown = S.rumor || 0; S.rumor = 0;
-  const maxTier = S.rep >= 55 ? 3 : S.rep >= 25 ? 2 : 1;
-  let pool = CASES.filter(c => c.tier <= maxTier && !S.played.includes(c.id));
+  // 들어오는 사건 규모는 사무실이 정한다
+  const tiers = office().tiers, maxTier = Math.max(...tiers), fits = c => tiers.includes(c.tier);
+  let pool = CASES.filter(c => fits(c) && !S.played.includes(c.id));
   if (pool.length < n) {
     // 다 본 사건은 다시 섞어 넣는다
-    S.played = S.played.filter(id => !CASES.some(c => c.tier <= maxTier && c.id === id));
-    pool = CASES.filter(c => c.tier <= maxTier && !S.played.includes(c.id));
+    S.played = S.played.filter(id => !CASES.some(c => fits(c) && c.id === id));
+    pool = CASES.filter(c => fits(c) && !S.played.includes(c.id));
   }
   const weight = c => c.tier === maxTier ? 3 : c.tier === maxTier - 1 ? 2 : 1;
   const picks = [];
@@ -13198,8 +13333,8 @@ function planDay() {
   S.dayLog = []; S.taken = 0;
 }
 
-// 한 달 수임 한도: 기본 5건, 고용 변호사가 있으면 8건
-const intakeCap = () => has("assoc") ? 8 : 5;
+// 한 달 수임 한도: 사무실마다 4·5·6·8건, 고용 변호사가 있으면 +3건
+const intakeCap = () => office().cap + (has("assoc") ? 3 : 0);
 const monthDone = () => !S.today.some(t => t.status === "wait");
 function closeIfFull() {
   if ((S.taken || 0) >= intakeCap()) S.today.forEach(t => { if (t.status === "wait") t.status = "full"; });
@@ -13224,7 +13359,7 @@ function screenDayIntro() {
       <div class="note">${full ? "이번 달 일정이 꽉 찼습니다. 남은 손님은 다음에 오시라고 했습니다." : `한 달에 ${cap}건까지 맡을 수 있습니다${has("assoc") ? " (고용 변호사 덕분)" : ""}. 상담할 사람을 고르세요.`}</div></div>
     <div class="visitors">${list}</div>
     ${S.rumorShown ? `<div class="pn warn">나쁜 소문이 돌아 이번 달 손님이 ${S.rumorShown}명 줄었습니다.</div>` : ""}
-    <p class="note">명성이 오르면 손님이 늘고 큰 사건이 찾아옵니다.</p>`,
+    <p class="note">더 큰 사무실로 옮기면 큰 사건이 찾아옵니다.</p>`,
     monthDone() ? `<button class="btn primary" id="toEnd">이번 달 장부 보기</button>`
       : `<button class="btn ghost" id="closeMonth">남은 손님은 돌려보내고 달 마감</button>`);
   on("[data-meet]", e => { S.idx = +e.currentTarget.dataset.meet; startCase(S.today[S.idx].id); });
@@ -13240,20 +13375,48 @@ function screenDayIntro() {
 }
 
 /* ---------- 사건 파일철: 이긴 사건 모음 ---------- */
-function screenArchive(back) {
-  const arc = (S.archive || []).slice().reverse();
-  const rows = arc.map(a => {
-    const c = BY_ID[a.id]; if (!c) return "";
-    return `<details class="file">
-      <summary><div class="portrait">${portrait(c)}</div>
-        <div><div class="vn">${esc(c.client.name)} · ${esc(c.category)}</div><div class="vm">${monthLabel(a.m)} · <b class="pos">${resultLabel(c, "win")}</b> · 수임료 ${won(a.money)}</div></div></summary>
-      <div class="file-body"><div class="judgment"><div class="lbl">주문</div>${esc(c.outcomes.win)}</div><p class="note">${esc(c.epilogue)}</p></div>
-    </details>`;
+// 사건 갤러리: 이긴 사건을 분류별로 모은다(새 게임을 시작해도 남는다)
+const GAL_KEY = "lawyer-game-gallery";
+function galLoad() { try { return JSON.parse(localStorage.getItem(GAL_KEY)) || {}; } catch (e) { return {}; } }
+function galAdd(id, info) { const g = galLoad(); if (!g[id]) { g[id] = info; try { localStorage.setItem(GAL_KEY, JSON.stringify(g)); } catch (e) {} } }
+const GROUPS = ["계약·금전", "손해배상", "부동산·임대차", "노동", "가사·상속", "행정", "형사 · 재산범죄", "형사 · 폭력·교통", "형사 · 그 밖의 범죄"];
+function groupOf(c) {
+  if (isCrim(c)) {
+    const t = c.category;
+    if (/사기|절도|횡령|배임|공갈|강도|보이스피싱|수재|뇌물|유사수신|다단계|시세조종|미공개정보|회계부정|조세|대부업|도박|입찰방해|통장 대여|대포폰|손괴/.test(t)) return "형사 · 재산범죄";
+    if (/폭행|상해|협박|스토킹|치상|치사|운전|도주|교통|미조치|음주|보복|주거침입|공무집행방해|과실/.test(t)) return "형사 · 폭력·교통";
+    return "형사 · 그 밖의 범죄";
+  }
+  const k = courtOf(c), t = c.category;
+  if (k === "admin") return "행정";
+  if (k === "fsuit" || k === "fnon" || /상속|유류분|유언|유증|특별수익|한정승인/.test(t)) return "가사·상속";
+  if (/임금|해고|퇴직|수당|산재|근로|징계|정직|괴롭힘|육아휴직|수습|성차별|경업금지|스톡옵션/.test(t)) return "노동";
+  if (/임대|전세|보증금|권리금|명도|건물|토지|분양|하자|경계|일조|등기|점유|통행|공유물|분묘|관리비|재건축|원룸|셰어하우스|주택|상가|누수|층간|전대차|근저당|유치권|나무뿌리|아파트|공사 소음|복도|수선의무|중개/.test(t)) return "부동산·임대차";
+  if (/손해배상|사고|과실|물림|명예훼손|초상권|식중독|부작용|학대|파손|훼손|분실|감염|낙상|침해|유출|해킹|유실|과오|제조물|설명의무/.test(t)) return "손해배상";
+  return "계약·금전";
+}
+function screenArchive(back, openId) {
+  const g = galLoad();
+  (S && S.archive || []).forEach(a => { if (!g[a.id]) g[a.id] = { m: a.m, money: a.money }; });
+  const got = CASES.filter(c => g[c.id]).length;
+  const sel = openId && BY_ID[openId] && g[openId] ? BY_ID[openId] : null;
+  const detail = sel ? `<div class="file gal-open"><div class="gal-head"><div class="portrait">${portrait(sel)}</div>
+      <div><div class="vn">${esc(sel.client.name)} · ${esc(sel.category)}</div><div class="vm">${caseNo(sel)} · <b class="pos">${resultLabel(sel, "win")}</b>${g[openId].money ? ` · 수임료 ${won(g[openId].money)}` : ""}</div></div></div>
+      <div class="file-body"><div class="judgment"><div class="lbl">주문</div>${esc(sel.outcomes.win)}</div><p class="note">${esc(sel.epilogue)}</p></div></div>` : "";
+  const secs = GROUPS.map(gr => {
+    const list = CASES.filter(c => groupOf(c) === gr);
+    const n = list.filter(c => g[c.id]).length;
+    return `<div class="gal-sec"><div class="section-head"><span class="eyebrow">${gr}</span><span class="eyebrow">${n} / ${list.length}</span></div>
+      <div class="gal-grid">${list.map(c => g[c.id]
+        ? `<button class="gal-t ${sel === c ? "on" : ""}" data-g="${c.id}">${portrait(c)}<span>${esc(c.category)}</span></button>`
+        : `<div class="gal-t lock">?</div>`).join("")}</div></div>`;
   }).join("");
-  show(`<div><div class="eyebrow">이긴 사건 ${arc.length}건</div><h2>사건 파일철</h2></div>
-    ${arc.length ? `<div class="stack">${rows}</div>` : `<div class="pn"><div class="note">아직 이긴 사건이 없습니다. 승소하거나 무죄를 받은 사건이 여기에 모입니다.</div></div>`}`,
-    `<button class="btn primary" id="archBack">돌아가기</button>`, S.ended && back === screenEnding ? "end-top" : "office");
+  show(`<div><div class="eyebrow">모은 사건 ${got} / ${CASES.length}</div><h2>사건 갤러리</h2></div>
+    ${detail}${secs}`,
+    `<button class="btn primary" id="archBack">돌아가기</button>`, S && S.ended && back === screenEnding ? "end-top" : "office");
+  on("[data-g]", e => screenArchive(back, e.currentTarget.dataset.g));
   on("#archBack", back);
+  if (sel) app.scrollTop = 0;
 }
 
 /* ---------- 상담 ---------- */
@@ -13262,6 +13425,7 @@ function startCase(id) {
   C = { c, wallet: 0.8 + Math.random() * 0.6, suspOrder: shuffle([0, 1, 2]), argOrder: shuffle(c.arguments.map((_, i) => i)), asked: [], opened: {}, verdict: null, susp: null, confessed: false, haggled: false, offerF: null, offerB: null, fee: 0, bonus: 0, flagged: false, left: false, sub: new Set(), arg: null };
   screenConsult();
 }
+const tierTxt = ts => { const a = Math.min(...ts), b = Math.max(...ts); return "★".repeat(a) + (b > a ? "~" + "★".repeat(b) : ""); };
 const stars = t => "★".repeat(t) + "☆".repeat(3 - t);
 const STEP = { 1: 10, 2: 50, 3: 100 };
 const roundTo = (n, s) => Math.max(s, Math.round(n / s) * s);
@@ -13409,7 +13573,7 @@ function react() {
     say = "감사합니다, 변호사님. 잘 부탁드립니다.";
   } else if (v === "hiding") {
     if (t === "hiding" && C.susp === c.hiddenIndex) {
-      C.confessed = true; say = c.confession;
+      C.confessed = true; C.card = true; say = c.confession;
       note = "숨긴 사실을 알아냈습니다.";
     } else if (t === "honest") {
       if (offended()) { C.left = true; C.penalty = 1; say = "그런 거 없습니다. 저를 못 믿으시면 다른 데 가 보겠습니다."; note = "의뢰인이 기분이 상해 떠났습니다. 명성 −1 · 나쁜 소문이 돌아 다음 달 손님이 줄어듭니다."; }
@@ -13417,6 +13581,10 @@ function react() {
     } else if (t === "hiding") {
       // 짚은 곳이 빗나가도 가끔은 멈칫해서 헷갈리게 한다
       say = Math.random() < 0.3 ? pick(LINES.annoyed) : pick(LINES.hideMiss); note = "짚은 곳이 빗나갔습니다.";
+    } else if (c.mirror != null && C.susp === c.mirror) {
+      // 거짓 의뢰인이라도 거짓말 뒤의 사실을 숨김으로 짚으면 털어놓는다 → 털어놓은 사실 카드
+      C.confessed = true; C.card = true; say = c.confession;
+      note = "숨긴 사실을 알아냈습니다.";
     } else {
       // 거짓 의뢰인: 거짓말과 맞닿은 곳을 짚으면 당황한다(털어놓지는 않음)
       if (c.touchIndex != null && C.susp === c.touchIndex) { say = pick(LINES.rattled); note = "의뢰인이 눈에 띄게 당황합니다."; }
@@ -13424,6 +13592,10 @@ function react() {
     }
   } else {
     if (t === "liar" && C.lie === c.lieIndex) {
+      C.confessed = true; C.flagged = true; say = c.confession;
+      note = "거짓을 간파했습니다.";
+    } else if (t === "hiding" && c.mirror != null && C.lie === c.mirror) {
+      // 숨긴 사실을 덮은 말을 거짓으로 짚으면 털어놓는다 → 위험한 증거 표시
       C.confessed = true; C.flagged = true; say = c.confession;
       note = "거짓을 간파했습니다.";
     } else if (t === "liar") {
@@ -13472,7 +13644,7 @@ function screenFee(extra) {
   const fx = C.fxOnce ? (C.confessed ? "confess" : "") : ""; C.fxOnce = false;
   show(`${clientCard(c, fx)}
     <div class="talk">${talk.join("")}</div>
-    ${C.confessed && c.truth === "hiding" ? `<div class="evlist"><div class="ev card-k"><div class="ev-name">${esc(c.confessionCard.name)}</div><div class="ev-desc">${esc(c.confessionCard.desc)}</div></div></div>` : ""}
+    ${C.card ? `<div class="evlist"><div class="ev card-k"><div class="ev-name">${esc(c.confessionCard.name)}</div><div class="ev-desc">${esc(c.confessionCard.desc)}</div></div></div>` : ""}
     <div class="feebox">
       <div><div class="eyebrow">수임료 제시</div>
       <div class="market">비슷한 사건 시세 착수금 <b>${won(marketFee(c))}</b> · 성공보수 <b>${won(marketBonus(c))}</b></div></div>
@@ -13561,7 +13733,7 @@ function trialHead(c) {
 function screenTrial() {
   const c = C.c;
   const cards = c.evidence.slice();
-  if (C.confessed && c.truth === "hiding") cards.push(Object.assign({ isK: true, detail: "" }, c.confessionCard));
+  if (C.card) cards.push(Object.assign({ isK: true, detail: "" }, c.confessionCard));
   // 처음엔 전부 제출로 두고, 불리한 것을 직접 빼게 한다
   if (!C.trialInit) { cards.forEach(e => C.sub.add(e.id)); C.trialInit = true; }
   const evs = cards.map((e, i) => {
@@ -13602,7 +13774,7 @@ const josaEul = w => { const ch = (w.match(/[가-힣](?=[^가-힣]*$)/) || [""])
 function runTrial() {
   const c = C.c;
   const steps = [];
-  const pool = c.evidence.concat(C.confessed && c.truth === "hiding" ? [c.confessionCard] : []);
+  const pool = c.evidence.concat(C.card ? [c.confessionCard] : []);
   // 거짓 의뢰인의 위험 증거는 상대가 허점을 파고들어 세 배로 불리하다
   pool.filter(e => C.sub.has(e.id)).forEach(e => steps.push({ cls: "ours", who: "우리 측 증거", text: e.name, d: c.truth === "liar" && e.value < 0 ? e.value * 3 : e.value }));
   const arg = c.arguments.find(a => a.id === C.arg);
@@ -13692,11 +13864,12 @@ function verdict(score) {
   const c = C.c;
   const res = score >= 3 ? "win" : score >= 1 ? "partial" : "lose";
   const f = C.fee, b = res === "win" ? C.bonus : res === "partial" ? Math.round(C.bonus / 2 / 10) * 10 : 0;
-  const repD = res === "win" ? 1 + c.tier : res === "partial" ? 0 : -(1 + c.tier);
+  // 사건 규모가 클수록 이기면 명성이 많이 오르고, 지면 많이 깎인다
+  const repD = { win: [4, 7, 10], partial: [1, 2, 3], lose: [-2, -5, -9] }[res][c.tier - 1];
   S.money += f + b;
   S.rep = Math.max(0, Math.min(100, S.rep + repD));
   S[res === "win" ? "w" : res === "partial" ? "p" : "l"]++;
-  if (res === "win") S.archive = (S.archive || []).concat({ id: c.id, m: S.day, money: f + b });
+  if (res === "win") { S.archive = (S.archive || []).concat({ id: c.id, m: S.day, money: f + b }); galAdd(c.id, { m: S.day, money: f + b }); }
   const truthTxt = { honest: "진실한 의뢰인", hiding: "불리한 사실을 숨긴 의뢰인", liar: "거짓말을 한 의뢰인" }[c.truth];
   const el = document.getElementById("verdict");
   const stamp = !isCrim(c) && res !== "partial" ? `<img class="stamp-img" src="assets/stamp-${res}.png" alt="${resultLabel(c, res)}">` : `<div class="stamp ${res}">${resultLabel(c, res)}</div>`;
@@ -13728,15 +13901,16 @@ function monoOpener(c, res) {
 
 /* ---------- 사무실·직원 ---------- */
 const OFFICES = [
-  { name: "동네 상가 2층", need: 0, cost: 0, rent: 150, live: 300, guests: 0, up: 0 },
-  { name: "역세권 오피스", need: 30, cost: 3000, rent: 600, live: 450, guests: 2, up: 0.1 },
-  { name: "서초동 법조타운", need: 55, cost: 10000, rent: 1800, live: 750, guests: 4, up: 0.2 },
-  { name: "강남 빌딩 한 층", need: 80, cost: 30000, rent: 4500, live: 1200, guests: 6, up: 0.3 }
+  // 사무실이 맡을 수 있는 사건 규모(tiers)와 한 달 수임 한도(cap)를 정한다
+  { name: "동네 상가 2층", need: 0, cost: 0, rent: 150, live: 300, guests: 0, up: 0, tiers: [1], cap: 4 },
+  { name: "역세권 오피스", need: 30, cost: 1000, rent: 350, live: 400, guests: 2, up: 0.1, tiers: [1, 2], cap: 5 },
+  { name: "서초동 법조타운", need: 55, cost: 4000, rent: 800, live: 550, guests: 4, up: 0.2, tiers: [1, 2, 3], cap: 6 },
+  { name: "강남 빌딩 한 층", need: 80, cost: 10000, rent: 2000, live: 800, guests: 6, up: 0.3, tiers: [2, 3], cap: 8 }
 ];
 const STAFF = [
   { key: "mgr", name: "사무장", pay: 450, desc: "매달 손님 +1~2" },
   { key: "sec", name: "비서", pay: 350, desc: "수임료 제시 때 의뢰인 형편을 귀띔" },
-  { key: "assoc", name: "고용 변호사", pay: 700, desc: "한 달 수임 5건 → 8건 · 상담 질문 3번 → 4번" },
+  { key: "assoc", name: "고용 변호사", pay: 700, desc: "한 달 수임 +3건 · 상담 질문 3번 → 4번" },
   { key: "inv", name: "조사원", pay: 600, desc: "재판 전 증거 하나 뒷조사" }
 ];
 // 세금(부가세·소득세를 합쳐 매달 수입의 일정 비율)
@@ -13754,7 +13928,7 @@ function screenOffice() {
   const moveBox = nx ? `<div class="pn ${canMove() ? "on" : ""}">
       <div class="pn-top"><span class="eyebrow">다음 단계</span>${canMove() ? `<span class="pill ok">이전 가능</span>` : ""}</div>
       <div class="pn-name">${esc(nx.name)}</div>
-      <div class="note">이전 비용 ${won(nx.cost)} · 월세 ${won(nx.rent)} · 생활비 ${won(nx.live)} · 직원 정원 ${OFFICES.indexOf(nx) + 1}명<br>월 손님 +${nx.guests} · 수임료 상한 +${Math.round(nx.up * 100)}%</div>
+      <div class="note">이전 비용 ${won(nx.cost)} · 월세 ${won(nx.rent)} · 생활비 ${won(nx.live)} · 직원 정원 ${OFFICES.indexOf(nx) + 1}명<br>사건 규모 ${tierTxt(nx.tiers)} · 한 달 수임 ${nx.cap}건 · 수임료 +${Math.round(nx.up * 100)}%</div>
       ${canMove() ? `<button class="btn" id="move">${won(nx.cost)} 내고 이전</button>`
         : `<div class="note need">${S.rep < nx.need ? `명성 ${nx.need} 필요 (지금 ${S.rep})` : `자금 ${won(nx.cost)} 필요`}</div>`}
     </div>` : `<div class="pn"><div class="note">가장 좋은 사무실입니다.</div></div>`;
@@ -13767,9 +13941,9 @@ function screenOffice() {
   }).join("");
   show(`<div><div class="eyebrow">자금 ${won(S.money)} · 월 고정비 ${won(monthlyCost())}</div><h2>사무실 관리</h2></div>
     <div class="pn"><div class="eyebrow">지금 사무실</div><div class="pn-name">${esc(cur.name)}</div>
-      <div class="note">월세 ${won(cur.rent)} · 생활비 ${won(cur.live)} · 직원 정원 ${capacity()}명${cur.guests ? ` · 월 손님 +${cur.guests} · 수임료 상한 +${Math.round(cur.up * 100)}%` : ""}</div></div>
+      <div class="note">월세 ${won(cur.rent)} · 생활비 ${won(cur.live)} · 직원 정원 ${capacity()}명<br>사건 규모 ${tierTxt(cur.tiers)} · 한 달 수임 ${cur.cap}건${cur.up ? ` · 수임료 +${Math.round(cur.up * 100)}%` : ""}</div></div>
     ${moveBox}
-    <button class="btn ghost" id="toArchive">사건 파일철 · 이긴 사건 ${(S.archive || []).length}건</button>
+    <button class="btn ghost" id="toArchive">사건 갤러리 · 모은 사건 ${Object.keys(galLoad()).length}건</button>
     <div class="section-head"><span class="eyebrow">직원</span><span class="eyebrow">정원 ${staffCount()} / ${capacity()}</span></div>
     <div class="stack">${staff}</div>`,
     `<button class="btn primary" id="backLedger">장부로 돌아가기</button>`);
@@ -13866,7 +14040,7 @@ function screenEnding() {
       <span>모은 돈</span><span class="r">${won(S.money)}</span>
     </div>
     <p class="lede">이제 사무실 앞에는 줄이 늘어섭니다. 계속해서 명성을 지켜 보세요.</p>
-    <button class="btn ghost" id="endArchive">사건 파일철 보기 · 이긴 사건 ${(S.archive || []).length}건</button>
+    <button class="btn ghost" id="endArchive">사건 갤러리 보기 · 모은 사건 ${Object.keys(galLoad()).length}건</button>
   </section>`, `<button class="btn primary" id="cont">계속하기</button>`, "end-top", "ending");
   on("#endArchive", () => screenArchive(screenEnding));
   on("#cont", () => { if (monthDone()) screenDayEnd(); else screenDayIntro(); });
@@ -13895,7 +14069,7 @@ function renderHud() {
 }
 function renderTabs() {
   const hasEv = !!app.querySelector(".ev-drawer"), hasTalk = !!app.querySelector(".vn-bottom .talk");
-  const items = [["ev", "증거", hasEv], ["log", "대화 기록", hasTalk], ["arc", "파일철", !C && !!S], ["snd", soundOn ? "음악 켬" : "음악 끔", true]];
+  const items = [["ev", "증거", hasEv], ["log", "대화 기록", hasTalk], ["arc", "갤러리", !C], ["snd", soundOn ? "음악 켬" : "음악 끔", true]];
   tabsEl.innerHTML = items.map(([k, l, ok]) => `<button class="tab ${ok ? "" : "off"} ${(k === "ev" && showEv) || (k === "log" && showLog) ? "on" : ""}" data-tab="${k}" ${ok ? "" : "disabled"}>${TAB_ICON[k]}<span>${l}</span></button>`).join("");
   tabsEl.querySelectorAll("[data-tab]").forEach(b => b.addEventListener("click", () => {
     const k = b.dataset.tab;
