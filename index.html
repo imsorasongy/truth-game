@@ -343,6 +343,8 @@ html[data-scene^="end"] #backdrop::after { background: linear-gradient(180deg, #
 .gal-t.on { outline: 2px solid var(--brass); }
 .gal-open .gal-head { display: grid; grid-template-columns: 56px 1fr; gap: 10px; align-items: center; padding: 10px 12px 0; }
 .gal-open .gal-head .portrait { width: 56px; height: 56px; }
+.howto { display: flex; flex-direction: column; gap: 6px; }
+.howto .note { font-size: 14px; line-height: 1.6; color: var(--text); margin: 0; }
 .file { background: #1f150fd1; border: 1px solid #c9a24a33; border-radius: 10px; }
 .file summary { display: grid; grid-template-columns: 44px 1fr; gap: 10px; align-items: center; padding: 8px 12px; cursor: pointer; list-style: none; }
 .file summary::-webkit-details-marker { display: none; }
@@ -541,6 +543,7 @@ html, body { height: 100%; overflow: hidden; }
 
 /* 의뢰인 대사(명조) 한 단계 작게 */
 .vn .bubble:not(.me):not(.sys) { font-size: 18px; }
+.hud .pill small { color: var(--muted); font-size: 11px; margin-left: 1px; }
 
 </style>
 
@@ -13123,7 +13126,7 @@ function renderHud() {
     <div class="rank">${S.name ? esc(S.name) + " · " : ""}${esc(rankOf(S.rep))}</div>
     <div class="wr"><small>승률</small>${trials() ? winRate() + "%" : "—"}</div>
     <div class="stats">
-      <span>명성 <b>${S.rep}</b></span>
+      <span>명성 <b>${S.rep}</b>${office().repCap < 100 ? ` / ${office().repCap}` : ""}</span>
       <span class="repbar" aria-hidden="true"><i style="width:${S.rep}%"></i></span>
       <span>자금 <b>${won(S.money)}</b></span>
       ${sndBtn()}
@@ -13220,7 +13223,7 @@ function screenCover() {
   setDock("");
   const pop = html => { document.getElementById("titlePop").innerHTML = html ? `<div class="title-pop">${html}</div>` : ""; };
   on(".snd", toggleSound);
-  on("#howto", () => screenOpening(screenCover, 0, "돌아가기"));
+  on("#howto", () => screenHowto(screenCover));
   on("#cont", () => {
     if (!saved) return pop(`<p>저장된 기록이 없습니다.</p><button class="btn primary" id="popOk">확인</button>`), on("#popOk", () => pop(""));
     S = saved; resume();
@@ -13274,16 +13277,55 @@ function screenCreate() {
 /* ---------- 오프닝 (주인공 독백) ---------- */
 const OPENING = [
   { scene: "office", step: "개업 첫날",
-    body: f => `드디어 개업이다. 「${f}」. 간판은 작아도 내 이름을 건 사무실이다. 이기는 만큼 명성이 쌓이고, 명성이 쌓이면 손님도 수임료도 따라온다. 목표는 하나, 대한민국 최고의 변호사.` },
+    body: f => `드디어 개업이다. 「${f}」. 간판은 작아도 내 이름을 건 사무실이다. 이기는 만큼 명성이 쌓이고, 명성이 쌓이면 더 큰 사무실로 옮겨 더 큰 사건을 맡는다. 목표는 하나, 대한민국 최고의 변호사.` },
   { scene: "office", step: "1 · 상담",
-    body: () => "의뢰인은 다 자기 편한 대로 말한다. 의뢰인의 말을 그대로 믿으면 안 된다. 가져온 증거도 꼼꼼히 봐야지. 말과 증거가 어긋나는 데가 있으면, 거기에 뭔가 있다." },
+    body: () => "의뢰인은 다 자기 편한 대로 말한다. 의뢰인의 말을 그대로 믿으면 안 된다. 가져온 증거도 하나하나 열어 봐야지. 말과 증거가 어긋나는 데가 있으면, 거기에 뭔가 있다." },
   { scene: "office", step: "2 · 판단", art: `<div class="op-chips"><span>진실</span><span>숨김</span><span>거짓</span></div>`,
     body: () => "진실인가, 숨기는 게 있나, 아예 거짓말인가. 숨긴 걸 정확히 짚으면 털어놓을 거고, 거짓을 꿰뚫으면 위험한 증거가 보인다. 괜히 의심했다간 손님이 그냥 나가 버리겠지." },
   { scene: "office", step: "3 · 수임료", art: `<div class="op-fee"><span>착수금 <b>300만원</b></span><span>성공보수 <b>500만원</b></span></div>`,
-    body: () => "착수금과 성공보수는 내가 부른다. 시세와 내 명성에 맞아야 한다. 욕심을 부리면 흥정이 들어오거나, 그대로 떠나 버린다." },
+    body: () => "착수금과 성공보수는 내가 부른다. 시세와 내 명성에 맞아야 한다. 비싸면 의뢰인이 금액을 깎아 부르고, 너무 비싸면 그대로 떠나 버린다." },
   { scene: "court", step: "4 · 재판",
     body: () => "법정에서는 낼 증거를 고르고 주장을 하나로 정한다. 불리한 증거는 빼야 한다. 상대의 반박을 막지 못하면 진다. 자, 첫 손님을 맞을 시간이다." }
 ];
+// 게임 방법: 지금 규칙 그대로 한 화면에
+const HOWTO = [
+  ["한 달의 흐름", [
+    "매달 손님이 찾아옵니다. 상담할 사람을 고르고, 맡지 않을 사람은 돌려보냅니다.",
+    "한 달에 맡을 수 있는 사건 수는 사무실마다 다릅니다(4·5·6·8건, 고용 변호사가 있으면 +3건).",
+    "달 말에 월세·생활비·직원 급여와 세금(그달 수입의 20%)이 나갑니다. 3달 연속 적자면 폐업합니다."]],
+  ["1. 상담 — 증거를 꼭 보세요", [
+    "질문은 3번 할 수 있습니다(고용 변호사가 있으면 4번).",
+    "의뢰인이 가져온 증거는 화면 아래 '증거' 탭에 있습니다. 카드를 누르면 자세한 내용이 나옵니다.",
+    "말과 증거가 어긋나는 곳에 숨긴 사실이나 거짓말이 있습니다."]],
+  ["2. 판단 — 진실 · 숨김 · 거짓", [
+    "진실: 의뢰인 말을 그대로 믿고 맡습니다.",
+    "숨김: 의뢰인이 말하지 않은 사실을 고릅니다. 맞히면 털어놓고 '털어놓은 사실' 카드가 생깁니다. 재판에서 증거처럼 낼 수 있습니다.",
+    "거짓: 의뢰인이 한 말 중 거짓을 고릅니다. 맞히면 털어놓고 불리한 증거에 '위험' 표시가 붙습니다.",
+    "같은 사실을 반대쪽 메뉴로 짚어도 털어놓지만, 얻는 것은 메뉴를 따라갑니다.",
+    "진실한 의뢰인을 의심하면 화를 내고 떠날 수 있습니다. 명성이 깎이고 다음 달 손님이 줄어듭니다."]],
+  ["3. 수임료", [
+    "착수금과 성공보수를 부릅니다. 처음 금액은 시세에 명성과 사무실을 반영한 값입니다.",
+    "비싸다 싶으면 의뢰인이 금액을 맞제안합니다. 받아들이거나 한 번 더 부를 수 있지만, 그래도 비싸면 떠납니다.",
+    "성공보수는 이기면 전부, 일부 승소면 절반을 받습니다."]],
+  ["4. 재판", [
+    "낼 증거를 고르고 주장을 하나 정합니다. 불리한 증거는 빼야 합니다. 거짓말한 의뢰인 사건에서는 불리한 증거가 세 배로 불리합니다.",
+    "상대 반박은 맞는 증거·주장·털어놓은 사실로 막습니다. 막지 못한 반박은 그대로 점수를 깎습니다.",
+    "숨긴 의뢰인 사건의 결정타는 털어놓은 사실 카드와 맞는 주장이 함께 있어야 막힙니다.",
+    "재판 중 화면을 누르면 다음으로 넘어갑니다."]],
+  ["5. 명성과 사무실", [
+    "이기면 명성이 오르고(사건 규모 ★·★★·★★★에 따라 +2·+3·+4), 지면 그만큼 깎입니다.",
+    "사무실마다 명성 상한이 있습니다(40·60·80·100). 더 오르려면 사무실을 옮겨야 합니다.",
+    "큰 사무실일수록 큰 사건이 들어오고 더 많이 맡을 수 있습니다. 명성과 이전 비용이 되면 달 말 장부 화면의 '사무실 관리'에서 옮깁니다.",
+    "명성 100이면 엔딩입니다."]],
+  ["사건 갤러리", [
+    "이긴 사건은 갤러리에 분류별로 모입니다. 새 게임을 시작해도 남습니다."]]
+];
+function screenHowto(back) {
+  show(`<div><div class="eyebrow">벼넥시트 외전 : 의뢰인의 진실</div><h2>게임 방법</h2></div>
+    ${HOWTO.map(([h, ps]) => `<div class="pn howto"><div class="pn-name">${esc(h)}</div>${ps.map(p => `<p class="note">${esc(p)}</p>`).join("")}</div>`).join("")}`,
+    `<button class="btn primary" id="howBack">돌아가기</button>`, "office");
+  on("#howBack", back);
+}
 function screenOpening(next, i = 0, doneLabel = "개업하기") {
   const o = OPENING[i], last = i === OPENING.length - 1, hero = heroOf();
   const name = who().name || hero.name, firm = who().firm || "새벽 법률사무소";
@@ -13864,10 +13906,11 @@ function verdict(score) {
   const c = C.c;
   const res = score >= 3 ? "win" : score >= 1 ? "partial" : "lose";
   const f = C.fee, b = res === "win" ? C.bonus : res === "partial" ? Math.round(C.bonus / 2 / 10) * 10 : 0;
-  // 사건 규모가 클수록 이기면 명성이 많이 오르고, 지면 많이 깎인다
-  const repD = { win: [4, 7, 10], partial: [1, 2, 3], lose: [-2, -5, -9] }[res][c.tier - 1];
+  const repRaw = res === "win" ? 1 + c.tier : res === "partial" ? 0 : -(1 + c.tier), repBefore = S.rep;
   S.money += f + b;
-  S.rep = Math.max(0, Math.min(100, S.rep + repD));
+  // 사무실마다 명성 상한(40·60·80·100): 더 오르려면 사무실을 옮겨야 한다
+  S.rep = Math.max(0, Math.min(Math.max(office().repCap, S.rep), S.rep + repRaw));
+  const repD = S.rep - repBefore, capped = repRaw > repD;
   S[res === "win" ? "w" : res === "partial" ? "p" : "l"]++;
   if (res === "win") { S.archive = (S.archive || []).concat({ id: c.id, m: S.day, money: f + b }); galAdd(c.id, { m: S.day, money: f + b }); }
   const truthTxt = { honest: "진실한 의뢰인", hiding: "불리한 사실을 숨긴 의뢰인", liar: "거짓말을 한 의뢰인" }[c.truth];
@@ -13879,7 +13922,7 @@ function verdict(score) {
     <div class="ledger">
       <span>착수금</span><span class="r">${won(f)}</span>
       <span>성공보수</span><span class="r">${won(b)}</span>
-      <span class="sum">명성</span><span class="r sum ${repD > 0 ? "pos" : repD < 0 ? "neg" : "zero"}">${repD > 0 ? "+" : repD < 0 ? "−" : "±"}${Math.abs(repD)}</span>
+      <span class="sum">명성</span><span class="r sum ${repD > 0 ? "pos" : repD < 0 ? "neg" : "zero"}">${repD > 0 ? "+" : repD < 0 ? "−" : "±"}${Math.abs(repD)}${capped ? ` (사무실 상한 ${office().repCap})` : ""}</span>
     </div>`;
   renderHud();
   el.scrollIntoView({ block: "start", behavior: REDUCED ? "auto" : "smooth" });
@@ -13902,10 +13945,10 @@ function monoOpener(c, res) {
 /* ---------- 사무실·직원 ---------- */
 const OFFICES = [
   // 사무실이 맡을 수 있는 사건 규모(tiers)와 한 달 수임 한도(cap)를 정한다
-  { name: "동네 상가 2층", need: 0, cost: 0, rent: 150, live: 300, guests: 0, up: 0, tiers: [1], cap: 4 },
-  { name: "역세권 오피스", need: 30, cost: 1000, rent: 350, live: 400, guests: 2, up: 0.1, tiers: [1, 2], cap: 5 },
-  { name: "서초동 법조타운", need: 55, cost: 4000, rent: 800, live: 550, guests: 4, up: 0.2, tiers: [1, 2, 3], cap: 6 },
-  { name: "강남 빌딩 한 층", need: 80, cost: 10000, rent: 2000, live: 800, guests: 6, up: 0.3, tiers: [2, 3], cap: 8 }
+  { name: "동네 상가 2층", need: 0, cost: 0, rent: 150, live: 300, guests: 0, up: 0, tiers: [1], cap: 4, repCap: 40 },
+  { name: "역세권 오피스", need: 30, cost: 1000, rent: 350, live: 400, guests: 2, up: 0.1, tiers: [1, 2], cap: 5, repCap: 60 },
+  { name: "서초동 법조타운", need: 55, cost: 4000, rent: 800, live: 550, guests: 4, up: 0.2, tiers: [1, 2, 3], cap: 6, repCap: 80 },
+  { name: "강남 빌딩 한 층", need: 80, cost: 10000, rent: 2000, live: 800, guests: 6, up: 0.3, tiers: [2, 3], cap: 8, repCap: 100 }
 ];
 const STAFF = [
   { key: "mgr", name: "사무장", pay: 450, desc: "매달 손님 +1~2" },
@@ -13928,7 +13971,7 @@ function screenOffice() {
   const moveBox = nx ? `<div class="pn ${canMove() ? "on" : ""}">
       <div class="pn-top"><span class="eyebrow">다음 단계</span>${canMove() ? `<span class="pill ok">이전 가능</span>` : ""}</div>
       <div class="pn-name">${esc(nx.name)}</div>
-      <div class="note">이전 비용 ${won(nx.cost)} · 월세 ${won(nx.rent)} · 생활비 ${won(nx.live)} · 직원 정원 ${OFFICES.indexOf(nx) + 1}명<br>사건 규모 ${tierTxt(nx.tiers)} · 한 달 수임 ${nx.cap}건 · 수임료 +${Math.round(nx.up * 100)}%</div>
+      <div class="note">이전 비용 ${won(nx.cost)} · 월세 ${won(nx.rent)} · 생활비 ${won(nx.live)} · 직원 정원 ${OFFICES.indexOf(nx) + 1}명<br>사건 규모 ${tierTxt(nx.tiers)} · 한 달 수임 ${nx.cap}건 · 명성 상한 ${nx.repCap} · 수임료 +${Math.round(nx.up * 100)}%</div>
       ${canMove() ? `<button class="btn" id="move">${won(nx.cost)} 내고 이전</button>`
         : `<div class="note need">${S.rep < nx.need ? `명성 ${nx.need} 필요 (지금 ${S.rep})` : `자금 ${won(nx.cost)} 필요`}</div>`}
     </div>` : `<div class="pn"><div class="note">가장 좋은 사무실입니다.</div></div>`;
@@ -13941,7 +13984,7 @@ function screenOffice() {
   }).join("");
   show(`<div><div class="eyebrow">자금 ${won(S.money)} · 월 고정비 ${won(monthlyCost())}</div><h2>사무실 관리</h2></div>
     <div class="pn"><div class="eyebrow">지금 사무실</div><div class="pn-name">${esc(cur.name)}</div>
-      <div class="note">월세 ${won(cur.rent)} · 생활비 ${won(cur.live)} · 직원 정원 ${capacity()}명<br>사건 규모 ${tierTxt(cur.tiers)} · 한 달 수임 ${cur.cap}건${cur.up ? ` · 수임료 +${Math.round(cur.up * 100)}%` : ""}</div></div>
+      <div class="note">월세 ${won(cur.rent)} · 생활비 ${won(cur.live)} · 직원 정원 ${capacity()}명<br>사건 규모 ${tierTxt(cur.tiers)} · 한 달 수임 ${cur.cap}건 · 명성 상한 ${cur.repCap}${cur.up ? ` · 수임료 +${Math.round(cur.up * 100)}%` : ""}</div></div>
     ${moveBox}
     <button class="btn ghost" id="toArchive">사건 갤러리 · 모은 사건 ${Object.keys(galLoad()).length}건</button>
     <div class="section-head"><span class="eyebrow">직원</span><span class="eyebrow">정원 ${staffCount()} / ${capacity()}</span></div>
@@ -14062,7 +14105,7 @@ function renderHud() {
   const ym = `${2030 + Math.floor((S.day - 1) / 12)}.${((S.day - 1) % 12) + 1}`;
   hud.innerHTML = `<div class="pills">
       <span class="pill"><i>₩</i>${won(S.money)}</span>
-      <span class="pill"><i>★</i>${S.rep}</span>
+      <span class="pill"><i>★</i>${S.rep}${office().repCap < 100 ? `<small>/${office().repCap}</small>` : ""}</span>
       <span class="pill r">${ym} · 수임 ${S.taken || 0}/${intakeCap()}</span>
     </div>
     <div class="rk">${S.name ? esc(S.name) + " · " : ""}${esc(rankOf(S.rep))} · 승률 ${trials() ? winRate() + "%" : "—"}</div>`;
