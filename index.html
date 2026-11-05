@@ -13316,6 +13316,7 @@ const HOWTO = [
     "이기면 명성이 오르고(사건 규모 ★·★★·★★★에 따라 +2·+3·+4), 지면 그만큼 깎입니다.",
     "사무실마다 명성 상한이 있습니다(40·60·80·100). 더 오르려면 사무실을 옮겨야 합니다.",
     "큰 사무실일수록 큰 사건이 들어오고 더 많이 맡을 수 있습니다. 명성과 이전 비용이 되면 달 말 장부 화면의 '사무실 관리'에서 옮깁니다.",
+    "직원: 사무장(매달 손님 +1~2), 비서(수임료 때 의뢰인 형편 귀띔), 고용 변호사(한 달 수임 +3건·질문 +1번), 조사원(재판 전 증거 하나 뒷조사).",
     "명성 100이면 엔딩입니다."]],
   ["사건 갤러리", [
     "이긴 사건은 갤러리에 분류별로 모입니다. 새 게임을 시작해도 남습니다."]]
@@ -13672,7 +13673,8 @@ function react() {
 function secHint(c) {
   const st = payStyle(c), w = C.wallet || 1;
   const a = st === "poor" ? "착수금이 부담스러운 형편 같아요. 성공보수로 받는 게 낫겠어요." : st === "rich" ? "형편이 넉넉해 보여요. 착수금은 넉넉히 받아도 될 것 같고요." : "형편은 보통 같아요.";
-  const b = w > 1.1 ? "이번 건은 꽤 급해 보여서, 시세보다 더 불러도 될 것 같아요." : w < 0.9 ? "주머니 사정이 빠듯해 보여요. 무리하면 놓칠 수 있어요." : "";
+  // 형편(0.8~1.4)이 1 아래면 처음 금액에 맞제안이 들어온다
+  const b = w > 1.2 ? "이번 건은 꽤 급해 보여서, 더 불러도 될 것 같아요." : w < 1 ? "주머니 사정이 빠듯해 보여요. 이 금액이면 깎자고 할 것 같아요." : "";
   return `<div class="sec"><i class="sec-ico">비서</i>"${a}${b ? " " + b : ""}"</div>`;
 }
 function screenFee(extra) {
@@ -13690,6 +13692,7 @@ function screenFee(extra) {
     <div class="feebox">
       <div><div class="eyebrow">수임료 제시</div>
       <div class="market">비슷한 사건 시세 착수금 <b>${won(marketFee(c))}</b> · 성공보수 <b>${won(marketBonus(c))}</b></div></div>
+      ${has("sec") ? secHint(c) : ""}
       <div class="feerow"><span class="lbl">착수금</span><button data-adj="F" data-d="-1" aria-label="착수금 내리기">−</button>
         <span class="amt"><input id="offerF" inputmode="numeric" value="${C.offerF.toLocaleString()}"><span class="unit">만원</span></span>
         <button data-adj="F" data-d="1" aria-label="착수금 올리기">+</button></div>
