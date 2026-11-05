@@ -373,7 +373,7 @@ html[data-scene^="end"] #backdrop::after { background: linear-gradient(180deg, #
 @keyframes zl { 0% { box-shadow: 0 0 0 0 #ff7a66; } 30% { box-shadow: 0 0 18px 6px #ff7a66cc; } 100% { box-shadow: 0 0 0 0 transparent; } }
 .ofc-banner { position: relative; aspect-ratio: 16 / 11; border-radius: 10px; overflow: hidden; border: 2px solid #c9a24a66; background-size: cover; background-position: center 39%; box-shadow: 0 8px 22px #000a; flex: none; }
 .ofc-banner::after { content: ""; position: absolute; inset: 0; background: linear-gradient(#000a, #0000 28%, #0000 66%, #000d); }
-.ofc-name { position: absolute; left: 12px; top: 10px; z-index: 1; font-family: var(--f-display); font-size: 18px; color: #fff; text-shadow: 0 2px 8px #000; display: flex; flex-direction: column; }
+.ofc-name { cursor: pointer; position: absolute; left: 12px; top: 10px; z-index: 1; font-family: var(--f-display); font-size: 18px; color: #fff; text-shadow: 0 2px 8px #000; display: flex; flex-direction: column; }
 .ofc-name small { font-family: inherit; font-size: 12px; color: #e8d6b0; }
 
 .ofc-staff { position: absolute; left: 6px; right: 6px; bottom: 5px; z-index: 1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
@@ -14521,7 +14521,7 @@ function screenOffice() {
   const cur = office(), nx = nextOffice();
   // 직원 얼굴은 그림 맨 아래 줄에. 주인공 얼굴(그림 높이 33~46%)이 그 위에 오도록 보여 줄 부분을 맞춘다
   const banner = `<div class="ofc-banner" style="background-image:url('${sceneImage("office")}')">
-      <div class="ofc-name">${esc(S.firm || "")}<small>${esc(cur.name)}</small></div>
+      <div class="ofc-name" id="firmEdit" role="button">${esc(S.firm || "")} ✎<small>${esc(cur.name)}</small></div>
     <div class="ofc-staff">${STAFF.map(s => `<div class="ofc-seat ${has(s.key) ? "on" : ""}" data-seat="${s.key}" role="button"><img src="${staffFace(s.key)}" alt=""><span>${staffOf(s.key) ? esc(staffOf(s.key).name) : s.name}</span></div>`).join("")}</div></div>`;
   // 사무실은 이름만 두 칸. 누르면 자세한 내용
   const tile = (lbl, o, extra = "") => `<button class="pn ofc-tile ${extra}" data-ofc="${OFFICES.indexOf(o)}"><span class="eyebrow">${lbl}</span><span class="pn-name">${esc(o.name)}</span></button>`;
@@ -14530,8 +14530,27 @@ function screenOffice() {
     <div class="ofc-tiles">${tile("지금 사무실", cur)}${nx ? tile(canMove() ? "다음 단계 · 이전 가능" : "다음 단계", nx, canMove() ? "on" : "") : `<div class="pn ofc-tile"><span class="eyebrow">다음 단계</span><span class="note">가장 좋은 사무실</span></div>`}</div>`,
     `<button class="btn primary" id="backLedger">${officeBack ? "돌아가기" : "장부로 돌아가기"}</button>`);
   on("[data-ofc]", e => officePop(+e.currentTarget.dataset.ofc));
+  on("#firmEdit", firmPop);
   on("[data-seat]", e => staffPop(e.currentTarget.dataset.seat));
   on("#backLedger", () => { const b = officeBack || screenDayEnd; officeBack = null; b(); });
+}
+// 사무소 이름 바꾸기
+function firmPop() {
+  const ov = document.createElement("div");
+  ov.className = "staff-pop";
+  ov.innerHTML = `<div class="sp-card"><div class="sp-name">사무소 이름</div>
+    <label class="field" style="width:100%"><input id="firmNew" maxlength="14" value="${esc(S.firm || "")}"></label>
+    <div class="row2"><button class="btn ghost" id="fnCancel">취소</button><button class="btn primary" id="fnOk">바꾸기</button></div></div>`;
+  document.body.appendChild(ov);
+  const close = () => ov.remove();
+  ov.addEventListener("click", e => { if (e.target === ov) close(); });
+  ov.querySelector("#fnCancel").onclick = close;
+  ov.querySelector("#fnOk").onclick = () => {
+    let f = ov.querySelector("#firmNew").value.trim();
+    if (f) { if (!/(사무소|법인|로펌)$/.test(f)) f += " 법률사무소"; S.firm = f; save(); }
+    close(); screenOffice();
+  };
+  ov.querySelector("#firmNew").focus();
 }
 function officePop(i) {
   const o = OFFICES[i], isCur = i === (S.office || 0), isNext = i === (S.office || 0) + 1;
