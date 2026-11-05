@@ -13841,7 +13841,7 @@ function screenFee(extra) {
   tutSet(() => C.card && !tutK("f0") ? { t: "털어놓았다. 재판에 낼 카드가 하나 생겼다.", tap: "f0" }
     : !tutK("f1") ? { t: "<b>착수금</b>은 맡을 때 받는 돈, <b>성공보수</b>는 이기면 받는 돈이다. 일부만 이기면 절반.", tap: "f1", sel: ".feerow" }
     : !tutK("f2") ? { t: "처음 금액은 시세에 내 명성을 얹은 값. 비싸면 깎자고 하고, 너무 비싸면 떠난다.", tap: "f2" }
-    : { t: "이번엔 이대로 <b>이 금액으로 제시</b>.", sel: "#propose" });
+    : { t: "<b>이 금액으로 제시</b>를 누르자.", sel: "#propose" });
   on("#refuse", () => {
     S.refused++;
     finishCase("refused", { rep: 0, money: 0 });
@@ -13940,7 +13940,7 @@ function screenTrial() {
     C.inv = e.currentTarget.dataset.inv; const y = window.scrollY; screenTrial(); window.scrollTo({ top: y });
   }));
   on("#plead", runTrial);
-  tutSet(() => !tutK("t1") ? { t: "체크된 증거가 재판에 나간다. 불리한 증거는 눌러서 빼면 된다. 이번엔 다 내도 된다.", tap: "t1" }
+  tutSet(() => !tutK("t1") ? { t: "체크된 증거가 재판에 나간다. 불리한 증거는 눌러서 빼면 된다.", tap: "t1" }
     : !C.arg ? { t: C.card ? "털어놓은 사실에 맞는 주장을 하나 고르자." : "주장을 하나 고르자.", sel: ".arg" }
     : { t: "<b>변론 시작</b>.", sel: "#plead" });
 }
