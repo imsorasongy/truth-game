@@ -382,6 +382,8 @@ html[data-scene^="end"] #backdrop::after { background: linear-gradient(180deg, #
 .staff-row .sf img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 12%; display: block; filter: grayscale(.8) brightness(.7); }
 .staff-row.on .sf { border-color: var(--brass); } .staff-row.on .sf img { filter: none; }
 .ln-note { font-size: 12.5px; line-height: 1.5; color: var(--muted); margin-top: 3px; }
+.talk.refs-talk { display: none; }
+.vn.show-log .talk.refs-talk { display: flex; }
 .closeup, .flip { position: fixed; inset: 0; z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: #0d0806e6; animation: fadein .25s; }
 .closeup.out, .flip.out { opacity: 0; transition: opacity .3s; }
 .closeup-face { width: min(220px, 60vw); aspect-ratio: 1; border-radius: 50%; overflow: hidden; border: 4px solid var(--brass); animation: zoom 1.5s ease-out; }
@@ -724,6 +726,7 @@ window.CASES.push(
   hiddenIndex: null,
   lies: ["9월에 추가금 문제로 건축주와 크게 싸웠다는 말", "공사를 작년 10월 말에 다 끝냈다는 말", "건축주가 타일을 바꿔 자재가 늦게 들어왔다는 말"],
   lieIndex: 1, touchIndex: 0,
+  deny: {"say":"다 끝냈다니까 그러네. 사인 받은 준공 확인서가 있잖아.","proof":["e4","e2"],"fail":"그런 걸로 트집 잡지 마. 공사는 내가 다 했어."},
   confession: "…7할쯤 하고 손 뗐어. 싸우고 나서 연락도 안 받길래, 준공 확인서는 내가 써 넣었고.",
   confessionCard: null,
   arguments: [
@@ -806,6 +809,7 @@ window.CASES.push(
   hiddenIndex: null,
   lies: ["계좌번호 한 자리를 잘못 눌러 보냈다는 말", "은행에 착오송금 신고를 했다는 말", "받은 사람이 수익 나면 돌려준다고 했다는 말"],
   lieIndex: 0, touchIndex: 0,
+  deny: {"say":"아니라니까요. 진짜 번호 하나 잘못 누른 거예요.","proof":["e4","e2"],"fail":"그게 뭐요. 저 그 사람 진짜 몰라요."},
   confession: "…코인 리딩방에서 투자하라고 해서 제가 보낸 거예요. 돈이 안 돌아오길래, 잘못 보냈다고 하면 쉽게 받을 줄 알았어요.",
   confessionCard: null,
   arguments: [
@@ -1011,6 +1015,7 @@ window.CASES.push(
   hiddenIndex: 0,
   lies: ["동업계약서에 지분·손익을 반반으로 정했다는 말", "가게를 몰래 하나 더 차리려 한 적이 없다는 말", "세무사가 세 곳 순자산을 4억으로 평가했다는 말"],
   lieIndex: null, touchIndex: null,
+  deny: {"say":"아따, 잠깐 돌려 쓴 거 말고는 손댄 거 없당께요. 장부에 다 적혀 있어라.","proof":["e2","e3"],"fail":"그거 갖고 뭘 그라요. 가게 돈 빼 쓴 거 없어라."},
   confession: "…작년에 집 대출 막느라 가게 통장에서 6천을 빼 썼어라. 갚을 생각이었는디 그 뒤로 싸움이 나 부렀어요.",
   confessionCard: { id: "k", name: "가지급금 정산 인정", desc: "가져다 쓴 6,000만 원을 먼저 빼고 남은 지분만 청구", value: 1 },
   arguments: [
@@ -1052,6 +1057,7 @@ window.CASES.push(
   hiddenIndex: null,
   lies: ["대표가 개발비 대신 외제차 리스료를 냈다는 말", "주주총회 소집 통지를 받고도 가지 않았다는 말", "3억 원을 이자 받기로 하고 빌려준 것이라는 말"],
   lieIndex: 2, touchIndex: 0,
+  deny: {"say":"빌려준 겁니다. 차용증까지 받았는데 무슨 투자예요.","proof":["e1","e2"],"fail":"그건 상관없습니다. 빌려준 돈 맞아요."},
   confession: "…투자 맞습니다. 망할 줄 알았으면 안 넣었죠. 차용증은 나중에 대표 찾아가서 반쯤 우겨서 받은 겁니다.",
   confessionCard: null,
   arguments: [
@@ -1216,6 +1222,7 @@ window.CASES.push(
   hiddenIndex: null,
   lies: ["월세를 한 번도 밀린 적이 없다는 말", "건물주 조카가 그 자리에서 장사한다는 말", "인테리어·주방 설비에 6천만 원이 들었다는 말"],
   lieIndex: 0, touchIndex: 0,
+  deny: {"say":"안 밀렸다니께유. 꼬박꼬박 냈슈, 지가 거짓말할 사람이 아녀유.","proof":["e3","e2"],"fail":"그게 뭔 상관이래유. 월세는 다 냈슈."},
   confession: "…작년에 장사 안돼서 두 달 치를 밀렸슈. 나중에 다 갚았는디, 그거 말하면 권리금 못 받는다길래 표를 그렇게 만들었쥬.",
   confessionCard: null,
   arguments: [
@@ -1343,6 +1350,7 @@ window.CASES.push(
   hiddenIndex: 0,
   lies: ["손님이 길을 돌아갔다고 내내 시비를 걸었다는 말", "손님이 넘어질 때 한 발짝 떨어져 있었다는 말", "운행 중 녹음 앱을 켜 두고 다닌다는 말"],
   lieIndex: null, touchIndex: null,
+  deny: {"say":"처음 본 사람이라니까요. 하루에 손님이 몇인데요.","proof":["e1","e2"],"fail":"그게 뭐요. 저는 기억도 안 나요."},
   confession: "…그 양반, 여드레 전에도 태웠어요. 그때 요금 갖고 싸우고 제가 앱에 신고까지 당했죠. 그 얘기 하면 제가 앙심 품은 걸로 볼까 봐요.",
   confessionCard: { id: "k", name: "지난 다툼과 사과 문자", desc: "여드레 전 다툼 뒤 의뢰인이 먼저 보낸 사과 문자와 손님의 \"됐어요\" 답장", value: 1 },
   arguments: [
@@ -1382,6 +1390,7 @@ window.CASES.push(
   hiddenIndex: null,
   lies: ["자기 이어폰과 헷갈려서 들고 왔다는 말", "경찰이 동의서 없이 가방을 뒤져 가져갔다는 말", "피해자에게 돈을 물어 주고 합의서를 받았다는 말"],
   lieIndex: 0, touchIndex: 0,
+  deny: {"say":"진짜 헷갈린 거라니까요. 제 거랑 똑같이 생겼어요.","proof":["e1","e2"],"fail":"그거랑은 상관없잖아요. 헷갈린 거 맞아요."},
   confession: "…솔직히 제 건 그날 없었어요. 벤치에 있길래 그냥 넣었고, 다음 날 놀라서 똑같은 거 하나 샀어요.",
   confessionCard: null,
   arguments: [
@@ -1499,6 +1508,7 @@ window.CASES.push(
   hiddenIndex: null,
   lies: ["원장과 회원권 환불 문제로 다퉜다는 말", "계정이 해킹당해 자기가 쓴 글이 아니라는 말", "원장이 환불을 안 해 주고 버틴다는 말"],
   lieIndex: 1, touchIndex: 0,
+  deny: {"say":"저 아니에요. 해킹당한 거라니까요, 진짜.","proof":["e1","e2"],"fail":"그게 뭐요. 제가 쓴 거 아니라고요."},
   confession: "…제가 썼어요. 공항 가는 리무진에서요. 너무 화가 나서. 해킹이라고 하면 끝날 줄 알았어요.",
   confessionCard: null,
   arguments: [
@@ -1655,6 +1665,7 @@ window.CASES.push(
   hiddenIndex: null,
   lies: ["학원 통장에서 300만 원이 빠져나갔다는 말", "동업자가 돈을 빼돌린 줄 진짜로 알았다는 말", "아는 언니가 진술서를 써 줬다는 말"],
   lieIndex: 1, touchIndex: 0,
+  deny: {"say":"저는 진짜 빼돌린 줄 알았다니까요. 정산은 끝난 적 없어요.","proof":["e1"],"fail":"그걸로 뭘 어쩌라고요. 저는 몰랐어요."},
   confession: "…정산은 끝났어요. 그 사람이 다른 데 학원 차린다는 말 듣고 화가 나서. 메모도 제가 지웠고요.",
   confessionCard: null,
   arguments: [
@@ -1851,6 +1862,7 @@ window.CASES.push(
   hiddenIndex: null,
   lies: ["마지막 회의에 상무 대신 부장이 나왔다는 말", "원청이 단가를 일방적으로 깎았다는 말", "협박 같은 말은 한 적이 없다는 말"],
   lieIndex: 2, touchIndex: 0,
+  deny: {"say":"협박이라니요. 손해 얘기만 점잖게 했습니다.","proof":["e2"],"fail":"그건 아무 의미 없습니다. 협박 같은 말 안 했어요."},
   confession: "…30억 안 주면 상무 리베이트 장부 기자한테 넘긴다고 했습니다. 회사가 망하게 생겨서 눈이 돌았어요.",
   confessionCard: null,
   arguments: [
@@ -2013,6 +2025,7 @@ window.CASES.push(
   hiddenIndex: 0,
   lies: ["근로계약서에 월 250, 주 6일로 썼다는 말", "8월 말까지 일하고 그만뒀다는 말", "노동청 감독관이 소송하라고 했다는 말"],
   lieIndex: null, touchIndex: null,
+  deny: {"say":"오토바이는 제가 그런 거 아니에요. 사장이 괜히 트집 잡는 거예요.","proof":["e2"],"fail":"그거랑은 상관없어요. 사장이 핑계 대는 거라니까요."},
   confession: "…6월에 술 좀 먹고 배달하다 오토바이를 박살냈어요. 사장이 그거 물어내라고 월급을 안 주는 거예요.",
   confessionCard: { id: "k", name: "사고 경위 인정", desc: "사고는 인정하고 수리비는 따로 다투겠다는 진술", value: 1 },
   arguments: [
@@ -2327,6 +2340,7 @@ window.CASES.push(
   hiddenIndex: null,
   lies: ["새 임차인이 아는 동생 소개로 온 사람이라는 말", "건물주가 아들이 들어온다며 거절했다는 말", "건물주가 계약 만료 넉 달 전부터 거절 뜻을 밝혔다는 말"],
   lieIndex: 0, touchIndex: 0,
+  deny: {"say":"아는 동생이 소개해 준 사람 맞아요. 저랑은 아무 사이 아니에요.","proof":["e3","e4"],"fail":"그거 갖고 왜 그러세요. 소개받은 사람이라니까요."},
   confession: "…처남이에요. 건물주가 어차피 안 받는다니까 서류라도 갖춰 놓은 거죠.",
   confessionCard: null,
   arguments: [
@@ -2404,6 +2418,7 @@ window.CASES.push(
   hiddenIndex: null,
   lies: ["을지로 상가를 상속받아 지금도 세를 받는다는 말", "반포 아파트를 선친 유산으로 샀다는 말", "아내가 처음 6년은 은행에 다녔다는 말"],
   lieIndex: 1, touchIndex: 0,
+  deny: {"say":"선친 유산으로 산 거 맞습니다. 집사람 돈은 한 푼도 안 들어갔어요.","proof":["e1","e2"],"fail":"그거하고는 상관없습니다. 유산으로 산 집이에요."},
   confession: "…아파트는 집사람 퇴직금 보태서 샀고, 대출은 같이 갚았습니다. 그래도 상가 세로 이자 낸 것도 있어요.",
   confessionCard: null,
   arguments: [
@@ -2654,6 +2669,7 @@ window.CASES.push(
   lies: ["업체가 수리비와 휴차료로 450을 내라고 한다는 말", "범퍼 흠집은 빌릴 때부터 있었고 출발 전에 사진도 찍었다는 말", "자차 보험을 넣고 빌렸다는 말"],
   lieIndex: 1,
   touchIndex: 0,
+  deny: {"say":"빌릴 때부터 있던 거예요. 출발 전에 사진 찍었다니까요.","proof":["e2","e3"],"fail":"그건 아무것도 아니에요. 원래 찌그러져 있었어요."},
   confession: "…주차장에서 후진하다가 기둥을 박았어요. 면책 써도 자기부담금 50은 내야 하니까, 그냥 원래 있던 거라고 했어요.",
   confessionCard: null,
   arguments: [
@@ -2739,6 +2755,7 @@ window.CASES.push(
   lies: ["약정서에 처음부터 소개비 1억으로 적었다는 말", "매수인이 20년 거래처라는 말", "매매 협상 자리에 직접 붙어 있었다는 말"],
   lieIndex: 0,
   touchIndex: 0,
+  deny: {"say":"처음부터 1억이었어. 내가 그걸 왜 지어내.","proof":["e1","e3"],"fail":"그거 갖고 뭘 그래. 1억 맞다니까."},
   confession: "…원래 3천으로 썼어. 일이 커지고 나니까 너무 적다 싶어서, 사본에 손을 좀 댔지.",
   confessionCard: null,
   arguments: [
@@ -2780,6 +2797,7 @@ window.CASES.push(
   lies: ["4억 지급명령이 확정됐다는 말", "아파트가 부도 사흘 전에 아내 앞으로 넘어갔다는 말", "사장 아내가 회사 감사로 등기돼 있다는 말"],
   lieIndex: null,
   touchIndex: null,
+  deny: {"say":"다른 데서 받은 돈은 없어요. 4억 고스란히 떼였다니까요.","proof":["e3"],"fail":"그건 아무것도 아니에요. 받은 돈 없어요."},
   confession: "…매출채권보험에서 1억은 나왔어요. 그 얘기 하면 4억이 3억 되잖아요. 아파트 값이 딱 그 언저리라서요.",
   confessionCard: { id: "k", name: "보험 회수분 공제", desc: "받은 보험금 1억 원을 빼고 3억 원 범위에서 청구", value: 1 },
   arguments: [
@@ -2906,6 +2924,7 @@ window.CASES.push(
   lies: ["시술 직후 코끝이 하얘지며 아팠다는 말", "동의서 설명 때 괴사 같은 말은 없었다는 말", "대학병원에서 흉이 남는다고 했다는 말"],
   lieIndex: null,
   touchIndex: null,
+  deny: {"say":"다른 데서 코 맞은 적 없어요. 여기가 처음이라니까요.","proof":["e3"],"fail":"그건 이번 일이랑 상관없는 거예요."},
   confession: "…3주 전에 다른 데서 코에 조금 맞았어요. 모양이 맘에 안 들어서 여기 와서 더 넣은 거고요. 그 얘기 하면 그쪽 탓이 될까 봐요.",
   confessionCard: { id: "k", name: "앞선 시술 인정", desc: "3주 전 다른 의원 시술 사실을 먼저 밝히고, 증상 시점으로 인과관계를 다툼", value: 1 },
   arguments: [
@@ -2991,6 +3010,7 @@ window.CASES.push(
   lies: ["스냅 비용으로 180을 냈다는 말", "계약서 원본 제공 칸에 체크가 돼 있었다는 말", "받은 보정본에 얼굴 잘린 사진이 열 장 넘는다는 말"],
   lieIndex: 1,
   touchIndex: 0,
+  deny: {"say":"체크 돼 있었다니까요. 제가 찍어 둔 사진에도 있잖아요.","proof":["e1","e3"],"fail":"그게 무슨 상관이에요. 원본 준다고 했어요."},
   confession: "…원본은 50 더 내야 한다고 들었어요. 근데 사진이 너무 엉망이라 화가 나서, 집에서 체크를 해 버렸어요.",
   confessionCard: null,
   arguments: [
@@ -3032,6 +3052,7 @@ window.CASES.push(
   lies: ["특약은 매도인이 직접 볼펜으로 썼다는 말", "계약금 6천을 매도인에게 보냈다는 말", "대출을 신청한 곳이 ○○은행이라는 말"],
   lieIndex: null,
   touchIndex: null,
+  deny: {"say":"대출은 은행이 안 해 준 거예요. 제가 왜 그걸 취소합니까.","proof":["e3"],"fail":"그건 별거 아닙니다. 은행에서 안 된다고 했어요."},
   confession: "…대출은 승인이 났습니다. 그 사이에 더 싼 집이 나와서 제가 신청을 취소했고요. 그 말 하면 계약금 다 날아갈 것 같아서요.",
   confessionCard: { id: "k", name: "대출 철회 인정", desc: "스스로 취소한 사실을 인정하고, 매도인이 3주 뒤 더 비싸게 다시 판 등기부를 들어 몰취 과다를 다툼", value: 1 },
   arguments: [
@@ -3162,6 +3183,7 @@ window.CASES.push(
   lies: ["업자가 돈 받고 공사를 반도 안 하고 떠났다는 말", "인부들이 일당을 못 받았다는 말", "그날 폰을 현장 사무실에 두고 퇴근했다는 말"],
   lieIndex: 2,
   touchIndex: 0,
+  deny: {"say":"내는 안 보냈다 캤잖심니꺼. 폰은 사무실 서랍에 있었어예.","proof":["e3","e2"],"fail":"그기 뭐 어쨌다꼬예. 내는 모르는 일입니더."},
   confession: "…폰은 내 주머니에 있었심더. 내가 보냈어예. 인부들 일당 떼먹고 웃고 다니는 꼴 보니 손이 먼저 나가데예.",
   confessionCard: null,
   arguments: [
@@ -3201,6 +3223,7 @@ window.CASES.push(
   lies: ["그 카톡은 동기에게만 보냈다는 말", "동기가 서른 명 있는 단톡방에 캡처를 올렸다는 말", "승진 심사에서 빠져 팀장에게 서운했다는 말"],
   lieIndex: null,
   touchIndex: null,
+  deny: {"say":"지우려고 한 적 없어요. 그냥 말다툼만 하고 왔다니까요.","proof":["e1"],"fail":"그거랑은 상관없습니다. 말다툼만 했어요."},
   confession: "…그날 밤 동기 집 앞에서 폰을 뺏으려 했어요. 지우려고요. 증거 없애려 한 걸로 보일까 봐 말 못 했습니다.",
   confessionCard: { id: "k", name: "삭제 시도 경위", desc: "퍼지기 전에 지우려 동기를 찾아갔다는 사실과 당시 카톡", value: 1 },
   arguments: [
@@ -3322,6 +3345,7 @@ window.CASES.push(
   lies: ["결제할 때 룸메이트가 깨어서 '그냥 써'라고 했다는 말", "경찰서에 밤 열한 시에 불려 갔다는 말", "고소당하고 140만 원을 다 돌려줬다는 말"],
   lieIndex: 0,
   touchIndex: 0,
+  deny: {"say":"걔 깨어 있었어요. 옆에서 그냥 쓰라고 했다니까요.","proof":["e2","e3"],"fail":"그건 다른 얘기잖아요. 걔가 쓰라고 했어요."},
   confession: "…걔 잘 때 지문으로 열었어요. 월급 들어오면 채워 놓으려고 했는데 금방 들켰어요.",
   confessionCard: null,
   arguments: [
@@ -3563,6 +3587,7 @@ window.CASES.push(
   lies: ["작은아버지가 지금 요양병원에 계신다는 말", "검찰이 영장에 없는 집 서재까지 뒤졌다는 말", "위임장 서명은 작은아버지 본인이 했다는 말"],
   lieIndex: 2,
   touchIndex: 0,
+  deny: {"say":"작은아버지가 직접 서명하셨습니다. 제가 옆에서 봤어요.","proof":["e3","e2"],"fail":"그런 걸로는 아무것도 안 됩니다. 본인이 하신 거예요."},
   confession: "…제가 썼습니다. 회사가 넘어가게 생겨서요. 작은아버지 정신 드시면 말씀드리려고 했어요.",
   confessionCard: null,
   arguments: [
@@ -3690,6 +3715,7 @@ window.CASES.push(
   lieIndex: null,
   touchIndex: null,
   confession: "…한 달에 이틀씩은 팀장이 연장 대신 쉬라고 해서 쉬었어요. 그거 말하면 수당이 깎일까 봐요.",
+  deny: { say: "그건 한가해서 쉰 거예요. 연장 대신 받은 휴가 같은 거 없어요.", proof: ["e1"] },
   confessionCard: { id: "k", name: "보상휴가 인정", desc: "쉰 날만큼 빼고 나머지 연장근로만 청구", value: 1 },
   arguments: [
     { id: "a1", text: "원고는 피고의 지시로 매일 두 시간씩 더 일했으므로 피고는 연장근로수당 전액을 지급하라", value: 2 },
@@ -3730,6 +3756,7 @@ window.CASES.push(
   lieIndex: 0,
   touchIndex: 0,
   confession: "…제가 먼저 '없던 일로 하자'고 했어요. 시어머니 될 분이랑 싸우고 나서요. 사흘 뒤에 그 사람이 받아들인 거예요.",
+  deny: { say: "제가 먼저요? 아니에요. 그 사람이 끝내자고 한 거라니까요.", proof: ["e3", "e4"], fail: "그게 뭐요. 끝내자고 한 건 그 사람이에요." },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "피고는 정당한 이유 없이 약혼을 해제했으므로 위자료와 손해 전부를 배상해야 한다", value: 2 },
@@ -3932,6 +3959,7 @@ window.CASES.push(
   lieIndex: 2,
   touchIndex: 0,
   confession: "…모델하우스에서 약속받은 건 없어요. 계약 날 조망 보장 안 된다는 확인서에 사인했어요. 집값 떨어지고 분양권도 안 팔리니까 빠져나갈 구멍을 찾은 겁니다.",
+  deny: { say: "약속받은 거 맞습니다. 그래서 메모까지 해 둔 거고요.", proof: ["e3", "e4"] },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "입주가 예정일보다 4개월 늦어졌으므로 계약서 조항에 따라 해제할 수 있다", value: 1 },
@@ -4052,6 +4080,7 @@ window.CASES.push(
   lieIndex: 0,
   touchIndex: 0,
   confession: "…5천 얘기는 창업 브로커가 한 거예요. 본사 서류엔 2,500으로 돼 있었고 저도 사인했어요.",
+  deny: { say: "그 사람 본사 쪽 사람 맞아요. 본사에서 들은 말이라니까요.", proof: ["e3"] },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "피고가 월 매출 5,000만 원을 약속하며 원고를 속였으므로 계약을 취소하고 낸 돈 전부를 돌려받아야 한다", value: 2 },
@@ -4092,6 +4121,7 @@ window.CASES.push(
   lieIndex: null,
   touchIndex: null,
   confession: "…그날 고깃집에서 소주를 좀 마셨어요. 애 데리고 대리 안 부르고 집까지 운전했고요.",
+  deny: { say: "그날 애 잘 데리고 놀다 들여보냈어요. 제가 뭘 잘못했다고요.", proof: ["e3"], fail: "그거랑 무슨 상관이에요. 애는 잘 놀았어요." },
   confessionCard: { id: "k", name: "금주 서약", desc: "면접교섭 날엔 술을 입에 대지 않고 차 대신 대중교통을 타겠다는 서약서", value: 1 },
   arguments: [
     { id: "a1", text: "음주 금지 같은 조건을 붙여서라도 면접교섭은 재개돼야 한다", value: 1 },
@@ -4263,6 +4293,7 @@ window.CASES.push(
   lieIndex: 1,
   touchIndex: 0,
   confession: "…화장품 광고 세 건, 제가 직접 받았어요. 수수료 떼이기 싫어서요. 정산 보류된 것도 그 뒤부터예요.",
+  deny: { say: "없다니까요. 언니 브랜드 몇 번 찍어 준 게 다예요.", proof: ["e3"] },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "피고가 6개월간 정산을 하지 않아 계약이 해지됐으므로 미정산금 전액을 지급해야 한다", value: 2 },
@@ -4305,6 +4336,7 @@ window.CASES.push(
   lieIndex: null,
   touchIndex: null,
   confession: "…출원 전에 대전에 그런 이름 호프집이 하나 있다는 얘기는 들었어. 동네 가게라 신경을 안 썼지. 그 얘기 하면 남의 이름 뺏은 걸로 보일까 봐.",
+  deny: { say: "그 동네 호프집이 뭐 어쨌다고. 저것들은 작년에 우르르 생긴 거야.", proof: ["e2"], fail: "그걸로 뭘 어쩌라고. 우리가 먼저 등록했어." },
   confessionCard: { id: "k", name: "1호점 선사용 인정", desc: "대전 1호점의 선사용은 먼저 인정하고, 등록 뒤 새로 연 13개 매장만 문제 삼음", value: 1 },
   arguments: [
     { id: "a1", text: "피고는 등록상표와 비슷한 이름을 써 혼동을 일으켰으므로 손해를 배상해야 한다", value: 2 },
@@ -4389,6 +4421,7 @@ window.CASES.push(
   lieIndex: 2,
   touchIndex: 0,
   confession: "…집사람 계좌로 미리 사 놨어요. 공지 띄우고 오를 때 다 팔았고요. 제 명의로만 안 했을 뿐이죠.",
+  deny: { say: "집사람 계좌는 집사람 거예요. 저는 손댄 적 없다니까요.", proof: ["e1"] },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "피고인은 그 코인을 사거나 판 적이 없어 얻은 이익이 없다", value: 2 },
@@ -4473,6 +4506,7 @@ window.CASES.push(
   lieIndex: null,
   touchIndex: null,
   confession: "…단톡방 공지는 봤어요. '확인했습니다'라고 답도 달았고요. 근데 서류는 정말 안 왔어요. 봤다고 하면 끝날 것 같아서.",
+  deny: { say: "연락은 아무것도 못 받았습니다. 받았으면 제가 가만있었겠어요?", proof: ["e4"] },
   confessionCard: { id: "k", name: "단톡 공지 경위 인정", desc: "회의 8일 전 단톡 공지만 받았고 서면 통지는 없었다는 사실을 먼저 밝힘", value: 1 },
   arguments: [
     { id: "a1", text: "원고는 소집통지를 전혀 받지 못했으므로 결의는 취소돼야 한다", value: 2 },
@@ -4683,6 +4717,7 @@ window.CASES.push(
   lieIndex: 2,
   touchIndex: 0,
   confession: "…매크로 돌렸어요. 근무 중에 PC방 구석 자리에 켜 놓고요. 다들 쓰는데 저만 걸린 거예요.",
+  deny: { say: "매크로 안 썼어요. 컴퓨터 뒤져 봐도 된다니까요.", proof: ["e2", "e3"], fail: "그게 매크로 썼다는 증거는 아니잖아요." },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "정지가 정당하더라도 피고는 쓰지 않은 유료 재화를 환불해야 한다", value: 1 },
@@ -4815,6 +4850,7 @@ window.CASES.push(
   lieIndex: 0,
   touchIndex: 0,
   confession: "…배기 말고도 창호, 화장실 다 옮기라 했어요. 기성금은 돈이 모자라서 못 줬고요. 늦어진 건 반은 제 탓이에요.",
+  deny: { say: "배기구 자리 한 번 물어본 게 다예요. 도면 바꾼 적 없어요.", proof: ["e2", "e3"] },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "피고의 공사 지연을 이유로 계약을 해제했으므로 피고는 선급금 전액을 반환해야 한다", value: 2 },
@@ -4899,6 +4935,7 @@ window.CASES.push(
   lieIndex: 1,
   touchIndex: 0,
   confession: "…현금 봉투엔 2백밖에 안 들었어요. 영수증 사인은 제가 흉내 낸 거고요. 다 갚았다고 해야 풀어 줄 것 같아서요.",
+  deny: { say: "다 갚았어요. 영수증에 사인까지 받았는데 뭘 더 해요.", proof: ["e3", "e4"], fail: "그거 보면 뭐가 나와요. 갚은 건 갚은 거예요." },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "남은 채무를 변제하는 것을 조건으로 근저당권을 말소하라는 판결을 구한다", value: 1 },
@@ -5065,6 +5102,7 @@ window.CASES.push(
   lieIndex: 2,
   touchIndex: 0,
   confession: "…매출은 겨울부터 빠졌어요. 가격 올리고 잘하던 직원이 나가서요. 공사 핑계 대면 다 받을 수 있을 줄 알았어요.",
+  deny: { say: "공사 전엔 괜찮았어요. 3월부터 확 빠진 거라니까요.", proof: ["e3", "e4"] },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "공사 소음 때문에 매출이 줄었으므로 피고는 영업손실 2,500만 원을 배상해야 한다", value: 2 },
@@ -5149,6 +5187,7 @@ window.CASES.push(
   lieIndex: 1,
   touchIndex: 0,
   confession: "…이틀 앓고 나았어요. 여행은 원래 잡혀 있던 거고요. 그 집에서 탈 난 건 맞으니까 좀 크게 받아도 되겠다 싶었어요.",
+  deny: { say: "진짜 누워만 있었어요. 회사도 못 나갔다니까요.", proof: ["e4"] },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "원고는 식중독으로 3주간 일하지 못했으므로 피고는 휴업손해 전부를 배상해야 한다", value: 2 },
@@ -5274,6 +5313,7 @@ window.CASES.push(
   lieIndex: 0,
   touchIndex: 0,
   confession: "…집에서 울 코스로 한 번 돌렸어요. 줄어든 거 보고, 세탁소에 맡기면 세탁소 탓이 될 줄 알았어요.",
+  deny: { say: "드라이 맡기는 코트를 왜 집에서 빨아요. 한 번도 안 빨았어요.", proof: ["e4"] },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "피고가 드라이클리닝을 잘못해 코트가 줄었으므로 코트값을 배상해야 한다", value: 2 },
@@ -5440,6 +5480,7 @@ window.CASES.push(
   lieIndex: null,
   touchIndex: null,
   confession: "…경고등 켜진 거 봤어요. 손님 내려놓고 보려 했지요. 공항 콜이 5만 원짜리라…",
+  deny: { say: "소리가 좀 이상했던 거지, 경고등 같은 건 못 봤어요.", proof: ["e3"] },
   confessionCard: { id: "k", name: "경고 뒤 주행 인정", desc: "경고 뒤 주행은 인정하고 정비소 과실 몫만 청구", value: 1 },
   arguments: [
     { id: "a1", text: "피고가 볼트를 덜 조여 엔진이 망가졌으므로 수리비 전액을 배상해야 한다", value: 2 },
@@ -5524,6 +5565,7 @@ window.CASES.push(
   lieIndex: 1,
   touchIndex: 0,
   confession: "…처음엔 올려도 된다고 했어요. 근데 DM이 너무 와서요. 동의했다고 하면 아무것도 못 받을 것 같았어요.",
+  deny: { say: "허락한 적 없어요. 올리는 줄도 몰랐다니까요.", proof: ["e3", "e4"] },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "피고가 동의 없이 원고의 얼굴 사진을 올렸으므로 초상권 침해 위자료를 지급해야 한다", value: 2 },
@@ -5690,6 +5732,7 @@ window.CASES.push(
   lieIndex: null,
   touchIndex: null,
   confession: "…제 자전거 휠을 회비로 산 적이 있습니다. 나중에 채워 넣었고요. 그게 알려지면 회장 자리도 끝이라…",
+  deny: { say: "제가 회비를요? 그런 적 없습니다. 장부 보시면 아시잖아요.", proof: ["e1"], fail: "그건 전 총무가 한 짓이고요. 저랑은 상관없습니다." },
   confessionCard: { id: "k", name: "회장 사용분 공개", desc: "회장이 쓰고 채워 넣은 200만 원을 먼저 밝히고 총무 몫만 청구", value: 1 },
   arguments: [
     { id: "a1", text: "증빙 없이 현금으로 인출한 600만 원은 피고가 반환해야 한다", value: 2 },
@@ -5820,6 +5863,7 @@ window.CASES.push(
   lieIndex: 0,
   touchIndex: 0,
   confession: "…병 들고 덤비길래 옆에 있던 병을 잡고 휘둘렀습니다. 정신 차려 보니 머리에서 피가 나고 있었어요.",
+  deny: { say: "손 안 댔습니다. 이건 깨진 병 치우다 베인 거라니까요.", proof: ["e3"], fail: "그게 뭐요. 저는 손도 안 댔습니다." },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "피해자는 술에 취해 혼자 넘어져 탁자에 머리를 부딪혔다", value: 2 },
@@ -6021,6 +6065,7 @@ window.CASES.push(
   lieIndex: 1,
   touchIndex: 0,
   confession: "…내려서 봤어요. 긁힌 거. 근데 미팅 시간이 다 돼서 그냥 갔고, 나중에 무서워서 범퍼 칠하고 영상도 지웠어요.",
+  deny: { say: "진짜 몰랐어요. 느낌이 있었으면 내려서 봤겠죠.", proof: ["e1", "e2"] },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "피고인은 접촉을 전혀 느끼지 못해 사고 사실을 알 수 없었다", value: 2 },
@@ -6101,6 +6146,7 @@ window.CASES.push(
   lieIndex: 0,
   touchIndex: 0,
   confession: "…처음 본 사람 아닙니다. 2층 사는 동생이랑 짰습니다. 정비소 리모델링 대출 이자가 밀려서요. 한 번만 하자고 한 게…",
+  deny: { say: "모르는 사람이라니까요. 사고 나고 명함 주고받은 게 다예요.", proof: ["e2", "e4"] },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "피고인은 사고 전까지 상대 운전자와 전혀 모르는 사이였다", value: 2 },
@@ -6221,6 +6267,7 @@ window.CASES.push(
   lieIndex: 1,
   touchIndex: 0,
   confession: "…재계약 끝나고 대표가 고맙다고 봉투를 줬어요. 감사 들어온다길래 차용증을 급히 만들고 오백을 보냈습니다.",
+  deny: { say: "차용증 그때 바로 쓴 거 맞습니다. 빌린 돈이에요.", proof: ["e2", "e3"], fail: "그거하고 차용증은 상관없습니다. 빌린 돈 맞아요." },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "재계약은 돈이 오가기 전에 위원회 채점으로 이미 정해져 있었으므로 부정한 청탁의 대가가 될 수 없다", value: 2 },
@@ -6340,6 +6387,7 @@ window.CASES.push(
   lieIndex: null,
   touchIndex: null,
   confession: "…다음 선거에 나가려고 모임을 꾸리고 있었소. 그게 알려지면 선거 때문에 조합장 흠집 낸 걸로 볼까 봐 말을 안 했소.",
+  deny: { say: "선거는 무슨. 나는 조합 바로잡자는 것뿐이오.", proof: ["e2"], fail: "그런 걸 들이밀어도 내 말은 같소." },
   confessionCard: { id: "k", name: "모임 회의록", desc: "출마 준비와 별개로, 감사보고서 공개 직후 조합원 총의로 해명 요구를 정했다는 회의록", value: 1 },
   arguments: [
     { id: "a1", text: "현수막 내용은 감사보고서에 근거한 진실이다", value: 2 },
@@ -6380,6 +6428,7 @@ window.CASES.push(
   lieIndex: 2,
   touchIndex: 0,
   confession: "…제가 넣었어요. 아이템 몇 개 팔면 용돈 되겠다 싶어서요. 압수 다음 날 깨끗한 버전으로 저장소를 새로 만들었어요.",
+  deny: { say: "제 원본은 깨끗해요. 저장소 들어가 보시면 다 나와요.", proof: ["e1", "e2"] },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "제3자가 원본 파일을 받아 악성 코드를 덧붙여 퍼뜨린 것이다", value: 2 },
@@ -6460,6 +6509,7 @@ window.CASES.push(
   lieIndex: null,
   touchIndex: null,
   confession: "…세금 줄일라꼬 급여 절반만 신고했어예. 그거 말하면 세무서까지 일이 커질까 봐서…",
+  deny: { say: "신고는 세무사가 다 알아서 했다 안 캤습니꺼. 내는 모르는 일이라예.", proof: ["e2"], fail: "그기 뭐 어쨌다꼬예. 돈은 다 줬심더." },
   confessionCard: { id: "k", name: "미신고 급여 인정", desc: "신고 안 한 현금 급여를 인정하고 수정신고 접수증과 출금 내역을 함께 제출", value: 1 },
   arguments: [
     { id: "a1", text: "피고인은 직원들에게 매달 현금으로 급여를 모두 지급했다", value: 2 },
@@ -6541,6 +6591,7 @@ window.CASES.push(
   lieIndex: 0,
   touchIndex: 0,
   confession: "…알았어요. 개당 팔천 원짜리가 정품일 리가 없잖아요. 미러급이라고 손님들한테도 귓속말로 팔았어요.",
+  deny: { say: "정품인 줄 알았다니까요. 통관 서류도 다 있잖아요.", proof: ["e1", "e2"] },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "피고인은 정품 병행수입품인 줄 알았다", value: 2 },
@@ -6661,6 +6712,7 @@ window.CASES.push(
   lieIndex: 0,
   touchIndex: 0,
   confession: "…제가 지었습니다. 건물 사고 이 년 뒤에요. 전 주인한테 부탁해서 확인서를 받았고요.",
+  deny: { say: "살 때부터 있던 겁니다. 전 주인이 확인서까지 써 줬잖아요.", proof: ["e1", "e2"] },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "구조물은 6년 전 완공돼 공소시효 5년이 이미 지났다", value: 2 },
@@ -6787,6 +6839,7 @@ window.CASES.push(
   lieIndex: null,
   touchIndex: null,
   confession: "…이혼 한 달 전에 같이 붓던 적금 4천을 깨서 제 통장으로 옮겼어요. 그거 말하면 아파트 몫이 줄어들까 봐서요.",
+  deny: { say: "제 통장은 상관없어요. 혼자 챙긴 거 없어요.", proof: ["e3"] },
   confessionCard: { id: "k", name: "적금 해지 인정", desc: "가져간 4천만 원을 분할 대상에 넣어 정산", value: 1 },
   arguments: [
     { id: "a1", text: "아파트는 혼인 중 부부가 함께 모은 재산이니 절반씩 나눠야 한다", value: 2 },
@@ -6866,6 +6919,7 @@ window.CASES.push(
   lieIndex: 0,
   touchIndex: 1,
   confession: "…그놈이 때린 게 아닙니다. 팔은 그날 혼자 문턱에 걸려 넘어진 거예요. 제가 먼저 호적에서 파겠다고 하니 그놈이 소리를 지른 거고요.",
+  deny: { say: "그놈이 손을 댄 거 맞습니다. 내가 왜 거짓말을 해요.", proof: ["e1"], fail: "그게 뭐 어쨌다는 겁니까. 그놈 짓 맞아요." },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "피고가 양부인 원고를 때리고 폭언했으니 학대를 이유로 파양해야 한다", value: 2 },
@@ -6986,6 +7040,7 @@ window.CASES.push(
   lieIndex: 1,
   touchIndex: 2,
   confession: "…장례 끝나고 집 정리할 때 대부업체 독촉장 봤어요. 금방 정리하면 되겠지 하고 미뤘죠. 그게 8개월 전이에요.",
+  deny: { say: "정말 몰랐어요. 우편물은 다 광고지였다니까요.", proof: ["e2"] },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "피고는 소장을 받고서야 빚을 알았으니 특별한정승인은 기한 안에 한 것이다", value: 2 },
@@ -7105,6 +7160,7 @@ window.CASES.push(
   lieIndex: 2,
   touchIndex: 0,
   confession: "…주소가 비어 있었어요. 그럼 무효라길래 제가 할머니 글씨 흉내 내서 써 넣었어요. 나머진 진짜 할머니가 쓰신 거예요.",
+  deny: { say: "할머니가 다 쓰신 거예요. 제가 거기 무슨 손을 대요.", proof: ["e1"], fail: "그런 건 상관없어요. 할머니가 쓰신 거예요." },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "망인이 생전에 통장을 맡기며 사후에 주겠다고 했고 원고가 이를 받아들였으니 사인증여다", value: 2 },
@@ -7584,6 +7640,7 @@ window.CASES.push(
   lieIndex: 1,
   touchIndex: 0,
   confession: "…요원이 와서 찬성에 동그라미 치라길래 했어요. 그땐 액수를 잘 몰랐어요. 이제 와서 보니 기가 막혀서.",
+  deny: { say: "사인 안 했어요. 요원이 왔어도 저는 안 했다니까요.", proof: ["e4"] },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "원고는 총회 소집 통지를 받지 못해 의결권을 행사할 수 없었다", value: 2 },
@@ -7704,6 +7761,7 @@ window.CASES.push(
   lieIndex: 2,
   touchIndex: 2,
   confession: "…처음엔 깨끗했어요. 겨울에 창문 닫고 빨래 널다 보니 생긴 거예요. 여자친구랑 살려고 빨리 빼고 싶었고요.",
+  deny: { say: "입주 날부터 있었어요. 들어가자마자 냄새가 났다니까요.", proof: ["e1", "e4"] },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "입주 첫날부터 곰팡이가 핀 방이니 계약을 해제하고 낸 돈을 전부 돌려받아야 한다", value: 2 },
@@ -7875,6 +7933,7 @@ window.CASES.push(
   lieIndex: 0,
   touchIndex: 1,
   confession: "…사출기가 3월 중순에 퍼져서 부품 오는 데 열흘 걸렸습니다. 도면 메일은 그 뒤에 온 거고요. 기계 탓이라 하면 지체상금 꼼짝없이 다 무니까요.",
+  deny: { say: "도면 바뀐 게 먼저라니까요. 기계는 멀쩡했고요.", proof: ["e2", "e3"], fail: "그건 그거고요. 늦은 건 도면 때문입니다." },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "납기가 늦어진 것은 원고의 도면 변경 때문이다", value: 2 },
@@ -7959,6 +8018,7 @@ window.CASES.push(
   lieIndex: 1,
   touchIndex: 0,
   confession: "…기사 보고 샀어요. 신생 브랜드라 나중에 비싸게 팔릴 줄 알고요. 계획서는 소장 받고 만든 거예요.",
+  deny: { say: "제가 먼저 샀다니까요. 꽃집 하려고 사 둔 거예요.", proof: ["e1", "e2"] },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "도메인 이전에는 응하되, 쓰지도 않은 도메인이라 원고에게 생긴 손해는 없다", value: 2 },
@@ -8084,6 +8144,7 @@ window.CASES.push(
   lieIndex: 2,
   touchIndex: 2,
   confession: "…내린 건 아니에요. 인도로 달리다가 신호 바뀌기 전에 건너려고 그대로 들어갔어요. 친구는 소리만 들었고요.",
+  deny: { say: "진짜 내려서 끌고 갔어요. 친구도 봤다니까요.", proof: ["e2", "e3"], fail: "그거랑은 상관없어요. 끌고 건넜다니까요." },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "원고는 킥보드에서 내려 끌고 건너던 중 피고 차에 치였다", value: 2 },
@@ -8209,6 +8270,7 @@ window.CASES.push(
   lieIndex: 0,
   touchIndex: 0,
   confession: "…그날 바빠서 신분증 볼 정신이 없었어요. 사진은 다음 날 걔들 다시 불러서 찍은 거고요. 위조였다고 해야 면제된다길래.",
+  deny: { say: "확인했다니까요. 민지가 사진까지 찍어 놨잖아요.", proof: ["e2", "e3"] },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "원고는 위조 신분증에 속았으니 처분을 면해야 한다", value: 2 },
@@ -8250,6 +8312,7 @@ window.CASES.push(
   lieIndex: null,
   touchIndex: null,
   confession: "…경찰 양반한테 욕을 퍼붓고 20분을 버티다 불었소. 그거 말하믄 아예 감경이 안 된다 해서라.",
+  deny: { say: "아따, 언성 좀 높인 거지 욕은 안 했소.", proof: ["e3"], fail: "그런 거 갖고 뭘 그라요. 욕은 안 했다니께." },
   confessionCard: { id: "k", name: "사과문·경찰관 처벌불원서", desc: "다음 날 지구대에 찾아가 사과했고, 해당 경찰관이 문제 삼지 않겠다는 서면을 써 줬다.", value: 1 },
   arguments: [
     { id: "a1", text: "원고에게 운전은 생계 수단이라 면허 취소는 지나치게 가혹하다", value: 2 },
@@ -8375,6 +8438,7 @@ window.CASES.push(
   lieIndex: null,
   touchIndex: null,
   confession: "…퇴사자 자리 세 대에 크랙 버전이 깔려 있다는 보고는 받았어요. 바빠서 그냥 두라고 했죠. 그게 고의로 보일까 봐서요.",
+  deny: { say: "퇴사자 PC는 IT 담당이 알아서 한 거예요. 저는 몰랐어요.", proof: ["e3"] },
   confessionCard: { id: "k", name: "3대 인정·삭제 확인서", desc: "크랙 설치 3대는 인정하고 바로 지웠다는 업체 확인서. 나머지 25대는 정품·체험판이다.", value: 1 },
   arguments: [
     { id: "a1", text: "불법 설치는 3대뿐이라 손해도 그 3대분으로 한정된다", value: 1 },
@@ -8542,6 +8606,7 @@ window.CASES.push(
   lieIndex: 2,
   touchIndex: 0,
   confession: "…강연은 두세 번 했나. 나머지는 사진만 찍었어요. 다들 그렇게 받는 줄 알았고요.",
+  deny: { say: "매달 했다니까요. 사진도 다 있잖아요.", proof: ["e1", "e2"], fail: "그거랑은 상관없어요. 강연은 다 했습니다." },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "받은 돈은 모두 실제로 강연을 하고 받은 정당한 강연료다", value: 2 },
@@ -8667,6 +8732,7 @@ window.CASES.push(
   lieIndex: 0,
   touchIndex: 2,
   confession: "…서른 명 넘게 돈을 받아서 2%씩 떼고 보내 줬어요. 인보이스는 소환장 받고 거래처에 부탁해 만든 거예요.",
+  deny: { say: "다 제 물건값이에요. 인보이스 금액도 딱 맞잖아요.", proof: ["e1", "e2"] },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "보낸 돈은 모두 피고인의 무역 대금이다", value: 2 },
@@ -8881,6 +8947,7 @@ window.CASES.push(
   lieIndex: 1,
   touchIndex: 0,
   confession: "…3천 받았어요. 이자도 몇 달 줬고요. 다 갚을 형편이 안 돼서 안 받은 걸로 하면 될 줄 알았습니다.",
+  deny: { say: "받은 거 없다니까요. 통장 깨끗하잖아요.", proof: ["e2", "e3", "e4"], fail: "그거랑은 상관없어요. 한 푼도 안 받았습니다." },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "돈이 오가지 않은 가장 공정증서라 집행력이 없다", value: 2 },
@@ -8965,6 +9032,7 @@ window.CASES.push(
   lieIndex: 0,
   touchIndex: 0,
   confession: "…4년 전에 200 보냈어요. 사모님 계좌로요. 곧 갚겠다고 문자도 했고요. 그걸 말하면 시효가 안 끝난다길래요.",
+  deny: { say: "십 원 한 장 안 보냈다니까요. 통장 다 떼 왔잖아요.", proof: ["e3", "e4"] },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "원금은 다투지 않되, 3년 넘게 지난 이자는 단기 소멸시효로 소멸했다", value: 1 },
@@ -9089,6 +9157,7 @@ window.CASES.push(
   lieIndex: 2,
   touchIndex: 1,
   confession: "…알고 샀어요. 도로 난다는 소문 듣고요. 보상이 물 건너가니까 착오라고 하면 빠져나갈 줄 알았습니다.",
+  deny: { say: "알았으면 안 샀죠. 누가 집 못 짓는 땅을 삽니까.", proof: ["e3", "e4"] },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "피고는 건축 가능한 땅으로 잘못 알고 샀으니 착오를 이유로 계약을 취소한다", value: 2 },
@@ -9172,6 +9241,7 @@ window.CASES.push(
   lieIndex: null,
   touchIndex: null,
   confession: "…내가 먼저 재떨이를 던졌어. 맞진 않았고. 그 얘기 나오면 내 잘못이 될까 봐 말을 안 했지.",
+  deny: { say: "내가 손을 대긴 뭘 대. 그놈이 먼저 주먹을 휘둘렀다니까.", proof: ["e2"], fail: "그게 뭐. 때린 건 그놈이여." },
   confessionCard: { id: "k", name: "먼저 던진 사실 인정", desc: "재떨이를 먼저 던진 건 인정하고, 아들의 폭행이 따로 확정된 범죄임을 다툼", value: 1 },
   arguments: [
     { id: "a1", text: "피고가 부친을 폭행한 이상 증여는 처음부터 없던 일로 돌려야 한다", value: 2 },
@@ -9339,6 +9409,7 @@ window.CASES.push(
   lieIndex: 0,
   touchIndex: 0,
   confession: "…지을 때 그냥 쓰라고 했어요. 술자리에서요. 땅값 오르니까 10년 치를 다 받고 싶어서 몰랐다고 했습니다.",
+  deny: { say: "허락은 무슨요. 창고 지을 땐 가 보지도 않았다니까요.", proof: ["e3", "e4"] },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "피고는 허락 없이 10년을 썼으니 10년 치 사용료 6,000만 원을 내야 한다", value: 2 },
@@ -9464,6 +9535,7 @@ window.CASES.push(
   lieIndex: 2,
   touchIndex: 0,
   confession: "…제가 개통했어요. 폰 넘기면 현금 50 준다는 광고 보고요. 그 사람이 요금도 다 낸다고 했는데 연락이 끊겼어요.",
+  deny: { say: "진짜 제가 안 했어요. 신분증 잃어버렸다니까요.", proof: ["e3", "e4"], fail: "그건 모르겠고요. 저는 개통한 적 없어요." },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "명의도용으로 개통된 휴대폰이니 피고는 할부금과 요금을 낼 의무가 없다", value: 2 },
@@ -9589,6 +9661,7 @@ window.CASES.push(
   lieIndex: null,
   touchIndex: null,
   confession: "…빨리 끝내려고 3천 주겠다고 했어요. 그걸 유치권 인정한 걸로 칠까 봐 대화를 지웠습니다.",
+  deny: { say: "만나서 나가라고만 했어요. 돈 얘기는 저쪽이 꺼낸 거고요.", proof: ["e3"] },
   confessionCard: { id: "k", name: "합의금 제의 인정", desc: "3,000만 원 제의 사실을 밝히고, 분쟁을 끝내려는 양보였다고 설명", value: 1 },
   arguments: [
     { id: "a1", text: "피고는 낙찰자에게 받을 돈이 없으니 유치권을 주장할 수 없다", value: 2 },
@@ -9714,6 +9787,7 @@ window.CASES.push(
   lieIndex: 0,
   touchIndex: 0,
   confession: "…뒤에 냇물이 있어서 그 집은 우리 밭 아니면 못 나가. 20년 넘게 다닌 길이여. 포장한다니까 밭 뺏길까 봐 그랬지.",
+  deny: { say: "있다니까. 뒤로 돌면 바로 군도여.", proof: ["e3"], fail: "그건 그거고. 그 집은 딴 길로 나가믄 돼." },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "원고는 군도로 바로 나갈 수 있으니 통행권이 없다", value: 2 },
@@ -9886,6 +9960,7 @@ window.CASES.push(
   lieIndex: 0,
   touchIndex: 0,
   confession: "…1시에 친구 창고 가서 구리선 트럭에 싣는 것만 도와줬어요. 공사장엔 진짜 안 갔어요. 집에 있었다고 하면 아예 빠질 줄 알았죠.",
+  deny: { say: "걔가 뭘 했든 저는 집에서 게임만 했어요.", proof: ["e2", "e4"], fail: "그게 뭐요. 저는 집에 있었다니까요." },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "피고인은 그날 밤 집에서 게임을 하고 있었다", value: 2 },
@@ -10043,6 +10118,7 @@ window.CASES.push(
   lieIndex: 1,
   touchIndex: 1,
   confession: "…견적 두 장은 그 업체한테 같이 만들어 달라고 했습니다. 절차 맞추려고요. 공사비는 진짜 시세대로입니다.",
+  deny: { say: "세 군데 따로 받은 거예요. 제가 직접 전화 돌렸다니까요.", proof: ["e2"] },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "세 곳에서 견적을 받아 최저가 업체를 골랐으므로 절차상 문제가 없다", value: 2 },
@@ -10123,6 +10199,7 @@ window.CASES.push(
   lieIndex: 2,
   touchIndex: 1,
   confession: "…원금은 제가 책임진다고 했어요. 안 그러면 아무도 안 넣을 것 같아서요. 근데 진짜 다 아는 사람들이에요.",
+  deny: { say: "원금 얘기는 한 적 없다니까요. 투자는 위험하다고 늘 말했어요.", proof: ["e1", "e2"] },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "피고인은 원금 보장을 약속한 적이 없다", value: 2 },
@@ -10202,6 +10279,7 @@ window.CASES.push(
   lieIndex: 0,
   touchIndex: 1,
   confession: "…판마다 한 장씩 떼서 통에 넣었소. 월세가 밀려서. 그래도 내가 판을 깔자고 한 적은 없소.",
+  deny: { say: "한 푼도 안 뗐소. 다과는 내가 그냥 내놓은 거라니까.", proof: ["e1"], fail: "그게 뭐 어쨌다는 거요. 안 뗐소." },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "현금통과 수첩은 사후영장 없이 압수한 것이라 증거로 쓸 수 없다", value: 2 },
@@ -10320,6 +10398,7 @@ window.CASES.push(
   lieIndex: 1,
   touchIndex: 0,
   confession: "…열받아서 앞으로 들어가 꽉 밟았어요. 딱 한 번이요. 겁만 좀 주려고요.",
+  deny: { say: "급정거는 무슨요. 앞차가 서길래 저도 선 거라니까요.", proof: ["e1", "e2"] },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "피고인은 급정거하지 않고 차로를 따라 주행했을 뿐이다", value: 2 },
@@ -10518,6 +10597,7 @@ window.CASES.push(
   lieIndex: 2,
   touchIndex: 1,
   confession: "…봉투를 들고 나왔다가 감찰 얘기가 돈다길래 이틀 뒤에 돌려줬습니다. 동료한테는 그렇게 써 달라고 부탁했고요.",
+  deny: { say: "그 자리에서 돌려줬다니까요. 동료도 봤고요.", proof: ["e2", "e4"], fail: "그거랑은 상관없습니다. 바로 돌려줬어요." },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "피고인은 봉투를 받은 그 자리에서 바로 돌려줬다", value: 2 },
@@ -10755,6 +10835,7 @@ window.CASES.push(
   lieIndex: null,
   touchIndex: null,
   confession: "…사실 1년 넘게 한 달에 두 번씩 그 요양원에 약을 들고 갔습니다. 그거 말하면 영업한 걸로 보일까 봐요.",
+  deny: { say: "그날 한 번 갖다 드린 거예요. 따로 그런 적은 없습니다.", proof: ["e3"] },
   confessionCard: { id: "k", name: "복약지도 요청서", desc: "요양원 담당 의사가 거동 불가 환자들의 방문 복약지도를 약국에 정식 요청한 문서", value: 1 },
   arguments: [
     { id: "a1", text: "약사가 직접 전달하며 복약지도를 해 약국 밖 판매로 볼 수 없다", value: 2 },
@@ -10795,6 +10876,7 @@ window.CASES.push(
   lieIndex: 1,
   touchIndex: 2,
   confession: "…통지서는 받았어요. 엄마 수술이랑 겹쳐서 그냥 서랍에 넣어 뒀어요. 못 받았다고 하면 넘어갈 줄 알았어요.",
+  deny: { say: "진짜 못 받았어요. 집주인이 버렸다니까요.", proof: ["e1", "e3"] },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "피고인은 통지서를 받지 못해 입영일을 알 수 없었다", value: 2 },
@@ -10882,6 +10964,7 @@ window.CASES.push(
   lieIndex: null,
   touchIndex: null,
   confession: "…부산 간 게 사실은 남편이랑 못 살겠어서였어요. 9년을 따로 살았어요. 그거 알면 연금 못 받을까 봐요.",
+  deny: { say: "따로 살긴요. 딸네 가서 손주 봐 준 거라니까요.", proof: ["e4"], fail: "그게 뭐요. 손주 봐 주러 간 거예요." },
   confessionCard: { id: "k", name: "별거 기간 인정", desc: "9년 별거를 빼고 실제 함께 산 기간만큼 연금 분할 청구", value: 1 },
   arguments: [
     { id: "a1", text: "원고는 38년 혼인 기간 내내 가사로 기여했으므로 연금을 절반씩 나눠야 한다", value: 2 },
@@ -10966,6 +11049,7 @@ window.CASES.push(
   lieIndex: 0,
   touchIndex: 0,
   confession: "…사실 방에서 피웠어요. 창문 열고요. 탄 자국도 제가 낸 거예요. 사진은 나가기 전에 찍었어요.",
+  deny: { say: "진짜 안 피웠어요. 그 자국은 처음부터 있었다니까요.", proof: ["e3"] },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "장판의 탄 자국은 입주 전부터 있었으므로 공제는 부당하다", value: 2 },
@@ -11259,6 +11343,7 @@ window.CASES.push(
   lieIndex: 1,
   touchIndex: 2,
   confession: "…그날 제가 모시고 나갔어요. 차에 태우다 문에 팔을 찧으셨어요. 요양원 탓으로 돌리면 제 속이 좀 편할 것 같았어요.",
+  deny: { say: "그 주말엔 안 나갔다니까요. 쭉 요양원에 계셨어요.", proof: ["e3", "e4"] },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "요양보호사가 원고의 어머니를 거칠게 다뤄 멍이 들었다", value: 2 },
@@ -11301,6 +11386,7 @@ window.CASES.push(
   lieIndex: null,
   touchIndex: null,
   confession: "…문짝이랑 벽지 값으로 400을 떼고 보냈어요. 그쪽이 부순 건지 증거는 없어요.",
+  deny: { say: "다 줬다니까요. 2억 그대로요.", proof: ["e2"], fail: "그거랑 무슨 상관이에요. 다 줬어요." },
   confessionCard: { id: "k", name: "공제 사실 인정", desc: "뗀 400만 원을 공탁해 반환을 마무리", value: 1 },
   arguments: [
     { id: "a1", text: "피고는 이미 이사를 나가 전세권을 유지할 이익이 없다", value: 2 },
@@ -11385,6 +11471,7 @@ window.CASES.push(
   lieIndex: 0,
   touchIndex: 0,
   confession: "…작년에 욕실 리모델링 했어요. 관리소엔 말 안 하고요. 업자가 배관도 좀 건드렸을 거예요.",
+  deny: { say: "공사는 무슨요. 입주하고 손 하나 안 댔어요.", proof: ["e3", "e4"] },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "누수는 공용 수직배관이 터져 생긴 것이므로 관리주체가 배상해야 한다", value: 2 },
@@ -11511,6 +11598,7 @@ window.CASES.push(
   lieIndex: 2,
   touchIndex: 1,
   confession: "…4천은 주식에 넣었어요. 반토막 났고요. 남편이 알면 저 혼자 다 떠안을 것 같아서요.",
+  deny: { say: "다 생활비로 썼다니까요. 가계부에도 다 있잖아요.", proof: ["e3", "e4"], fail: "그게 뭐요. 생활비로 썼다니까요." },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "대출금 중 학원비·관리비로 나간 1천만 원만큼은 부부 공동채무로 나눠야 한다", value: 2 },
@@ -11763,6 +11851,7 @@ window.CASES.push(
   lieIndex: 0,
   touchIndex: null,
   confession: "…네 번 만났어요. 다 마음에 안 들었어요. 0번이라고 해야 다 돌려받을 것 같아서요.",
+  deny: { say: "한 번도 못 만났다니까요. 프로필만 받다 말았어요.", proof: ["e3", "e4"] },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "피고는 단 한 번도 소개를 하지 않았으므로 전액 환불해야 한다", value: 2 },
@@ -11889,6 +11978,7 @@ window.CASES.push(
   lieIndex: 2,
   touchIndex: 0,
   confession: "…식당은 아내 이름으로 돌려놓고 제가 그대로 해요. 수입이 끊긴 건 아니에요. 양육비가 버거워서요.",
+  deny: { say: "식당은 접었다니까요. 지금은 일용직 나가요.", proof: ["e3", "e4"] },
   confessionCard: null,
   arguments: [
     { id: "a1", text: "첫째가 성년이 되어 입대했으므로 첫째 몫 양육비는 종료돼야 한다", value: 2 },
@@ -11976,6 +12066,7 @@ window.CASES.push(
   suspicions: ["공동창업자를 업무에서 일부러 뺐다", "공동창업자 급여를 몇 달 밀렸다", "투자사와 지분을 따로 약속했다"],
   hiddenIndex: 1,
   confession: "…투자 받기 전 석 달은 걔 월급을 못 줬어요. 나중에 다 주긴 했는데, 그 얘기 하면 회사 때문에 나간 걸로 보일까 봐요.",
+  deny: { say: "월급은 다 줬어요. 걔는 대기업 간다고 나간 거예요.", proof: ["e3"] },
   confessionCard: { id: "k", name: "체불 급여 완납 내역·이직 제안 메일", desc: "보류한 석 달 치는 퇴사 전에 모두 지급했다. 대기업 제안 메일은 급여 보류보다 먼저 온 것이다.", value: 1 },
   lies: ["공동창업자가 대기업으로 옮겼다는 말", "공동창업자가 사직서를 직접 썼다는 말", "공동창업자의 자본금이 300만 원이라는 말"],
   lieIndex: null,
@@ -12018,6 +12109,7 @@ window.CASES.push(
   suspicions: ["납품 뒤 회사와 추가 조건을 협의했다", "캐릭터를 다른 회사에도 팔았다", "다른 작가 그림을 참고해 그렸다"],
   hiddenIndex: null,
   confession: "…두 달 뒤에 200 더 받고 캐릭터 권리를 다 넘기기로 했어요. 이모티콘이 이렇게 대박 날 줄 몰랐죠. 억울해서요.",
+  deny: { say: "150 말고는 진짜 받은 거 없어요. 파일 넘기고 끝이었다니까요.", proof: ["e2", "e4"], fail: "그건 상관없어요. 150 받은 게 다예요." },
   confessionCard: null,
   lies: ["로고 대금 150만 원 말고는 받은 돈이 없다는 말", "굿즈 어디에도 작가 이름이 없다는 말", "캐릭터를 직접 처음 그렸다는 말"],
   lieIndex: 0,
@@ -12185,6 +12277,7 @@ window.CASES.push(
   suspicions: ["사고 전날 모르는 사람과 오래 통화했다", "통장을 다른 사람에게 빌려준 적이 있다", "은행 앱 비밀번호를 가족과 같이 썼다"],
   hiddenIndex: null,
   confession: "…그날 밤 검찰 수사관이라는 사람이랑 한참 통화했어요. 내 계좌가 범죄에 쓰였다길래 시키는 대로 인증번호를 불러 줬지. 그 말 하면 은행이 한 푼도 안 물어 줄까 봐.",
+  deny: { say: "전화 한 통 안 왔다니까. 그날 일찍 잤어요.", proof: ["e2", "e3"] },
   confessionCard: null,
   lies: ["새벽 2시 넘어 돈이 빠져나갔다는 말", "사고 전날 이상한 전화나 문자가 없었다는 말", "은행이 본인 인증을 다 거쳤다고 했다는 말"],
   lieIndex: 1,
@@ -12268,6 +12361,7 @@ window.CASES.push(
   suspicions: ["같은 노트북을 다른 앱에 다시 팔려고 내놨다", "받고 며칠 쓴 뒤에 문제를 발견했다", "판매자와 가격을 깎는 문제로 다퉜다"],
   hiddenIndex: null,
   confession: "…사흘은 멀쩡히 썼어요. 카페에서 떨어뜨린 거고요. 자동확정 기한이 남아 있길래 처음부터 깨져 왔다고 하면 될 줄 알았어요.",
+  deny: { say: "받자마자 뜯었다니까요. 그때부터 금 가 있었어요.", proof: ["e3", "e4"] },
   confessionCard: null,
   lies: ["안전결제로 280만 원을 냈다는 말", "구매확정을 직접 누르지 않았다는 말", "택배를 받자마자 뜯어 금 간 걸 봤다는 말"],
   lieIndex: 2,
@@ -12435,6 +12529,7 @@ window.CASES.push(
   suspicions: ["옆 땅 주인과 경계 다툼이 있었다", "상가가 아니라 다른 용도로 지으려 했다", "승낙서 일부를 대신 써서 냈다"],
   hiddenIndex: null,
   confession: "…두 집만 도장 받았어요. 나머지는 연락이 안 돼서 제가 막도장을 팠고요. 30년 다닌 길인데 설마 문제 삼을까 했죠.",
+  deny: { say: "다섯 집 다 돌아서 도장 받았다니까요.", proof: ["e2", "e4"], fail: "그건 구청 트집이고요. 도장은 다 받았어요." },
   confessionCard: null,
   lies: ["길 땅 주인 다섯 명에게 승낙을 다 받았다는 말", "그 길이 30년 동안 동네 통행로였다는 말", "마을에서 돈을 걷어 길을 포장했다는 말"],
   lieIndex: 0,
@@ -12642,6 +12737,7 @@ window.CASES.push(
   suspicions: ["반품될 줄 알면서 연말에 출고했다", "대표의 분식 지시 메일을 받았다", "매출 목표에 걸린 거액 성과급을 받았다"],
   hiddenIndex: 2,
   confession: "…매출 목표를 넘기면 성과급 1억 2천이 나오는 조건이었어요. 그 말 하면 그것 때문에 숫자를 만졌다고 볼까 봐서요. 그 돈은 기소되고 나서 회사에 돌려줬습니다.",
+  deny: { say: "성과급은 임원이면 다 받는 거예요. 매출하고는 상관없습니다.", proof: ["e3"] },
   confessionCard: { id: "k", name: "성과급 반납 확인서·임원 공통 기준표", desc: "성과급은 임원 전원에게 같은 기준이었고, 의뢰인은 기소 직후 전액 반납했다.", value: 1 },
   lies: ["매출 일부가 다음 해 반품됐다는 말", "감사인이 적정 의견을 줬다는 말", "대표의 매출 압박이 있었다는 말"],
   lieIndex: null,
@@ -12726,6 +12822,7 @@ window.CASES.push(
   suspicions: ["업계 모임에서 가격 정보를 주고받았다", "회사 대표 지시로 모임에 나갔다", "다른 업체 임원과 따로 골프를 쳤다"],
   hiddenIndex: null,
   confession: "…그날 강남 모임에 갔습니다. 밥값도 제가 냈고요. 언제 올릴 거냐는 얘기는 오갔는데 딱 정한 건 없었어요. 출장 보고서는 나중에 만들었습니다.",
+  deny: { say: "그날은 대전에 있었다니까요. 출장 보고서도 있잖아요.", proof: ["e1", "e2"] },
   confessionCard: null,
   lies: ["시멘트값이 올라 단가를 올렸다는 말", "그날 대전 출장 중이라 모임에 가지 않았다는 말", "협회 행사에서나 다른 업체 사람들을 본다는 말"],
   lieIndex: 1,
@@ -12893,6 +12990,7 @@ window.CASES.push(
   suspicions: ["OEM 공장이 원료를 바꿔 넣었다", "단골에게 당뇨약 대신 먹으라며 팔았다", "판매 매출을 줄여 신고했다"],
   hiddenIndex: null,
   confession: "…그 제품은 그냥 일반 식품이에요. 원료가 인정받은 거라 똑같은 줄 알고 그 인정서를 가져다 썼어요.",
+  deny: { say: "인정받은 거 맞다니까요. 인정서도 있잖아요.", proof: ["e1", "e2"], fail: "그건 모르겠고요. 인정은 받았어요." },
   confessionCard: null,
   lies: ["제품이 식약처 기능성 인정을 받았다는 말", "온라인 광고는 위탁판매 업체가 만든다는 말", "충북 공장에 OEM으로 맡긴다는 말"],
   lieIndex: 0,
@@ -13099,6 +13197,7 @@ BY_ID[TUT_ID] = {
   suspicions: ["이미 일부를 돌려받았다", "빌려준 게 아니라 같이 투자한 돈이다", "동창에게 따로 갚을 돈이 있다"],
   hiddenIndex: 0,
   confession: "…작년 6월에 200은 받았어요. 그거 말하면 괜히 다 받은 걸로 칠까 봐요.",
+  deny: { say: "받은 돈이요? 없다니까요. 한 푼도 안 갚았어요.", proof: ["e2"], fail: "그게 무슨 상관이에요. 받은 거 없어요." },
   confessionCard: { id: "k", name: "일부 변제 인정", desc: "받은 200만 원을 빼고 300만 원만 청구", value: 1 },
   lies: ["차용증을 받아 놨다", "작년 3월 말까지 갚기로 했다", "동창이 전화를 안 받는다"],
   lieIndex: null, touchIndex: null,
@@ -13658,10 +13757,15 @@ function evCard(e, opts = {}) {
   </button>`;
 }
 
+const consultTalk = c => [`<div class="bubble">${esc(c.opening)}</div>`]
+  .concat(C.asked.map(i => `<div class="me-row"><div class="bubble me">${esc(c.questions[i].q)}</div><div class="ava me-ava"><img src="${heroOf().img}" alt=""></div></div><div class="bubble">${esc(c.questions[i].a)}</div>`)).join("");
+// 판단·추궁 화면에 붙이는 자료: 대화 기록(기록 탭에서만 보임)과 증거(증거 탭 서랍)
+const caseRefs = () => `<div class="talk refs-talk">${consultTalk(C.c)}</div>
+    <div class="stack"><div class="section-head"><span class="eyebrow">가져온 증거 ${C.c.evidence.length}건</span></div>
+      <div class="evlist">${C.c.evidence.map(e => evCard(e, { open: C.opened[e.id] })).join("")}</div></div>`;
 function screenConsult() {
   const c = C.c, left = (has("assoc") ? 4 : 3) - C.asked.length;
-  const talk = [`<div class="bubble">${esc(c.opening)}</div>`]
-    .concat(C.asked.map(i => `<div class="me-row"><div class="bubble me">${esc(c.questions[i].q)}</div><div class="ava me-ava"><img src="${heroOf().img}" alt=""></div></div><div class="bubble">${esc(c.questions[i].a)}</div>`)).join("");
+  const talk = consultTalk(c);
   const qs = c.questions.map((q, i) => C.asked.includes(i) ? "" :
     `<button class="btn" data-q="${i}" ${left <= 0 ? "disabled" : ""}>${esc(q.q)}</button>`).join("");
   show(`${clientCard(c)}
@@ -13705,7 +13809,8 @@ function screenJudge() {
       <button class="btn" data-v="hiding">숨기는 게 있다</button>
       <button class="btn" data-v="liar">거짓말을 하고 있다</button>
     </div>
-    <button class="btn ghost" id="back">상담으로 돌아가기</button>`);
+    <button class="btn ghost" id="back">상담으로 돌아가기</button>
+    ${caseRefs()}`);
   on("[data-v]", e => {
     const v = e.currentTarget.dataset.v;
     if (v === "hiding") return screenSuspect();
@@ -13722,7 +13827,8 @@ function screenSuspect() {
   show(`${clientCard(c)}
     <div><div class="eyebrow">숨기는 게 있다</div><h2>무엇을 숨기고 있나</h2></div>
     <div class="stack">${C.suspOrder.map(i => `<button class="btn" data-s="${i}">${esc(c.suspicions[i])}</button>`).join("")}</div>
-    <button class="btn ghost" id="back">다시 생각하기</button>`);
+    <button class="btn ghost" id="back">다시 생각하기</button>
+    ${caseRefs()}`);
   on("[data-s]", e => { C.verdict = "hiding"; C.susp = +e.currentTarget.dataset.s; react(); });
   on("#back", screenJudge);
   tutSet(() => ({ t: "의뢰인이 말하지 않은 사실을 고르자.", sel: "[data-s]" }));
@@ -13734,7 +13840,8 @@ function screenLie() {
   show(`${clientCard(c)}
     <div><div class="eyebrow">거짓말을 하고 있다</div><h2>무엇이 거짓말인가</h2></div>
     <div class="stack">${C.lieOrder.map(i => `<button class="btn" data-l="${i}">${esc(lies[i])}</button>`).join("")}</div>
-    <button class="btn ghost" id="back">다시 생각하기</button>`);
+    <button class="btn ghost" id="back">다시 생각하기</button>
+    ${caseRefs()}`);
   on("[data-l]", e => { C.verdict = "liar"; C.lie = +e.currentTarget.dataset.l; react(); });
   on("#back", screenJudge);
   tutSet(() => ({ t: "이 의뢰인은 거짓말을 한 건 아니다. <b>다시 생각하기</b>.", sel: "#back" }));
@@ -13748,49 +13855,86 @@ const LINES = {
   rattled: ["그, 그건… 아니에요. 제가 말씀드린 게 맞다니까요.", "네? 그, 그게 왜요… 그런 거 없어요.", "…아, 아니 그건요. 아무튼 제 말이 맞아요."],
   hideMiss: ["네? 그건 전혀 아닌데요.", "음… 그런 일은 없었어요.", "그건 아니에요. 정말로요."],
   lieMiss: ["무슨 말씀이세요? 그건 진짜 그랬다니까요.", "그 부분은 정말 그랬어요. 증거도 있잖아요.", "그건 거짓말 아니에요. 확인해 보셔도 돼요."],
+  denyHold: ["그게 이거랑 무슨 상관이에요?", "그건 다른 얘기잖아요. 아니라니까요.", "그걸로 뭘 어쩌시려고요. 아니에요."],
   honestHurt: ["없어요. …뭐, 변호사님이니까 확인하시는 거겠죠.", "숨긴 거 없어요. 좀 서운하네요.", "…없어요. 제가 그렇게 보이나요?"]
 };
+// 정확히 짚었을 때: deny 가 있는 의뢰인은 한 번 발뺌하고, 맞는 증거를 들이밀어야 인정한다
+function caught(kind) {
+  const c = C.c;
+  const apply = (say, note) => {
+    C.confessed = true; if (kind === "card") C.card = true; else C.flagged = true;
+    C.reaction = { say, note }; C.fxOnce = true; screenFee();
+  };
+  if (!c.deny) return apply(c.confession, kind === "card" ? "숨긴 사실을 알아냈습니다." : "거짓을 간파했습니다.");
+  screenDeny(kind, apply);
+}
+function screenDeny(kind, apply) {
+  const c = C.c;
+  show(`${clientCard(c)}
+    <div class="talk"><div class="bubble">${esc(c.deny.say)}</div><div class="bubble sys">의심스럽다. 증거를 들이밀며 추궁해 볼까?</div></div>
+    <div class="stack"><button class="btn" id="press">증거를 들이밀며 추궁한다</button><button class="btn ghost" id="letgo">그냥 넘어간다</button></div>
+    ${caseRefs()}`);
+  on("#press", () => screenProof(kind, apply));
+  on("#letgo", () => { C.reaction = { say: c.deny.say, note: "더 캐묻지 않았습니다." }; C.fxOnce = true; screenFee(); });
+  tutSet(() => ({ t: "발뺌한다. 통장 거래내역을 보여 주며 따져 보자. <b>추궁한다</b>.", sel: "#press" }));
+}
+function screenProof(kind, apply) {
+  const c = C.c;
+  show(`${clientCard(c)}
+    <div class="talk"><div class="bubble">${esc(c.deny.say)}</div></div>
+    <div><div class="eyebrow">추궁</div><h2>어떤 증거를 내밀까</h2></div>
+    <div class="stack proof"><div class="evlist">${c.evidence.map(e => `<button class="ev" data-pf="${esc(e.id)}"><div class="ev-name">${evIcon(e)}${esc(e.name)}</div><div class="ev-desc">${esc(e.desc)}</div><div class="ev-detail">${esc(e.detail)}</div></button>`).join("")}</div></div>
+    <button class="btn ghost" id="back">다시 생각하기</button>`);
+  on("[data-pf]", e => {
+    const id = e.currentTarget.dataset.pf;
+    if ((c.deny.proof || []).includes(id)) return apply(c.confession, "증거를 들이밀자 털어놓았습니다.");
+    C.reaction = { say: c.deny.fail || pick(LINES.denyHold), note: "의뢰인은 끝까지 부인합니다." }; C.fxOnce = true; screenFee();
+  });
+  on("#back", () => screenDeny(kind, apply));
+  tutSet(() => ({ t: "작년 6월에 200만 원이 들어온 기록이 있었다. 그 증거를 고르자.", sel: '[data-pf="e2"]' }));
+}
 function react() {
   const c = C.c, t = c.truth, v = C.verdict;
   const offended = () => Math.random() < 0.5;
+  // 숨기거나 거짓말한 의뢰인도 엉뚱하게 짚으면 가끔 화난 척하며 떠난다(명성 손해·소문은 없음)
+  const fakeLeave = () => c.id !== TUT_ID && Math.random() < 0.12;
+  const storm = line => { C.left = true; C.penalty = 0; say = line; note = "의뢰인이 화를 내며 나갔습니다."; };
   let say = "", note = "";
   if (v === "honest") {
     say = "감사합니다, 변호사님. 잘 부탁드립니다.";
   } else if (v === "hiding") {
     if (t === "hiding" && C.susp === c.hiddenIndex) {
-      C.confessed = true; C.card = true; say = c.confession;
-      note = "숨긴 사실을 알아냈습니다.";
+      return caught("card");
     } else if (t === "honest") {
       if (offended()) { C.left = true; C.penalty = 1; say = "그런 거 없습니다. 저를 못 믿으시면 다른 데 가 보겠습니다."; note = "의뢰인이 기분이 상해 떠났습니다. 명성 −1 · 나쁜 소문이 돌아 다음 달 손님이 줄어듭니다."; }
       else { say = pick(LINES.honestHurt); note = "의뢰인이 언짢아하지만 남았습니다."; }
     } else if (t === "hiding") {
       // 짚은 곳이 빗나가도 가끔은 멈칫해서 헷갈리게 한다
-      say = Math.random() < 0.3 ? pick(LINES.annoyed) : pick(LINES.hideMiss); note = "짚은 곳이 빗나갔습니다.";
+      if (fakeLeave()) storm("그런 걸 왜 자꾸 물으세요? 다른 데 알아보겠습니다.");
+      else { say = Math.random() < 0.3 ? pick(LINES.annoyed) : pick(LINES.hideMiss); note = "짚은 곳이 빗나갔습니다."; }
     } else if (c.mirror != null && C.susp === c.mirror) {
       // 거짓 의뢰인이라도 거짓말 뒤의 사실을 숨김으로 짚으면 털어놓는다 → 털어놓은 사실 카드
-      C.confessed = true; C.card = true; say = c.confession;
-      note = "숨긴 사실을 알아냈습니다.";
+      return caught("card");
     } else {
       // 거짓 의뢰인: 거짓말과 맞닿은 곳을 짚으면 당황한다(털어놓지는 않음)
       if (c.touchIndex != null && C.susp === c.touchIndex) { say = pick(LINES.rattled); note = "의뢰인이 눈에 띄게 당황합니다."; }
+      else if (fakeLeave()) storm("그런 걸 왜 자꾸 물으세요? 다른 데 알아보겠습니다.");
       else { say = Math.random() < 0.4 ? pick(LINES.annoyed) : pick(LINES.calm); note = "의뢰인은 부인합니다."; }
     }
   } else {
     if (t === "liar" && C.lie === c.lieIndex) {
-      C.confessed = true; C.flagged = true; say = c.confession;
-      note = "거짓을 간파했습니다.";
+      return caught("flag");
     } else if (t === "hiding" && c.mirror != null && C.lie === c.mirror) {
       // 숨긴 사실을 덮은 말을 거짓으로 짚으면 털어놓는다 → 위험한 증거 표시
-      C.confessed = true; C.flagged = true; say = c.confession;
-      note = "거짓을 간파했습니다.";
+      return caught("flag");
     } else if (t === "liar") {
-      say = Math.random() < 0.5 ? pick(LINES.lieMiss) : pick(LINES.annoyed); note = "의뢰인은 버팁니다.";
+      if (fakeLeave()) storm("거짓말이라니요! 이런 대접 받으려고 온 거 아닙니다.");
+      else { say = Math.random() < 0.5 ? pick(LINES.lieMiss) : pick(LINES.annoyed); note = "의뢰인은 버팁니다."; }
     } else if (t === "honest") {
       C.left = true; C.penalty = 3; say = "제가 거짓말쟁이라고요? 다른 변호사 찾아가겠습니다.";
       note = "의뢰인이 화를 내며 나갔습니다. 명성 −3 · 나쁜 소문이 돌아 다음 달 손님이 줄어듭니다.";
-    } else if (offended()) {
-      C.left = true; C.penalty = 1; say = "거짓말이라니요! 이런 대접 받으려고 온 거 아닙니다.";
-      note = "의뢰인이 기분이 상해 떠났습니다. 명성 −1 · 나쁜 소문이 돌아 다음 달 손님이 줄어듭니다.";
+    } else if (fakeLeave()) {
+      storm("거짓말이라니요! 이런 대접 받으려고 온 거 아닙니다.");
     } else {
       say = "거짓말이라니요! …그 말은 사실이에요. 뭐, 말 안 한 게 조금 있을 수는 있지만요."; note = "의뢰인이 언짢아하지만 남았습니다.";
     }
@@ -14437,7 +14581,7 @@ function show(html, dockHtml, scene = "office", track) {
     while (first.nextSibling) bottom.appendChild(first.nextSibling);
     app.appendChild(bottom);
     // 상담 중 증거 목록은 서랍으로 뺀다
-    const evStack = [...bottom.querySelectorAll(".stack")].find(s => s.querySelector(".evlist") && !s.querySelector(".pick"));
+    const evStack = [...bottom.querySelectorAll(".stack")].find(s => s.querySelector(".evlist") && !s.querySelector(".pick") && !s.classList.contains("proof"));
     if (evStack) {
       evStack.classList.add("ev-drawer"); app.appendChild(evStack);
       // 증거 카드는 그 자리에서만 펼치고 접는다(화면 전체를 다시 그리지 않음)
