@@ -13971,7 +13971,7 @@ function runTrial() {
       const ids = cs.filter(id => C.sub.has(id) || id === C.arg);
       const evNames = ids.filter(id => id !== "k" && id !== C.arg).map(id => (c.evidence.find(e => e.id === id) || {}).name).filter(Boolean);
       const lines = [];
-      if (ids.includes("k")) lines.push(`그 점은 저희가 먼저 밝힙니다. 「${c.confessionCard.name}」입니다.`);
+      if (ids.includes("k")) lines.push(`그 점은 저희가 먼저 밝힌 부분입니다. 「${c.confessionCard.name}」입니다.`);
       if (evNames.length) lines.push(`우리 측 증거 ${evNames.map(n => `「${n}」`).join(", ")}${josaEul(evNames[evNames.length - 1])} 보십시오.`);
       if (ids.includes(C.arg)) { const t = c.arguments.find(a => a.id === C.arg).text; lines.push(/[.!?]$/.test(t) ? t : t + "."); }
       steps.push({ img: heroOf().img, cls: "ours rebut", who: "우리 측 반론", text: `이의 있습니다! ${lines.join(" ")}`, d: 0, dTxt: "막아냄" });
