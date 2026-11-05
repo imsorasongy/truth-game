@@ -14009,28 +14009,14 @@ function sfx(kind) {
     tone("sine", 140, 45, 0.35, 0.6); tone("triangle", 90, 40, 0.3, 0.3);
   } catch (e) {}
 }
-// 판결 직전: 판사 얼굴을 크게 띄우고 의사봉 소리
+// 판결 직전: 판사 얼굴을 크게 띄운다(우리 법원은 의사봉을 쓰지 않으므로 소리 없음)
 function judgeCloseUp(fast, done) {
-  if (fast || REDUCED) { gavel(); return done(); }
+  if (fast || REDUCED) return done();
   const ov = document.createElement("div");
   ov.className = "closeup";
   ov.innerHTML = `<div class="closeup-face"><img src="assets/judge.webp" alt=""></div><div class="closeup-txt">판결을 선고합니다</div>`;
   document.body.appendChild(ov);
-  setTimeout(gavel, 650);
   setTimeout(() => { ov.classList.add("out"); setTimeout(() => { ov.remove(); done(); }, 300); }, 1500);
-}
-// 의사봉 소리: 브라우저에서 합성한 짧은 '땅, 땅'
-function gavel() {
-  if (!soundOn) return;
-  try {
-    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
-    [0, 0.22].forEach(t0 => {
-      const t = actx.currentTime + t0, o = actx.createOscillator(), g = actx.createGain();
-      o.type = "triangle"; o.frequency.setValueAtTime(180, t); o.frequency.exponentialRampToValueAtTime(60, t + 0.12);
-      g.gain.setValueAtTime(0.5, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
-      o.connect(g).connect(actx.destination); o.start(t); o.stop(t + 0.2);
-    });
-  } catch (e) {}
 }
 function verdict(score) {
   const c = C.c;
