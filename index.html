@@ -8110,7 +8110,7 @@ window.CASES.push(
 
 // k11 영업정지 처분 취소 / liar
 {
-  id: "k11", kind: "civil", category: "영업정지 처분 취소(행정)", tier: 1, truth: "liar",
+  id: "k11", kind: "civil", category: "영업정지 처분 취소", tier: 1, truth: "liar",
   client: { name: "문영호", age: 49, job: "호프집 사장", face: "chef" },
   fee: 600, bonus: 380,
   opening: "고등학생들한테 술 팔았다고 영업정지 두 달 먹었습니다. 분명히 신분증 확인했어요. 위조 신분증에 속은 건데 이건 너무하잖아요.",
@@ -8152,7 +8152,7 @@ window.CASES.push(
 
 // k12 운전면허 취소처분 취소 / hiding
 {
-  id: "k12", kind: "civil", category: "운전면허 취소처분 취소(행정)", tier: 1, truth: "hiding",
+  id: "k12", kind: "civil", category: "운전면허 취소처분 취소", tier: 1, truth: "hiding",
   client: { name: "조성만", age: 54, job: "화물차 기사", face: "c1" },
   fee: 330, bonus: 200,
   opening: "회식 끝나고 차 빼다가 걸렸는디, 0.085라고 면허를 취소해 부렀어요. 기준 0.08에서 쬐까 넘은 거고, 화물 몰아서 먹고사는 놈이 면허 없으믄 끝이요.",
@@ -8193,7 +8193,7 @@ window.CASES.push(
 
 // k13 공무원 징계 취소 / honest (역효과 증거)
 {
-  id: "k13", kind: "civil", category: "공무원 징계 취소(행정)", tier: 2, truth: "honest",
+  id: "k13", kind: "civil", category: "공무원 징계 취소", tier: 2, truth: "honest",
   client: { name: "서지현", age: 39, job: "구청 주무관", face: "rep" },
   fee: 440, bonus: 250,
   opening: "민원인한테 폭언했다고 정직 2개월을 받았어요. 소리 지른 건 그분이고, 저는 진정하시라고만 했어요. 녹음도 있는데 징계위는 듣지도 않았어요.",
@@ -12297,7 +12297,7 @@ window.CASES.push(
 
 // o12 정보공개 거부 취소 / honest (역효과 증거)
 {
-  id: "o12", kind: "civil", category: "정보공개 거부 취소(행정)", tier: 1, truth: "honest",
+  id: "o12", kind: "civil", category: "정보공개 거부 취소", tier: 1, truth: "honest",
   client: { name: "서경희", age: 46, job: "시민단체 사무국장", face: "c7" },
   fee: 330, bonus: 200,
   opening: "시청에 시장 업무추진비 1년 치 쓴 데를 공개해 달라 했더니, 개인정보라고 통째로 거부했어요. 세금으로 밥 먹은 걸 왜 못 보여 줍니까.",
@@ -12339,7 +12339,7 @@ window.CASES.push(
 
 // o13 건축허가 반려 취소 / liar
 {
-  id: "o13", kind: "civil", category: "건축허가 반려 취소(행정)", tier: 1, truth: "liar",
+  id: "o13", kind: "civil", category: "건축허가 반려 취소", tier: 1, truth: "liar",
   client: { name: "마정길", age: 61, job: "토지 소유자(전 농협 직원)", face: "vic" },
   fee: 600, bonus: 450,
   opening: "제 땅에 4층 상가를 지으려는데 구청이 진입도로가 없다고 건축허가를 반려했어요. 그 길은 30년 동안 동네 사람들이 다니던 길이고, 땅 주인들 승낙서도 제가 다 받아서 냈습니다.",
@@ -12381,7 +12381,7 @@ window.CASES.push(
 
 // o14 과징금 부과 취소 / hiding
 {
-  id: "o14", kind: "civil", category: "과징금 부과 취소(행정)", tier: 2, truth: "hiding",
+  id: "o14", kind: "civil", category: "과징금 부과 취소", tier: 2, truth: "hiding",
   client: { name: "김도윤", age: 41, job: "온라인 반려용품 쇼핑몰 대표", face: "c3" },
   fee: 650, bonus: 500,
   opening: "쇼핑몰이 해킹당해서 회원 2만 명 정보가 샜어요. 저희 잘못 있는 거 압니다. 근데 과징금을 회사 전체 매출로 매겨서 4,800만 원이에요. 직원 다섯 명 회사에 이건 문 닫으라는 거죠.",
@@ -12422,7 +12422,7 @@ window.CASES.push(
 
 // o15 국가유공자 등록 거부 취소 / honest
 {
-  id: "o15", kind: "civil", category: "국가유공자 등록 거부 취소(행정)", tier: 1, truth: "honest",
+  id: "o15", kind: "civil", category: "국가유공자 등록 거부 취소", tier: 1, truth: "honest",
   client: { name: "박만수", age: 69, job: "전 공장 경비원", face: "c6" },
   fee: 400, bonus: 250,
   opening: "군대에서 훈련받다 무릎을 다쳐서 평생 절룩이며 살았소. 보훈청에 국가유공자 신청했더니 공무 관련 기록이 없다고 퇴짜를 놨어요.",
@@ -12924,7 +12924,7 @@ const won = n => {
   return (neg ? "−" : "") + s + "원";
 };
 const rankOf = rep => RANKS.filter(r => rep >= r[0]).pop()[1];
-const feeMult = rep => 1 + rep / 200;
+const feeMult = rep => 1 + rep / 400;
 const trials = () => S.w + S.p + S.l;
 const winRate = () => trials() ? Math.round((S.w + S.p * 0.5) / trials() * 100) : 0;
 // 한 달에 찾아오는 의뢰인 수: 명성 0이면 1~2명, 100이면 10~20명
@@ -13215,7 +13215,7 @@ function screenDayIntro() {
       ? `<div class="v-act"><button class="mini gold" data-meet="${i}">상담</button><button class="mini" data-skip="${i}">돌려보내기</button></div>`
       : `<div class="st">${statusText[t.status] || ""}</div>`;
     return `<div class="visitor ${t.status === "wait" ? "" : "dim"}"><div class="portrait">${portrait(c)}</div>
-      <div><div class="vn">${esc(c.client.name)}</div><div class="vm">${isCrim(c) ? "형사" : "민사"} · ${esc(c.category)} · 규모 ${stars(c.tier)}</div></div>
+      <div><div class="vn">${esc(c.client.name)}</div><div class="vm">${kindLabel(c)} · ${esc(c.category)} · 규모 ${stars(c.tier)}</div></div>
       ${right}</div>`;
   }).join("");
   const full = taken >= cap;
@@ -13259,7 +13259,7 @@ function screenArchive(back) {
 /* ---------- 상담 ---------- */
 function startCase(id) {
   const c = BY_ID[id];
-  C = { c, wallet: 0.85 + Math.random() * 0.4, suspOrder: shuffle([0, 1, 2]), argOrder: shuffle(c.arguments.map((_, i) => i)), asked: [], opened: {}, verdict: null, susp: null, confessed: false, haggled: false, offerF: null, offerB: null, fee: 0, bonus: 0, flagged: false, left: false, sub: new Set(), arg: null };
+  C = { c, wallet: 0.8 + Math.random() * 0.6, suspOrder: shuffle([0, 1, 2]), argOrder: shuffle(c.arguments.map((_, i) => i)), asked: [], opened: {}, verdict: null, susp: null, confessed: false, haggled: false, offerF: null, offerB: null, fee: 0, bonus: 0, flagged: false, left: false, sub: new Set(), arg: null };
   screenConsult();
 }
 const stars = t => "★".repeat(t) + "☆".repeat(3 - t);
@@ -13285,7 +13285,7 @@ const ceiling = c => burden(c, c.fee, c.bonus) * feeMult(S.rep) * (1 + office().
 function clientCard(c, fx = "") {
   return `<div class="scene ${fx}">
     <div class="portrait">${portrait(c)}</div>
-    <div class="chips"><span class="chip ${isCrim(c) ? "crim" : "civ"}">${isCrim(c) ? "형사" : "민사"} · ${esc(c.category)}</span><span class="chip">규모 ${stars(c.tier)}</span></div>
+    <div class="chips"><span class="chip ${isCrim(c) ? "crim" : "civ"}">${kindLabel(c)} · ${esc(c.category)}</span><span class="chip">규모 ${stars(c.tier)}</span></div>
     <div class="plate"><div class="name">${esc(c.client.name)}</div><div class="meta">${c.client.age}세 · ${esc(c.client.job)}</div></div>
   </div>`;
 }
@@ -13463,7 +13463,9 @@ function secHint(c) {
 }
 function screenFee(extra) {
   const c = C.c, step = STEP[c.tier], mult = feeMult(S.rep);
-  if (C.offerF == null) { C.offerF = marketFee(c); C.offerB = marketBonus(c); }
+  // 처음 제시액은 내 기준 수임료(시세 × 명성 × 사무실). 의뢰인 형편에 따라 셋 중 하나꼴로 깎자고 한다
+  const myRate = v => roundTo(v * mult * (1 + office().up), step);
+  if (C.offerF == null) { C.offerF = myRate(marketFee(c)); C.offerB = myRate(marketBonus(c)); }
   const talk = [`<div class="bubble">${esc(C.reaction.say)}</div>`];
   if (C.reaction.note) talk.push(`<div class="bubble sys">${esc(C.reaction.note)}</div>`);
   if (extra) talk.push(extra);
@@ -13498,6 +13500,14 @@ function screenFee(extra) {
   });
 }
 
+// 맞제안: 형편이 어려우면 착수금을, 여유가 있으면 성공보수를 먼저 깎는다
+function counterOffer(c, F, B) {
+  const st = STEP[c.tier], [a, w] = STYLE_W[payStyle(c)], t = ceiling(c) * 0.9, val = burden(c, F, B);
+  let f = F * t / val, b = B * t / val;
+  if (payStyle(c) === "poor" && (t - B * w) / a >= st) { f = (t - B * w) / a; b = B; }
+  if (payStyle(c) === "rich" && t - F * a >= 0) { f = F; b = (t - F * a) / w; }
+  return [Math.max(st, Math.floor(f / st) * st), Math.max(0, Math.floor(b / st) * st)];
+}
 function propose() {
   const c = C.c, val = burden(c, C.offerF, C.offerB), ceil = ceiling(c);
   const me = `<div class="bubble me">착수금 ${won(C.offerF)}, 성공보수 ${won(C.offerB)}입니다.</div>`;
@@ -13509,10 +13519,13 @@ function propose() {
       `<button class="btn primary" id="toTrial">재판 준비하기</button>`);
     S.taken = (S.taken || 0) + 1; save();
     on("#toTrial", screenTrial);
-  } else if (!C.haggled && val <= ceil * 1.2) {
+  } else if (!C.haggled && val <= ceil * 1.3) {
+    // 비싸면 의뢰인이 금액을 맞제안한다(마음속 상한보다 조금 낮게)
     C.haggled = true;
-    const st = payStyle(c);
-    const ask = st === "poor" ? "착수금이 좀 부담돼요… 이기면 성공보수는 더 드릴 테니, 착수금을 낮춰 주시면 안 될까요?" : st === "rich" ? "성공보수가 너무 세네요. 착수금은 넉넉히 드릴 테니 성공보수를 좀 낮춰 주세요." : "음… 조금만 낮춰 주시면 안 될까요?";
+    const st = payStyle(c), [cf, cb] = counterOffer(c, C.offerF, C.offerB);
+    C.offerF = cf; C.offerB = cb;
+    const amt = `착수금 ${won(cf)}, 성공보수 ${won(cb)}`;
+    const ask = st === "poor" ? `착수금이 부담돼요. ${amt}이면 하겠습니다.` : st === "rich" ? `성공보수가 세네요. ${amt}으로 하시죠.` : `조금 깎아 주세요. ${amt}이면 하겠습니다.`;
     screenFee(`${me}<div class="bubble">${esc(ask)}</div><div class="bubble sys">한 번 더 제시할 수 있습니다.</div>`);
   } else {
     show(`${clientCard(c)}<div class="talk">${me}<div class="bubble">${esc(C.haggled ? "죄송하지만 다른 데 알아볼게요." : "그렇게까지는 못 드리겠네요. 다른 데 알아볼게요.")}</div><div class="bubble sys">의뢰인이 떠났습니다.</div></div>`,
@@ -13522,8 +13535,24 @@ function propose() {
 }
 
 /* ---------- 재판 준비 ---------- */
+// 민사 아닌 사건의 번호 종류: 행정(구), 가사소송(드), 가사비송(느), 보전(카), 합의부 전속(가합)
+const COURT = {
+  admin: "k11 k12 k13 o12 o13 o14 o15 j13",
+  fsuit: "c13 f03 f09 j02 j03 j04 n01 n09 n16 n17",
+  fnon: "c10 c15 f01 f06 f12 j01 j05 j10 n04 n05 n18 n25",
+  hold: "l01", gahap: "g08"
+};
+const kindLabel = c => isCrim(c) ? "형사" : { admin: "행정", fsuit: "가사", fnon: "가사" }[courtOf(c)] || "민사";
+const courtOf = c => Object.keys(COURT).find(k => COURT[k].split(" ").includes(c.id));
 function caseNo(c) {
-  const code = isCrim(c) ? (c.tier === 3 ? "고합" : "고단") : (c.tier === 1 ? "가소" : c.tier === 2 ? "가단" : "가합");
+  const k = courtOf(c), big = c.tier === 3;
+  const code = isCrim(c) ? (big ? "고합" : "고단")
+    : k === "admin" ? (c.tier === 1 ? "구단" : "구합")
+    : k === "fsuit" ? (big ? "드합" : "드단")
+    : k === "fnon" ? (big ? "느합" : "느단")
+    : k === "hold" ? "카단"
+    : k === "gahap" ? "가합"
+    : (c.tier === 1 ? "가소" : c.tier === 2 ? "가단" : "가합");
   return `${2030 + Math.floor((((S && S.day) || 1) - 1) / 12)}${code}${(1000 + hash(c.id) % 9000)}`;
 }
 function trialHead(c) {
@@ -13618,16 +13647,20 @@ function runTrial() {
     setTimeout(() => { el.className = "slam"; }, 700);
   };
   const step = () => {
-    if (i >= steps.length) return judgeCloseUp(fast, () => verdict(score));
+    if (i >= steps.length) { app.removeEventListener("click", tapNext); return judgeCloseUp(fast, () => verdict(score)); }
     const s = steps[i++]; score += s.d;
     const dTxt = s.dTxt != null ? s.dTxt : s.d > 0 ? `+${s.d}` : s.d < 0 ? `−${-s.d}` : "±0";
     logEl.insertAdjacentHTML("beforeend", `<div class="log-line ${s.cls} ${s.ava || s.img ? "has-ava" : ""}">${s.ava || s.img ? `<div class="ava"><img src="${s.img || `assets/${s.ava}.webp`}" alt=""></div>` : ""}<div><span class="who">${esc(s.who)}</span>${esc(s.text)}</div><span class="d ${s.d > 0 ? "pos" : s.d < 0 ? "neg" : "zero"}">${dTxt}</span></div>`);
     tilt();
     if (s.cls === "opp") slam("반박!", "bad"); else if (s.cls.includes("rebut")) slam("이의 있음!", "good");
     if (!fast) logEl.lastElementChild.scrollIntoView({ block: "nearest", behavior: "smooth" });
-    timer = setTimeout(step, fast ? 0 : 900);
+    // 글 길이만큼 읽을 시간을 준다(우리 측 반론은 최소 3초). 화면을 누르면 바로 다음으로
+    const wait = Math.min(7000, Math.max(s.cls.includes("rebut") ? 3000 : 1300, 600 + s.text.length * 70));
+    timer = setTimeout(step, fast ? 0 : wait);
   };
-  on("#skip", () => { fast = true; clearTimeout(timer); step(); });
+  const tapNext = e => { if (fast || e.target.closest("button")) return; clearTimeout(timer); step(); };
+  app.addEventListener("click", tapNext);
+  on("#skip", () => { fast = true; clearTimeout(timer); app.removeEventListener("click", tapNext); step(); });
   timer = setTimeout(step, fast ? 0 : 500);
 }
 
