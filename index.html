@@ -13966,9 +13966,9 @@ function runTrial() {
     };
     if (!fast && (rebut || oppHit)) {
       busy = true;
-      cutIn(rebut ? heroOf().img : `assets/${s.ava}.webp`, rebut ? "이의 있음!" : "반박!", rebut ? "us" : "opp", rebut ? 1500 : 1200);
+      cutIn(rebut ? heroOf().img : `assets/${s.ava}.webp`, rebut ? "이의 있음!" : "반박!", rebut ? "us" : "opp", 1500);
       if (rebut) flash("white");
-      timer = setTimeout(run, rebut ? 1500 : 1200);
+      timer = setTimeout(run, 1500);
     } else run();
   };
   const tapNext = e => { if (fast || busy || e.target.closest("button")) return; clearTimeout(timer); step(); };
