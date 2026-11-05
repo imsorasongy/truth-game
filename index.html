@@ -13521,7 +13521,7 @@ const HOWTO = [
     "이기면 명성이 오르고(사건 규모 ★·★★·★★★에 따라 +2·+3·+4), 지면 그만큼 깎입니다.",
     "사무실마다 명성 상한이 있습니다(40·60·80·100). 더 오르려면 사무실을 옮겨야 합니다.",
     "큰 사무실일수록 큰 사건이 들어오고 더 많이 맡을 수 있습니다. 명성과 이전 비용이 되면 달 말 장부 화면의 '사무실 관리'에서 옮깁니다.",
-    "직원: 사무장(매달 손님 +1~2), 비서(수임료 때 의뢰인 형편 귀띔), 고용 변호사(한 달 수임 +3건·질문 +1번), 조사원(재판 전 증거 하나 뒷조사).",
+    "직원은 사무장·비서·고용 변호사·조사원 네 자리입니다. 자리마다 후보 3명 중 한 명을 뽑고, 사람마다 특기가 다릅니다.",
     "명성 100이면 엔딩입니다."]],
   ["사건 갤러리", [
     "이긴 사건은 갤러리에 분류별로 모입니다. 새 게임을 시작해도 남습니다."]]
@@ -13558,7 +13558,7 @@ function resume() {
 /* ---------- 하루 계획 ---------- */
 function planDay() {
   const [lo, hi] = visitorRange(S.rep);
-  const n = Math.max(1, lo + Math.floor(Math.random() * (hi - lo + 1)) + office().guests + (has("mgr") ? 1 + Math.floor(Math.random() * 2) : 0) - (S.rumor || 0));
+  const n = Math.max(1, lo + Math.floor(Math.random() * (hi - lo + 1)) + office().guests - (S.rumor || 0));
   S.rumorShown = S.rumor || 0; S.rumor = 0;
   // 들어오는 사건 규모는 사무실이 정한다
   const tiers = office().tiers, maxTier = Math.max(...tiers), fits = c => tiers.includes(c.tier);
@@ -13576,13 +13576,27 @@ function planDay() {
     for (; i < pool.length; i++) { r -= weight(pool[i]); if (r <= 0) break; }
     picks.push(pool.splice(Math.min(i, pool.length - 1), 1)[0].id);
   }
+  // 사무장이 따로 데려오는 손님
+  const extra = (count, ok, w = () => 1) => {
+    let pl = CASES.filter(c => ok(c) && !picks.includes(c.id) && !S.played.includes(c.id));
+    if (!pl.length) pl = CASES.filter(c => ok(c) && !picks.includes(c.id));
+    for (let k = 0; k < count && pl.length; k++) {
+      const tot = pl.reduce((a, c) => a + w(c), 0); let r = Math.random() * tot, j = 0;
+      for (; j < pl.length; j++) { r -= w(pl[j]); if (r <= 0) break; }
+      picks.push(pl.splice(Math.min(j, pl.length - 1), 1)[0].id);
+    }
+  };
+  const minTier = Math.min(...tiers);
+  if (hired("kang")) extra(minTier === 1 ? 2 : 1, c => c.tier === minTier);
+  if (hired("yoon")) extra(1, c => c.tier === maxTier);
+  if (hired("jo")) extra(1 + Math.floor(Math.random() * 3), fits, c => c.truth === "liar" ? 2 : 1);
   S.today = picks.map(id => ({ id, status: "wait" }));
   S.idx = 0;
   S.dayLog = []; S.taken = 0;
 }
 
 // 한 달 수임 한도: 사무실마다 4·5·6·8건, 고용 변호사가 있으면 +3건
-const intakeCap = () => office().cap + (has("assoc") ? 3 : 0);
+const intakeCap = () => office().cap + (hired("seo") ? 3 : has("assoc") ? 2 : 0);
 const monthDone = () => !S.today.some(t => t.status === "wait");
 function closeIfFull() {
   if ((S.taken || 0) >= intakeCap()) S.today.forEach(t => { if (t.status === "wait") t.status = "full"; });
@@ -13764,14 +13778,14 @@ const caseRefs = () => `<div class="talk refs-talk">${consultTalk(C.c)}</div>
     <div class="stack"><div class="section-head"><span class="eyebrow">가져온 증거 ${C.c.evidence.length}건</span></div>
       <div class="evlist">${C.c.evidence.map(e => evCard(e, { open: C.opened[e.id] })).join("")}</div></div>`;
 function screenConsult() {
-  const c = C.c, left = (has("assoc") ? 4 : 3) - C.asked.length;
+  const c = C.c, left = (hired("jin") ? 4 : 3) - C.asked.length;
   const talk = consultTalk(c);
   const qs = c.questions.map((q, i) => C.asked.includes(i) ? "" :
     `<button class="btn" data-q="${i}" ${left <= 0 ? "disabled" : ""}>${esc(q.q)}</button>`).join("");
   show(`${clientCard(c)}
     <div class="talk" id="talk">${talk}</div>
     <div class="stack">
-      <div class="section-head"><span class="eyebrow">질문하기</span><span class="eyebrow">남은 기회 <b>${left}</b>${has("assoc") ? " · 고용 변호사" : ""}</span></div>
+      <div class="section-head"><span class="eyebrow">질문하기</span><span class="eyebrow">남은 기회 <b>${left}</b>${hired("jin") ? " · 진하늘 변호사" : ""}</span></div>
       ${left > 0 ? qs : `<p class="note">상담 시간이 다 됐습니다.</p>`}
     </div>
     <div class="stack">
@@ -13809,6 +13823,7 @@ function screenJudge() {
       <button class="btn" data-v="hiding">숨기는 게 있다</button>
       <button class="btn" data-v="liar">거짓말을 하고 있다</button>
     </div>
+    ${hired("oh") ? faceHint(c) : ""}
     <button class="btn ghost" id="back">상담으로 돌아가기</button>
     ${caseRefs()}`);
   on("[data-v]", e => {
@@ -13821,6 +13836,12 @@ function screenJudge() {
   tutSet(() => !tutK("j1")
     ? { t: "말과 증거가 다 맞으면 <b>진실</b>, 말하지 않은 게 있으면 <b>숨김</b>, 증거와 다른 말을 했으면 <b>거짓</b>.", tap: "j1" }
     : { t: "통장에 들어온 돈 얘기는 없었다. <b>숨기는 게 있다</b>를 누르자.", sel: '[data-v="hiding"]' });
+}
+// 오다은 비서의 표정 귀띔: 넷 중 셋은 맞고 하나는 엉뚱하다(사건마다 한 번 정해 둔다)
+function faceHint(c) {
+  const T = { honest: "말할 때 눈빛이 흔들리진 않았어요.", hiding: "뭔가 말을 아끼는 느낌이었어요.", liar: "말이 너무 매끄러워요. 외운 것 같아요." };
+  if (!C.faceHint) { const keys = Object.keys(T); C.faceHint = Math.random() < 0.75 ? c.truth : pick(keys.filter(x => x !== c.truth)); }
+  return `<div class="sec"><i class="sec-ico">오다은</i>"${T[C.faceHint]}"</div>`;
 }
 function screenSuspect() {
   const c = C.c;
@@ -13985,7 +14006,7 @@ function screenFee(extra) {
     <div class="feebox">
       <div><div class="eyebrow">수임료 제시</div>
       <div class="market">비슷한 사건 시세 착수금 <b>${won(marketFee(c))}</b> · 성공보수 <b>${won(marketBonus(c))}</b></div></div>
-      ${has("sec") ? secHint(c) : ""}
+      ${hired("han") ? secHint(c) : ""}
       <div class="feerow"><span class="lbl">착수금</span><button data-adj="F" data-d="-1" aria-label="착수금 내리기">−</button>
         <span class="amt"><input id="offerF" inputmode="numeric" value="${C.offerF.toLocaleString()}"><span class="unit">만원</span></span>
         <button data-adj="F" data-d="1" aria-label="착수금 올리기">+</button></div>
@@ -14042,6 +14063,12 @@ function propose() {
     const amt = `착수금 ${won(cf)}, 성공보수 ${won(cb)}`;
     const ask = st === "poor" ? `착수금이 부담돼요. ${amt}이면 하겠습니다.` : st === "rich" ? `성공보수가 세네요. ${amt}으로 하시죠.` : `조금 깎아 주세요. ${amt}이면 하겠습니다.`;
     screenFee(`${me}<div class="bubble">${esc(ask)}</div><div class="bubble sys">한 번 더 제시할 수 있습니다.</div>`);
+  } else if (hired("moon") && !C.rescued) {
+    // 문태윤 비서가 나가려는 의뢰인을 붙잡아 한 번 더 협상하게 한다
+    C.rescued = true; C.haggled = true;
+    const [cf, cb] = counterOffer(c, C.offerF, C.offerB);
+    C.offerF = cf; C.offerB = cb;
+    screenFee(`${me}<div class="bubble">${esc("그렇게까지는 못 드리겠네요.")}</div><div class="sec"><i class="sec-ico">문태윤</i>"잠깐만요, 차 한 잔 하시고 가세요. 착수금 ${won(cf)}, 성공보수 ${won(cb)}이면 어떠세요?"</div><div class="bubble sys">한 번 더 제시할 수 있습니다.</div>`);
   } else {
     show(`${clientCard(c)}<div class="talk">${me}<div class="bubble">${esc(C.haggled ? "죄송하지만 다른 데 알아볼게요." : "그렇게까지는 못 드리겠네요. 다른 데 알아볼게요.")}</div><div class="bubble sys">의뢰인이 떠났습니다.</div></div>`,
       `<button class="btn primary" id="next">다음</button>`);
@@ -14081,16 +14108,19 @@ function screenTrial() {
   if (!C.trialInit) { cards.forEach(e => C.sub.add(e.id)); C.trialInit = true; }
   const evs = cards.map((e, i) => {
     const on_ = C.sub.has(e.id), danger = C.flagged && e.value < 0;
-    const inv = C.inv === e.id ? (e.value < 0 ? `<span class="tag-inv bad">조사: 위험</span>` : e.value > 0 ? `<span class="tag-inv good">조사: 유리</span>` : `<span class="tag-inv">조사: 쓸모 없음</span>`)
-      : has("inv") && !C.inv && !e.isK ? `<span class="tag-inv ask" data-inv="${esc(e.id)}">뒷조사</span>` : "";
+    const digital = hired("yu") && !e.isK && ["chat", "video", "photo", "voice"].includes(evKind(e.name));
+    const inv = C.inv === e.id || digital ? (e.value < 0 ? `<span class="tag-inv bad">조사: 위험</span>` : e.value > 0 ? `<span class="tag-inv good">조사: 유리</span>` : `<span class="tag-inv">조사: 쓸모 없음</span>`)
+      : hired("ma") && !C.inv && !e.isK ? `<span class="tag-inv ask" data-inv="${esc(e.id)}">뒷조사</span>` : "";
     return `<label class="ev pick ${e.isK ? "card-k" : ""} ${danger ? "danger" : ""} ${on_ ? "" : "off"}">
       <input type="checkbox" id="sub-${esc(e.id)}" data-sub="${esc(e.id)}" ${on_ ? "checked" : ""}>
       <span><div class="ev-name">${evIcon(e)}제${i + 1}호증 ${esc(e.name)}${danger ? `<span class="tag-danger">위험</span>` : ""}${inv}</div>
       <div class="ev-desc">${esc(e.desc)}</div>${e.detail ? `<div class="ev-detail">${esc(e.detail)}</div>` : ""}</span></label>`;
   }).join("");
   const args = C.argOrder.map(i => c.arguments[i]).map(a => `<label class="arg pick"><input type="radio" name="arg" id="arg-${esc(a.id)}" data-arg="${esc(a.id)}" ${C.arg === a.id ? "checked" : ""}><span>${esc(a.text)}</span></label>`).join("");
+  const scout = hired("ha") ? c.opponent.slice().sort((a, b) => b.power - a.power)[0] : null;
   show(`${trialHead(c)}
-    <div class="stack"><div class="section-head"><span class="eyebrow">제출할 증거 고르기</span>${has("inv") ? `<span class="eyebrow">${C.inv ? "조사원 뒷조사 끝" : "조사원 뒷조사 1회"}</span>` : ""}</div>
+    ${scout ? `<div class="sec"><i class="sec-ico">하유리</i>"상대 쪽은 「${esc(scout.name)}」${josaEul(scout.name)} 준비했대요."</div>` : ""}
+    <div class="stack"><div class="section-head"><span class="eyebrow">제출할 증거 고르기</span>${hired("ma") ? `<span class="eyebrow">${C.inv ? "마동철 뒷조사 끝" : "마동철 뒷조사 1회"}</span>` : hired("yu") ? `<span class="eyebrow">유성진 디지털 감정</span>` : ""}</div>
       <div class="evlist">${evs}</div></div>
     <div class="stack"><div class="eyebrow">주장 하나 고르기</div>${args}</div>`,
     `<button class="btn primary" id="plead" ${C.arg ? "" : "disabled"}>변론 시작</button>`, "court");
@@ -14147,6 +14177,7 @@ function runTrial() {
   };
   const arg = c.arguments.find(a => a.id === C.arg);
   steps.push({ cls: "ours", who: "우리 측 주장", text: formal(arg.text) + ".", d: arg.value });
+  if (hired("baek") && isCrim(c)) steps.push({ cls: "ours", who: "백지원 변호사", text: "검찰 증거에 빠진 부분이 있습니다. 피고인에게 유리한 사정도 함께 살펴 주십시오.", d: 1 });
   c.opponent.forEach(o => {
     const cs = o.counters || [];
     // 숨긴 사실 폭로는 털어놓은 사실을 내고 맞는 주장까지 골라야 막힌다
@@ -14340,21 +14371,38 @@ const office = () => OFFICES[S.office || 0];
 const has = k => !!(S.staff && S.staff[k]);
 const staffCount = () => STAFF.filter(s => has(s.key)).length;
 const capacity = () => (S.office || 0) + 1;
-const monthlyCost = () => office().rent + office().live + STAFF.reduce((a, s) => a + (has(s.key) ? s.pay : 0), 0);
+const monthlyCost = () => office().rent + office().live + STAFF.reduce((a, s) => a + (staffOf(s.key) ? staffOf(s.key).pay : 0), 0);
 const nextOffice = () => OFFICES[(S.office || 0) + 1];
 const canMove = () => { const n = nextOffice(); return !!n && S.rep >= n.need && S.money >= n.cost; };
 
-const STAFF_FACES = {
-  mgr: ["manager_female_40s", "manager_male_30s", "manager_male_50s"],
-  sec: ["secretary_female_20s_01", "secretary_female_20s_02", "secretary_male_30s"],
-  assoc: ["lawyer_female_20s", "lawyer_female_30s", "lawyer_male_30s"],
-  inv: ["investigator_female_20s", "investigator_male_30s", "investigator_male_40s"]
+// 직무마다 후보 3명. 같은 일을 다른 방식으로 한다
+const STAFF_PICKS = {
+  mgr: [
+    { id: "kang", face: "manager_male_50s", name: "강만석", pay: 450, desc: "동네 단골 손님 +2 (작은 사건만)" },
+    { id: "yoon", face: "manager_female_40s", name: "윤경숙", pay: 500, desc: "큰 사건 손님 +1" },
+    { id: "jo", face: "manager_male_30s", name: "조현태", pay: 400, desc: "손님 +1~3 (거짓말쟁이가 섞이기도)" }],
+  sec: [
+    { id: "han", face: "secretary_female_20s_01", name: "한지수", pay: 350, desc: "의뢰인 형편 귀띔" },
+    { id: "oh", face: "secretary_female_20s_02", name: "오다은", pay: 350, desc: "의뢰인 표정 귀띔 (가끔 틀림)" },
+    { id: "moon", face: "secretary_male_30s", name: "문태윤", pay: 400, desc: "떠나려는 의뢰인 한 번 붙잡기" }],
+  assoc: [
+    { id: "seo", face: "lawyer_male_30s", name: "서도현", pay: 700, desc: "수임 +3" },
+    { id: "baek", face: "lawyer_female_30s", name: "백지원", pay: 700, desc: "수임 +2 · 형사 재판 +1" },
+    { id: "jin", face: "lawyer_female_20s", name: "진하늘", pay: 650, desc: "수임 +2 · 질문 +1" }],
+  inv: [
+    { id: "ma", face: "investigator_male_40s", name: "마동철", pay: 600, desc: "증거 하나 뒷조사" },
+    { id: "yu", face: "investigator_male_30s", name: "유성진", pay: 600, desc: "디지털 증거 모두 감정" },
+    { id: "ha", face: "investigator_female_20s", name: "하유리", pay: 550, desc: "상대 반박 하나 미리 파악" }]
 };
-function staffFace(k) {
-  S.faces = S.faces || {};
-  if (!S.faces[k]) { const a = STAFF_FACES[k]; S.faces[k] = a[Math.floor(Math.random() * a.length)]; save(); }
-  return `assets/staff/${S.faces[k]}.webp`;
+// 예전 저장(true)은 그 판에 정해 둔 얼굴의 사람으로 이어 준다
+function staffOf(k) {
+  const v = S && S.staff && S.staff[k]; if (!v) return null;
+  const list = STAFF_PICKS[k];
+  if (v === true) { const f = S.faces && S.faces[k]; return list.find(x => x.face === f) || list[0]; }
+  return list.find(x => x.id === v) || null;
 }
+const hired = id => !!S && Object.keys(STAFF_PICKS).some(k => (staffOf(k) || {}).id === id);
+const staffFace = k => `assets/staff/${(staffOf(k) || STAFF_PICKS[k][0]).face}.webp`;
 function screenOffice() {
   const cur = office(), nx = nextOffice(), full = staffCount() >= capacity();
   const moveBox = nx ? `<div class="pn ${canMove() ? "on" : ""}">
@@ -14365,11 +14413,11 @@ function screenOffice() {
         : `<div class="note need">${S.rep < nx.need ? `명성 ${nx.need} 필요 (지금 ${S.rep})` : `자금 ${won(nx.cost)} 필요`}</div>`}
     </div>` : `<div class="pn"><div class="note">가장 좋은 사무실입니다.</div></div>`;
   const staff = STAFF.map(s => {
-    const on_ = has(s.key), dim = !on_ && full;
-    return `<div class="pn staff-row ${dim ? "dim" : ""} ${on_ ? "on" : ""}"><div class="sf"><img src="${staffFace(s.key)}" alt=""></div><div>
-      <div class="pn-top"><span><b>${s.name}</b> · 월 ${won(s.pay)}</span>
-      ${on_ ? `<button class="mini" data-fire="${s.key}">내보내기</button>` : dim ? `<span class="note">정원 초과</span>` : `<button class="mini gold" data-hire="${s.key}">고용</button>`}</div>
-      <div class="note">${s.desc}${on_ ? " · <span class='pos'>근무 중</span>" : ""}</div></div></div>`;
+    const who = staffOf(s.key), dim = !who && full;
+    return `<div class="pn staff-row ${dim ? "dim" : ""} ${who ? "on" : ""}"><div class="sf"><img src="${staffFace(s.key)}" alt=""></div><div>
+      <div class="pn-top"><span><b>${who ? `${esc(who.name)} ${s.name}` : s.name}</b>${who ? ` · 월 ${won(who.pay)}` : ""}</span>
+      ${who ? `<button class="mini" data-fire="${s.key}">내보내기</button>` : dim ? `<span class="note">정원 초과</span>` : `<button class="mini gold" data-hire="${s.key}">고용</button>`}</div>
+      <div class="note">${who ? `${who.desc} · <span class='pos'>근무 중</span>` : "후보 3명"}</div></div></div>`;
   }).join("");
   const banner = `<div class="ofc-banner" style="background-image:url('${sceneImage("office")}')">
       <div class="ofc-name">${esc(S.firm || "")}<small>${esc(cur.name)}</small></div>
@@ -14384,11 +14432,22 @@ function screenOffice() {
     <div class="stack">${staff}</div>`,
     `<button class="btn primary" id="backLedger">장부로 돌아가기</button>`);
   on("#move", () => { S.money -= nx.cost; S.office = (S.office || 0) + 1; S.moveNote = false; save(); screenOffice(); });
-  on("[data-hire]", e => { S.staff = S.staff || {}; S.staff[e.currentTarget.dataset.hire] = true; save(); screenOffice(); });
+  on("[data-hire]", e => screenHire(e.currentTarget.dataset.hire));
   on("[data-fire]", e => { S.staff[e.currentTarget.dataset.fire] = false; save(); screenOffice(); });
   on("#backLedger", screenDayEnd);
 }
 
+// 고용: 그 직무의 후보 3명 중 한 명을 고른다
+function screenHire(k) {
+  const role = STAFF.find(s => s.key === k);
+  show(`<div><div class="eyebrow">${role.name} 고용</div><h2>누구를 뽑을까</h2></div>
+    <div class="stack">${STAFF_PICKS[k].map(x => `<div class="pn staff-row on"><div class="sf"><img src="assets/staff/${x.face}.webp" alt=""></div><div>
+      <div class="pn-top"><span><b>${esc(x.name)}</b> · 월 ${won(x.pay)}</span><button class="mini gold" data-pick="${x.id}">고용</button></div>
+      <div class="note">${x.desc}</div></div></div>`).join("")}</div>`,
+    `<button class="btn ghost" id="hireBack">돌아가기</button>`);
+  on("[data-pick]", e => { S.staff = S.staff || {}; S.staff[k] = e.currentTarget.dataset.pick; save(); screenOffice(); });
+  on("#hireBack", screenOffice);
+}
 function screenBankrupt() {
   const name = S.name || heroOf().name;
   S.gameover = true; save();
@@ -14449,7 +14508,7 @@ function screenDayEnd() {
     save();
     if (S.deficit >= 3) return screenBankrupt();
   }
-  const costParts = [`월세 ${office().rent}`, `생활비 ${office().live}`].concat(STAFF.filter(s => has(s.key)).map(s => `${s.name} ${s.pay}`)).join(" · ");
+  const costParts = [`월세 ${office().rent}`, `생활비 ${office().live}`].concat(STAFF.filter(s => has(s.key)).map(s => `${staffOf(s.key).name} ${staffOf(s.key).pay}`)).join(" · ");
   const net = money - S.cost - (S.tax || 0);
   show(`<div><div class="eyebrow">${monthLabel(S.day)} 말</div><h2>이번 달 장부</h2></div>
     <div class="ledger">${rows}
@@ -14492,8 +14551,8 @@ function endingRoll(done) {
     mono(`그동안 ${S.w}번 이겼고, ${S.l}번 졌다. 이상하게도 진 사건이 더 오래 기억에 남는다.`),
     mono("의뢰인은 다 자기 편한 대로 말한다. 그 말 뒤를 들여다보는 게 내 일이었다."),
     ...pickWins.map((c, k) => ({ html: portrait(c), who: c.client.name + " 씨 · " + c.category, text: thanks[k % thanks.length] })),
-    ...(has("mgr") ? [{ who: "사무장", text: "변호사님, 오늘 저녁은 제가 삽니다. 다들 기다리고 있어요." }] : []),
-    ...(has("sec") ? [{ who: "비서", text: "축하 화환이 또 왔어요. 이제 둘 데가 없어요." }] : []),
+    ...(has("mgr") ? [{ who: staffOf("mgr").name + " 사무장", text: "변호사님, 오늘 저녁은 제가 삽니다. 다들 기다리고 있어요." }] : []),
+    ...(has("sec") ? [{ who: staffOf("sec").name + " 비서", text: "축하 화환이 또 왔어요. 이제 둘 데가 없어요." }] : []),
     { who: "변호사협회 소식지", text: `올해의 변호사: ${name} 변호사(${firm})` },
     mono("사무실 앞에 오늘도 줄이 늘어서 있다. 자, 다음 손님.")
   ];
