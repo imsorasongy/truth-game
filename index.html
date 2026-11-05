@@ -13946,7 +13946,7 @@ function runTrial() {
     finishType();
     if (i >= steps.length) { app.removeEventListener("click", tapNext); return judgeCloseUp(fast, () => verdict(score)); }
     const s = steps[i++];
-    const rebut = s.cls.includes("rebut"), big = s.cls === "opp" && s.d <= -4;
+    const rebut = s.cls.includes("rebut"), oppHit = s.cls === "opp", big = oppHit && s.d <= -4;
     const run = () => {
       busy = false; score += s.d;
       const dTxt = s.dTxt != null ? s.dTxt : s.d > 0 ? `+${s.d}` : s.d < 0 ? `−${-s.d}` : "±0";
@@ -13958,13 +13958,13 @@ function runTrial() {
       const z = zoneOf(score);
       if (!fast && z !== zone) { const g = document.querySelector(".gauge"); g.classList.remove("zw", "zl"); void g.offsetWidth; g.classList.add(z > zone ? "zw" : "zl"); }
       zone = z;
-      if (s.cls === "opp") { slam("반박!", "bad"); if (!fast && s.d < 0) { flash("red"); sfx("thud"); if (big) shakeAll(); } }
+      if (oppHit) { if (fast) slam("반박!", "bad"); else if (s.d < 0) { flash("red"); sfx("thud"); if (big) shakeAll(); } }
       if (!fast) logEl.lastElementChild.scrollIntoView({ block: "nearest", behavior: "smooth" });
       // 글 길이만큼 읽을 시간(1초에 25자 꼴, 우리 측 반론은 최소 1.8초). 화면을 누르면 바로 다음으로
       const wait = Math.min(4000, Math.max(rebut ? 1800 : 900, 300 + s.text.length * 40));
       timer = setTimeout(step, fast ? 0 : wait);
     };
-    if (!fast && (rebut || big)) {
+    if (!fast && (rebut || oppHit)) {
       busy = true;
       cutIn(rebut ? heroOf().img : `assets/${s.ava}.webp`, rebut ? "이의 있음!" : "반박!", rebut ? "us" : "opp", rebut ? 1500 : 1200);
       if (rebut) flash("white");
