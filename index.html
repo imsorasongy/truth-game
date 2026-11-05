@@ -13951,6 +13951,21 @@ const pct = s => Math.max(0, Math.min(100, (s - MIN) / (MAX - MIN) * 100));
 
 // 받침 있으면 '을', 없으면 '를'
 const josaEul = w => { const ch = (w.match(/[가-힣](?=[^가-힣]*$)/) || [""])[0]; return ch && (ch.charCodeAt(0) - 0xac00) % 28 ? "을" : "를"; };
+// 주장 문장(…한다·…있다·…하라)을 법정 말투(…합니다·…있습니다·…해야 합니다)로
+const JONG = ch => { const n = ch.charCodeAt(0) - 0xac00; return n >= 0 && n < 11172 ? n % 28 : -1; };
+const setJong = (ch, j) => String.fromCharCode(ch.charCodeAt(0) - JONG(ch) + j);
+function formal(t) {
+  t = t.replace(/[.!]\s*$/, "");
+  if (/달라$/.test(t)) return t.replace(/\s?달라$/, " 주십시오");
+  if (/하[라자]$/.test(t)) return t.replace(/하[라자]$/, "해야 합니다");
+  if (!/다$/.test(t)) return t + "입니다";
+  if (/는다$/.test(t)) return t.replace(/는다$/, "습니다");
+  const s = t.slice(-2, -1), j = JONG(s), head = t.slice(0, -2);
+  if (j === 4) return head + setJong(s, 17) + "니다";          // 한다 → 합니다
+  if (j > 0) return t.slice(0, -1) + "습니다";                  // 있다 → 있습니다
+  if ("하크치니이되쁘프르".includes(s)) return head + setJong(s, 17) + "니다"; // 아니다 → 아닙니다
+  return t.slice(0, -1) + "입니다";                             // 무효다 → 무효입니다
+}
 function runTrial() {
   const c = C.c;
   const steps = [];
@@ -13958,7 +13973,7 @@ function runTrial() {
   // 거짓 의뢰인의 위험 증거는 상대가 허점을 파고들어 세 배로 불리하다
   pool.filter(e => C.sub.has(e.id)).forEach(e => steps.push({ cls: "ours", who: "우리 측 증거", text: e.name, d: c.truth === "liar" && e.value < 0 ? e.value * 3 : e.value }));
   const arg = c.arguments.find(a => a.id === C.arg);
-  steps.push({ cls: "ours", who: "우리 측 주장", text: arg.text, d: arg.value });
+  steps.push({ cls: "ours", who: "우리 측 주장", text: formal(arg.text) + ".", d: arg.value });
   c.opponent.forEach(o => {
     const cs = o.counters || [];
     // 숨긴 사실 폭로는 털어놓은 사실을 내고 맞는 주장까지 골라야 막힌다
@@ -13973,7 +13988,7 @@ function runTrial() {
       const lines = [];
       if (ids.includes("k")) lines.push(`그 점은 저희가 먼저 밝힌 부분입니다. 「${c.confessionCard.name}」입니다.`);
       if (evNames.length) lines.push(`우리 측 증거 ${evNames.map(n => `「${n}」`).join(", ")}${josaEul(evNames[evNames.length - 1])} 보십시오.`);
-      if (ids.includes(C.arg)) { const t = c.arguments.find(a => a.id === C.arg).text; lines.push(/[.!?]$/.test(t) ? t : t + "."); }
+      if (ids.includes(C.arg)) lines.push(formal(c.arguments.find(a => a.id === C.arg).text) + ".");
       steps.push({ img: heroOf().img, cls: "ours rebut", who: "우리 측 반론", text: `이의 있습니다! ${lines.join(" ")}`, d: 0, dTxt: "막아냄" });
     }
   });
