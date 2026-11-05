@@ -367,6 +367,20 @@ html[data-scene^="end"] #backdrop::after { background: linear-gradient(180deg, #
 .gauge.zw { animation: zw 1s ease-out; } .gauge.zl { animation: zl 1s ease-out; }
 @keyframes zw { 0% { box-shadow: 0 0 0 0 #8fdc9f; } 30% { box-shadow: 0 0 18px 6px #8fdc9fcc; } 100% { box-shadow: 0 0 0 0 transparent; } }
 @keyframes zl { 0% { box-shadow: 0 0 0 0 #ff7a66; } 30% { box-shadow: 0 0 18px 6px #ff7a66cc; } 100% { box-shadow: 0 0 0 0 transparent; } }
+.ofc-banner { position: relative; aspect-ratio: 16 / 10; border-radius: 10px; overflow: hidden; border: 2px solid #c9a24a66; background-size: cover; background-position: center 30%; box-shadow: 0 8px 22px #000a; flex: none; }
+.ofc-banner::after { content: ""; position: absolute; inset: 0; background: linear-gradient(#0000 40%, #000c); }
+.ofc-name { position: absolute; left: 12px; top: 10px; z-index: 1; font-family: var(--f-display); font-size: 18px; color: #fff; text-shadow: 0 2px 8px #000; display: flex; flex-direction: column; }
+.ofc-name small { font-family: inherit; font-size: 12px; color: #e8d6b0; }
+.ofc-staff { position: absolute; left: 8px; right: 8px; bottom: 8px; z-index: 1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.ofc-seat { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.ofc-seat img { width: 100%; max-width: 72px; aspect-ratio: 1; object-fit: cover; object-position: 50% 12%; border-radius: 50%; border: 2px solid #c9a24a55; background: #1a120d; filter: grayscale(1) brightness(.45); }
+.ofc-seat.on img { filter: none; border-color: var(--brass); box-shadow: 0 0 12px #c9a24a88; }
+.ofc-seat span { font-size: 11px; color: #cdbb98; text-shadow: 0 1px 4px #000; }
+.ofc-seat.on span { color: #fff; }
+.staff-row { display: grid; grid-template-columns: 48px 1fr; gap: 10px; align-items: center; }
+.staff-row .sf { width: 48px; height: 48px; border-radius: 50%; overflow: hidden; border: 2px solid #c9a24a55; background: #1a120d; }
+.staff-row .sf img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 12%; display: block; filter: grayscale(.8) brightness(.7); }
+.staff-row.on .sf { border-color: var(--brass); } .staff-row.on .sf img { filter: none; }
 .closeup, .flip { position: fixed; inset: 0; z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: #0d0806e6; animation: fadein .25s; }
 .closeup.out, .flip.out { opacity: 0; transition: opacity .3s; }
 .closeup-face { width: min(220px, 60vw); aspect-ratio: 1; border-radius: 50%; overflow: hidden; border: 4px solid var(--brass); animation: zoom 1.5s ease-out; }
@@ -14158,6 +14172,17 @@ const monthlyCost = () => office().rent + office().live + STAFF.reduce((a, s) =>
 const nextOffice = () => OFFICES[(S.office || 0) + 1];
 const canMove = () => { const n = nextOffice(); return !!n && S.rep >= n.need && S.money >= n.cost; };
 
+const STAFF_FACES = {
+  mgr: ["manager_female_40s", "manager_male_30s", "manager_male_50s"],
+  sec: ["secretary_female_20s_01", "secretary_female_20s_02", "secretary_male_30s"],
+  assoc: ["lawyer_female_20s", "lawyer_female_30s", "lawyer_male_30s"],
+  inv: ["investigator_female_20s", "investigator_male_30s", "investigator_male_40s"]
+};
+function staffFace(k) {
+  S.faces = S.faces || {};
+  if (!S.faces[k]) { const a = STAFF_FACES[k]; S.faces[k] = a[Math.floor(Math.random() * a.length)]; save(); }
+  return `assets/staff/${S.faces[k]}.webp`;
+}
 function screenOffice() {
   const cur = office(), nx = nextOffice(), full = staffCount() >= capacity();
   const moveBox = nx ? `<div class="pn ${canMove() ? "on" : ""}">
@@ -14169,12 +14194,17 @@ function screenOffice() {
     </div>` : `<div class="pn"><div class="note">가장 좋은 사무실입니다.</div></div>`;
   const staff = STAFF.map(s => {
     const on_ = has(s.key), dim = !on_ && full;
-    return `<div class="pn ${dim ? "dim" : ""}">
+    return `<div class="pn staff-row ${dim ? "dim" : ""} ${on_ ? "on" : ""}"><div class="sf"><img src="${staffFace(s.key)}" alt=""></div><div>
       <div class="pn-top"><span><b>${s.name}</b> · 월 ${won(s.pay)}</span>
       ${on_ ? `<button class="mini" data-fire="${s.key}">내보내기</button>` : dim ? `<span class="note">정원 초과</span>` : `<button class="mini gold" data-hire="${s.key}">고용</button>`}</div>
-      <div class="note">${s.desc}${on_ ? " · <span class='pos'>근무 중</span>" : ""}</div></div>`;
+      <div class="note">${s.desc}${on_ ? " · <span class='pos'>근무 중</span>" : ""}</div></div></div>`;
   }).join("");
+  const banner = `<div class="ofc-banner" style="background-image:url('${sceneImage("office")}')">
+      <div class="ofc-name">${esc(S.firm || "")}<small>${esc(cur.name)}</small></div>
+      <div class="ofc-staff">${STAFF.map(s => `<div class="ofc-seat ${has(s.key) ? "on" : ""}"><img src="${staffFace(s.key)}" alt=""><span>${s.name}</span></div>`).join("")}</div>
+    </div>`;
   show(`<div><div class="eyebrow">자금 ${won(S.money)} · 월 고정비 ${won(monthlyCost())}</div><h2>사무실 관리</h2></div>
+    ${banner}
     <div class="pn"><div class="eyebrow">지금 사무실</div><div class="pn-name">${esc(cur.name)}</div>
       <div class="note">월세 ${won(cur.rent)} · 생활비 ${won(cur.live)} · 직원 정원 ${capacity()}명<br>사건 규모 ${tierTxt(cur.tiers)} · 한 달 수임 ${cur.cap}건 · 명성 상한 ${cur.repCap}${cur.up ? ` · 수임료 +${Math.round(cur.up * 100)}%` : ""}</div></div>
     ${moveBox}
