@@ -14201,7 +14201,21 @@ function finishCase(status, d) {
   closeIfFull();
   save();
   if (!S.ended && S.rep >= 100) return endingRoll(screenEnding);
-  if (monthDone()) screenDayEnd(); else screenDayIntro();
+  const go = () => monthDone() ? screenDayEnd() : screenDayIntro();
+  if (t.id === TUT_ID) return tutOutro(go);
+  go();
+}
+// 튜토리얼을 마치면 주인공 한마디 → 암전 → 본 게임
+function tutOutro(next) {
+  const ov = document.createElement("div");
+  ov.className = "endroll";
+  ov.innerHTML = `<div class="er-line"><div class="ava"><img src="${heroOf().img}" alt=""></div><div><div class="who">${esc(S.name || heroOf().name)} 변호사</div><p>이런 식으로 사건을 진행하면 된다. 어렵지 않지? 이제 한 번 본격적으로 시작해 볼까!</p></div></div><div class="er-tap">화면을 누르면 넘어갑니다</div>`;
+  document.body.appendChild(ov);
+  ov.onclick = () => {
+    ov.onclick = null;
+    ov.innerHTML = "";
+    setTimeout(() => { next(); ov.classList.add("out"); setTimeout(() => ov.remove(), 1200); }, REDUCED ? 0 : 900);
+  };
 }
 
 function screenDayEnd() {
