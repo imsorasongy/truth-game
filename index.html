@@ -14178,14 +14178,12 @@ function screenOffice() {
     <div class="pn"><div class="eyebrow">지금 사무실</div><div class="pn-name">${esc(cur.name)}</div>
       <div class="note">월세 ${won(cur.rent)} · 생활비 ${won(cur.live)} · 직원 정원 ${capacity()}명<br>사건 규모 ${tierTxt(cur.tiers)} · 한 달 수임 ${cur.cap}건 · 명성 상한 ${cur.repCap}${cur.up ? ` · 수임료 +${Math.round(cur.up * 100)}%` : ""}</div></div>
     ${moveBox}
-    <button class="btn ghost" id="toArchive">사건 갤러리 · 모은 사건 ${Object.keys(galLoad()).length}건</button>
     <div class="section-head"><span class="eyebrow">직원</span><span class="eyebrow">정원 ${staffCount()} / ${capacity()}</span></div>
     <div class="stack">${staff}</div>`,
     `<button class="btn primary" id="backLedger">장부로 돌아가기</button>`);
   on("#move", () => { S.money -= nx.cost; S.office = (S.office || 0) + 1; S.moveNote = false; save(); screenOffice(); });
   on("[data-hire]", e => { S.staff = S.staff || {}; S.staff[e.currentTarget.dataset.hire] = true; save(); screenOffice(); });
   on("[data-fire]", e => { S.staff[e.currentTarget.dataset.fire] = false; save(); screenOffice(); });
-  on("#toArchive", () => screenArchive(screenOffice));
   on("#backLedger", screenDayEnd);
 }
 
