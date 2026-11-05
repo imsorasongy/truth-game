@@ -291,6 +291,10 @@ html[data-scene="court"] #backdrop { background-image: url("assets/bg-court.webp
 .mini { border: 1px solid #c9a24a80; background: transparent; color: var(--muted); border-radius: 6px; padding: 4px 10px; font-size: 13px; }
 .mini.gold { background: var(--brass); color: #2a1c0c; border-color: var(--brass); }
 .sec { display: grid; grid-template-columns: auto 1fr; gap: 8px; align-items: start; background: #3a2a1e; border-radius: 8px; padding: 9px 11px; font-size: 14px; }
+.staff-say { display: grid; grid-template-columns: 40px 1fr; gap: 10px; align-items: start; }
+.staff-say .sf { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; border: 2px solid var(--brass); background: #1a120d; }
+.staff-say .sf img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 12%; display: block; }
+.staff-say .who { font-size: 12px; color: var(--brass); margin-bottom: 2px; font-style: normal; }
 .sec-ico { font-style: normal; font-size: 11px; color: #2a1c0c; background: var(--brass); border-radius: 4px; padding: 1px 6px; }
 .tag-inv { font-family: var(--f-body); font-size: 11px; padding: 1px 6px; border-radius: 3px; margin-left: 6px; vertical-align: 2px; border: 1px solid #8f7536; color: #5b4a20; }
 .tag-inv.ask { cursor: pointer; background: #f6e7bf; }
@@ -385,6 +389,15 @@ html[data-scene^="end"] #backdrop::after { background: linear-gradient(180deg, #
 .ln-note { font-size: 12.5px; line-height: 1.5; color: var(--muted); margin-top: 3px; }
 .talk.refs-talk { display: none; }
 .vn.show-log .talk.refs-talk { display: flex; }
+.ofc-seat { cursor: pointer; }
+.staff-pop { position: fixed; inset: 0; z-index: 26; display: flex; align-items: center; justify-content: center; padding: 20px; background: #000a; animation: fadein .2s; }
+.sp-card { width: min(100%, 320px); background: #1f150f; border: 1px solid var(--brass); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; align-items: center; gap: 8px; box-shadow: 0 14px 36px #000c; }
+.sp-face { width: 120px; height: 120px; border-radius: 50%; overflow: hidden; border: 3px solid var(--brass); background: #1a120d; }
+.sp-face img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 12%; display: block; }
+.sp-name { font-family: var(--f-display); font-size: 22px; color: var(--text); }
+.sp-name small { font-size: 14px; color: var(--brass); margin-left: 4px; }
+.sp-row { font-size: 14.5px; color: #e6dac6; text-align: center; }
+.sp-card .row2 { width: 100%; margin-top: 6px; }
 .closeup, .flip { position: fixed; inset: 0; z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: #0d0806e6; animation: fadein .25s; }
 .closeup.out, .flip.out { opacity: 0; transition: opacity .3s; }
 .closeup-face { width: min(220px, 60vw); aspect-ratio: 1; border-radius: 50%; overflow: hidden; border: 4px solid var(--brass); animation: zoom 1.5s ease-out; }
@@ -13910,7 +13923,7 @@ function screenJudge() {
 function faceHint(c) {
   const T = { honest: "말할 때 눈빛이 흔들리진 않았어요.", hiding: "뭔가 말을 아끼는 느낌이었어요.", liar: "말이 너무 매끄러워요. 외운 것 같아요." };
   if (!C.faceHint) { const keys = Object.keys(T); C.faceHint = Math.random() < 0.75 ? c.truth : pick(keys.filter(x => x !== c.truth)); }
-  return `<div class="sec"><i class="sec-ico">오다은</i>"${T[C.faceHint]}"</div>`;
+  return staffSay("sec", T[C.faceHint]);
 }
 function screenSuspect() {
   const c = C.c;
@@ -14053,12 +14066,26 @@ function react() {
 /* ---------- 수임료 제시 ---------- */
 // 비서: 성공보수를 시세대로 둘 때 착수금을 어디까지 받을 수 있는지 범위로 귀띔
 // 비서: 정확한 금액 대신 형편과 여유만 귀띔
+// 직원이 말할 때: 얼굴·이름과 함께
+function staffSay(k, text) {
+  const who = staffOf(k), role = STAFF.find(s => s.key === k).name;
+  return `<div class="sec staff-say"><div class="sf"><img src="${staffFace(k)}" alt=""></div><div><div class="who">${esc(who ? who.name : "")} ${role}</div>"${text}"</div></div>`;
+}
+// 한지수 비서: 평소 형편(직업)과 이번 사건 주머니 사정(형편 0.8~1.4)을 한 번에 따져 한마디
 function secHint(c) {
-  const st = payStyle(c), w = C.wallet || 1;
-  const a = st === "poor" ? "착수금이 부담스러운 형편 같아요. 성공보수로 받는 게 낫겠어요." : st === "rich" ? "형편이 괜찮아 보여요. 착수금은 넉넉히 불러도 되겠어요." : "형편은 보통 같아요.";
-  // 형편(0.8~1.4)이 1 아래면 처음 금액에 맞제안이 들어온다
-  const b = w > 1.2 ? "이번 건은 꽤 급해 보여서, 더 불러도 될 것 같아요." : w < 1 ? "주머니 사정이 빠듯해 보여요. 이 금액이면 깎자고 할 것 같아요." : "";
-  return `<div class="sec"><i class="sec-ico">비서</i>"${a}${b ? " " + b : ""}"</div>`;
+  const st = payStyle(c), w = C.wallet || 1, tight = w < 1, rush = w > 1.2;
+  const T = {
+    rich: tight ? "형편은 괜찮아 보이는데, 요즘 돈 들어갈 데가 많은가 봐요. 이 금액이면 깎자고 할 것 같아요."
+      : rush ? "형편도 괜찮고 이번 일은 꽤 급해 보여요. 넉넉히 불러도 될 것 같아요."
+      : "형편이 괜찮아 보여요. 착수금은 넉넉히 불러도 되겠어요.",
+    poor: tight ? "형편이 빠듯해 보여요. 이 금액이면 깎자고 할 테니, 착수금을 줄이고 성공보수로 받는 게 낫겠어요."
+      : rush ? "형편은 넉넉하지 않은데, 이번 일은 꽤 급해 보여요. 성공보수는 넉넉히 잡아도 될 것 같아요."
+      : "착수금이 부담스러운 형편 같아요. 성공보수로 받는 게 낫겠어요.",
+    mid: tight ? "형편은 보통 같은데, 이 금액이면 깎자고 할 것 같아요."
+      : rush ? "이번 일은 꽤 급해 보여요. 조금 더 불러도 될 것 같아요."
+      : "형편은 보통 같아요."
+  };
+  return staffSay("sec", T[st]);
 }
 function screenFee(extra) {
   const c = C.c, step = STEP[c.tier], mult = feeMult(S.rep);
@@ -14145,7 +14172,7 @@ function propose() {
     C.rescued = true; C.haggled = true;
     const [cf, cb] = counterOffer(c, C.offerF, C.offerB);
     C.offerF = cf; C.offerB = cb;
-    screenFee(`${me}<div class="bubble">${esc("그렇게까지는 못 드리겠네요.")}</div><div class="sec"><i class="sec-ico">문태윤</i>"잠깐만요, 차 한 잔 하시고 가세요. 착수금 ${won(cf)}, 성공보수 ${won(cb)}이면 어떠세요?"</div><div class="bubble sys">한 번 더 제시할 수 있습니다.</div>`);
+    screenFee(`${me}<div class="bubble">${esc("그렇게까지는 못 드리겠네요.")}</div>${staffSay("sec", `잠깐만요, 차 한 잔 하시고 가세요. 착수금 ${won(cf)}, 성공보수 ${won(cb)}이면 어떠세요?`)}<div class="bubble sys">한 번 더 제시할 수 있습니다.</div>`);
   } else {
     show(`${clientCard(c)}<div class="talk">${me}<div class="bubble">${esc(overStake ? "그 돈이면 차라리 소송을 안 하고 말죠." : C.haggled ? "죄송하지만 다른 데 알아볼게요." : "그렇게까지는 못 드리겠네요. 다른 데 알아볼게요.")}</div><div class="bubble sys">의뢰인이 떠났습니다.</div></div>`,
       `<button class="btn primary" id="next">다음</button>`);
@@ -14196,7 +14223,7 @@ function screenTrial() {
   const args = C.argOrder.map(i => c.arguments[i]).map(a => `<label class="arg pick"><input type="radio" name="arg" id="arg-${esc(a.id)}" data-arg="${esc(a.id)}" ${C.arg === a.id ? "checked" : ""}><span>${esc(a.text)}</span></label>`).join("");
   const scout = hired("ha") ? c.opponent.slice().sort((a, b) => b.power - a.power)[0] : null;
   show(`${trialHead(c)}
-    ${scout ? `<div class="sec"><i class="sec-ico">하유리</i>"상대 쪽은 「${esc(scout.name)}」${josaEul(scout.name)} 준비했대요."</div>` : ""}
+    ${scout ? staffSay("inv", `상대 쪽은 「${esc(scout.name)}」${josaEul(scout.name)} 준비했대요.`) : ""}
     <div class="stack"><div class="section-head"><span class="eyebrow">제출할 증거 고르기</span>${hired("ma") ? `<span class="eyebrow">${C.inv ? "마동철 뒷조사 끝" : "마동철 뒷조사 1회"}</span>` : hired("yu") ? `<span class="eyebrow">유성진 디지털 감정</span>` : ""}</div>
       <div class="evlist">${evs}</div></div>
     <div class="stack"><div class="eyebrow">주장 하나 고르기</div>${args}</div>`,
@@ -14263,14 +14290,16 @@ function runTrial() {
     const power = c.truth === "liar" && o.power >= 5 ? 12 : o.power;
     // 일부 막음(o.half): 반박을 절반만 깎아 낸다
     const used = id => C.sub.has(id) || id === C.arg;
-    const half = !hit && (o.half || []).some(used);
+    // 숨긴 사실 폭로: 털어놓은 사실을 이미 냈으면 맞는 주장을 못 골랐어도 절반은 막는다
+    const kOnly = false; // 보류: 털어놓은 사실만 내고 주장이 틀린 경우 처리(변호사님 결정 대기)
+    const half = !hit && (kOnly || (o.half || []).some(used));
     const say = oppSay(o);
     steps.push({ ava: isCrim(c) ? "pros" : "opp", cls: "opp", who: isCrim(c) ? "검사" : "상대 대리인", text: say.text, note: say.note, d: hit ? 0 : half ? -Math.ceil(power / 2) : -power, dTxt: hit ? "" : null });
     if (half) {
-      const ids = o.half.filter(used);
-      const evNames = ids.filter(id => id !== "k" && id !== C.arg).map(id => (id === "k" ? c.confessionCard : c.evidence.find(e => e.id === id) || {}).name).filter(Boolean);
+      const ids = (o.half || []).filter(used).concat(kOnly ? ["k"] : []);
+      const evNames = ids.filter(id => id !== "k" && id !== C.arg).map(id => (c.evidence.find(e => e.id === id) || {}).name).filter(Boolean);
       const lines = [];
-      if (ids.includes("k")) lines.push(`그 점은 저희가 먼저 밝힌 부분입니다.`);
+      if (ids.includes("k")) lines.push(`그 점은 저희가 먼저 밝힌 부분입니다. 「${c.confessionCard.name}」${josaEul(c.confessionCard.name)} 보십시오.`);
       if (evNames.length) lines.push(`적어도 그 일부는 저희가 제출한 ${evNames.map(n => `「${n}」`).join(", ")}${josaEul(evNames[evNames.length - 1])} 보시면 사실과 다릅니다.`);
       if (ids.includes(C.arg)) lines.push(`앞서 말씀드린 대로, ${formal(c.arguments.find(a => a.id === C.arg).text)}.`);
       steps.push({ img: heroOf().img, cls: "ours rebut", who: "우리 측 반론", text: `이의 있습니다! ${lines.join(" ")}`, d: 0, dTxt: "일부 막음" });
@@ -14499,7 +14528,7 @@ function screenOffice() {
   // 직원 얼굴은 그림 맨 아래 줄에. 주인공 얼굴(그림 높이 33~46%)이 그 위에 오도록 보여 줄 부분을 맞춘다
   const banner = `<div class="ofc-banner" style="background-image:url('${sceneImage("office")}')">
       <div class="ofc-name">${esc(S.firm || "")}<small>${esc(cur.name)}</small></div>
-    <div class="ofc-staff">${STAFF.map(s => `<div class="ofc-seat ${has(s.key) ? "on" : ""}"><img src="${staffFace(s.key)}" alt=""><span>${staffOf(s.key) ? esc(staffOf(s.key).name) : s.name}</span></div>`).join("")}</div></div>`;
+    <div class="ofc-staff">${STAFF.map(s => `<div class="ofc-seat ${has(s.key) ? "on" : ""}" data-seat="${s.key}" role="button"><img src="${staffFace(s.key)}" alt=""><span>${staffOf(s.key) ? esc(staffOf(s.key).name) : s.name}</span></div>`).join("")}</div></div>`;
   show(`<div><div class="eyebrow">자금 ${won(S.money)} · 월 고정비 ${won(monthlyCost())}</div><h2>사무실 관리</h2></div>
     ${banner}
     <div class="pn"><div class="eyebrow">지금 사무실</div><div class="pn-name">${esc(cur.name)}</div>
@@ -14511,9 +14540,26 @@ function screenOffice() {
   on("#move", () => { S.money -= nx.cost; S.office = (S.office || 0) + 1; S.moveNote = false; save(); screenOffice(); });
   on("[data-hire]", e => screenHire(e.currentTarget.dataset.hire));
   on("[data-fire]", e => { S.staff[e.currentTarget.dataset.fire] = false; save(); screenOffice(); });
+  on("[data-seat]", e => staffPop(e.currentTarget.dataset.seat));
   on("#backLedger", screenDayEnd);
 }
 
+// 사무실 그림의 직원 얼굴을 누르면: 고용한 직원은 정보 카드, 빈자리는 후보 고르기
+function staffPop(k) {
+  const who = staffOf(k), role = STAFF.find(s => s.key === k).name;
+  if (!who) return screenHire(k);
+  const ov = document.createElement("div");
+  ov.className = "staff-pop";
+  ov.innerHTML = `<div class="sp-card"><div class="sp-face"><img src="assets/staff/${who.face}.webp" alt=""></div>
+    <div class="sp-name">${esc(who.name)} <small>${role}</small></div>
+    <div class="sp-row">월급 ${won(who.pay)}</div><div class="sp-row">${who.desc}</div>
+    <div class="row2"><button class="btn ghost" id="spFire">내보내기</button><button class="btn primary" id="spClose">닫기</button></div></div>`;
+  document.body.appendChild(ov);
+  const close = () => ov.remove();
+  ov.addEventListener("click", e => { if (e.target === ov) close(); });
+  ov.querySelector("#spClose").onclick = close;
+  ov.querySelector("#spFire").onclick = () => { close(); S.staff[k] = false; save(); screenOffice(); };
+}
 // 고용: 그 직무의 후보 3명 중 한 명을 고른다
 function screenHire(k) {
   const role = STAFF.find(s => s.key === k);
