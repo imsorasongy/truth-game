@@ -14109,7 +14109,7 @@ function verdict(score) {
   const el = document.getElementById("verdict");
   const stamp = !isCrim(c) && res !== "partial" ? `<img class="stamp-img" src="assets/stamp-${res}.png" alt="${resultLabel(c, res)}">` : `<div class="stamp ${res}">${resultLabel(c, res)}</div>`;
   el.innerHTML = `${stamp}
-    <div class="judgment"><div class="lbl">주문</div>${esc(c.outcomes[res])}</div>
+    <div class="judgment"><div class="lbl">${/^재판부의 조정권고/.test(c.outcomes[res]) ? "결정사항" : "주문"}</div>${esc(c.outcomes[res])}</div>
     <div class="mono"><div class="ava"><img src="${heroOf().img}" alt=""></div><div><div class="who">${esc(S.name || heroOf().name)} 변호사 · <span>${truthTxt}</span></div><p>${esc(monoOpener(c, res))} ${esc(c.epilogue)}</p></div></div>
     <div class="ledger">
       <span>착수금</span><span class="r">${won(f)}</span>
