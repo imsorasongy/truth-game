@@ -14332,6 +14332,8 @@ function runTrial() {
     <div id="verdict" class="stack"></div>`,
     `<button class="btn ghost" id="skip">빨리 넘기기</button>`, "court");
 
+  ["neutral", "confident", "flustered", "serious", "relieved"].forEach(e => { new Image().src = face("us", e); if (e !== "relieved") new Image().src = face("opp", e); });
+  setFaces("neutral", "neutral");
   let score = 0, i = 0, fast = REDUCED, timer = null;
   const logEl = document.getElementById("log"), needle = document.getElementById("needle");
   const tilt = () => { needle.style.left = pct(score) + "%"; };
@@ -14350,8 +14352,15 @@ function runTrial() {
     if (i >= steps.length) { app.removeEventListener("click", tapNext); return judgeCloseUp(fast, () => verdict(score)); }
     const s = steps[i++];
     const rebut = s.cls.includes("rebut"), oppHit = s.cls === "opp", big = oppHit && s.d <= -4;
+    const partial = rebut && s.dTxt === "일부 막음";
+    const ex = rebut ? (partial ? ["serious", "serious"] : ["confident", "flustered"])
+      : oppHit ? [s.d < 0 ? (big ? "flustered" : "serious") : "serious", "confident"]
+      : s.cls === "ours" ? [s.who === "우리 측 주장" ? "confident" : "neutral", "neutral"] : null;
+    if (rebut) s.img = face("us", ex[0]);
+    if (oppHit) s.img = face("opp", "confident");
     const run = () => {
       busy = false; score += s.d;
+      if (ex) setFaces(ex[0], ex[1]);
       const dTxt = s.dTxt != null ? s.dTxt : s.d > 0 ? `+${s.d}` : s.d < 0 ? `−${-s.d}` : "±0";
       logEl.insertAdjacentHTML("beforeend", `<div class="log-line ${s.cls} ${s.ava || s.img ? "has-ava" : ""}">${s.ava || s.img ? `<div class="ava"><img src="${s.img || `assets/${s.ava}.webp`}" alt=""></div>` : ""}<div><span class="who">${esc(s.who)}</span><span class="tx"></span>${s.note ? `<div class="ln-note">${esc(s.note)}</div>` : ""}</div><span class="d ${s.d > 0 ? "pos" : s.d < 0 ? "neg" : "zero"}">${dTxt}</span></div>`);
       const tx = logEl.lastElementChild.querySelector(".tx");
@@ -14369,7 +14378,7 @@ function runTrial() {
     };
     if (!fast && (rebut || oppHit)) {
       busy = true;
-      cutIn(rebut ? heroOf().img : `assets/${s.ava}.webp`, rebut ? "이의 있음!" : "반박!", rebut ? "us" : "opp", 1500);
+      cutIn(face(rebut ? "us" : "opp", partial ? "serious" : "confident"), rebut ? "이의 있음!" : "반박!", rebut ? "us" : "opp", 1500);
       if (rebut) flash("white");
       timer = setTimeout(run, 1500);
     } else run();
@@ -14383,6 +14392,13 @@ function runTrial() {
 
 let actx = null;
 const zoneOf = sc => sc >= 3 ? 2 : sc >= 1 ? 1 : 0;
+// 재판 표정: 주인공 기본·자신감·당황·심각·안도, 상대 변호사·검사 기본·자신감·당황·심각
+const face = (side, e) => side === "us" ? `assets/expr/hero-${heroKey()}_${e}.webp` : `assets/expr/${C && isCrim(C.c) ? "prosecutor" : "opponent"}_${e}.webp`;
+function setFaces(us, opp) {
+  const u = document.querySelector(".court .side.us img"), o = document.querySelector(".court .side.opp img");
+  if (u && us) u.src = face("us", us);
+  if (o && opp) o.src = face("opp", opp);
+}
 function cutIn(img, txt, side, ms = 1200) {
   const ov = document.createElement("div");
   ov.className = "cutin " + side;
@@ -14426,6 +14442,7 @@ function verdict(score) {
   tutScreen = null; tutRefresh();
   const c = C.c;
   const res = score >= 3 ? "win" : score >= 1 ? "partial" : "lose";
+  setFaces(res === "win" ? "relieved" : res === "partial" ? "neutral" : "serious", res === "win" ? "serious" : res === "lose" ? "confident" : "neutral");
   const f = C.fee, b = res === "win" ? C.bonus : res === "partial" ? Math.round(C.bonus / 2 / 10) * 10 : 0;
   const repRaw = res === "win" ? 1 + c.tier : res === "partial" ? 0 : -(1 + c.tier), repBefore = S.rep;
   S.money += f + b;
