@@ -492,6 +492,8 @@ html[data-scene^="end"] #backdrop::after { background: linear-gradient(180deg, #
 .k-rp { display:flex; align-items:center; gap:10px; }
 .k-rp img { width:44px; height:44px; border-radius:50%; object-fit:cover; object-position:50% 12%; border:2px solid var(--brass); }
 .k-sec { font-size:12px; color:var(--brass); letter-spacing:.06em; margin-bottom:6px; }
+.k-vtag { display:inline-block; margin-left:6px; padding:1px 9px; border-radius:10px; font-size:12.5px; font-weight:700; letter-spacing:0; color:#fff; background:#6b8a4a; vertical-align:1px; }
+.k-vtag.hiding { background:#b07a2a; } .k-vtag.liar { background:#a8432f; }
 .k-say { background:#efe7d6; color:#2a1d14; border-radius:12px; padding:10px 12px; font-size:14px; line-height:1.55; }
 .k-qa { margin-top:8px; display:flex; flex-direction:column; gap:6px; font-size:14px; }
 .k-qa .q { color:var(--muted); font-size:13px; }
@@ -558,6 +560,27 @@ html[data-scene^="end"] #backdrop::after { background: linear-gradient(180deg, #
 .mk-ad .sw { grid-row:1 / span 2; grid-column:2; font-size:12px; padding:5px 10px; border-radius:14px; border:1px solid #c9a24a66; color:var(--muted); }
 .mk-ad .sw.on { background:var(--brass); color:#1b120d; border-color:var(--brass); }
 .mk-ad.lock { opacity:.45; }
+/* ===== 버튼 통일: 진행(금색) · 보통(갈색 바탕+금색 테두리) · 작은 버튼 · 대화 선택지(왼쪽 금색 줄) =====
+   폰 화면판 규칙보다 앞서도록 html body 를 붙인다 */
+html body .btn { border:1px solid #c9a24a88; border-image:none; border-radius:10px; background:#2b1e15; color:#f3e6cf; text-shadow:none; box-shadow:none; filter:none;
+  min-height:42px; padding:10px 14px; font-size:15px; line-height:1.4; text-align:center; display:block; }
+html body .btn:hover:not(:disabled) { background:#3a291c; border-color:#c9a24a; filter:none; }
+html body .btn.ghost { background:#2b1e15; border:1px solid #c9a24a88; }
+html body .btn.primary { background:#d4b05a; border-color:#d4b05a; color:#1b120d; font-weight:600; min-height:46px; padding:10px 16px; }
+html body .btn.primary:hover:not(:disabled) { background:#ddba66; }
+html body .btn small { color:#c9b89c; font-size:12px; }
+html body .btn.primary small { color:#4a3a1c; }
+/* 대화 선택지: 상담 화면의 질문·판단 고르기, 이유 묻는 창의 보기 */
+html body .vn .vn-bottom .btn:not(.primary):not(.ghost), html body .k-why .btn:not(.primary):not([data-o="x"]), html body .stack .btn[data-k], html body .stack .btn[data-w] {
+  border:none; border-left:3px solid #c9a24a; border-radius:4px; background:#3a281bee; text-align:left; padding:10px 14px; min-height:42px; }
+html body .vn .vn-bottom .btn:not(.primary):not(.ghost):hover:not(:disabled) { background:#4a3423; }
+html body .mini { display:inline-flex; align-items:center; justify-content:center; height:30px; padding:0 12px; border-radius:15px; border:1px solid #c9a24a88; background:#2b1e15; color:#f3e6cf; font-size:13px; }
+html body .mini.gold { background:#d4b05a; border-color:#d4b05a; color:#1b120d; font-weight:600; }
+html body .k-acts .btn { height:42px; min-height:42px; padding:0 6px; display:flex; flex-direction:row; align-items:center; justify-content:center; }
+html body .k-mb { background:#2b1e15; border:1px solid #c9a24a88; border-radius:10px; height:86px; }
+html body .k-mb.go { background:#d4b05a; border:1px solid #d4b05a; height:48px; }
+html body .dock .btn.primary { padding:10px 16px; font-size:16px; }
+html body .tutb-next { background:#d4b05a; border-radius:15px; height:30px; padding:0 12px; }
 /* ===== 폰 게임 화면판(v2): 세로 한 화면 고정 · 비주얼노벨 대화창 · 증거 서랍 · 아래 탭 ===== */
 html, body { height: 100%; overflow: hidden; }
 .hud { position: fixed; left: 0; right: 0; top: 0; z-index: 9; background: transparent; border: none; -webkit-backdrop-filter: none; backdrop-filter: none; padding-top: env(safe-area-inset-top, 0px); }
@@ -23718,8 +23741,14 @@ function opsStart() {
 }
 function opsResume() {
   opsEnsureAll();
-  // 예전 저장의 고용 변호사 그림을 새 경로로(목록에서 뺀 사람은 앱판에 남아 있는 그림으로)
-  (S.assocs || []).forEach(a => { a.face = opsAssoc(a.id) ? opsAssoc(a.id).face : a.face.replace("assets/f-", "assets/cut/f-"); });
+  // 예전 저장의 고용 변호사: 그림은 새 목록대로, 목록에서 뺀 사람은 아직 안 뽑은 변호사로 바꾼다(승소 수·단계는 이어받음)
+  (S.assocs || []).forEach(a => {
+    if (opsAssoc(a.id)) { a.face = opsAssoc(a.id).face; return; }
+    const nw = ASSOC_POOL.find(p => !S.assocs.some(x => x.id === p.id)); if (!nw) { a.face = ASSOC_POOL[0].face; return; }
+    const old = a.id;
+    Object.assign(a, { id: nw.id, name: nw.name, face: nw.face, trait: nw.trait, field: nw.field, pay: nw.pay, lvl: Math.max(a.lvl || 0, nw.lvl) });
+    [].concat(S.list || [], S.reports || []).forEach(x => { if (x.who === old) x.who = nw.id; });
+  });
   if (S.gameover) return screenBankrupt();
   if (S.opsEnd) return opsFinal();
   if (!S.list) { opsNewMonth(); save(); }
@@ -23946,6 +23975,7 @@ function opsReportLines(r) {
   return L;
 }
 const josaGwa = w => hasJong(w) ? "과" : "와";
+const VD_TXT = { honest: "진실", hiding: "숨김", liar: "거짓" };
 function opsReports() {
   const st = { pending: "검토 전", ok: "컨펌", out: "돌려보냄", done: "끝" };
   const rows = S.reports.map((r, i) => {
@@ -23971,7 +24001,7 @@ function opsReport(i, mode) {
       <div class="k-sec">의뢰인</div><p class="k-p">${esc(c.client.name)}(${c.client.age}세, ${esc(c.client.job)}) · ${kindLabel(c)}${c.stake ? ` · 다툼 금액 ${won(c.stake)}` : ""}</p>
       <div class="k-sec">진술 요지</div><ol class="k-ol">${said.map(s => `<li>${esc(s)}</li>`).join("")}</ol>
       <div class="k-sec">증거 목록</div><div class="k-evl">${c.evidence.map((e, n) => `<button class="k-evr" data-evd="${e.id}"><b>${n + 1}. ${esc(e.name)}</b> <span>${esc(e.desc)}</span></button><div class="k-evd" id="evd-${e.id}" hidden>${esc(e.detail || "")}</div>`).join("")}</div>
-      <div class="k-sec">검토 의견</div><p class="k-p">${lines.map(sent).join(" ")} ${sent(`착수금 ${won(r.fee)}, 성공보수 ${won(r.bonus)}으로 계약하겠습니다.`, 9)}</p>
+      <div class="k-sec">검토 의견 <span class="k-vtag ${r.verdict}">${VD_TXT[r.verdict]}</span></div><p class="k-p">${lines.map(sent).join(" ")} ${sent(`착수금 ${won(r.fee)}, 성공보수 ${won(r.bonus)}으로 계약하겠습니다.`, 9)}</p>
     </div>
     ${hint}
     ${pick ? `<div class="note" style="text-align:center">잘못된 문장을 누르세요</div>` : ""}`,
