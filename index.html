@@ -23725,12 +23725,29 @@ function opsNewMonth() {
   }
   S.list = picks.map(p => ({ id: p.id, pay: p.pay, back: !!p.back, who: null, status: "new" }));
   S.today = []; S.reports = []; S.mon = { fee: 0, bonus: 0, results: [], out: 0 };
-  S.joint = 2; S.phase = "assign";
+  S.joint = 2; S.phase = "assign"; S.intro = false;
   S.played = (S.played || []).concat(S.list.map(x => x.id));
 }
 
 /* ---------- ① 달 시작: 누가 맡을지 ---------- */
+// 달 시작: 직원이 있으면 직원이, 없으면 대표가 혼자 말한다
+const KNUM = ["", "한", "두", "세", "네", "다섯", "여섯", "일곱", "여덟", "아홉", "열", "열한", "열두", "열세", "열네", "열다섯", "열여섯", "열일곱", "열여덟", "열아홉", "스무"];
+const kCount = n => (KNUM[n] || n) + " 명";
+function opsIntro() {
+  const n = S.list.length, k = ["mgr", "sec", "inv"].find(r => crewOf(r).length);
+  const who = k ? pickPerson(k, crewOf(k)[0]) : null;
+  const role = { mgr: "사무장", sec: "비서", inv: "조사원" }[k];
+  const face = who ? `assets/staff/${who.face}.webp` : heroOf().img;
+  const name = who ? `${who.name} ${role}` : `${S.name || heroOf().name} 변호사`;
+  const line = who ? `대표님, 이번 달에는 ${kCount(n)}의 손님이 찾아왔습니다. 누구에게 사건을 맡기시겠습니까?`
+    : `이번 달에는 ${kCount(n)}의 손님이 왔다. 사건들을 맡을지 결정해 보자.`;
+  show(`<div class="ofc-banner" style="background-image:url('${sceneImage("office")}')"><div class="ofc-name">${esc(S.firm)}<small>${monthLabel(S.day)}</small></div></div>
+    <div class="op-hero" style="margin-top:6px"><div class="op-face"><img src="${face}" alt=""></div><div><div class="eyebrow">${esc(name)}</div></div></div>
+    <p class="op-line">${esc(line)}</p>`, `<button class="btn primary" id="inNext">의뢰인 보기</button>`);
+  on("#inNext", () => { S.intro = true; save(); opsAssign(); });
+}
 function opsAssign() {
+  if (!S.intro) return opsIntro();
   const people = ["me"].concat(S.assocs.map(a => a.id));
   const capOf = p => p === "me" ? 5 : assocCap(myAssoc(p));
   const usedOf = p => S.list.filter(x => x.who === p).length;
