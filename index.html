@@ -24230,6 +24230,9 @@ const opsSeats = () => {
   opsSeatRest = all.length > 6 ? all.slice(5).join("") : "";
   return `<div class="mk-seats">${show6.join("")}${opsSeatRest ? `<button class="ofc-seat mk-more" aria-expanded="false"><b>+${all.length - 5}</b><span>더 보기</span></button>` : ""}</div>`;
 };
+// 운영 모드에서 직원이 하는 일(사무장의 손님 늘리기는 운영 모드에 없음)
+const OPS_CREW_DESC = { kang: "사건 보조", yoon: "사건 보조 · 독촉하면 잘 받아 냄", jo: "사건 보조" };
+const opsCrewDesc = p => OPS_CREW_DESC[p.id] || p.desc;
 // 얼굴을 누르면 자세한 내용(고용 변호사·직원)
 function opsPersonPop(key) {
   const [t, k, id] = key.split(":");
@@ -24243,7 +24246,7 @@ function opsPersonPop(key) {
     const p = pickPerson(k, id); if (!p) return;
     const role = { mgr: "사무장", sec: "비서", inv: "조사원" }[k], load = { mgr: "한 달 8건 보조", sec: "한 달 6건 귀띔", inv: "한 달 4건 조사" }[k];
     face = `assets/staff/${p.face}.webp`; name = `${esc(p.name)} <small>${role}</small>`;
-    rows = [esc(p.desc), `월급 ${won(crewPay(p))}`, load];
+    rows = [esc(opsCrewDesc(p)), `월급 ${won(crewPay(p))}`, load];
   }
   const ov = document.createElement("div"); ov.className = "staff-pop";
   ov.innerHTML = `<div class="sp-card"><div class="sp-face"><img src="${face}" alt=""></div><div class="sp-name">${name}</div>${rows.map(r => `<div class="sp-row">${r}</div>`).join("")}
@@ -25071,7 +25074,7 @@ function opsCrewScr() {
   const load = { mgr: "1명당 한 달 8건 보조", sec: "1명당 한 달 6건 귀띔", inv: "1명당 한 달 4건 조사" };
   const sec = k => `<div class="pn"><div class="k-sec">${role[k]} · ${load[k]}</div>${STAFF_PICKS[k].map(p => {
       const on_ = crewOf(k).includes(p.id);
-      return `<div class="k-due"><span><b>${esc(p.name)}</b> <span class="note">${esc(p.desc)} · 월 ${won(crewPay(p))}</span></span>
+      return `<div class="k-due"><span><b>${esc(p.name)}</b> <span class="note">${esc(opsCrewDesc(p))} · 월 ${won(crewPay(p))}</span></span>
         <button class="mini ${on_ ? "" : "gold"}" data-crew="${k}:${p.id}">${on_ ? "내보내기" : "뽑기"}</button></div>`;
     }).join("")}</div>`;
   show(`<h2>직원 ${crewCount()} / ${cap}</h2>${["mgr", "sec", "inv"].map(sec).join("")}`, `<button class="btn primary" id="cBack">돌아가기</button>`);
