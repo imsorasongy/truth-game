@@ -24167,8 +24167,12 @@ const ASSOC_POOL = [
   { id: "baek", name: "백지원", face: "assets/staff/lawyer_female_30s.webp", trait: "field", field: "형사", pay: 420, lvl: 0 },
   { id: "jin", name: "진하늘", face: "assets/staff/lawyer_female_20s.webp", trait: "nice", pay: 380, lvl: 0 },
   { id: "kwon", name: "권태오", face: "assets/staff/lawyer_male_30s_02.webp", trait: "sloppy", pay: 300, lvl: 0 },
-  { id: "lim", name: "임소연", face: "assets/staff/lawyer_female_30s_02.webp", trait: "careful", pay: 600, lvl: 1 }
-  // 얼굴 그림이 생기면 더 넣는다: 차정민(가사)·남궁현·고민재·여지아(노동)
+  { id: "lim", name: "임소연", face: "assets/staff/lawyer_female_30s_02.webp", trait: "careful", pay: 600, lvl: 1 },
+  { id: "cha", name: "차정민", face: "assets/staff/lawyer_female_30s_03.webp", trait: "field", field: "가사", pay: 750, lvl: 2 },
+  { id: "nam", name: "남궁현", face: "assets/staff/lawyer_male_30s_03.webp", trait: "nice", pay: 520, lvl: 1 },
+  { id: "yeo", name: "여지아", face: "assets/staff/lawyer_female_30s_04.webp", trait: "field", field: "노동", pay: 580, lvl: 1 },
+  { id: "go", name: "고민재", face: "assets/staff/lawyer_male_30s_04.webp", trait: "sloppy", pay: 280, lvl: 0 },
+  { id: "osj", name: "오세진", face: "assets/staff/lawyer_male_20s_01.webp", trait: "careful", pay: 400, lvl: 0 }
 ];
 const TRAIT = { careful: "꼼꼼", sloppy: "덜렁", nice: "사람 좋음", field: "분야통" };
 const ASSOC_CAP = [3, 4, 5, 6], CREW_CAP = [2, 4, 6, 9];
@@ -24196,7 +24200,9 @@ const opsAssoc = id => ASSOC_POOL.find(a => a.id === id);
 const myAssoc = id => (S.assocs || []).find(a => a.id === id);
 const assocCap = a => (a.lvl >= 2 ? 3 : 2);
 const assocQ = a => (a.lvl >= 3 ? 3 : 2);
-const lvlOf = w => w >= 36 ? 3 : w >= 20 ? 2 : w >= 8 ? 1 : 0;
+// 단계 올리기: 지금 단계에서 다음 단계까지 필요한 승소 수(0→1: 8, 1→2: 12, 2→3: 16). 경력직으로 뽑아도 그 단계부터 센다
+const LVL_NEED = [8, 12, 16];
+const LVL_BASE = [0, 8, 20, 36];
 const opsYear = () => Math.ceil(S.day / 12);
 const crewCount = () => Object.values(S.crew || {}).reduce((a, l) => a + l.length, 0);
 const crewOf = k => (S.crew && S.crew[k]) || [];
@@ -24217,13 +24223,37 @@ const shortFirm = n => n.replace(/ ?(법률사무소|법무법인)$/, "");
 // 사무실 그림 맨 아래 한 줄: 고용 변호사·직원 얼굴. 6명이 넘으면 다섯 명 + [+숫자], 누르면 그림 밑으로 나머지가 펼쳐진다
 let opsSeatRest = "";
 const opsSeats = () => {
-  const seat = (img, name) => `<div class="ofc-seat on"><img src="${img}" alt=""><span>${esc(name)}</span></div>`;
-  const all = (S.assocs || []).map(a => seat(a.face, a.name))
-    .concat(Object.entries(S.crew || {}).flatMap(([k, l]) => l.map(id => seat(`assets/staff/${pickPerson(k, id).face}.webp`, pickPerson(k, id).name))));
+  const seat = (img, name, key) => `<div class="ofc-seat on" data-op="${key}" role="button"><img src="${img}" alt=""><span>${esc(name)}</span></div>`;
+  const all = (S.assocs || []).map(a => seat(a.face, a.name, "a:" + a.id))
+    .concat(Object.entries(S.crew || {}).flatMap(([k, l]) => l.map(id => seat(`assets/staff/${pickPerson(k, id).face}.webp`, pickPerson(k, id).name, "c:" + k + ":" + id))));
   const show6 = all.length > 6 ? all.slice(0, 5) : all;
   opsSeatRest = all.length > 6 ? all.slice(5).join("") : "";
   return `<div class="mk-seats">${show6.join("")}${opsSeatRest ? `<button class="ofc-seat mk-more" aria-expanded="false"><b>+${all.length - 5}</b><span>더 보기</span></button>` : ""}</div>`;
 };
+// 얼굴을 누르면 자세한 내용(고용 변호사·직원)
+function opsPersonPop(key) {
+  const [t, k, id] = key.split(":");
+  let face, name, rows;
+  if (t === "a") {
+    const a = myAssoc(k); if (!a) return;
+    face = a.face; name = `${esc(a.name)} <small>고용 변호사</small>`;
+    rows = [`${TRAIT[a.trait]}${a.field ? "(" + a.field + ")" : ""} · ${a.lvl}단계`, `월급 ${won(a.pay)}`, `한 달 ${assocCap(a)}건 · 질문 ${assocQ(a)}개`,
+      `승소 ${a.wins || 0}${a.lvl < 3 ? ` · 다음 단계까지 ${Math.max(0, LVL_NEED[a.lvl] - (a.prog || 0))}승` : ""}`];
+  } else {
+    const p = pickPerson(k, id); if (!p) return;
+    const role = { mgr: "사무장", sec: "비서", inv: "조사원" }[k], load = { mgr: "한 달 8건 보조", sec: "한 달 6건 귀띔", inv: "한 달 4건 조사" }[k];
+    face = `assets/staff/${p.face}.webp`; name = `${esc(p.name)} <small>${role}</small>`;
+    rows = [esc(p.desc), `월급 ${won(crewPay(p))}`, load];
+  }
+  const ov = document.createElement("div"); ov.className = "staff-pop";
+  ov.innerHTML = `<div class="sp-card"><div class="sp-face"><img src="${face}" alt=""></div><div class="sp-name">${name}</div>${rows.map(r => `<div class="sp-row">${r}</div>`).join("")}
+    <button class="btn primary" id="spClose">닫기</button></div>`;
+  document.body.appendChild(ov);
+  const close = () => ov.remove();
+  ov.addEventListener("click", e => { if (e.target === ov) close(); });
+  ov.querySelector("#spClose").onclick = close;
+}
+document.addEventListener("click", e => { const s = isOps() && e.target.closest("[data-op]"); if (s) opsPersonPop(s.dataset.op); });
 document.addEventListener("click", e => {
   const b = e.target.closest(".mk-more"); if (!b) return;
   const ban = b.closest(".ofc-banner"), nx = ban.nextElementSibling;
@@ -24847,7 +24877,13 @@ function opsSettleJob(j, score) {
     S.money += r.fee; S.mon.fee += r.fee;
     opsBook(c, r.who, res, r.fee, r.bonus, a.trait === "nice" && r.pay === "late" && Math.random() < 0.5 ? "good" : r.pay, j.slip);
     if (j.vs) opsVsApply(j.vs, res);
-    if (res !== "lose") { a.wins = (a.wins || 0) + (res === "win" ? 1 : 0.5); const nl = Math.max(a.lvl, lvlOf(a.wins)); if (nl > a.lvl) { a.lvl = nl; S.mon.up = (S.mon.up || []).concat(a.name); } }
+    if (res !== "lose") {
+      const g = res === "win" ? 1 : 0.5;
+      a.wins = (a.wins || 0) + g;
+      if (a.prog == null) a.prog = Math.max(0, a.wins - g - LVL_BASE[a.lvl]); // 예전 저장
+      a.prog += g;
+      if (a.lvl < 3 && a.prog >= LVL_NEED[a.lvl]) { a.prog -= LVL_NEED[a.lvl]; a.lvl++; S.mon.up = (S.mon.up || []).concat(a.name); }
+    }
   }
 }
 function opsBook(c, who, res, fee, bonus, pay, slip) {
@@ -25016,7 +25052,7 @@ function opsAssocScr(pickMode) {
   const cap = ASSOC_CAP[S.office || 0];
   const card = (a, hiredNow) => `<div class="k-card"><div class="portrait"><img src="${a.face}" alt="" style="width:100%;height:100%;object-fit:cover;object-position:50% 12%"></div>
     <div><div class="nm">${esc(a.name)} <small class="note">${TRAIT[a.trait]}${a.field ? "(" + a.field + ")" : ""} · ${a.lvl}단계</small></div>
-    <div class="ct">월급 ${won(a.pay)} · 한 달 ${assocCap(a)}건 · 질문 ${assocQ(a)}개${hiredNow ? ` · 승소 ${a.wins || 0}` : ""}</div>
+    <div class="ct">월급 ${won(a.pay)} · 한 달 ${assocCap(a)}건 · 질문 ${assocQ(a)}개${hiredNow ? ` · 승소 ${a.wins || 0}${a.lvl < 3 ? ` · 다음 단계까지 ${Math.max(0, LVL_NEED[a.lvl] - (a.prog || 0))}승` : ""}` : ""}</div>
     <div style="margin-top:6px">${hiredNow ? `<button class="mini" data-fire="${a.id}">내보내기</button>` : `<button class="mini gold" data-hire="${a.id}">뽑기</button>`}</div></div></div>`;
   if (pickMode) {
     const cand = shuffle(ASSOC_POOL.filter(a => !myAssoc(a.id))).slice(0, 3);
@@ -25025,7 +25061,7 @@ function opsAssocScr(pickMode) {
     show(`<h2>고용 변호사 ${S.assocs.length} / ${cap}</h2><div class="k-list">${S.assocs.map(a => card(a, true)).join("") || `<div class="note">아직 없습니다.</div>`}</div>`,
       `${S.assocs.length < cap ? `<button class="btn primary" id="aPick">새로 뽑기</button>` : ""}<button class="btn ghost" id="aBack">돌아가기</button>`);
   }
-  on("[data-hire]", e => { const a = ASSOC_POOL.find(x => x.id === e.currentTarget.dataset.hire); S.assocs.push({ ...a, wins: 0 }); save(); opsAssocScr(); });
+  on("[data-hire]", e => { const a = ASSOC_POOL.find(x => x.id === e.currentTarget.dataset.hire); S.assocs.push({ ...a, wins: 0, prog: 0 }); save(); opsAssocScr(); });
   on("[data-fire]", e => { S.assocs = S.assocs.filter(a => a.id !== e.currentTarget.dataset.fire); save(); opsAssocScr(); });
   on("#aPick", () => opsAssocScr(true));
   on("#aBack", opsOffice);
