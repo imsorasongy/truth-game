@@ -492,6 +492,13 @@ html[data-scene^="end"] #backdrop::after { background: linear-gradient(180deg, #
 .k-rp { display:flex; align-items:center; gap:10px; }
 .k-rp img { width:44px; height:44px; border-radius:50%; object-fit:cover; object-position:50% 12%; border:2px solid var(--brass); }
 .k-sec { font-size:12px; color:var(--brass); letter-spacing:.06em; margin-bottom:6px; }
+.k-tier { color:var(--brass); font-weight:600; letter-spacing:-1px; margin-right:2px; }
+.k-std { display:grid; grid-template-columns:1fr auto auto auto; gap:6px 12px; font-size:14px; align-items:center; }
+.k-std .h { font-size:12px; color:var(--muted); }
+.k-std .r { text-align:right; }
+.k-std .me { color:var(--brass); font-weight:600; }
+.k-rk { color:var(--muted); } .k-rk.up { color:var(--win); } .k-rk.dn { color:var(--lose); }
+.k-vs { color:var(--brass); font-weight:600; }
 .k-vtag { display:inline-block; margin-left:6px; padding:1px 9px; border-radius:10px; font-size:12.5px; font-weight:700; letter-spacing:0; color:#fff; background:#6b8a4a; vertical-align:1px; }
 .k-vtag.hiding { background:#b07a2a; } .k-vtag.liar { background:#a8432f; }
 .k-say { background:#efe7d6; color:#2a1d14; border-radius:12px; padding:10px 12px; font-size:14px; line-height:1.55; }
@@ -550,6 +557,10 @@ html[data-scene^="end"] #backdrop::after { background: linear-gradient(180deg, #
 .mk-tiles .pn::after { content:"›"; position:absolute; right:10px; top:50%; transform:translateY(-50%); font-size:24px; color:var(--brass); }
 .mk-seats { position:absolute; left:6px; right:6px; bottom:5px; z-index:1; display:grid; grid-template-columns:repeat(6,1fr); gap:3px; }
 .mk-seats .ofc-seat img { max-width:40px; }
+.mk-more { background:none; border:none; padding:0; font:inherit; cursor:pointer; }
+.mk-more b { width:100%; max-width:40px; aspect-ratio:1; border-radius:50%; border:2px solid var(--brass); background:#1a120dcc; color:var(--brass); display:flex; align-items:center; justify-content:center; font-size:15px; }
+.mk-fold { display:grid; grid-template-columns:repeat(6,1fr); gap:6px 3px; background:#241912; border:1px solid #c9a24a55; border-top:none; border-radius:0 0 10px 10px; margin:-6px 0 8px; padding:12px 6px 8px; }
+.mk-fold .ofc-seat img { max-width:40px; }
 .mk-res { display:grid; grid-template-columns:44px 1fr auto; gap:10px; align-items:center; background:var(--wood-2); border-radius:10px; padding:8px 12px; }
 .mk-res img { width:44px; height:44px; border-radius:50%; object-fit:cover; object-position:50% 12%; border:2px solid #c9a24a99; }
 .mk-res .tag { font-family:var(--f-display); font-size:15px; }
@@ -23140,7 +23151,7 @@ function runTrial() {
     const kOnly = false; // 보류: 털어놓은 사실만 내고 주장이 틀린 경우 처리(변호사님 결정 대기)
     const half = !hit && (kOnly || (o.half || []).some(used));
     const say = oppSay(o);
-    steps.push({ ava: isCrim(c) ? "pros" : "opp", cls: "opp", who: isCrim(c) ? "검사" : "상대 대리인", text: say.text, note: say.note, d: hit ? 0 : half ? -Math.ceil(power / 2) : -power, dTxt: hit ? "" : null });
+    steps.push({ ava: isCrim(c) ? "pros" : "opp", cls: "opp", who: isCrim(c) ? "검사" : C.vs ? `상대 대리인 · ${C.vs}` : "상대 대리인", text: say.text, note: say.note, d: hit ? 0 : half ? -Math.ceil(power / 2) : -power, dTxt: hit ? "" : null });
     if (half) {
       const ids = (o.half || []).filter(used).concat(kOnly ? ["k"] : []);
       const evNames = ids.filter(id => id !== "k" && id !== C.arg).map(id => (c.evidence.find(e => e.id === id) || {}).name).filter(Boolean);
@@ -23656,8 +23667,8 @@ const RIVALS0 = [
   { name: "우리들 법률사무소", rep: 16, style: "field" }
 ];
 const GRADES = [
-  { g: "S", min: 600000, t: "한국 최고의 로펌" }, { g: "A", min: 350000, t: "한국 10대 로펌" },
-  { g: "B", min: 150000, t: "안정된 중견 로펌" }, { g: "C", min: 30000, t: "생계형 사무소" }, { g: "D", min: -Infinity, t: "간판만 달았던 법인" }
+  { g: "S", min: 500000, t: "한국 최고의 로펌" }, { g: "A", min: 200000, t: "한국 10대 로펌" },
+  { g: "B", min: 70000, t: "안정된 중견 로펌" }, { g: "C", min: 30000, t: "생계형 사무소" }, { g: "D", min: -Infinity, t: "간판만 달았던 법인" }
 ];
 const opsAssoc = id => ASSOC_POOL.find(a => a.id === id);
 const myAssoc = id => (S.assocs || []).find(a => a.id === id);
@@ -23681,9 +23692,23 @@ const opsTaken = () => (S.list || []).filter(x => x.who && x.who !== "out").leng
 // 명성은 사무실 상한까지만 오른다(이미 넘었으면 그대로)
 const opsRepAdd = d => { S.rep = Math.max(0, Math.min(Math.max(office().repCap, S.rep), S.rep + d)); };
 const shortFirm = n => n.replace(/ ?(법률사무소|법무법인)$/, "");
-// 사무실 그림 아래 줄: 고용 변호사·직원 얼굴
-const opsSeats = () => `<div class="mk-seats">${(S.assocs || []).map(a => `<div class="ofc-seat on"><img src="${a.face}" alt=""><span>${esc(a.name)}</span></div>`).join("")}
-  ${Object.entries(S.crew || {}).flatMap(([k, l]) => l.map(id => `<div class="ofc-seat on"><img src="assets/staff/${pickPerson(k, id).face}.webp" alt=""><span>${esc(pickPerson(k, id).name)}</span></div>`)).join("")}</div>`;
+// 사무실 그림 맨 아래 한 줄: 고용 변호사·직원 얼굴. 6명이 넘으면 다섯 명 + [+숫자], 누르면 그림 밑으로 나머지가 펼쳐진다
+let opsSeatRest = "";
+const opsSeats = () => {
+  const seat = (img, name) => `<div class="ofc-seat on"><img src="${img}" alt=""><span>${esc(name)}</span></div>`;
+  const all = (S.assocs || []).map(a => seat(a.face, a.name))
+    .concat(Object.entries(S.crew || {}).flatMap(([k, l]) => l.map(id => seat(`assets/staff/${pickPerson(k, id).face}.webp`, pickPerson(k, id).name))));
+  const show6 = all.length > 6 ? all.slice(0, 5) : all;
+  opsSeatRest = all.length > 6 ? all.slice(5).join("") : "";
+  return `<div class="mk-seats">${show6.join("")}${opsSeatRest ? `<button class="ofc-seat mk-more" aria-expanded="false"><b>+${all.length - 5}</b><span>더 보기</span></button>` : ""}</div>`;
+};
+document.addEventListener("click", e => {
+  const b = e.target.closest(".mk-more"); if (!b) return;
+  const ban = b.closest(".ofc-banner"), nx = ban.nextElementSibling;
+  if (nx && nx.classList.contains("mk-fold")) { nx.remove(); b.setAttribute("aria-expanded", "false"); b.querySelector("span").textContent = "더 보기"; return; }
+  ban.insertAdjacentHTML("afterend", `<div class="mk-fold">${opsSeatRest}</div>`);
+  b.setAttribute("aria-expanded", "true"); b.querySelector("span").textContent = "접기";
+});
 const opsFace = who => who === "me" ? heroOf().img : (myAssoc(who) || {}).face;
 const opsName = who => who === "me" ? (S.name || heroOf().name) : (myAssoc(who) || {}).name;
 
@@ -23772,30 +23797,159 @@ function opsAdBoost() {
   if (a.yt && Math.random() < 0.1) { b += 0.6; S.viral = true; } else S.viral = false;
   return b;
 }
-// 다른 법인 소식: 지난달 우리가 못 맡은 손님이 어디로 갔는지, 경쟁 법인이 뭘 하는지
+/* ---------- 경쟁 법인: 손님 행방 · 뒷이야기 · 움직임 · 맞대결 · 판도 · 올해의 로펌 · 스카우트 ---------- */
+// 한빛은 광고, 정의는 싼 수임료, 우리들은 형사 전문으로 손님을 끌어간다
 const RIVAL_NEWS = {
   ad: ["{f}, 지하철역마다 광고판을 걸었다", "{f} 대표가 아침 방송 법률 상담에 고정 출연한다", "{f} 유튜브 채널 구독자가 10만을 넘었다", "{f}, 포털 검색 광고 첫 줄을 차지했다"],
   cheap: ["{f}, 착수금을 또 내렸다", "{f}에 손님이 몰려 상담 대기가 2주라고 한다", "{f}에서 패소한 의뢰인들이 항의하러 몰려갔다", "{f}, 변호사 둘을 새로 뽑았다"],
-  field: ["{f}, 형사 전문 변호사를 영입했다", "{f}{이} 이혼 사건에서 잇따라 이겼다", "{f}, 노동 사건 큰 승소로 신문에 났다", "{f} 대표가 변호사회 강연에 나섰다"]
+  field: ["{f}, 형사 전문 변호사를 영입했다", "{f}{이} 형사 사건에서 잇따라 무죄를 받았다", "{f}, 형사 사건 큰 승소로 신문에 났다", "{f} 대표가 변호사회 강연에 나섰다"]
 };
-// 받침 따라 조사: 「한빛」과 / 「정의」와
+// 우리가 앞설 때 경쟁 법인이 하는 일
+const RIVAL_MOVE = { ad: "{f}, 우리를 따라잡겠다며 광고를 두 배로 늘렸다", cheap: "{f}, 착수금을 크게 내리며 손님을 끌어모은다", field: "{f}, 우리 변호사들에게 연락을 돌린다는 소문이다" };
+const RIVAL_FIELD = "형사";
+// 받침 따라 조사: 「한빛」과 / 「정의」와, 「한빛」으로 / 「우리들」로
 const hasJong = w => { const ch = (String(w).match(/[가-힣](?=[^가-힣]*$)/) || [""])[0]; return !!ch && (ch.charCodeAt(0) - 0xac00) % 28 > 0; };
+const rieul = w => { const ch = (String(w).match(/[가-힣](?=[^가-힣]*$)/) || [""])[0]; return !!ch && (ch.charCodeAt(0) - 0xac00) % 28 === 8; };
 const fq = (n, a, b) => `「${shortFirm(n)}」${hasJong(shortFirm(n)) ? a : b}`;
+const fro = n => `「${shortFirm(n)}」${hasJong(shortFirm(n)) && !rieul(shortFirm(n)) ? "으로" : "로"}`;
+const rivalYr = r => (r.yr = r.yr || { k: 0, w: 0, rev: 0 });
+const pickByPull = () => { const rv = S.rivals, t = rv.reduce((a, r) => a + (r.pull || 1), 0); let x = Math.random() * t; return rv.find(r => (x -= (r.pull || 1)) <= 0) || rv[0]; };
+// 못 맡은 손님이 어디로 가나: 형편 빠듯·돈 늦게 주는 손님 → 정의, 형사 → 우리들, 나머지는 한빛 쪽이 많게
+function routeLost(c, pay) {
+  const w = S.rivals.map(r => (r.pull || 1) * (r.style === "cheap" && (payStyle(c) === "poor" || pay !== "good") ? 3 : 1)
+    * (r.style === "field" && isCrim(c) ? 3 : 1) * (r.style === "ad" ? 1.5 : 1));
+  let x = Math.random() * w.reduce((a, b) => a + b, 0), i = 0;
+  for (; i < w.length - 1; i++) { x -= w[i]; if (x <= 0) break; }
+  return S.rivals[i];
+}
+const whyOf = (r, c) => r.style === "ad" ? "광고 보고" : r.style === "cheap" ? "싸서" : isCrim(c) ? `${RIVAL_FIELD} 전문이라` : "소개로";
+// 달 말: 경쟁 법인 쪽 한 달 — 우리가 못 맡은 손님의 행방과 결과, 명성, 순위, 움직임
+function opsRivalMonth() {
+  const lost = [];
+  S.list.forEach(x => { if (x.who === "out") lost.push({ id: x.id, pay: x.pay, back: true }); });
+  S.reports.forEach(r => { if (r.status === "out") lost.push({ id: r.id, pay: r.pay, back: true }); });
+  S.today.forEach(t => { if (t.status === "out" || t.status === "refused") lost.push({ id: t.id, pay: t.pay, back: t.status === "refused" }); });
+  const flow = {}, stories = [];
+  S.rivals.forEach(r => { r.gain = 0; });
+  lost.forEach(l => {
+    const c = BY_ID[l.id]; if (!c) return;
+    const r = routeLost(c, l.pay), why = whyOf(r, c);
+    const win = !c.doomed && Math.random() < 0.35 + r.rep / 200;
+    (flow[r.name] = flow[r.name] || { n: 0, why: {} }).n++; flow[r.name].why[why] = (flow[r.name].why[why] || 0) + 1;
+    r.gain += c.doomed ? -1 : win ? 0.4 * c.tier : -0.4;
+    rivalYr(r).k++; if (win) r.yr.w++;
+    stories.push({ name: c.client.name, firm: r.name, win, doomed: !!c.doomed, back: l.back, tier: c.tier });
+  });
+  (S.lostThink || []).forEach(t => { const c = BY_ID[t.id]; if (!c) return; const r = routeLost(c, t.pay); t.firm = r.name; t.why = whyOf(r, c); rivalYr(r).k++; });
+  S.flow = Object.entries(flow).map(([name, f]) => ({ name, n: f.n, why: Object.entries(f.why).sort((a, b) => b[1] - a[1])[0][0] })).sort((a, b) => b.n - a.n);
+  // 뒷이야기 하나: 돌려보낸 지는 사건을 다른 법인이 맡아 졌으면 그걸, 아니면 놓친 큰 사건을 이긴 것
+  S.story = stories.find(s => s.back && s.doomed) || stories.filter(s => s.win).sort((a, b) => b.tier - a.tier)[0] || null;
+  // 명성: 행방 사건 결과 + 원래 손님 몫, 매출
+  const avg = (S.mon.fee + S.mon.bonus) / Math.max(1, S.share.me);
+  S.rivals.forEach(r => {
+    const share = S.share[r.name] || 3, wr = Math.min(0.85, 0.45 + r.rep / 250);
+    r.rev = Math.round(share * (avg || 300) * (0.8 + Math.random() * 0.5) / 10) * 10;
+    // 경쟁 법인도 커진다: 매달 +1.5~2(변호사님 지시), 여기에 못 맡은 손님 사건 결과
+    r.rep = Math.max(5, Math.min(100, r.rep + 1.5 + Math.random() * 0.5 + Math.round(r.gain)));
+    const y = rivalYr(r); y.k += share; y.w += Math.round(share * wr); y.rev += r.rev;
+  });
+  const my = (S.myYr = S.myYr || { k: 0, w: 0, rev: 0 });
+  my.k += S.mon.results.length; my.w += S.mon.results.filter(x => x.res === "win").length; my.rev += S.mon.fee + S.mon.bonus;
+  // 순위(매출)와 움직임: 우리가 1위로 올라서면 한 법인이 성격대로 반응
+  const firms = [{ n: S.firm, v: S.mon.fee + S.mon.bonus }].concat(S.rivals.map(r => ({ n: r.name, v: r.rev }))).sort((a, b) => b.v - a.v);
+  S.rankPrev = S.rank || {}; S.rank = {}; firms.forEach((f, i) => { S.rank[f.n] = i + 1; });
+  S.move = null;
+  if (S.rank[S.firm] === 1 && (S.rankPrev[S.firm] !== 1 || Math.random() < 0.25)) {
+    const r = S.rivals[Math.floor(Math.random() * S.rivals.length)];
+    S.move = RIVAL_MOVE[r.style].replace("{f}", `「${shortFirm(r.name)}」`);
+    if (r.style === "ad") r.boost = 3; else if (r.style === "cheap") r.cut = 3; else S.scoutFrom = r.name;
+  }
+}
+// 달 시작 소식(최대 3줄): 손님 행방 · 뒷이야기 · 움직임
 function opsMakeNews() {
-  const news = [], m = S.mon || {}, rv = S.rivals || [];
+  const news = [], rv = S.rivals || [];
   if (!rv.length || S.day <= 1) return news;
-  const pickR = () => { const t = rv.reduce((a, r) => a + (r.pull || 1), 0); let x = Math.random() * t; return rv.find(r => (x -= (r.pull || 1)) <= 0) || rv[0]; };
-  // 생각해 보고 오겠다던 손님이 다른 법인과 계약
-  (S.lostThink || []).slice(0, 1).forEach(n => news.push(`생각해 보고 오겠다던 ${n} 씨가 ${fq(pickR().name, "과", "와")} 계약했다`));
-  if (m.out) { const r = pickR(), k = Math.max(1, Math.round(m.out * 0.6)); news.push(`우리가 못 맡은 손님 ${m.out}명 중 ${k}명이 ${fq(r.name, "을", "를")} 찾아갔다`); }
-  const top = rv.slice().sort((a, b) => (b.rev || 0) - (a.rev || 0))[0];
-  if (top && (top.rev || 0) > (m.fee || 0) + (m.bonus || 0)) news.push(`「${shortFirm(top.name)}」, 지난달 매출 ${won(top.rev)}으로 동네 1위`);
-  const r = rv[(S.day * 7) % rv.length], list = RIVAL_NEWS[r.style] || RIVAL_NEWS.ad;
-  news.push(list[(S.day + r.name.length) % list.length].replace("{f}{이}", fq(r.name, "이", "가")).replace("{f}에", `「${shortFirm(r.name)}」에`).replace("{f}", `「${shortFirm(r.name)}」`));
-  S.lostThink = [];
+  const th = (S.lostThink || []).find(t => t.firm);
+  if (th) news.push(`생각해 보고 오겠다던 ${th.name} 씨가 ${fq(th.firm, "과", "와")} 계약했다(${th.why.replace(/ 보고$|이라$|로$/, "")})`);
+  else if ((S.flow || []).length) news.push(`못 맡은 손님 ${S.flow.reduce((a, f) => a + f.n, 0)}명 → ${S.flow.map(f => `${shortFirm(f.name)} ${f.n}(${f.why.replace(/ 보고$|이라$|로$/, "")})`).join(" · ")}`);
+  const s = S.story;
+  if (s) news.push(s.doomed ? `우리가 돌려보낸 ${s.name} 씨 사건, ${fq(s.firm, "이", "가")} 맡아 패소했다` : `우리가 못 맡은 ${s.name} 씨 사건, ${fq(s.firm, "이", "가")} 맡아 이겼다`);
+  if (S.leftNews) news.push(S.leftNews);
+  else if (S.move) news.push(S.move);
+  else { const r = rv[(S.day * 7) % rv.length], list = RIVAL_NEWS[r.style] || RIVAL_NEWS.ad;
+    news.push(list[(S.day + r.name.length) % list.length].replace("{f}{이}", fq(r.name, "이", "가")).replace("{f}에", `「${shortFirm(r.name)}」에`).replace("{f}", `「${shortFirm(r.name)}」`)); }
+  S.lostThink = []; S.story = null; S.flow = []; S.move = null; S.leftNews = null;
   return news.slice(0, 3);
 }
+// 스카우트: 석 달에 한 번 이하. 변호사가 직접 말하거나, 조사원이 먼저 귀띔하거나, 말없이 떠난다
+function opsScoutCheck() {
+  S.scout = null;
+  const next = S.scoutNext; S.scoutNext = null;
+  if (!(S.assocs || []).length || !S.rivals.length) return;
+  let a, rival;
+  if (next && myAssoc(next.id)) { a = myAssoc(next.id); rival = next.rival; }
+  else {
+    if (S.day - (S.scoutAt || -9) < 3 || S.day < 4) return;
+    if (!S.scoutFrom && Math.random() > 0.2) return;
+    const pool = S.assocs.flatMap(x => Array(x.lvl + 1).fill(x)); a = pool[Math.floor(Math.random() * pool.length)];
+    rival = S.scoutFrom || pickByPull().name;
+  }
+  S.scoutFrom = null; S.scoutAt = S.day;
+  const raise = p => Math.round(a.pay * p / 10) * 10;
+  if (!next && crewOf("inv").length) { S.scout = { kind: "warn", id: a.id, rival, raise: raise(0.15) }; return; }
+  if (a.trait === "nice" || Math.random() < 0.5) { S.scout = { kind: "ask", id: a.id, rival, raise: raise(0.3) }; return; }
+  // 말없이 떠남
+  S.assocs = S.assocs.filter(x => x.id !== a.id);
+  const r = S.rivals.find(x => x.name === rival); if (r) r.rep = Math.min(100, r.rep + 2);
+  S.leftNews = `${a.name} 변호사가 사직서를 두고 ${fro(rival)} 옮겼다`;
+}
+// 달 시작 화면에 붙는 스카우트 장면. 고르면 true 를 돌려주며 다시 그린다
+function opsScoutBlock() {
+  const sc = S.scout; if (!sc) return null;
+  const a = myAssoc(sc.id); if (!a) { S.scout = null; return null; }
+  const firm = `「${shortFirm(sc.rival)}」`;
+  if (sc.kind === "warn") {
+    const p = pickPerson("inv", crewOf("inv")[0]);
+    return { html: staffSayP(p, `대표님, ${a.name} 변호사가 ${firm} 사람을 만나는 걸 봤어요.`),
+      btns: [[`미리 올려 준다 (월 +${won(sc.raise)})`, () => { a.pay += sc.raise; S.scout = null; toast(`${a.name} 변호사 월급을 올렸습니다.`); }],
+             ["모른 척한다", () => { S.scoutNext = { id: a.id, rival: sc.rival }; S.scout = null; }]] };
+  }
+  return { html: `<div class="sec staff-say"><div class="sf"><img src="${a.face}" alt=""></div><div><div class="who">${esc(a.name)}</div>"대표님, ${firm}에서 연락이 왔습니다. 월급을 ${won(sc.raise)} 올려 주시면 남겠습니다."</div></div>`,
+    btns: [["올려 준다", () => { a.pay += sc.raise; S.scout = null; }],
+           ["보낸다", () => { S.assocs = S.assocs.filter(x => x.id !== a.id); const r = S.rivals.find(x => x.name === sc.rival); if (r) r.rep = Math.min(100, r.rep + 2); S.scout = null; toast(`${a.name} 변호사가 ${fro(sc.rival)} 옮겼습니다.`); }]] };
+}
+// 맞대결 상대(민사만, 다섯 건에 한 건꼴)
+const opsVsPick = c => !isCrim(c) && S.rivals.length && Math.random() < 0.2 ? pickByPull().name : null;
+function opsVsApply(name, res) {
+  const r = S.rivals.find(x => x.name === name), last = S.mon.results[S.mon.results.length - 1];
+  last.vs = name;
+  if (!r || res === "partial") return;
+  if (res === "win") { r.rep = Math.max(5, r.rep - 1); opsRepAdd(1); last.rep += 1; }
+  else { r.rep = Math.min(100, r.rep + 1); opsRepAdd(-1); last.rep -= 1; }
+}
+// 판도표: 법인 · 명성 · 매출 · 순위
+function opsStandings() {
+  S.rank = S.rank || {};
+  const rows = [{ n: S.firm, rep: S.rep, v: S.mon.fee + S.mon.bonus, me: true }].concat(S.rivals.map(r => ({ n: r.name, rep: Math.round(r.rep), v: r.rev || 0 })))
+    .sort((a, b) => (S.rank[a.n] || 9) - (S.rank[b.n] || 9));
+  const mv = n => { const p = (S.rankPrev || {})[n], c = S.rank[n]; return !p || p === c ? `<span class="k-rk">–</span>` : p > c ? `<span class="k-rk up">▲${p - c}</span>` : `<span class="k-rk dn">▼${c - p}</span>`; };
+  return `<div class="pn"><div class="k-sec">판도</div><div class="k-std"><span class="h">법인</span><span class="h">명성</span><span class="h r">매출</span><span class="h r">순위</span>
+    ${rows.map(f => `<span class="${f.me ? "me" : ""}">${S.rank[f.n]}. ${esc(shortFirm(f.n))}</span><span class="${f.me ? "me" : ""}">${f.rep}</span><span class="r ${f.me ? "me" : ""}">${won(f.v)}</span><span class="r">${mv(f.n)}</span>`).join("")}</div></div>`;
+}
+// 올해의 로펌(12·24·36개월 정산 뒤)
+function opsYearAward(next) {
+  const my = S.myYr || { k: 0, w: 0, rev: 0 };
+  const rows = [{ name: S.firm, ...my, me: true }].concat(S.rivals.map(r => ({ name: r.name, ...rivalYr(r) }))).sort((a, b) => b.rev - a.rev);
+  const top = rows[0];
+  show(`<div class="eyebrow">${opsYear()}년차 결산</div><h2>올해의 로펌</h2>
+    <div class="pn k-big"><div class="v" style="font-size:28px">${esc(shortFirm(top.name))}</div><div class="l">${top.me ? "우리가 1위다" : "올해 매출 1위"}</div></div>
+    <div class="pn"><div class="k-std y"><span class="h">법인</span><span class="h r">사건</span><span class="h r">승률</span><span class="h r">매출</span>
+      ${rows.map((f, i) => `<span class="${f.me ? "me" : ""}">${i + 1}. ${esc(shortFirm(f.name))}</span><span class="r">${f.k}</span><span class="r">${f.k ? Math.round(f.w / f.k * 100) : 0}%</span><span class="r ${f.me ? "me" : ""}">${won(f.rev)}</span>`).join("")}</div></div>`,
+    `<button class="btn primary" id="yrNext">${S.day >= OPS_MONTHS ? "결산" : "다음 달"}</button>`);
+  on("#yrNext", () => { S.myYr = { k: 0, w: 0, rev: 0 }; S.rivals.forEach(r => { r.yr = { k: 0, w: 0, rev: 0 }; }); S.yrShown = S.day; save(); next(); });
+}
 function opsNewMonth() {
+  if (S.rivals) opsScoutCheck();
   S.news = opsMakeNews();
   const year = opsYear(), market = [30, 40, 50][Math.min(2, year - 1)] + Math.floor(Math.random() * 7) - 3;
   // 광고 나이·구독자
@@ -23803,7 +23957,11 @@ function opsNewMonth() {
   ADS.forEach(ad => { S.adAge[ad.k] = S.ads[ad.k] ? (S.adAge[ad.k] || 0) + 1 : Math.max(0, (S.adAge[ad.k] || 0) - 1); });
   S.subs = S.ads.yt ? (S.subs || 0) + 1500 + Math.floor(Math.random() * 2500) : Math.floor((S.subs || 0) * 0.97);
   const mine = opsPull(S.rep, opsAdBoost(), S.price);
-  S.rivals.forEach(r => { r.ad = r.style === "ad" ? 0.3 + Math.random() * 0.2 : Math.random() * 0.15; r.pull = opsPull(r.rep, r.ad, r.style === "cheap" ? "low" : "mid"); });
+  S.rivals.forEach(r => {
+    r.ad = (r.style === "ad" ? 0.3 + Math.random() * 0.2 : Math.random() * 0.15) + (r.boost > 0 ? 0.3 : 0);
+    r.pull = opsPull(r.rep, r.ad, r.style === "cheap" ? "low" : "mid") * (r.cut > 0 ? 1.2 : 1);
+    if (r.boost > 0) r.boost--; if (r.cut > 0) r.cut--;
+  });
   const total = mine + S.rivals.reduce((a, r) => a + r.pull, 0);
   const n = Math.max(3, Math.round(market * mine / total));
   S.market = market; S.share = { me: n };
@@ -23844,11 +24002,14 @@ function opsIntro() {
   const name = who ? `${who.name} ${role}` : `${S.name || heroOf().name} 변호사`;
   const line = who ? `대표님, 이번 달에는 ${kCount(n)}의 손님이 찾아왔습니다. 누구에게 사건을 맡기시겠습니까?`
     : `이번 달에는 ${kCount(n)}의 손님이 왔다. 사건들을 맡을지 결정해 보자.`;
+  const sc = opsScoutBlock();
   const news = (S.news || []).length ? `<div class="pn k-news"><div class="k-sec">이번 달 소식</div>${S.news.map(t => `<div class="k-nw">${esc(t)}</div>`).join("")}</div>` : "";
   show(`<div class="ofc-banner" style="background-image:url('${sceneImage("office")}')"><div class="ofc-name">${esc(S.firm)}<small>${monthLabel(S.day)}</small></div>${opsSeats()}</div>
     ${news}
     <div class="op-hero" style="margin-top:6px"><div class="op-face"><img src="${face}" alt=""></div><div><div class="eyebrow">${esc(name)}</div></div></div>
-    <p class="op-line">${esc(line)}</p>`, `<button class="btn primary" id="inNext">의뢰인 보기</button>`);
+    <p class="op-line">${esc(line)}</p>${sc ? sc.html : ""}`,
+    sc ? `<div class="row2">${sc.btns.map((b, i) => `<button class="btn" data-sc="${i}">${esc(b[0])}</button>`).join("")}</div>` : `<button class="btn primary" id="inNext">의뢰인 보기</button>`);
+  on("[data-sc]", e => { sc.btns[+e.currentTarget.dataset.sc][1](); save(); opsIntro(); });
   on("#inNext", () => { S.intro = true; save(); opsAssign(); });
 }
 function opsAssign() {
@@ -23861,7 +24022,7 @@ function opsAssign() {
     const c = BY_ID[x.id];
     const picks = people.map(p => `<i class="${x.who === p ? "on" : ""}" data-as="${i}" data-p="${p}"><img src="${opsFace(p)}" alt=""></i>`).join("")
       + `<i class="${x.who === "out" ? "on" : ""}" data-as="${i}" data-p="out">✕</i>`;
-    return `<div class="k-card"><div class="portrait">${portrait(c)}</div><div style="min-width:0"><div class="nm">${esc(c.client.name)}${x.back ? ` <small class="note">다시 옴</small>` : ""}<span class="ct">${kindLabel(c)} · ${esc(c.category)} · ${"★".repeat(c.tier)}</span></div><div class="k-pick">${picks}</div></div></div>`;
+    return `<div class="k-card"><div class="portrait">${portrait(c)}</div><div style="min-width:0"><div class="nm">${esc(c.client.name)}${x.back ? ` <small class="note">다시 옴</small>` : ""}<span class="ct"><b class="k-tier">${"★".repeat(c.tier)}</b> ${kindLabel(c)} · ${esc(c.category)}</span></div><div class="k-pick">${picks}</div></div></div>`;
   };
   show(`<div class="k-head"><h2>${monthLabel(S.day)} 의뢰인 ${S.list.length}명</h2><div class="k-cap">${head}</div></div>
     <div class="k-list">${S.list.map(card).join("")}</div>`,
@@ -23920,7 +24081,7 @@ function opsMine() {
     const c = BY_ID[t.id];
     const act = t.status === "wait" ? `<button class="mini gold" data-meet="${i}">상담</button>` : `<div class="st">${st[t.status] || ""}</div>`;
     return `<div class="visitor ${t.status === "wait" ? "" : "dim"}"><div class="portrait">${portrait(c)}</div>
-      <div><div class="vn">${esc(c.client.name)}</div><div class="vm">${kindLabel(c)} · ${esc(c.category)} · ${"★".repeat(c.tier)}</div></div>${act}</div>`;
+      <div><div class="vn">${esc(c.client.name)}</div><div class="vm"><b class="k-tier">${"★".repeat(c.tier)}</b> ${kindLabel(c)} · ${esc(c.category)}</div></div>${act}</div>`;
   }).join("");
   show(`<h2>내 의뢰인 ${S.today.length}명</h2><div class="visitors">${rows || `<div class="note">이번 달 직접 맡은 의뢰인이 없습니다.</div>`}</div>`,
     `<button class="btn primary" id="mBack">돌아가기</button>`);
@@ -24125,8 +24286,8 @@ function opsRun(watch) {
   const total = S.today.filter(t => t.status === "ready").length + S.reports.filter(r => r.status === "ok").length;
   let spare = crewOf("mgr").length * CREW_LOAD.mgr;
   const slip = () => { if (spare > 0) { spare--; return 0; } return Math.random() < 0.3 ? -2 : 0; };
-  S.today.filter(t => t.status === "ready").forEach(t => jobs.push({ kind: "me", t, slip: slip() }));
-  S.reports.filter(r => r.status === "ok").forEach(r => jobs.push({ kind: "as", r, slip: slip() }));
+  S.today.filter(t => t.status === "ready").forEach(t => jobs.push({ kind: "me", t, slip: slip(), vs: opsVsPick(BY_ID[t.id]) }));
+  S.reports.filter(r => r.status === "ok").forEach(r => jobs.push({ kind: "as", r, slip: slip(), vs: opsVsPick(BY_ID[r.id]) }));
   S.mon.total = total;
   let k = 0;
   const next = () => {
@@ -24134,7 +24295,7 @@ function opsRun(watch) {
     const j = jobs[k++];
     if (j.kind === "me" && watch) {
       const c = BY_ID[j.t.id];
-      C = { c, sub: new Set(j.t.prep.sub), arg: j.t.prep.arg, card: j.t.prep.card, confessed: j.t.prep.confessed, fee: j.t.prep.fee, bonus: j.t.prep.bonus, opened: {}, asked: [] };
+      C = { c, sub: new Set(j.t.prep.sub), arg: j.t.prep.arg, card: j.t.prep.card, confessed: j.t.prep.confessed, fee: j.t.prep.fee, bonus: j.t.prep.bonus, opened: {}, asked: [], vs: j.vs ? shortFirm(j.vs) : null };
       S.opsJob = { j, next }; runTrial(); return;
     }
     opsSettleJob(j, null); next();
@@ -24147,7 +24308,9 @@ function opsSettleJob(j, score) {
     const c = BY_ID[j.t.id], p = j.t.prep;
     j.t.status = "done";
     const sc = score != null ? score + j.slip : trialScore(c, new Set(p.sub), p.arg) + noise() + j.slip;
-    opsBook(c, "me", resOf(sc, c), p.fee, p.bonus, j.t.pay, j.slip);
+    const res = resOf(sc, c);
+    opsBook(c, "me", res, p.fee, p.bonus, j.t.pay, j.slip);
+    if (j.vs) opsVsApply(j.vs, res);
   } else {
     const r = j.r, c = BY_ID[r.id], a = myAssoc(r.who);
     r.status = "done";
@@ -24157,6 +24320,7 @@ function opsSettleJob(j, score) {
     const res = resOf(sc, c);
     S.money += r.fee; S.mon.fee += r.fee;
     opsBook(c, r.who, res, r.fee, r.bonus, a.trait === "nice" && r.pay === "late" && Math.random() < 0.5 ? "good" : r.pay, j.slip);
+    if (j.vs) opsVsApply(j.vs, res);
     if (res !== "lose") { a.wins = (a.wins || 0) + (res === "win" ? 1 : 0.5); const nl = Math.max(a.lvl, lvlOf(a.wins)); if (nl > a.lvl) { a.lvl = nl; S.mon.up = (S.mon.up || []).concat(a.name); } }
   }
 }
@@ -24184,6 +24348,7 @@ function opsVerdict(score) {
     <div class="ledger vd-ledger"><span>착수금</span><span class="r">${won(r.fee)}</span><span>성공보수</span><span class="r">${r.bonus ? won(r.bonus) + " (다음 달)" : "0원"}</span>
     <span class="sum">명성</span><span class="r sum ${r.rep > 0 ? "pos" : r.rep < 0 ? "neg" : "zero"}">${r.rep > 0 ? "+" : r.rep < 0 ? "−" : "±"}${Math.abs(r.rep)}</span></div></div>
     <div class="judgment"><div class="lbl">주문</div>${esc(c.outcomes[r.res])}</div>
+    ${r.vs ? `<div class="pn">상대 대리인 「${esc(shortFirm(r.vs))}」 · ${r.res === "win" ? "우리 명성 +1, 상대 명성 −1" : r.res === "lose" ? "상대 명성 +1, 우리 명성 −1" : "무승부"}</div>` : ""}
     ${job.j.slip ? `<div class="pn warn">사무장 보조를 못 받아 업무 실수가 있었습니다 (−2)</div>` : ""}`;
   renderHud();
   el.scrollIntoView({ block: "start", behavior: REDUCED ? "auto" : "smooth" });
@@ -24195,7 +24360,7 @@ function opsResults() {
   const rows = S.mon.results.map(x => {
     const c = BY_ID[x.id], lab = resultLabel(c, x.res);
     return `<div class="mk-res"><img src="${opsFace(x.who)}" alt=""><div><div class="vn">${esc(c.client.name)} · ${esc(c.category)}</div>
-      <div class="vm">${esc(opsName(x.who))} · 착수금 ${won(x.fee)}${x.bonus ? ` · 성공보수 ${won(x.bonus)} 다음 달` : ""}${x.slip ? " · 업무 실수" : ""}</div></div>
+      <div class="vm">${esc(opsName(x.who))} · 착수금 ${won(x.fee)}${x.bonus ? ` · 성공보수 ${won(x.bonus)} 다음 달` : ""}${x.slip ? " · 업무 실수" : ""}${x.vs ? ` · <b class="k-vs">vs ${esc(shortFirm(x.vs))}</b>` : ""}</div></div>
       <div class="tag ${x.res === "win" ? "w" : x.res === "lose" ? "l" : "p"}">${lab}</div></div>`;
   }).join("");
   show(`<h2>${monthLabel(S.day)} 사건 결과</h2><div class="visitors">${rows || `<div class="note">이번 달 재판이 없었습니다.</div>`}</div>
@@ -24218,30 +24383,27 @@ function opsSettle() {
     S.mon.cost = opsCost(); S.mon.tax = Math.round((S.mon.fee + bonus) * TAX_RATE / 10) * 10;
     S.money -= S.mon.cost + S.mon.tax;
     if (S.ads.tv) opsRepAdd(1);
-    // 경쟁 사무소 매출과 명성
-    const avg = (S.mon.fee + bonus) / Math.max(1, S.share.me);
-    S.rivals.forEach(r => { r.rev = Math.round((S.share[r.name] || 3) * (avg || 300) * (0.8 + Math.random() * 0.5) / 10) * 10; r.rep = Math.max(5, r.rep + Math.floor(Math.random() * 4) - 1); });
     S.low = S.money < opsCost() ? (S.low || 0) + 1 : 0;
     S.mon.settled = true;
     S.hist.push({ m: S.day, rev: S.mon.fee + bonus });
     // 생각해 보고 온다던 손님: 40%(인테리어 단계마다 +10%) 다음 달 다시 옴
     const comeP = 0.4 + (S.interior || 0) * 0.1;
     S.back = []; S.lostThink = [];
-    (S.thinkers || []).forEach(t => Math.random() < comeP ? S.back.push({ id: t.id, pay: t.pay, back: true }) : S.lostThink.push(BY_ID[t.id].client.name));
+    (S.thinkers || []).forEach(t => Math.random() < comeP ? S.back.push({ id: t.id, pay: t.pay, back: true }) : S.lostThink.push({ id: t.id, name: BY_ID[t.id].client.name, pay: t.pay }));
     S.thinkers = [];
+    // 경쟁 법인: 손님 행방·결과·명성·매출·순위·움직임
+    opsRivalMonth();
     save();
     if (S.low >= 3) return screenBankrupt();
   }
   const rev = S.mon.fee + S.mon.bonus;
-  const firms = [{ n: S.firm, v: rev, me: true }].concat(S.rivals.map(r => ({ n: r.name, v: r.rev }))).sort((a, b) => b.v - a.v);
-  const top = Math.max(1, ...firms.map(f => f.v));
   const due = S.recv.filter(x => x.state === "wait" || x.state === "bad" || x.state === "suit");
   const inv = crewOf("inv").length;
   show(`<div class="eyebrow">${monthLabel(S.day)}</div><h2>이번 달 정산</h2>
     <div class="pn k-big"><div class="l">매출</div><div class="v">${won(rev)}</div><div class="d ${rev - S.mon.cost - S.mon.tax < 0 ? "neg" : ""}">남은 돈 ${rev - S.mon.cost - S.mon.tax >= 0 ? "+" : "−"}${won(Math.abs(rev - S.mon.cost - S.mon.tax))}</div></div>
     <div class="ledger"><span>착수금</span><span class="r">${won(S.mon.fee)}</span><span>성공보수</span><span class="r">${won(S.mon.bonus)}</span>
       <span>고정비 <span class="note">(월급·임대료·광고)</span></span><span class="r neg">−${won(S.mon.cost)}</span><span>세금</span><span class="r neg">−${won(S.mon.tax)}</span></div>
-    <div class="pn"><div class="k-sec">매출 순위</div>${firms.map(f => `<div class="k-bar ${f.me ? "me" : ""}"><span>${esc(f.n.replace(/ ?(법률사무소|법무법인)$/, ""))}</span><i style="width:${f.v / top * 100}%"></i><b>${won(f.v)}</b></div>`).join("")}</div>
+    ${opsStandings()}
     ${due.length ? `<div class="pn"><div class="k-sec">받을 돈</div>${due.map(x => `<div class="k-due">
         <span class="${x.state === "bad" ? "neg" : ""}">${esc(x.name)}</span><span class="${x.state === "bad" ? "neg" : ""}">${won(x.amt)} · ${x.state === "bad" ? "안 줌" : x.state === "suit" ? "지급명령 중" : x.due <= S.day + 1 ? "다음 달" : (x.due - S.day) + "달 뒤"}</span></div>
         ${x.state === "bad" ? `<div class="k-act"><button class="mini" data-rc="${S.recv.indexOf(x)}" data-a="dun">독촉</button><button class="mini gold" data-rc="${S.recv.indexOf(x)}" data-a="suit">지급명령 50만</button><button class="mini" data-rc="${S.recv.indexOf(x)}" data-a="drop">포기</button></div>
@@ -24255,9 +24417,15 @@ function opsSettle() {
     save(); opsSettle();
   });
   on("#nextM", () => {
+    if (S.day % 12 === 0 && S.yrShown !== S.day) return opsYearAward(opsAfterYear);
     if (S.day >= OPS_MONTHS) { S.opsEnd = true; save(); return opsFinal(); }
     S.day++; opsNewMonth(); save(); opsAssign();
   });
+}
+// 정산 뒤 다음 달(또는 결산)로
+function opsAfterYear() {
+  if (S.day >= OPS_MONTHS) { S.opsEnd = true; save(); return opsFinal(); }
+  S.day++; opsNewMonth(); save(); opsAssign();
 }
 function opsFinal() {
   const recv = S.recv.filter(x => x.state === "wait" || x.state === "suit").reduce((a, x) => a + x.amt, 0);
