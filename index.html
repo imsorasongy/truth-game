@@ -23649,15 +23649,15 @@ const ADS = [
   { k: "tv", name: "방송·언론 광고", cost: 1000, from: 3, role: "명성 +1 · 큰 사건" }
 ];
 const PRICE = { low: { name: "싸게", fee: 0.85, pull: 1.25 }, mid: { name: "보통", fee: 1, pull: 1 }, high: { name: "비싸게", fee: 1.2, pull: 0.8 } };
-const INTERIOR_COST = [3000, 5000, 8000, 15000];
+const INTERIOR_COST = [500, 1000, 2000, 4000];
 const RIVALS0 = [
   { name: "한빛법률사무소", rep: 30, style: "ad" },
   { name: "정의 법무법인", rep: 22, style: "cheap" },
   { name: "우리들 법률사무소", rep: 16, style: "field" }
 ];
 const GRADES = [
-  { g: "S", min: 300000, t: "한국 최고의 로펌" }, { g: "A", min: 150000, t: "한국 10대 로펌" },
-  { g: "B", min: 60000, t: "안정된 중견 로펌" }, { g: "C", min: 10000, t: "생계형 사무소" }, { g: "D", min: -Infinity, t: "간판만 달았던 법인" }
+  { g: "S", min: 600000, t: "한국 최고의 로펌" }, { g: "A", min: 350000, t: "한국 10대 로펌" },
+  { g: "B", min: 150000, t: "안정된 중견 로펌" }, { g: "C", min: 30000, t: "생계형 사무소" }, { g: "D", min: -Infinity, t: "간판만 달았던 법인" }
 ];
 const opsAssoc = id => ASSOC_POOL.find(a => a.id === id);
 const myAssoc = id => (S.assocs || []).find(a => a.id === id);
@@ -24313,7 +24313,7 @@ function opsAds() {
       const lock = lvl < a.from, on_ = !!S.ads[a.k];
       const extra = a.k === "yt" && S.subs ? ` · 구독자 ${(S.subs / 10000).toFixed(1)}만명` : a.k === "blog" && on_ ? ` · ${S.adAge.blog || 0}달째` : "";
       return `<button class="mk-ad ${lock ? "lock" : ""}" data-ad="${a.k}" style="font:inherit;color:inherit;text-align:left;width:100%"><span class="t">${a.name} <span class="note">월 ${won(a.cost)}</span></span>
-        <span class="sw ${on_ ? "on" : ""}">${lock ? "잠김" : on_ ? "켬" : "끔"}</span><span class="d">${a.role}${extra}</span></button>`;
+        <span class="sw ${on_ ? "on" : ""}">${lock ? "잠김" : on_ ? "켬" : "끔"}</span>${extra ? `<span class="d">${extra.replace(/^ · /, "")}</span>` : ""}</button>`;
     }).join("")}</div>`, `<button class="btn primary" id="adBack">돌아가기</button>`);
   on("[data-ad]", e => { const a = ADS.find(x => x.k === e.currentTarget.dataset.ad); if (lvl < a.from) return toast(`${OFFICES[a.from].name.split(" ")[0]}부터 할 수 있습니다.`); S.ads[a.k] = !S.ads[a.k]; save(); opsAds(); });
   on("#adBack", opsOffice);
