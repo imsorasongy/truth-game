@@ -23842,7 +23842,11 @@ function opsAssign() {
     if (x.who === p) x.who = null;
     else if (p === "out" || usedOf(p) < capOf(p)) x.who = p;
     else return toast(`${opsName(p)}은(는) 이번 달 더 맡을 수 없습니다.`);
-    const y = window.scrollY; opsAssign(); window.scrollTo({ top: y });
+    // 화면을 다시 그리지 않고 누른 칸과 위쪽 건수만 바꾼다(내려 둔 자리 그대로)
+    const i = e.currentTarget.dataset.as;
+    document.querySelectorAll(`[data-as="${i}"]`).forEach(el => el.classList.toggle("on", el.dataset.p === x.who));
+    document.querySelector(".k-cap").innerHTML = people.map(q => `<span><img src="${opsFace(q)}" alt=""><b>${usedOf(q)}</b>/${capOf(q)}</span>`).join("");
+    save(); renderHud();
   });
   on("#asDone", () => {
     S.list.forEach(x => { if (!x.who || x.who === "out") { x.who = "out"; x.status = "out"; S.mon.out++; } });
