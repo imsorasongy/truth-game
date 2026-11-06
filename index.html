@@ -256,6 +256,8 @@ html[data-scene="court"] #backdrop::after { background: linear-gradient(180deg, 
 .op-dots { display: flex; gap: 6px; }
 .op-dots i { width: 22px; height: 4px; border-radius: 2px; background: #c9a24a40; }
 .op-dots i.on { background: var(--brass); }
+.op-pic { margin: -8px -6px 2px; border-radius: 6px; overflow: hidden; border: 1px solid #c9a24a55; aspect-ratio: 3 / 2; background: #140d09; }
+.op-pic img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .op-art { min-height: 120px; display: flex; align-items: center; padding-block: 6px; }
 .op-face { width: 120px; height: 120px; border-radius: 50%; overflow: hidden; border: 3px solid var(--brass); box-shadow: 0 6px 18px #000a; }
 .op-face img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 18%; display: block; }
@@ -22386,9 +22388,16 @@ function screenCreate() {
 }
 
 /* ---------- 오프닝 (주인공 독백) ---------- */
+// 오프닝 세 장: 그림 한 장 + 한 줄. 그림(assets/op/)이 아직 없으면 그림 자리만 빠진다. 주인공이 보이는 그림은 -m / -f 두 장
 const OPENING = [
-  { scene: "office", step: "개업 첫날",
-    body: f => `드디어 개업이다. 「${f}」. 간판은 작아도 내 이름을 건 사무실이다. 이길수록 이름이 알려지고, 그러면 더 큰 사무실에서 더 큰 사건을 맡게 되겠지. 언젠가는 대한민국 최고의 변호사가 되고 말 거다.` },
+  { scene: "office", step: "개업 첫날", img: "assets/op/s1.webp", body: f => `드디어 개업이다. 「${f}」. 간판은 작아도 내 이름을 건 사무실이다.` },
+  { scene: "office", step: "개업 첫날", img: "assets/op/s2.webp", body: () => "이길수록 이름이 알려지고, 그러면 더 큰 사무실에서 더 큰 사건을 맡게 되겠지." },
+  { scene: "office", step: "개업 첫날", img: "assets/op/s3.webp", body: () => "언젠가는 대한민국 최고의 변호사가 되고 말 거다." }
+];
+const OPS_OPENING = [
+  { scene: "office", step: "설립", img: h => `assets/op/o1-${h}.webp`, body: () => "긴 어쏘 시절을 지나, 동기 두 명과 함께 법무법인을 설립했다. 이제 새로운 시작이라는 생각에 다들 열정이 넘쳤었지." },
+  { scene: "office", step: "설립", img: h => `assets/op/o2-${h}.webp`, body: () => "하지만 동기들은 어느 순간 법조계에 관심이 없어졌는지 이름만 걸어놨을 뿐 출근도 안 한다." },
+  { scene: "office", step: "설립", img: "assets/op/o3.webp", body: () => "내가 혼자 이 법인을 살려 내야 한다. 아니, 보란 듯이 이 법무법인을 한국 최고의 법무법인으로 만들어 내겠다." }
 ];
 // 게임 방법: 지금 규칙 그대로 한 화면에
 const HOWTO = [
@@ -22430,20 +22439,21 @@ function screenHowto(back) {
     `<button class="btn primary" id="howBack">돌아가기</button>`, "office");
   on("#howBack", back);
 }
-function screenOpening(next, i = 0, doneLabel = "개업하기") {
-  const o = OPENING[i], last = i === OPENING.length - 1, hero = heroOf();
+function screenOpening(next, i = 0, doneLabel = "개업하기", cards = OPENING) {
+  const o = cards[i], last = i === cards.length - 1, hero = heroOf();
   const name = who().name || hero.name, firm = who().firm || "새벽 법률사무소";
+  const img = typeof o.img === "function" ? o.img(heroKey()) : o.img;
   show(`<section class="op">
-      <div class="op-dots" aria-hidden="true">${OPENING.map((_, k) => `<i class="${k === i ? "on" : ""}"></i>`).join("")}</div>
+      <div class="op-dots" aria-hidden="true">${cards.map((_, k) => `<i class="${k === i ? "on" : ""}"></i>`).join("")}</div>
+      ${img ? `<div class="op-pic"><img src="${img}" alt="" onerror="this.parentNode.remove()"></div>` : ""}
       <div class="op-hero"><div class="op-face"><img src="${hero.img}" alt=""></div>
         <div><div class="eyebrow">${esc(o.step)}</div><div class="op-name">${esc(name)} 변호사</div></div></div>
       <p class="op-line">${esc(o.body(firm))}</p>
-      ${o.art ? `<div class="op-art">${o.art}</div>` : ""}
     </section>`,
     `<div class="row2"><button class="btn primary" id="opNext">${last ? doneLabel : "다음"}</button><button class="btn ghost" id="opSkip">${last ? "처음 장으로" : "건너뛰기"}</button></div>`,
     o.scene, "opening");
-  on("#opNext", () => last ? next() : screenOpening(next, i + 1, doneLabel));
-  on("#opSkip", () => last ? screenOpening(next, 0, doneLabel) : next());
+  on("#opNext", () => last ? next() : screenOpening(next, i + 1, doneLabel, cards));
+  on("#opSkip", () => last ? screenOpening(next, 0, doneLabel, cards) : next());
 }
 
 function resume() {
@@ -23749,20 +23759,8 @@ function opsStart() {
   Object.assign(S, { mode: "ops", money: OPS_START_MONEY, rep: 10, assocs: [], crew: { mgr: [], sec: [], inv: [] }, ads: {}, adAge: {}, subs: 0,
     price: "mid", interior: 0, rivals: RIVALS0.map(r => ({ ...r })), recv: [], hist: [], joint: 2, back: [], low: 0 });
   S.firm = S.firm && /법률사무소$/.test(S.firm) ? S.firm.replace(/법률사무소$/, "법무법인") : (S.firm || "새벽 법무법인");
-  const name = S.name || heroOf().name;
-  const lines = [
-    `동료 둘과 함께 「${S.firm}」을 세웠다. 간판 앞에서 셋이 사진도 찍었다.`,
-    "그런데 언제부턴가 두 사람은 출근을 하지 않는다. 연락도 뜸하다.",
-    "이 법인을 혼자 살려 내야 한다. 아니, 보란 듯이 한국 최고의 법무법인으로 만들어 내겠다."
-  ];
-  const step = i => {
-    show(`<section class="op"><div class="op-hero"><div class="op-face"><img src="${heroOf().img}" alt=""></div>
-      <div><div class="eyebrow">${esc(S.firm)}</div><div class="op-name">${esc(name)} 변호사</div></div></div>
-      <p class="op-line">${esc(lines[i])}</p></section>`,
-      `<button class="btn primary" id="opNext">${i === lines.length - 1 ? "시작하기" : "다음"}</button>`, "office", "opening");
-    on("#opNext", () => i === lines.length - 1 ? (opsNewMonth(), save(), opsAssign()) : step(i + 1));
-  };
-  step(0);
+  // 오프닝 세 장(그림 + 한 줄): 설립 · 빈자리 · 맞은편
+  screenOpening(() => { opsNewMonth(); save(); opsAssign(); }, 0, "시작하기", OPS_OPENING);
 }
 function opsResume() {
   opsEnsureAll();
