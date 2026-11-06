@@ -256,8 +256,11 @@ html[data-scene="court"] #backdrop::after { background: linear-gradient(180deg, 
 .op-dots { display: flex; gap: 6px; }
 .op-dots i { width: 22px; height: 4px; border-radius: 2px; background: #c9a24a40; }
 .op-dots i.on { background: var(--brass); }
-.op-pic { margin: -8px -6px 2px; border-radius: 6px; overflow: hidden; border: 1px solid #c9a24a55; aspect-ratio: 3 / 2; background: #140d09; }
-.op-pic img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.op-full { position: relative; overflow: hidden; justify-content: flex-end; min-height: calc(100vh - 210px); padding: 0; background: #140d09; }
+.op-full .op-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; }
+.op-full .op-dots { position: absolute; top: 12px; left: 0; right: 0; z-index: 1; justify-content: center; }
+.op-full .op-face { display: none; }
+.op-full .op-txt { position: relative; z-index: 1; margin: 12px; padding: 14px 16px; border-radius: 8px; background: #140d09d9; border: 1px solid #c9a24a55; display: flex; flex-direction: column; gap: 10px; }
 .op-art { min-height: 120px; display: flex; align-items: center; padding-block: 6px; }
 .op-face { width: 120px; height: 120px; border-radius: 50%; overflow: hidden; border: 3px solid var(--brass); box-shadow: 0 6px 18px #000a; }
 .op-face img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 18%; display: block; }
@@ -22443,12 +22446,15 @@ function screenOpening(next, i = 0, doneLabel = "개업하기", cards = OPENING)
   const o = cards[i], last = i === cards.length - 1, hero = heroOf();
   const name = who().name || hero.name, firm = who().firm || "새벽 법률사무소";
   const img = typeof o.img === "function" ? o.img(heroKey()) : o.img;
-  show(`<section class="op">
+  // 그림이 있으면 화면 가득 깔고 글은 아래 상자에. 그림을 못 불러오면 예전처럼 글만
+  show(`<section class="op ${img ? "op-full" : ""}">
+      ${img ? `<img class="op-bg" src="${img}" alt="" onerror="this.parentNode.classList.remove('op-full');this.remove()">` : ""}
       <div class="op-dots" aria-hidden="true">${cards.map((_, k) => `<i class="${k === i ? "on" : ""}"></i>`).join("")}</div>
-      ${img ? `<div class="op-pic"><img src="${img}" alt="" onerror="this.parentNode.remove()"></div>` : ""}
+      <div class="op-txt">
       <div class="op-hero"><div class="op-face"><img src="${hero.img}" alt=""></div>
         <div><div class="eyebrow">${esc(o.step)}</div><div class="op-name">${esc(name)} 변호사</div></div></div>
       <p class="op-line">${esc(o.body(firm))}</p>
+      </div>
     </section>`,
     `<div class="row2"><button class="btn primary" id="opNext">${last ? doneLabel : "다음"}</button><button class="btn ghost" id="opSkip">${last ? "처음 장으로" : "건너뛰기"}</button></div>`,
     o.scene, "opening");
