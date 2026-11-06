@@ -13289,7 +13289,7 @@ const TUT_ID = "t00";
 BY_ID[TUT_ID] = {
   id: TUT_ID, kind: "civil", category: "대여금", tier: 1, truth: "hiding",
   client: { name: "배수철", age: 44, job: "분식집 운영", face: "c3" },
-  fee: 30, bonus: 30,
+  fee: 30, bonus: 30, stake: 500, stakeTrue: 300,
   opening: "고등학교 동창한테 500만 원을 빌려줬어요. 석 달 뒤에 갚는다더니 1년이 넘도록 감감무소식입니다. 이젠 전화도 안 받아요.",
   questions: [
     { q: "빌려준 증거는 있으세요?", a: "계좌로 보냈죠. 차용증도 받아 놨고요." },
@@ -13830,18 +13830,21 @@ function screenArchive(back, openId, tab) {
 const tutOn = () => !!S && (C ? C.c.id === TUT_ID : (S.today || []).some(t => t.id === TUT_ID && t.status === "wait"));
 let tutScreen = null;
 const tutK = k => !!(C && C.tutK && C.tutK[k]);
-function tutSet(fn) { tutScreen = fn; tutRefresh(); }
+let tutMsg = null;
+function tutSet(fn) { tutScreen = fn; tutMsg = null; tutRefresh(); }
+// 튜토리얼에서 잘못 고르면 넘어가지 않고 주인공이 짚어 준다. true를 돌려주면 막은 것
+function tutWarn(bad, text) { if (!bad || !tutOn()) return false; tutMsg = text; tutRefresh(); return true; }
 function tutRefresh() {
   document.querySelectorAll(".tut-glow").forEach(el => el.classList.remove("tut-glow"));
   const old = document.getElementById("tutb"); if (old) old.remove();
   if (!tutScreen || !tutOn()) return;
-  const tip = tutScreen(); if (!tip) return;
+  const tip = tutMsg ? { t: tutMsg, tap: "warn" } : tutScreen(); if (!tip) return;
   const b = document.createElement("div");
   b.id = "tutb"; b.className = "tutb";
   b.innerHTML = `<div class="ava"><img src="${heroOf().img}" alt=""></div><p>${tip.t}</p>${tip.tap ? `<button class="tutb-next">다음</button>` : ""}`;
   document.body.appendChild(b);
   b.style.top = ((hud.getBoundingClientRect().bottom || 0) + 6) + "px";
-  if (tip.tap) b.querySelector(".tutb-next").addEventListener("click", e => { e.stopPropagation(); C.tutK = C.tutK || {}; C.tutK[tip.tap] = true; tutRefresh(); });
+  if (tip.tap) b.querySelector(".tutb-next").addEventListener("click", e => { e.stopPropagation(); if (tip.tap === "warn") tutMsg = null; else { C.tutK = C.tutK || {}; C.tutK[tip.tap] = true; } tutRefresh(); });
   if (tip.sel) setTimeout(() => document.querySelectorAll(tip.sel).forEach(el => el.classList.add("tut-glow")), 60);
 }
 document.addEventListener("click", () => setTimeout(tutRefresh, 80), true);
@@ -13969,6 +13972,7 @@ function screenJudge() {
     ${caseRefs()}`);
   on("[data-v]", e => {
     const v = e.currentTarget.dataset.v;
+    if (tutWarn(v === "honest", "잠깐. 통장에 200만 원이 들어온 줄이 있었는데, 의뢰인은 그 얘기를 안 했다.")) return;
     if (v === "hiding") return screenSuspect();
     if (v === "liar") return screenLie();
     C.verdict = v; react();
@@ -13991,7 +13995,7 @@ function screenSuspect() {
     <div class="stack">${C.suspOrder.map(i => `<button class="btn" data-s="${i}">${esc(c.suspicions[i])}</button>`).join("")}</div>
     <button class="btn ghost" id="back">다시 생각하기</button>
     ${caseRefs()}`);
-  on("[data-s]", e => { C.verdict = "hiding"; C.susp = +e.currentTarget.dataset.s; react(); });
+  on("[data-s]", e => { if (tutWarn(+e.currentTarget.dataset.s !== c.hiddenIndex, "그건 증거 어디에도 없는 얘기다. 통장에 찍힌 돈을 떠올려 보자.")) return; C.verdict = "hiding"; C.susp = +e.currentTarget.dataset.s; react(); });
   on("#back", screenJudge);
   tutSet(() => ({ t: "의뢰인이 말하지 않은 사실을 고르자.", sel: "[data-s]" }));
 }
@@ -14004,7 +14008,7 @@ function screenLie() {
     <div class="stack">${C.lieOrder.map(i => `<button class="btn" data-l="${i}">${esc(lies[i])}</button>`).join("")}</div>
     <button class="btn ghost" id="back">다시 생각하기</button>
     ${caseRefs()}`);
-  on("[data-l]", e => { C.verdict = "liar"; C.lie = +e.currentTarget.dataset.l; react(); });
+  on("[data-l]", e => { if (tutWarn(true, "차용증도 날짜도 증거와 맞는다. 거짓말은 아니다.")) return; C.verdict = "liar"; C.lie = +e.currentTarget.dataset.l; react(); });
   on("#back", screenJudge);
   tutSet(() => ({ t: "이 의뢰인은 거짓말을 한 건 아니다. <b>다시 생각하기</b>.", sel: "#back" }));
 }
@@ -14056,6 +14060,7 @@ function screenProof(kind, apply) {
     <button class="btn ghost" id="back">다시 생각하기</button>`);
   on("[data-pf]", e => {
     const id = e.currentTarget.dataset.pf;
+    if (tutWarn(!(c.deny.proof || []).includes(id), "이걸로는 못 따진다. 돈이 들어온 기록이 있는 증거를 들이밀자.")) return;
     if ((c.deny.proof || []).includes(id)) return apply(c.confession, "증거를 들이밀자 털어놓았습니다.");
     C.reaction = { say: c.deny.fail || pick(LINES.denyHold), note: "의뢰인은 끝까지 부인합니다." }; C.fxOnce = true; screenFee();
   });
@@ -14179,7 +14184,7 @@ function screenFee(extra) {
     C["offer" + k] = Math.max(0, C["offer" + k] + d);
     document.getElementById("offer" + k).value = C["offer" + k].toLocaleString();
   });
-  on("#propose", () => { sync(); propose(); });
+  on("#propose", () => { sync(); if (tutWarn(C.offerF + C.offerB > (effStake(c) || Infinity), `${won(effStake(c))} 받자고 온 사람한테 이렇게 부르면 안 맡긴다.`)) return; propose(); });
   tutSet(() => C.card && !tutK("f0") ? { t: "털어놓았다. 재판에 낼 카드가 하나 생겼다.", tap: "f0" }
     : !tutK("f1") ? { t: "<b>착수금</b>은 맡을 때 받는 돈, <b>성공보수</b>는 이기면 받는 돈이다. 일부만 이기면 절반.", tap: "f1", sel: ".feerow" }
     : !tutK("f2") ? { t: "처음 금액은 시세에 내 명성을 얹은 값. 비싸면 깎자고 하고, 너무 비싸면 떠난다.", tap: "f2" }
@@ -14301,7 +14306,7 @@ function screenTrial() {
     e.preventDefault(); e.stopPropagation();
     C.inv = e.currentTarget.dataset.inv; const y = window.scrollY; screenTrial(); window.scrollTo({ top: y });
   }));
-  on("#plead", runTrial);
+  on("#plead", () => { if (tutWarn(C.card && C.arg !== "a3", "200만 원 받은 걸 털어놓았는데 이렇게 말하면 바로 걸린다. 받은 돈을 뺀 주장으로 가자.")) return; runTrial(); });
   tutSet(() => !tutK("t1") ? { t: "체크된 증거가 재판에 나간다. 불리한 증거는 눌러서 빼면 된다.", tap: "t1" }
     : !C.arg ? { t: C.card ? "털어놓은 사실에 맞는 주장을 하나 고르자." : "주장을 하나 고르자.", sel: ".arg" }
     : { t: "<b>변론 시작</b>.", sel: "#plead" });
