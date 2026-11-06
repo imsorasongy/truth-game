@@ -22022,7 +22022,8 @@ BY_ID[TUT_ID] = {
   evidence: [
     { id: "e1", name: "차용증", desc: "500만 원, 갚을 날 작년 3월 31일", detail: "동창 이름과 도장이 또렷하다.", value: 2 },
     { id: "e2", name: "통장 거래내역", desc: "작년 1월, 동창에게 500만 원 송금", detail: "같은 통장에 작년 6월, 동창 이름으로 200만 원이 들어온 줄이 있다.", value: 2 },
-    { id: "e3", name: "카톡 대화", desc: "\"곧 갚을게, 미안하다\"", detail: "작년 5월 대화. 그 뒤로는 답이 없다.", value: 0 }
+    { id: "e3", name: "카톡 대화", desc: "\"곧 갚을게, 미안하다\"", detail: "작년 5월 대화. 그 뒤로는 답이 없다.", value: 0 },
+    { id: "e4", name: "가게 장부", desc: "작년 1월 지출 기록", detail: "'동창 500 — 투자'라고 의뢰인 글씨로 적혀 있다.", value: -2 }
   ],
   suspicions: ["이미 일부를 돌려받았다", "빌려준 게 아니라 같이 투자한 돈이다", "동창에게 따로 갚을 돈이 있다"],
   hiddenIndex: 0,
@@ -23051,8 +23052,9 @@ function screenTrial() {
     e.preventDefault(); e.stopPropagation();
     C.inv = e.currentTarget.dataset.inv; const y = window.scrollY; screenTrial(); window.scrollTo({ top: y });
   }));
-  on("#plead", () => { if (tutWarn(C.card && C.arg !== "a3", "200만 원 받은 걸 털어놓았는데 이렇게 말하면 바로 걸린다. 받은 돈을 뺀 주장으로 가자.")) return; if (isOps()) return opsSavePrep(); runTrial(); });
+  on("#plead", () => { if (tutWarn(C.sub.has("e4"), "가게 장부가 아직 들어가 있다. 빼고 가자.") || tutWarn(C.card && C.arg !== "a3", "200만 원 받은 걸 털어놓았는데 이렇게 말하면 바로 걸린다. 받은 돈을 뺀 주장으로 가자.")) return; if (isOps()) return opsSavePrep(); runTrial(); });
   tutSet(() => !tutK("t1") ? { t: "체크된 증거가 재판에 나간다. 불리한 증거는 눌러서 빼면 된다.", tap: "t1" }
+    : C.sub.has("e4") ? { t: "가게 장부의 '투자'라는 메모는 상대 말을 거든다. <b>가게 장부</b>를 눌러 빼자.", sel: 'label.ev:has([data-sub="e4"])' }
     : !C.arg || (C.card && C.arg !== "a3") ? { t: C.card ? "200만 원은 이미 받았다. 그 돈을 뺀 주장을 고르자." : "주장을 하나 고르자.", sel: C.card ? 'label.arg:has([data-arg="a3"])' : ".arg" }
     : { t: "<b>변론 시작</b>.", sel: "#plead" });
 }
