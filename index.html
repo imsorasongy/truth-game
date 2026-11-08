@@ -515,6 +515,7 @@ html[data-scene^="end"] #backdrop::after { background: linear-gradient(180deg, #
 .k-ln.pick { border:1px dashed var(--lose); cursor:pointer; }
 .k-dim { position:fixed; inset:0; background:#000b; z-index:40; display:flex; align-items:center; justify-content:center; }
 .k-pop { width:300px; background:#241912; border:1px solid var(--brass); border-radius:16px; padding:22px 18px 16px; text-align:center; display:flex; flex-direction:column; gap:12px; }
+.k-ev-face { display:flex; justify-content:center; }
 .k-pop h3 { margin:0; font-family:var(--f-display); font-weight:400; font-size:21px; color:var(--brass); }
 .k-pop .sub { font-size:13.5px; color:var(--muted); margin-top:-4px; }
 .k-big { text-align:center; padding:6px 0 2px; }
@@ -24212,7 +24213,7 @@ const pickPerson = (k, id) => STAFF_PICKS[k].find(x => x.id === id);
 const crewPay = p => Math.round(p.pay * 0.45 / 10) * 10;
 const opsCost = () => office().rent + office().live + (S.assocs || []).reduce((a, x) => a + x.pay, 0)
   + Object.entries(S.crew || {}).reduce((a, [k, l]) => a + l.reduce((b, id) => b + crewPay(pickPerson(k, id)), 0), 0)
-  + ADS.filter(ad => S.ads && S.ads[ad.k]).reduce((a, ad) => a + ad.cost, 0);
+  + ADS.filter(ad => S.ads && S.ads[ad.k]).reduce((a, ad) => a + ad.cost, 0) + (S.jg ? JG_PAY : 0);
 const opsPayStyle = () => { const r = Math.random(), bad = 0.15 + (S.ads?.portal ? 0.05 : 0) - (S.ads?.paper ? 0.07 : 0), late = 0.25; return r < bad ? "bad" : r < bad + late ? "late" : "good"; };
 const PAY_TXT = { good: "잘 줌", late: "늦게 줌", bad: "떼먹음" };
 // 이번 달 맡은 건수 / 맡을 수 있는 건수(대표 5 + 고용 변호사)
@@ -24297,7 +24298,7 @@ function ensureCase(id) {
   const [b, k] = id.split("~"); BY_ID[id] = variantOf(BY_ID[b], +k); return BY_ID[id];
 }
 function opsEnsureAll() {
-  [].concat(S.list || [], S.today || [], S.reports || [], S.recv || [], S.back || [], S.thinkers || []).forEach(x => x && x.id && ensureCase(x.id));
+  [].concat(S.list || [], S.today || [], S.reports || [], S.recv || [], S.back || [], S.thinkers || [], S.ev ? [S.ev] : []).forEach(x => x && x.id && ensureCase(x.id));
 }
 
 /* ---------- 시작 ---------- */
@@ -24493,8 +24494,9 @@ function opsYearAward(next) {
   on("#yrNext", () => { S.myYr = { k: 0, w: 0, rev: 0 }; S.rivals.forEach(r => { r.yr = { k: 0, w: 0, rev: 0 }; }); S.yrShown = S.day; save(); next(); });
 }
 function opsNewMonth() {
+  const lastMon = S.mon;
   if (S.rivals) opsScoutCheck();
-  S.news = opsMakeNews();
+  S.news = opsMakeNews().concat(S.suitNews || []); S.suitNews = [];
   const year = opsYear(), market = [30, 40, 50][Math.min(2, year - 1)] + Math.floor(Math.random() * 7) - 3;
   // 광고 나이·구독자
   S.adAge = S.adAge || {};
@@ -24507,7 +24509,13 @@ function opsNewMonth() {
     if (r.boost > 0) r.boost--; if (r.cut > 0) r.cut--;
   });
   const total = mine + S.rivals.reduce((a, r) => a + r.pull, 0);
-  const n = Math.max(3, Math.round(market * mine / total));
+  let n = Math.max(3, Math.round(market * mine / total));
+  // 이벤트 효과: 브로커 3달 +2, 고소 중 −1, 방송·선물·소개 다음 달
+  if (S.brokerLeft > 0) { n += 2; if (--S.brokerLeft === 0 && Math.random() < 0.3) { const h = (S.hist || []).slice(-1)[0], fine = h ? Math.round(h.rev * 0.5 / 10) * 10 : 0; S.money -= fine; opsRepAdd(-5); S.news.push(`브로커와의 거래가 적발돼 징계를 받았다. 과태료 ${won(fine)}, 명성 −5`); } }
+  if (S.protestLeft > 0) { n = Math.max(3, n - 1); if (--S.protestLeft === 0) S.news.push("사무실 앞 시위가 끝났다"); }
+  n += S.evGuest || 0; S.evGuest = 0;
+  // 전관: 1년 계약, 달마다 5% 기사가 나면 명성 −5에 계약 끝
+  if (S.jg) { if (Math.random() < 0.05) { opsRepAdd(-5); S.jg = null; S.news.push("전관예우 기사가 났다. 영입한 변호사가 나갔다. 명성 −5"); } else if (--S.jg.left <= 0) { S.jg = null; S.news.push("전관 변호사와 계약이 끝났다"); } }
   S.market = market; S.share = { me: n };
   S.rivals.forEach(r => { S.share[r.name] = Math.round(market * r.pull / total); });
   // 사건 고르기: 안 해 본 것부터, 사무실 규모, 포털 광고면 거짓·지는 사건이 조금 더
@@ -24519,7 +24527,7 @@ function opsNewMonth() {
     const done = CASES.filter(c => c.id !== TUT_ID && tiers.includes(c.tier) && used.has(c.id) && !c.doomed);
     shuffle(done).slice(0, n * 2).forEach(c => { const k = (S.vk[c.id] || 0) + 1; S.vk[c.id] = k; pool.push(ensureCase(c.id + "~" + k)); });
   }
-  const w = c => (S.ads.portal && (c.truth === "liar" || c.doomed) ? 1.6 : 1) * (S.ads.tv && c.tier === 3 ? 1.5 : 1) * (S.ads.bus && c.tier === 1 ? 1.3 : 1) * (c.ops ? 1.4 : 1);
+  const w = c => (S.ads.portal && (c.truth === "liar" || c.doomed) ? 1.6 : 1) * (S.ads.tv && c.tier === 3 ? 1.5 : 1) * (S.jg && c.tier === 3 ? 2 : 1) * (S.ads.bus && c.tier === 1 ? 1.3 : 1) * (c.ops ? 1.4 : 1);
   const picks = (S.back || []).slice(0, n);
   S.back = [];
   while (picks.length < n && pool.length) {
@@ -24528,10 +24536,12 @@ function opsNewMonth() {
     const c = pool.splice(Math.min(i, pool.length - 1), 1)[0];
     picks.push({ id: c.id, pay: opsPayStyle(), back: false });
   }
+  picks.slice(0, S.evGood || 0).forEach(p => { p.pay = "good"; }); S.evGood = 0;
   S.list = picks.map(p => ({ id: p.id, pay: p.pay, back: !!p.back, who: null, status: "new" }));
   S.today = []; S.reports = []; S.mon = { fee: 0, bonus: 0, results: [], out: 0 };
   S.joint = 2; S.phase = "assign"; S.intro = false;
   S.played = (S.played || []).concat(S.list.map(x => x.id));
+  opsPickEvent(lastMon);
 }
 
 /* ---------- ① 달 시작: 누가 맡을지 ---------- */
@@ -24554,17 +24564,96 @@ function opsIntro() {
   opsMonthPops();
 }
 // 달을 넘기면 소식 → 스카우트 순서로 팝업. 확인하기 전 저장해도 다시 뜬다
+const opsPop = html => { const d = document.createElement("div"); d.className = "k-dim k-month"; d.innerHTML = html; document.body.appendChild(d); return d; };
 function opsMonthPops() {
   if (document.querySelector(".k-month")) return;
-  const open = html => { const d = document.createElement("div"); d.className = "k-dim k-month"; d.innerHTML = html; document.body.appendChild(d); return d; };
   if ((S.news || []).length) {
-    const d = open(`<div class="k-pop" style="text-align:left"><h3 style="text-align:center">이번 달 소식</h3><div>${S.news.map(t => `<div class="k-nw">${esc(t)}</div>`).join("")}</div><button class="btn primary" id="nwOk" style="text-align:center">확인</button></div>`);
+    const d = opsPop(`<div class="k-pop" style="text-align:left"><h3 style="text-align:center">이번 달 소식</h3><div>${S.news.map(t => `<div class="k-nw">${esc(t)}</div>`).join("")}</div><button class="btn primary" id="nwOk" style="text-align:center">확인</button></div>`);
     d.querySelector("#nwOk").onclick = () => { S.news = []; save(); d.remove(); opsMonthPops(); };
     return;
   }
-  const sc = opsScoutBlock(); if (!sc) return;
-  const d = open(`<div class="k-pop" style="text-align:left">${sc.html}${sc.btns.map((b, i) => `<button class="btn" data-sc="${i}" style="text-align:center">${esc(b[0])}</button>`).join("")}</div>`);
-  d.querySelectorAll("[data-sc]").forEach(b => b.onclick = () => { sc.btns[+b.dataset.sc][1](); save(); d.remove(); opsMonthPops(); });
+  const sc = opsScoutBlock();
+  if (sc) {
+    const d = opsPop(`<div class="k-pop" style="text-align:left">${sc.html}${sc.btns.map((b, i) => `<button class="btn" data-sc="${i}" style="text-align:center">${esc(b[0])}</button>`).join("")}</div>`);
+    d.querySelectorAll("[data-sc]").forEach(b => b.onclick = () => { sc.btns[+b.dataset.sc][1](); save(); d.remove(); opsMonthPops(); });
+    return;
+  }
+  opsDebtPops(opsEventPop);
+}
+// 돈을 안 준 의뢰인: 한 명씩 얼굴 · 금액 · 핑계 → 독촉 / 지급명령 / 포기
+const DEBT_EXCUSE = ["요즘 장사가 안돼서요. 다음 달엔 꼭 드릴게요.", "보낸 줄 알았는데요? 확인해 볼게요.", "자금이 묶여 있어서요. 풀리면 바로 보낼게요.", "이번 달은 정말 어렵습니다. 조금만 기다려 주세요.", "집에 일이 좀 생겨서요. 곧 연락드릴게요.", "그 돈은 잊지 않았습니다. 시간을 좀 주세요."];
+function opsDebtPops(done) {
+  const x = (S.recv || []).find(r => r.state === "bad" && r.popDay !== S.day);
+  if (!x) return done();
+  const c = BY_ID[x.id], inv = crewOf("inv").length;
+  const hint = inv ? staffSayP(pickPerson("inv", crewOf("inv")[0]), payStyle(c) === "poor" ? "재산이 거의 없어요. 소송해도 못 받을 것 같아요." : "재산은 있어요. 소송하면 받아 낼 수 있겠습니다.") : "";
+  const d = opsPop(`<div class="k-pop"><div class="k-ev-face"><div class="portrait">${portrait(c)}</div></div><h3>${esc(x.name)} 씨 · ${won(x.amt)}</h3><div>"${esc(DEBT_EXCUSE[hash(x.id + S.day) % DEBT_EXCUSE.length])}"</div>${hint}
+    <div class="k-act"><button class="mini" data-a="dun">독촉</button><button class="mini gold" data-a="suit">지급명령 50만</button><button class="mini" data-a="drop">포기</button></div></div>`);
+  const next = () => { x.popDay = S.day; save(); renderHud(); d.remove(); opsDebtPops(done); };
+  d.querySelectorAll("[data-a]").forEach(b => b.onclick = () => {
+    const a = b.dataset.a;
+    if (a === "suit") { if (S.money < 50) return toast("돈이 모자랍니다."); S.money -= 50; x.state = "suit"; x.due = S.day + 1; return next(); }
+    if (a === "drop") { x.state = "lost"; return next(); }
+    const paid = Math.random() < (crewOf("mgr").includes("yoon") ? 0.6 : 0.3);
+    if (paid) { x.state = "paid"; S.money += x.amt; }
+    d.innerHTML = `<div class="k-pop"><div>${paid ? `${esc(x.name)} 씨가 ${won(x.amt)}을 보냈습니다.` : "연락이 없습니다."}</div><button class="btn primary" id="dbOk" style="text-align:center">확인</button></div>`;
+    d.querySelector("#dbOk").onclick = next;
+  });
+}
+/* ---------- 이벤트: 달 시작 팝업의 맨 끝. 3년에 10회 미만, 플레이 잘못 없이 손해 보는 일은 없게 ---------- */
+const EV_MAX = 9, EV_RATE = 0.25, JG_PAY = 1500, JG_MONTHS = 12;
+const GIFTS = [["떡", "건물에 떡을 돌렸습니다"], ["과일", "과일 상자를 보냈습니다"], ["손편지", "손편지를 보냈습니다"]];
+const EV = {
+  broker: { t: "수상한 제안", body: () => "\"대표님, 사건 좀 몰아 드릴게요. 소개비만 챙겨 주시면 됩니다.\"",
+    btns: () => [["받는다", () => { S.brokerLeft = 3; return "당분간 손님이 늘어납니다."; }], ["거절한다", () => "돌려보냈습니다."]] },
+  protest: { t: "1인 시위", face: true, body: e => `${BY_ID[e.id].client.name} 씨가 사무실 앞에서 피켓을 들고 있습니다.`,
+    btns: e => [
+      [`합의금 ${won(e.fee)}`, () => { if (S.money < e.fee) { toast("돈이 모자랍니다."); return null; } S.money -= e.fee; return "시위가 끝났습니다."; }],
+      [`명예훼손·업무방해 고소 ${won(e.cost)}`, () => { if (S.money < e.cost) { toast("돈이 모자랍니다."); return null; } S.money -= e.cost; S.protestLeft = 2; return "고소장을 냈습니다."; }],
+      ["무시한다", () => { opsRepAdd(-1); return "시위가 이어지다 끝났습니다. 명성 −1"; }]] },
+  meme: { t: "뜻밖의 유명세", body: () => "대표님 법원 앞 인터뷰 영상이 화제입니다. 방송에서 섭외가 왔습니다.",
+    btns: () => [["방송에 나간다", () => { S.evGuest = (S.evGuest || 0) + 3; return "다음 달 손님이 늘어납니다."; }], ["그냥 둔다", () => "지나갔습니다."]] },
+  jg: { t: "전관 영입 제안", body: () => `고등법원 부장판사 출신 변호사가 1년 계약을 제안했습니다. 월 ${won(JG_PAY)}입니다.`,
+    btns: () => [["영입한다", () => { S.jg = { left: JG_MONTHS }; return "큰 사건이 늘어납니다."; }], ["거절한다", () => "정중히 거절했습니다."]] },
+  gift: { t: "고마운 의뢰인", face: true, body: e => `${BY_ID[e.id].client.name} 씨가 고맙다며 ${GIFTS[e.g][1]}.`,
+    btns: () => [["확인", () => { S.evGuest = (S.evGuest || 0) + 1; return ""; }]] },
+  visit: { t: "다시 찾아온 의뢰인", face: true, body: e => { const c = BY_ID[e.id]; return `"변호사님, 그때 ${c.category} 사건 정말 감사했습니다. 제 지인이 변호사를 찾길래 여기를 소개했어요."`; },
+    btns: () => [["확인", () => { S.evGood = (S.evGood || 0) + 1; S.evGuest = (S.evGuest || 0) + 1; return ""; }]] }
+};
+function opsPickEvent(last) {
+  S.ev = null;
+  if (S.day < 3 || (S.evN || 0) >= EV_MAX || Math.random() > EV_RATE || !last) return;
+  const res = last.results || [], win = res.filter(x => x.res === "win"), err = res.filter(x => x.res === "lose" && x.err);
+  const old = (S.wonLog || []).filter(w => !w.seen && S.day - w.day >= 4 && S.day - w.day <= 12);
+  const can = [];
+  if ((last.total || 0) < opsCapAll() && !S.brokerLeft) can.push("broker");
+  if (err.length && !S.protestLeft) can.push("protest");
+  if (S.ads.yt) can.push("meme");
+  if ((S.office || 0) >= 2 && !S.jg) can.push("jg");
+  if (win.length) can.push("gift");
+  if (old.length) can.push("visit");
+  const pool = can.filter(k => k !== S.evLast);
+  if (!pool.length) return;
+  const k = pool[Math.floor(Math.random() * pool.length)];
+  const pick = l => l[Math.floor(Math.random() * l.length)];
+  if (k === "protest") { const x = pick(err); ensureCase(x.id); S.ev = { k, id: x.id, fee: x.fee, cost: Math.max(10, Math.round(x.fee * 0.3 / 10) * 10) }; }
+  else if (k === "gift") { const x = pick(win); ensureCase(x.id); S.ev = { k, id: x.id, g: Math.floor(Math.random() * GIFTS.length) }; }
+  else if (k === "visit") { const w = pick(old); w.seen = true; ensureCase(w.id); S.ev = { k, id: w.id }; }
+  else S.ev = { k };
+  S.evN = (S.evN || 0) + 1; S.evLast = k;
+}
+function opsEventPop() {
+  const e = S.ev; if (!e) return;
+  const v = EV[e.k], btns = v.btns(e);
+  const d = opsPop(`<div class="k-pop">${v.face ? `<div class="k-ev-face"><div class="portrait">${portrait(BY_ID[e.id])}</div></div>` : ""}<h3>${v.t}</h3><div>${esc(v.body(e))}</div>${btns.map((b, i) => `<button class="btn" data-ev="${i}" style="text-align:center">${esc(b[0])}</button>`).join("")}</div>`);
+  const end = () => { S.ev = null; save(); renderHud(); d.remove(); };
+  d.querySelectorAll("[data-ev]").forEach(b => b.onclick = () => {
+    const r = btns[+b.dataset.ev][1]();
+    if (r === null) return;
+    if (!r) return end();
+    d.innerHTML = `<div class="k-pop"><div>${esc(r)}</div><button class="btn primary" id="evOk" style="text-align:center">확인</button></div>`;
+    d.querySelector("#evOk").onclick = end;
+  });
 }
 function opsAssign() {
   if (!S.intro) return opsIntro();
@@ -24909,6 +24998,7 @@ function opsSettleJob(j, score) {
     const sc = score != null ? score + j.slip : trialScore(c, new Set(p.sub), p.arg) + noise() + j.slip;
     const res = resOf(sc, c);
     opsBook(c, "me", res, p.fee, p.bonus, j.t.pay, j.slip);
+    S.mon.results[S.mon.results.length - 1].err = res === "lose" && (!!c.doomed || p.verdict !== c.truth);
     if (j.vs) opsVsApply(j.vs, res);
   } else {
     const r = j.r, c = BY_ID[r.id], a = myAssoc(r.who);
@@ -24919,6 +25009,7 @@ function opsSettleJob(j, score) {
     const res = resOf(sc, c);
     S.money += r.fee; S.mon.fee += r.fee;
     opsBook(c, r.who, res, r.fee, r.bonus, a.trait === "nice" && r.pay === "late" && Math.random() < 0.5 ? "good" : r.pay, j.slip);
+    S.mon.results[S.mon.results.length - 1].err = res === "lose" && (!!c.doomed || !knows);
     if (j.vs) opsVsApply(j.vs, res);
     if (res !== "lose") {
       const g = res === "win" ? 1 : 0.5;
@@ -24938,7 +25029,7 @@ function opsBook(c, who, res, fee, bonus, pay, slip) {
     const due = pay === "good" ? S.day + 1 : pay === "late" ? S.day + 1 + Math.ceil(Math.random() * 3) : S.day + 1;
     S.recv.push({ id: c.id, name: c.client.name, amt: b, due, pay, state: "wait" });
   }
-  if (res === "win" && c.id !== TUT_ID) galAdd(c.base || c.id, { m: S.day, money: fee + b });
+  if (res === "win" && c.id !== TUT_ID) { galAdd(c.base || c.id, { m: S.day, money: fee + b }); S.wonLog = (S.wonLog || []).concat({ id: c.id, day: S.day }); }
   S.mon.results.push({ id: c.id, who, res, fee, bonus: b, rep: repD, slip });
 }
 // 재판을 볼 때: 판결 화면 대신 짧은 결과 후 다음 재판
@@ -24982,7 +25073,7 @@ function opsSettle() {
     let bonus = 0;
     S.recv.forEach(x => {
       if (x.state === "wait" && x.due <= S.day) { if (x.pay === "bad") x.state = "bad"; else { x.state = "paid"; bonus += x.amt; } }
-      if (x.state === "suit" && x.due <= S.day) { const c = BY_ID[x.id]; if (payStyle(c) !== "poor") { x.state = "paid"; bonus += x.amt; x.note = "지급명령으로 받음"; } else { x.state = "lost"; x.note = "이겨도 못 받음"; } }
+      if (x.state === "suit" && x.due <= S.day) { const c = BY_ID[x.id]; const ok = payStyle(c) !== "poor"; if (ok) { x.state = "paid"; bonus += x.amt; } else x.state = "lost"; S.suitNews = (S.suitNews || []).concat(ok ? `${x.name} 씨에게 지급명령으로 ${won(x.amt)}을 받았다` : `${x.name} 씨는 재산이 없어 지급명령으로도 못 받았다`); }
     });
     S.money += bonus; S.mon.bonus = bonus;
     S.mon.cost = opsCost(); S.mon.tax = Math.round((S.mon.fee + bonus) * TAX_RATE / 10) * 10;
@@ -25003,36 +25094,21 @@ function opsSettle() {
   }
   const rev = S.mon.fee + S.mon.bonus;
   const due = S.recv.filter(x => x.state === "wait" || x.state === "bad" || x.state === "suit");
-  const inv = crewOf("inv").length;
   show(`<div class="eyebrow">${monthLabel(S.day)}</div><h2>이번 달 정산</h2>
     <div class="pn k-big"><div class="l">매출</div><div class="v">${won(rev)}</div><div class="d ${rev - S.mon.cost - S.mon.tax < 0 ? "neg" : ""}">남은 돈 ${rev - S.mon.cost - S.mon.tax >= 0 ? "+" : "−"}${won(Math.abs(rev - S.mon.cost - S.mon.tax))}</div></div>
     <div class="ledger"><span>착수금</span><span class="r">${won(S.mon.fee)}</span><span>성공보수</span><span class="r">${won(S.mon.bonus)}</span>
       <span>고정비 <span class="note">(월급·임대료·광고)</span></span><span class="r neg">−${won(S.mon.cost)}</span><span>세금</span><span class="r neg">−${won(S.mon.tax)}</span></div>
     ${opsStandings()}
-    ${due.length ? `<div class="pn"><div class="k-sec">받을 돈</div>${due.map(x => `<div class="k-due">
-        <span class="${x.state === "bad" ? "neg" : ""}">${esc(x.name)}</span><span class="${x.state === "bad" ? "neg" : ""}">${won(x.amt)} · ${x.state === "bad" ? "안 줌" : x.state === "suit" ? "지급명령 중" : x.due <= S.day + 1 ? "다음 달" : (x.due - S.day) + "달 뒤"}</span></div>
-        ${x.state === "bad" ? `<div class="k-act">${x.dunned === S.day ? `<button class="mini" disabled style="opacity:.5">독촉함</button>` : `<button class="mini" data-rc="${S.recv.indexOf(x)}" data-a="dun">독촉</button>`}<button class="mini gold" data-rc="${S.recv.indexOf(x)}" data-a="suit">지급명령 50만</button><button class="mini" data-rc="${S.recv.indexOf(x)}" data-a="drop">포기</button></div>
-          ${inv ? staffSayP(pickPerson("inv", crewOf("inv")[0]), payStyle(BY_ID[x.id]) === "poor" ? "재산이 거의 없어요. 소송해도 못 받을 것 같아요." : "재산은 있어요. 소송하면 받아 낼 수 있겠습니다.") : ""}` : ""}`).join("")}</div>` : ""}`,
+    ${due.length ? `<div class="pn"><div class="k-due"><span>받을 돈</span><span>${won(due.reduce((a, x) => a + x.amt, 0))}</span></div></div>` : ""}`,
     `<button class="btn primary" id="nextM">${S.day >= OPS_MONTHS ? "결산" : "다음 달"}</button>`);
-  on("[data-rc]", e => {
-    const x = S.recv[+e.currentTarget.dataset.rc], a = e.currentTarget.dataset.a;
-    if (a === "dun") { const p = crewOf("mgr").includes("yoon") ? 0.6 : 0.3; if (Math.random() < p) { x.state = "paid"; S.money += x.amt; toast(`${x.name} 씨가 ${won(x.amt)}을 보냈습니다.`); } else { toast("연락이 없습니다."); } x.dunned = S.day; }
-    if (a === "suit") { if (S.money < 50) return toast("돈이 모자랍니다."); S.money -= 50; x.state = "suit"; x.due = S.day + 2; }
-    if (a === "drop") x.state = "lost";
-    // 다시 그려도 내려 둔 자리 그대로
-    const y = app.scrollTop, wy = window.scrollY;
-    save(); opsSettle();
-    app.scrollTop = y; window.scrollTo({ top: wy });
-  });
   on("#nextM", () => {
     if (S.day % 12 === 0 && S.yrShown !== S.day) return opsYearAward(opsAfterYear);
-    if (S.day >= OPS_MONTHS) { S.opsEnd = true; save(); return opsFinal(); }
-    S.day++; opsNewMonth(); save(); opsAssign();
+    opsAfterYear();
   });
 }
 // 정산 뒤 다음 달(또는 결산)로
 function opsAfterYear() {
-  if (S.day >= OPS_MONTHS) { S.opsEnd = true; save(); return opsFinal(); }
+  if (S.day >= OPS_MONTHS) return opsDebtPops(() => { S.opsEnd = true; save(); opsFinal(); });
   S.day++; opsNewMonth(); save(); opsAssign();
 }
 function opsFinal() {
