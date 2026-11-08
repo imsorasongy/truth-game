@@ -589,7 +589,7 @@ html body .btn.primary small { color:#4a3a1c; }
 html body .vn .vn-bottom .btn:not(.primary):not(.ghost), html body .k-why .btn:not(.primary):not([data-o="x"]), html body .stack .btn[data-k], html body .stack .btn[data-w] {
   border:none; border-left:3px solid #c9a24a; border-radius:4px; background:#3a281bee; text-align:left; padding:10px 14px; min-height:42px; }
 html body .vn .vn-bottom .btn:not(.primary):not(.ghost):hover:not(:disabled) { background:#4a3423; }
-html body .mini { display:inline-flex; align-items:center; justify-content:center; height:30px; padding:0 12px; border-radius:15px; border:1px solid #c9a24a88; background:#2b1e15; color:#f3e6cf; font-size:13px; }
+html body .mini { display:inline-flex; align-items:center; justify-content:center; flex:none; white-space:nowrap; height:30px; padding:0 12px; border-radius:15px; border:1px solid #c9a24a88; background:#2b1e15; color:#f3e6cf; font-size:13px; }
 html body .mini.gold { background:#d4b05a; border-color:#d4b05a; color:#1b120d; font-weight:600; }
 html body .k-acts .btn { height:42px; min-height:42px; padding:0 6px; display:flex; flex-direction:row; align-items:center; justify-content:center; }
 html body .k-mb { background:#2b1e15; border:1px solid #c9a24a88; border-radius:10px; height:86px; }
@@ -11987,7 +11987,7 @@ window.CASES.push(
 
 // n20 상속회복청구 / hiding
 {
-  id: "n20", kind: "civil", category: "상속회복청구(인지 후 가액)", tier: 3, truth: "hiding",
+  id: "n20", kind: "civil", category: "상속회복청구", tier: 3, truth: "hiding",
   client: { name: "이강수", age: 46, job: "공인중개사", face: "c3" },
   fee: 800, bonus: 1500, stake: 30000,
   opening: "아버지 돌아가시고 나서 인지 소송으로 아들로 인정받았어요. 그 사이 배다른 형이랑 누나가 저만 빼고 상가 건물을 나눠 가졌더라고요. 제 몫 받아야죠.",
@@ -13349,7 +13349,7 @@ window.CASES.push(
 
 // p02 도박자금 대여금 / hiding (지는 사건: 불법원인급여)
 {
-  id: "p02", kind: "civil", category: "도박자금 대여금", tier: 2, truth: "hiding", ops: true, doomed: true,
+  id: "p02", kind: "civil", category: "대여금", tier: 2, truth: "hiding", ops: true, doomed: true,
   client: { name: "배동철", age: 49, job: "중고차 딜러", face: "c3" },
   fee: 640, bonus: 500, stake: 3000,
   opening: "친구 놈한테 하룻밤에 3천을 빌려줬어요. 급하다고 해서 그 자리에서 계좌로 쏴 줬죠. 1년이 지났는데 이제 와서 갚을 돈이 없대요.",
@@ -13392,7 +13392,7 @@ window.CASES.push(
 
 // p03 각서 약정금 / liar (지는 사건: 의뢰인이 각서를 위조)
 {
-  id: "p03", kind: "civil", category: "손실 보전 각서 약정금", tier: 2, truth: "liar", ops: true, doomed: true,
+  id: "p03", kind: "civil", category: "약정금", tier: 2, truth: "liar", ops: true, doomed: true,
   client: { name: "함영길", age: 57, job: "건설 하청업체 대표", face: "exec" },
   fee: 1050, bonus: 840, stake: 5000,
   opening: "원청 대표가 공사 중간에 우리를 잘라 놓고, 손실 보전금 5천을 주겠다고 각서까지 써 줬어요. 근데 이제 와서 그런 각서 쓴 적 없답니다. 도장까지 찍혀 있는데요.",
@@ -13697,7 +13697,7 @@ window.CASES.push(
 
 // p10 무등록 중개 수수료 / liar (지는 사건: 중개를 업으로 한 무등록자의 수수료 약정 무효)
 {
-  id: "p10", kind: "civil", category: "무등록 중개 수수료", tier: 2, truth: "liar", ops: true, doomed: true,
+  id: "p10", kind: "civil", category: "중개 수수료", tier: 2, truth: "liar", ops: true, doomed: true,
   client: { name: "남궁철", age: 59, job: "부동산 컨설턴트", face: "exec" },
   fee: 950, bonus: 760, stake: 4500,
   opening: "아는 형님 건물이 팔리게 다리를 놔 줬어요. 매수인 데려오면 4,500 주기로 했는데 계약 끝나니까 입을 싹 닫네요. 약정서도 있어요.",
@@ -14227,7 +14227,7 @@ window.CASES.push(
 
 // q02 재판상 이혼(유책배우자) / hiding (지는 사건: 유책배우자의 이혼 청구)
 {
-  id: "q02", kind: "civil", court: "fsuit", category: "재판상 이혼(유책배우자)", tier: 2, truth: "hiding", ops: true, doomed: true,
+  id: "q02", kind: "civil", court: "fsuit", category: "재판상 이혼", tier: 2, truth: "hiding", ops: true, doomed: true,
   client: { name: "문정길", age: 58, job: "건설사 현장소장", face: "exec" },
   fee: 700, bonus: 400,
   opening: "집사람이랑 3년째 따로 삽니다. 말 한마디 안 섞은 지 오래고요. 이혼해 달래도 안 해 주니 소송으로 끝내려고요.",
@@ -14489,7 +14489,7 @@ window.CASES.push(
 
 // q08 개인회생 면책 채권 청구 / hiding (지는 사건: 면책 결정)
 {
-  id: "q08", kind: "civil", category: "개인회생 면책 채권 청구", tier: 1, truth: "hiding", ops: true, doomed: true,
+  id: "q08", kind: "civil", category: "대여금", tier: 1, truth: "hiding", ops: true, doomed: true,
   client: { name: "박경숙", age: 64, job: "미용실 운영", face: "c5" },
   fee: 570, bonus: 450, stake: 2600,
   opening: "10년 지기 친구한테 3천을 빌려줬는데 400만 갚고 끝이에요. 요즘 그 친구가 새 차 끌고 다닌대요. 나머지 2,600은 받아야겠어요.",
@@ -14662,7 +14662,7 @@ window.CASES.push(
 
 // q12 체불 임금(대지급금 수령 후) / hiding (지는 사건: 대지급금으로 청구권이 공단에 넘어감)
 {
-  id: "q12", kind: "civil", category: "체불 임금(대지급금 수령 후)", tier: 1, truth: "hiding", ops: true, doomed: true,
+  id: "q12", kind: "civil", category: "체불 임금", tier: 1, truth: "hiding", ops: true, doomed: true,
   client: { name: "탁미선", age: 41, job: "전 봉제공장 재봉사", face: "rep" },
   fee: 220, bonus: 170, stake: 1000,
   opening: "공장이 문 닫으면서 마지막 석 달 월급이랑 퇴직금을 못 받았어요. 1,000만 원이요. 사장은 폐업했다고 배 째라예요.",
@@ -14880,7 +14880,7 @@ window.CASES.push(
 
 // q17 강제집행면탈 / liar (지는 사건: 소장 받고 위장 이혼, 아파트 이전)
 {
-  id: "q17", kind: "criminal", category: "강제집행면탈(위장 이혼)", tier: 2, truth: "liar", ops: true, doomed: true,
+  id: "q17", kind: "criminal", category: "강제집행면탈", tier: 2, truth: "liar", ops: true, doomed: true,
   client: { name: "차영환", age: 52, job: "수산물 도매상", face: "c1" },
   fee: 900, bonus: 600,
   opening: "이혼하면서 집사람한테 아파트를 재산분할로 넘겼는데 그게 강제집행면탈이래요. 채권자가 고소했어요. 진짜 이혼한 거고 재산분할도 법대로 한 거예요.",
@@ -15106,7 +15106,7 @@ window.CASES.push(
 
 // r02 사실혼 중 대여금 / liar · 지는 사건 (차용증 위조)
 {
-  id: "r02", kind: "civil", category: "사실혼 중 대여금", tier: 2, truth: "liar", doomed: true, ops: true,
+  id: "r02", kind: "civil", category: "대여금", tier: 2, truth: "liar", doomed: true, ops: true,
   client: { name: "최수정", age: 45, job: "미용실 원장", face: "c4" },
   fee: 850, bonus: 680, stake: 4000,
   opening: "5년 같이 산 남자가 헤어지자마자 연락을 끊었어요. 같이 살 때 빌려 간 돈이 4천만 원이에요. 차용증도 있어요. 본인이 직접 도장 찍었다고요.",
@@ -16829,7 +16829,7 @@ window.CASES.push(
 
 // t02 관습법상 법정지상권 건물철거 / hiding / 항소(피고)
 {
-  id: "t02", kind: "civil", category: "관습법상 법정지상권 건물철거", tier: 2, truth: "hiding", appeal: true, ops: true,
+  id: "t02", kind: "civil", category: "건물철거", tier: 2, truth: "hiding", appeal: true, ops: true,
   client: { name: "오덕배", age: 67, job: "밭농사", face: "pd" },
   fee: 550, bonus: 600, stake: 8000,
   opening: "1심에서 내 집을 헐라고 나왔소. 땅만 판 거지 집까지 판 게 아닌데. 그때 변호사는 땅 주인이 바뀌었으니 별수 없다고 하더만.",
@@ -17043,7 +17043,7 @@ window.CASES.push(
 
 // t07 해고기간 임금(중간수입 공제) / hiding / 항소
 {
-  id: "t07", kind: "civil", category: "해고기간 임금(중간수입 공제)", tier: 1, truth: "hiding", appeal: true, ops: true,
+  id: "t07", kind: "civil", category: "해고기간 임금", tier: 1, truth: "hiding", appeal: true, ops: true,
   client: { name: "왕재민", age: 38, job: "물류창고 지게차 기사", face: "c1" },
   fee: 600, bonus: 500, stake: 4200,
   opening: "부당해고 판정 받고 1년 2개월 만에 복직했어요. 그동안 못 받은 월급 4,200만 원을 달랬더니, 1심은 제가 딴 데서 번 돈을 다 빼니까 줄 게 없대요. 굶을 수는 없잖아요.",
@@ -17128,7 +17128,7 @@ window.CASES.push(
 
 // t09 미용실 영업양도 잔금(경업금지) / liar / 항소
 {
-  id: "t09", kind: "civil", category: "미용실 영업양도 잔금(경업금지)", tier: 1, truth: "liar", appeal: true, ops: true,
+  id: "t09", kind: "civil", category: "영업양도 잔금", tier: 1, truth: "liar", appeal: true, ops: true,
   client: { name: "현순덕", age: 55, job: "미용사", face: "pw" },
   fee: 450, bonus: 360, stake: 2000, stakeTrue: 1200,
   opening: "15년 한 미용실을 단골 명단까지 6천에 넘겼는데, 잔금 2천을 안 줘요. 제가 근처에 다시 가게를 냈대요. 그 가게는 제 동생 거예요. 저는 거기 안 나가요. 1심은 그쪽 말만 듣고 졌어요.",
@@ -17171,7 +17171,7 @@ window.CASES.push(
 
 // t10 명의대여자 책임 / hiding / 항소
 {
-  id: "t10", kind: "civil", category: "명의대여자 책임(식자재 대금)", tier: 2, truth: "hiding", appeal: true, ops: true,
+  id: "t10", kind: "civil", category: "식자재 대금", tier: 2, truth: "hiding", appeal: true, ops: true,
   client: { name: "황보철", age: 56, job: "식자재 납품업", face: "c1" },
   fee: 550, bonus: 450, stake: 3800,
   opening: "2년 동안 갈빗집에 고기를 대 줬는데 3,800만 원을 떼였어요. 사업자등록증 이름대로 그 사장을 걸었더니, 1심이 제가 진짜 주인을 따로 알았다고 했어요. 저는 그 이름만 보고 거래했어요.",
@@ -17213,7 +17213,7 @@ window.CASES.push(
 
 // t11 재산분할(상속 주식 특유재산) / hiding / 항소 / 가사
 {
-  id: "t11", kind: "civil", court: "fsuit", category: "재산분할(상속 주식 특유재산)", tier: 3, truth: "hiding", appeal: true, ops: true,
+  id: "t11", kind: "civil", court: "fsuit", category: "재산분할", tier: 3, truth: "hiding", appeal: true, ops: true,
   client: { name: "문혜진", age: 51, job: "전 회사 경리부장", face: "c7" },
   fee: 1000, bonus: 1500, stake: 30000,
   opening: "이혼은 됐는데 재산분할이 2억밖에 안 나왔어요. 남편 회사 주식은 시아버지한테 물려받은 거라 빼야 한다고요. 그 회사 20년 장부는 제가 다 봤어요. 제가 없었으면 진작 망했어요.",
@@ -17552,7 +17552,7 @@ window.CASES.push(
 
 // t19 사기(차용금 편취) / hiding / 항소 / 형사
 {
-  id: "t19", kind: "criminal", category: "사기(차용금 편취 범의)", tier: 2, truth: "hiding", appeal: true, ops: true,
+  id: "t19", kind: "criminal", category: "사기", tier: 2, truth: "hiding", appeal: true, ops: true,
   client: { name: "마경수", age: 46, job: "한식당 운영", face: "chef" },
   fee: 600, bonus: 400,
   opening: "가게 고치려고 지인한테 3천을 빌렸는데 건물이 재건축 들어가면서 가게를 접었어요. 못 갚았더니 사기로 고소당했고 1심에서 징역 1년 실형이 나왔어요. 처음부터 떼먹을 생각이었으면 이자를 1년이나 냈겠어요?",
@@ -18843,7 +18843,7 @@ window.CASES.push(
 
 // v09 취업 청탁금 반환 / liar
 {
-  id: "v09", kind: "civil", category: "취업 청탁금 반환", tier: 2, truth: "liar", ops: true,
+  id: "v09", kind: "civil", category: "금전 반환", tier: 2, truth: "liar", ops: true,
   client: { name: "고상철", age: 61, job: "공기업 퇴직자", face: "vic" },
   fee: 680, bonus: 540, stake: 3000,
   opening: "옛 친구가 3천만 원을 돌려 달라고 소송을 걸었어요. 그 돈은 5년 전에 그 친구가 빌려 간 걸 이제야 갚은 겁니다. 아들 취업이 안 되니까 엉뚱한 소리를 해요.",
@@ -22176,7 +22176,7 @@ const newFaces = (key, age) => {
   return [1, 2, 3, 4].map(n => "n" + d + g + n);
 };
 function pickFace(c) {
-  const key = FACE[c.id] || c.client.face;
+  const key = FACE[c.base || c.id] || c.client.face;
   if (!key) return key;
   const pool = (FACE_POOL[key] || [key]).concat(newFaces(key, c.client.age || 40));
   return pool[hash(c.id) % pool.length];
@@ -22399,7 +22399,7 @@ const OPENING = [
 const OPS_OPENING = [
   { scene: "office", step: "설립", img: h => `assets/op/o1-${h}.webp`, body: () => "긴 어쏘 시절을 지나, 동기 두 명과 함께 법무법인을 설립했다. 이제 새로운 시작이라는 생각에 다들 열정이 넘쳤었지." },
   { scene: "office", step: "설립", img: h => `assets/op/o2-${h}.webp`, body: () => "하지만 동기들은 어느 순간 법조계에 관심이 없어졌는지 이름만 걸어놨을 뿐 출근도 안 한다." },
-  { scene: "office", step: "설립", img: "assets/op/o3.webp", body: () => "내가 혼자 이 법인을 살려 내야 한다. 아니, 한빛, 정의, 우리들을 넘어서 우리 법인을 한국 최고의 로펌으로 만들겠다." }
+  { scene: "office", step: "설립", img: "assets/op/o3.webp", body: () => "내가 혼자 이 법인을 살려 내야 한다. 아니, 3년 안에 한빛, 정의, 우리들을 넘어서 우리 법인을 한국 최고의 로펌으로 만들겠다." }
 ];
 // 게임 방법: 지금 규칙 그대로 한 화면에
 const HOWTO = [
@@ -22998,7 +22998,7 @@ function counterOffer(c, F, B) {
   return fitStake(c, [Math.max(st, Math.floor(f / st) * st), Math.max(0, Math.floor(b / st) * st)]);
 }
 // 다툼 금액(stake, 만원)이 있는 사건: 수임료 합이 그 60%를 넘으면 맡기지 않고, 맞제안은 절반 안으로 낮춘다
-const STAKE_CAP = 0.6, STAKE_ASK = 0.5;
+const STAKE_CAP = 0.4, STAKE_ASK = 0.3;
 // 털어놓은 뒤에는 실제로 받을 수 있는 돈(stakeTrue)이 기준
 const effStake = c => C && C.confessed && c.stakeTrue ? c.stakeTrue : c.stake;
 function fitStake(c, [f, b]) {
@@ -23151,7 +23151,8 @@ function runTrial() {
   const oppSay = o => {
     const isArg = o.arg || /(주장|항변)$/.test(o.name), sub = isArg ? "" : `「${o.name}」${josaEul(o.name)} 제출합니다.`;
     const m = o.desc.match(/^(.*?)\s*"([^"]+)"\s*$/);
-    if (m) return { text: (sub ? sub + " " : "") + m[2], note: m[1].replace(/[.\s]+$/, "") };
+    // 따옴표 속이 대리인 말투가 아니면 증거에 적힌 내용이므로 소리 내어 읽지 않는다
+    if (m && /(니다|십시오|니까)[.!?]?\s*$/.test(m[2])) return { text: (sub ? sub + " " : "") + m[2], note: m[1].replace(/[.\s]+$/, "") };
     return isArg ? { text: o.desc, note: "" } : { text: sub, note: o.desc.replace(/[.\s]+$/, "") };
   };
   const arg = c.arguments.find(a => a.id === C.arg);
@@ -24231,7 +24232,7 @@ const opsSeats = () => {
   return `<div class="mk-seats">${show6.join("")}${opsSeatRest ? `<button class="ofc-seat mk-more" aria-expanded="false"><b>+${all.length - 5}</b><span>더 보기</span></button>` : ""}</div>`;
 };
 // 운영 모드에서 직원이 하는 일(사무장의 손님 늘리기는 운영 모드에 없음)
-const OPS_CREW_DESC = { kang: "사건 보조", yoon: "사건 보조 · 독촉하면 잘 받아 냄", jo: "사건 보조" };
+const OPS_CREW_DESC = { kang: "사건 보조", yoon: "사건 보조", jo: "사건 보조" };
 const opsCrewDesc = p => OPS_CREW_DESC[p.id] || p.desc;
 // 얼굴을 누르면 자세한 내용(고용 변호사·직원)
 function opsPersonPop(key) {
@@ -24506,7 +24507,11 @@ function opsNewMonth() {
     if (r.boost > 0) r.boost--; if (r.cut > 0) r.cut--;
   });
   const total = mine + S.rivals.reduce((a, r) => a + r.pull, 0);
-  const n = Math.max(3, Math.round(market * mine / total));
+  const n0 = Math.max(3, Math.round(market * mine / total));
+  // 잘못 짚어 의뢰인이 떠나면 소문이 돌아 다음 달 손님이 준다(스피드 모드와 같은 규칙)
+  const n = Math.max(3, n0 - (S.rumor || 0));
+  S.rumor = 0;
+  if (n0 > n) S.news.push(`나쁜 소문이 돌아 이번 달 손님이 ${n0 - n}명 줄었다`);
   S.market = market; S.share = { me: n };
   S.rivals.forEach(r => { S.share[r.name] = Math.round(market * r.pull / total); });
   // 사건 고르기: 안 해 본 것부터, 사무실 규모, 포털 광고면 거짓·지는 사건이 조금 더
@@ -24545,15 +24550,25 @@ function opsIntro() {
   const name = who ? `${who.name} ${role}` : `${S.name || heroOf().name} 변호사`;
   const line = who ? `대표님, 이번 달에는 ${kCount(n)}의 손님이 찾아왔습니다. 누구에게 사건을 맡기시겠습니까?`
     : `이번 달에는 ${kCount(n)}의 손님이 왔다. 사건들을 맡을지 결정해 보자.`;
-  const sc = opsScoutBlock();
-  const news = (S.news || []).length ? `<div class="pn k-news"><div class="k-sec">이번 달 소식</div>${S.news.map(t => `<div class="k-nw">${esc(t)}</div>`).join("")}</div>` : "";
   show(`<div class="ofc-banner" style="background-image:url('${sceneImage("office")}')"><div class="ofc-name">${esc(S.firm)}<small>${monthLabel(S.day)}</small></div>${opsSeats()}</div>
-    ${news}
     <div class="op-hero" style="margin-top:6px"><div class="op-face"><img src="${face}" alt=""></div><div><div class="eyebrow">${esc(name)}</div></div></div>
-    <p class="op-line">${esc(line)}</p>${sc ? sc.html : ""}`,
-    sc ? `<div class="row2">${sc.btns.map((b, i) => `<button class="btn" data-sc="${i}">${esc(b[0])}</button>`).join("")}</div>` : `<button class="btn primary" id="inNext">의뢰인 보기</button>`);
-  on("[data-sc]", e => { sc.btns[+e.currentTarget.dataset.sc][1](); save(); opsIntro(); });
+    <p class="op-line">${esc(line)}</p>`,
+    `<button class="btn primary" id="inNext">의뢰인 보기</button>`);
   on("#inNext", () => { S.intro = true; save(); opsAssign(); });
+  opsMonthPops();
+}
+// 달을 넘기면 소식 → 스카우트 순서로 팝업. 확인하기 전 저장해도 다시 뜬다
+function opsMonthPops() {
+  if (document.querySelector(".k-month")) return;
+  const open = html => { const d = document.createElement("div"); d.className = "k-dim k-month"; d.innerHTML = html; document.body.appendChild(d); return d; };
+  if ((S.news || []).length) {
+    const d = open(`<div class="k-pop" style="text-align:left"><h3 style="text-align:center">이번 달 소식</h3><div>${S.news.map(t => `<div class="k-nw">${esc(t)}</div>`).join("")}</div><button class="btn primary" id="nwOk" style="text-align:center">확인</button></div>`);
+    d.querySelector("#nwOk").onclick = () => { S.news = []; save(); d.remove(); opsMonthPops(); };
+    return;
+  }
+  const sc = opsScoutBlock(); if (!sc) return;
+  const d = open(`<div class="k-pop" style="text-align:left">${sc.html}${sc.btns.map((b, i) => `<button class="btn" data-sc="${i}" style="text-align:center">${esc(b[0])}</button>`).join("")}</div>`);
+  d.querySelectorAll("[data-sc]").forEach(b => b.onclick = () => { sc.btns[+b.dataset.sc][1](); save(); d.remove(); opsMonthPops(); });
 }
 function opsAssign() {
   if (!S.intro) return opsIntro();
@@ -24569,7 +24584,18 @@ function opsAssign() {
   };
   show(`<div class="k-head"><h2>${monthLabel(S.day)} 의뢰인 ${S.list.length}명</h2><div class="k-cap">${head}</div></div>
     <div class="k-list">${S.list.map(card).join("")}</div>`,
-    `<button class="btn primary" id="asDone">이대로 맡기기</button>`);
+    S.assocs.length ? `<div class="row2"><button class="btn" id="asAuto">자동 배정</button><button class="btn primary" id="asDone">이대로 맡기기</button></div>` : `<button class="btn primary" id="asDone">이대로 맡기기</button>`);
+  // 자동 배정: 아직 안 정한 사건만 고용 변호사에게. 분야 맞는 사건 먼저, 나머지는 큰 사건부터 단계 높은 변호사에게
+  on("#asAuto", () => {
+    const todo = S.list.filter(x => !x.who).sort((a, b) => BY_ID[b.id].tier - BY_ID[a.id].tier);
+    const free = () => S.assocs.filter(a => usedOf(a.id) < capOf(a.id));
+    let done = 0;
+    todo.forEach(x => { const a = free().find(p => p.trait === "field" && groupOf(BY_ID[x.id]).includes(p.field)); if (a) { x.who = a.id; done++; } });
+    todo.filter(x => !x.who).forEach(x => { const a = free().sort((p, q) => q.lvl - p.lvl || usedOf(p.id) - usedOf(q.id))[0]; if (a) { x.who = a.id; done++; } });
+    const left = S.list.filter(x => !x.who).length;
+    save(); opsAssign();
+    toast(!done ? (left ? "고용 변호사 자리가 없습니다." : "배정할 사건이 없습니다.") : left ? `${done}건 배정 · ${left}건은 자리가 없어 남았습니다.` : `${done}건 배정했습니다.`);
+  });
   on("[data-as]", e => {
     const x = S.list[+e.currentTarget.dataset.as], p = e.currentTarget.dataset.p;
     if (x.who === p) x.who = null;
@@ -24668,17 +24694,22 @@ function opsMakeReport(x) {
 const opsSummary = c => { const s = (window.CASE_SUMMARY || {})[c.base || c.id]; return s ? (c.varF ? scaleText(s, c.varF) : s) : `${kindLabel(c)} · ${c.category}`; };
 // 의뢰인이 한 말("~라는 말")을 진술 요지 문장으로
 const saidOf = s => String(s).replace(/이라는 말$/, "이다.").replace(/라는 말$/, "다.").replace(/다는 말$/, "다.").replace(/는 말$/, "다.");
-const susOf = s => String(s).replace(/다$/, "") + "는 점";
+const susOf = s => String(s) + "는 점";
+// 진술 요지는 고용 변호사가 물어본 질문 수만큼. 거짓 의뢰인의 거짓말과 보고서가 짚은 말은 항상 들어간다
+function opsSaidIdx(r) {
+  const c = BY_ID[r.id], must = c.truth === "liar" ? [c.lieIndex] : [];
+  if (r.verdict === "liar" && r.pickI != null && !must.includes(r.pickI)) must.push(r.pickI);
+  const rest = c.lies.map((_, i) => i).filter(i => !must.includes(i)).sort((a, b) => hash(r.id + a) - hash(r.id + b));
+  return must.concat(rest).slice(0, Math.max(r.qs.length, must.length)).sort((a, b) => a - b);
+}
 // 검토 의견: 문장마다 하나씩(대표가 틀린 문장을 짚을 수 있게)
 function opsReportLines(r) {
   const c = BY_ID[r.id], ev = c.evidence;
-  const knew = (r.fixed || r.right) && r.verdict !== "honest";
   let L;
   if (r.verdict === "honest") L = [`${ev[0].name} 등 증거가 의뢰인 진술과 맞습니다.`, "숨기거나 사실과 다르게 말한 부분은 없어 보입니다."];
   else if (r.verdict === "hiding") L = [`의뢰인이 말하지 않은 사실이 있어 보입니다. ${susOf(c.suspicions[r.pickI])}입니다.`];
   else L = [`의뢰인 진술 중 "${saidOf(c.lies[r.pickI]).replace(/\.$/, "")}"는 부분은 사실과 다릅니다.`];
-  const formalAll = t => String(t).split(/(?<=.)s+/).map(x => formal(x) + ".").join(" ");
-  if (r.verdict !== "honest") L.push(knew && c.confessionCard ? `다시 물어 확인했습니다. ${formalAll(c.confessionCard.desc)}` : r.verdict === "hiding" ? "재판에서는 이 점을 조심하겠습니다." : "그 부분과 닿는 증거는 빼고 가겠습니다.");
+  if (r.verdict !== "honest") L.push(r.verdict === "hiding" ? "재판에서는 이 점을 조심하겠습니다." : "그 부분과 닿는 증거는 빼고 가겠습니다.");
   return L;
 }
 // 지는 사건을 알아챈 보고서는 돌려보내자고 권한다(대표가 '잘못됐다'로 그 줄을 짚어 그냥 맡을 수 있음)
@@ -24688,7 +24719,8 @@ const josaGwa = w => hasJong(w) ? "과" : "와";
 const VD_TXT = { honest: "진실", hiding: "숨김", liar: "거짓" };
 function opsReports() {
   const st = { pending: "검토 전", ok: "컨펌", out: "돌려보냄", done: "끝" };
-  const rows = S.reports.map((r, i) => {
+  // 검토 전 사건을 위로, 끝낸 사건은 뒤로
+  const rows = S.reports.map((r, i) => ({ r, i })).sort((a, b) => (a.r.status !== "pending") - (b.r.status !== "pending") || a.i - b.i).map(({ r, i }) => {
     const c = BY_ID[r.id], a = myAssoc(r.who);
     return `<button class="visitor ${r.status === "pending" ? "" : "dim"}" data-rp="${i}" style="text-align:left;width:100%;font:inherit;color:inherit">
       <div class="portrait">${portrait(c)}</div><div><div class="vn">${esc(c.client.name)}</div><div class="vm">${esc(c.category)} · ${esc(a.name)}</div></div><div class="st">${st[r.status]}</div></button>`;
@@ -24701,7 +24733,7 @@ function opsReports() {
 function opsReport(i, mode) {
   const r = S.reports[i], c = BY_ID[r.id], a = myAssoc(r.who);
   const pick = mode === "pick";
-  const said = c.lies.map(saidOf).concat(r.joint ? [`(동석 상담) ${r.joint}`] : []);
+  const said = opsSaidIdx(r).map(k => formal(saidOf(c.lies[k])) + ".").concat(r.joint ? [`(동석 상담) ${r.joint}`] : []);
   const lines = opsReportLines(r);
   const sent = (t, k) => `<span class="k-st ${pick ? "chk" : ""}" data-ln="${k}">${esc(t)}</span>`;
   const hint = crewOf("sec").length ? staffSayP(pickPerson("sec", crewOf("sec")[0]), opsSecHint(c, r)) : "";
@@ -24787,11 +24819,20 @@ function opsWhy(i) {
   const answer = (kind, k) => {
     const ok = kind === c.truth && (kind === "honest" || k === (c.truth === "hiding" ? c.hiddenIndex : c.lieIndex))
       || (c.truth === "liar" && kind === "hiding" && k === c.touchIndex);
-    let say;
+    let say, note = "";
     if (ok) { r.verdict = c.truth; r.pickI = c.truth === "hiding" ? c.hiddenIndex : c.truth === "liar" ? c.lieIndex : null; r.fixed = true; say = c.truth === "honest" ? "다시 확인해 보니 숨긴 건 없었습니다. 제가 잘못 봤습니다." : "의뢰인에게 다시 물어보니 털어놓았습니다. 보고서를 고쳤습니다."; }
-    else { say = "이상한데요. 이번에는 제 생각대로 진행해 보겠습니다."; r.status = "ok"; }
-    save();
-    d.innerHTML = `<div class="k-pop k-why">${head(say)}<button class="btn primary" id="wOk">${ok ? "보고서 보기" : "목록으로"}</button></div>`;
+    else {
+      // 잘못 짚은 대가: 스피드 모드 상담에서 잘못 몰았을 때와 같은 규칙
+      const t = c.truth;
+      const pen = kind === "liar" && t === "honest" ? 3 : kind === "hiding" && t === "honest" && Math.random() < 0.5 ? 1 : kind !== "honest" && t !== "honest" && Math.random() < 0.12 ? 0 : null;
+      if (pen != null) {
+        r.status = "out"; S.mon.out++;
+        say = "의뢰인에게 다시 물었더니 화를 내며 나갔습니다.";
+        if (pen) { opsRepAdd(-pen); S.rumor = (S.rumor || 0) + 1; note = `명성 −${pen} · 나쁜 소문이 돌아 다음 달 손님이 줄어듭니다.`; }
+      } else { say = "이상한데요. 이번에는 제 생각대로 진행해 보겠습니다."; r.status = "ok"; }
+    }
+    save(); renderHud();
+    d.innerHTML = `<div class="k-pop k-why">${head(say)}${note ? `<div class="sub" style="color:var(--lose)">${esc(note)}</div>` : ""}<button class="btn primary" id="wOk">${ok ? "보고서 보기" : "목록으로"}</button></div>`;
     d.querySelector("#wOk").onclick = () => { close(); ok ? opsReport(i) : opsReports(); };
   };
   document.body.appendChild(d);
@@ -24971,15 +25012,18 @@ function opsSettle() {
     ${opsStandings()}
     ${due.length ? `<div class="pn"><div class="k-sec">받을 돈</div>${due.map(x => `<div class="k-due">
         <span class="${x.state === "bad" ? "neg" : ""}">${esc(x.name)}</span><span class="${x.state === "bad" ? "neg" : ""}">${won(x.amt)} · ${x.state === "bad" ? "안 줌" : x.state === "suit" ? "지급명령 중" : x.due <= S.day + 1 ? "다음 달" : (x.due - S.day) + "달 뒤"}</span></div>
-        ${x.state === "bad" ? `<div class="k-act"><button class="mini" data-rc="${S.recv.indexOf(x)}" data-a="dun">독촉</button><button class="mini gold" data-rc="${S.recv.indexOf(x)}" data-a="suit">지급명령 50만</button><button class="mini" data-rc="${S.recv.indexOf(x)}" data-a="drop">포기</button></div>
+        ${x.state === "bad" ? `<div class="k-act">${x.dunned === S.day ? `<button class="mini" disabled style="opacity:.5">독촉함</button>` : `<button class="mini" data-rc="${S.recv.indexOf(x)}" data-a="dun">독촉</button>`}<button class="mini gold" data-rc="${S.recv.indexOf(x)}" data-a="suit">지급명령 50만</button><button class="mini" data-rc="${S.recv.indexOf(x)}" data-a="drop">포기</button></div>
           ${inv ? staffSayP(pickPerson("inv", crewOf("inv")[0]), payStyle(BY_ID[x.id]) === "poor" ? "재산이 거의 없어요. 소송해도 못 받을 것 같아요." : "재산은 있어요. 소송하면 받아 낼 수 있겠습니다.") : ""}` : ""}`).join("")}</div>` : ""}`,
     `<button class="btn primary" id="nextM">${S.day >= OPS_MONTHS ? "결산" : "다음 달"}</button>`);
   on("[data-rc]", e => {
     const x = S.recv[+e.currentTarget.dataset.rc], a = e.currentTarget.dataset.a;
-    if (a === "dun") { const p = crewOf("mgr").includes("yoon") ? 0.6 : 0.3; if (Math.random() < p) { x.state = "paid"; S.money += x.amt; toast(`${x.name} 씨가 ${won(x.amt)}을 보냈습니다.`); } else { toast("연락이 없습니다."); } x.dunned = true; }
+    if (a === "dun") { const p = crewOf("mgr").includes("yoon") ? 0.6 : 0.3; if (Math.random() < p) { x.state = "paid"; S.money += x.amt; toast(`${x.name} 씨가 ${won(x.amt)}을 보냈습니다.`); } else { toast("연락이 없습니다."); } x.dunned = S.day; }
     if (a === "suit") { if (S.money < 50) return toast("돈이 모자랍니다."); S.money -= 50; x.state = "suit"; x.due = S.day + 2; }
     if (a === "drop") x.state = "lost";
+    // 다시 그려도 내려 둔 자리 그대로
+    const y = app.scrollTop, wy = window.scrollY;
     save(); opsSettle();
+    app.scrollTop = y; window.scrollTo({ top: wy });
   });
   on("#nextM", () => {
     if (S.day % 12 === 0 && S.yrShown !== S.day) return opsYearAward(opsAfterYear);
@@ -25011,7 +25055,9 @@ function opsFinal() {
 function opsOffice() {
   const cur = office(), nx = nextOffice();
   const tile = (id, lbl, val, sub) => `<button class="pn" id="${id}" style="text-align:left;font:inherit;color:inherit"><span class="eyebrow">${lbl}</span><b style="font-size:16px">${val}</b>${sub ? `<span class="note">${sub}</span>` : ""}</button>`;
-  const ads = ADS.filter(a => S.ads[a.k]).map(a => a.name.split("·")[0].replace(/ 광고$/, "")).join(" · ");
+  // 광고가 둘 이상이면 가장 비싼 광고 외 몇 개
+  const adOn = ADS.filter(a => S.ads[a.k]).sort((a, b) => b.cost - a.cost);
+  const ads = adOn.length ? adOn[0].name.split("·")[0].replace(/ 광고$/, "") + (adOn.length > 1 ? ` 외 ${adOn.length - 1}개` : "") : "";
   show(`<div class="ofc-banner" style="background-image:url('${sceneImage("office")}')"><div class="ofc-name">${esc(S.firm)}<small>${esc(cur.name)}${S.interior ? ` · 인테리어 ${S.interior}단계` : ""}</small></div>
       ${opsSeats()}</div>
     <div class="mk-tiles">
