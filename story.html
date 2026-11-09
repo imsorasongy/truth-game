@@ -1,0 +1,1243 @@
+<!doctype html>
+<html lang="ko">
+<head><meta charset="utf-8">
+<title>의뢰인의 진실 스토리</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;600&family=Nanum+Myeongjo:wght@400;700&display=swap">
+<style>
+/* 레이아웃: 위 띠 + 인물 무대 + 아래 대화창. 본 게임의 호두나무·놋쇠 색을 그대로 씀(단일 다크) */
+:root { color-scheme: dark;
+  --wood: #1b120d; --panel: #140d09f0; --line: #c9a24a55; --brass: #c9a24a; --paper: #efe7d6; --ink: #221d18;
+  --text: #f3e9da; --muted: #b7a68f; --win: #79b585; --lose: #e0705f; --warn: #e3b448;
+  --f-d: "Black Han Sans", "Malgun Gothic", sans-serif; --f-b: "IBM Plex Sans KR", "Malgun Gothic", sans-serif; --f-s: "Nanum Myeongjo", "Batang", serif; }
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--wood); color: var(--text); font-family: var(--f-b); font-size: 16px; line-height: 1.6; word-break: keep-all; overflow: hidden; }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
+#bg { position: fixed; inset: 0; background: var(--wood) center / cover no-repeat; }
+#bg::after { content: ""; position: absolute; inset: 0; background: linear-gradient(#0d0806b0, #0d080666 34%, #0d0806e8 66%); }
+#app { position: fixed; inset: 0; display: flex; flex-direction: column; max-width: 480px; margin: 0 auto;
+  padding-left: max(14px, env(safe-area-inset-left, 0px)); padding-right: max(14px, env(safe-area-inset-right, 0px)); padding-top: calc(10px + env(safe-area-inset-top, 0px)); padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px)); gap: 8px; }
+#tabs { position: fixed; left: 0; right: 0; bottom: 0; margin: 0 auto; max-width: 480px; z-index: 30; display: grid; grid-template-columns: repeat(2, 1fr); height: calc(62px + env(safe-area-inset-bottom, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); background: #0d0806f5; border-top: 1px solid #c9a24a44; }
+#tabs .tab { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11.5px; color: var(--muted); background: none; border: none; }
+#tabs .tab svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+#tabs .tab.on { color: var(--brass); }
+.top { display: flex; align-items: center; gap: 8px; min-height: 36px; }
+.top .tt { font-family: var(--f-d); color: var(--brass); font-size: 17px; flex: 1; min-width: 0; text-shadow: 0 1px 4px #000; }
+.mini { background: #000a; border: 1px solid var(--brass); color: var(--brass); border-radius: 8px; padding: 4px 11px; font-size: 13.5px; white-space: nowrap; }
+.stage { flex: 1 1 0; min-height: 70px; display: flex; align-items: flex-end; justify-content: center; position: relative; }
+.stage img.who { max-height: 100%; max-width: 78%; object-fit: contain; filter: drop-shadow(0 8px 16px #000b); }
+/* 대화 상대가 있는 화면: 본 게임처럼 얼굴은 위에 고정, 대사와 선택지는 그 바로 아래부터 */
+.stage:not(:empty) { flex: 0 0 auto; height: min(36vh, 290px); align-items: flex-start; }
+.stage:not(:empty) + .panel { flex: 1 1 0; max-height: none; min-height: 0; }
+.stage:not(:empty) img.who { height: 100%; }
+.stage:not(:empty) + .panel > .btn.go:last-child, .stage:not(:empty) + .panel > .btn.ghost:last-child { margin-top: auto; flex: none; }
+.tag { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); background: var(--brass); color: #2a1c0c; font-weight: 600; font-size: 14px; border-radius: 6px; padding: 1px 12px; white-space: nowrap; }
+.panel { flex: 0 1 auto; max-height: 66%; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+.say { background: var(--panel); border: 1.5px solid var(--brass); border-radius: 12px; padding: 11px 14px; }
+.say .n { font-size: 13px; color: var(--brass); }
+.say p { margin: 0; font-family: var(--f-s); font-size: 17.5px; line-height: 1.7; }
+.say.mono { border-color: #c9a24a66; }
+.say.mono p { color: #e6d9c2; }
+.hint { text-align: center; font-size: 12.5px; color: var(--muted); }
+.btn { display: block; width: 100%; text-align: left; background: #1d140ef2; border: 1px solid var(--brass); border-left-width: 4px; border-radius: 8px; padding: 9px 12px; font-size: 16px; line-height: 1.45; }
+.btn small { display: block; color: var(--muted); font-size: 13px; }
+.btn:disabled { opacity: .4; cursor: default; }
+.btn.go { background: linear-gradient(#e4c46e, #b38a34); color: #2a1c0c; border: 1px solid #f1d98f; text-align: center; font-weight: 600; }
+.btn.ghost { background: #0d0806cc; text-align: center; border-left-width: 1px; }
+.btn.lock { border-color: var(--warn); }
+.lbl { font-size: 13.5px; color: var(--muted); display: flex; justify-content: space-between; gap: 8px; }
+.lbl b { color: var(--brass); }
+.ev { display: block; width: 100%; text-align: left; background: #f1e9d8; color: var(--ink); border: 1px solid #d7c9ab; border-radius: 8px; padding: 9px 12px; }
+.ev b { font-size: 16px; }
+.evpic { float: right; width: 64px; height: 64px; object-fit: cover; border-radius: 6px; margin-left: 8px; }
+.evshow { width: min(220px, 60%); align-self: center; border-radius: 10px; border: 2px solid var(--brass); box-shadow: 0 6px 18px #000a; }
+.stamp.long { font-size: 21px; letter-spacing: 0; }
+.ev-ico { width: 18px; height: 18px; vertical-align: -3px; margin-right: 6px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.ev .ev-ico { color: #6b5a44; }
+.ev .d { display: block; font-size: 15px; color: #4a4034; line-height: 1.55; }
+.ev .tagr { font-size: 11.5px; background: var(--lose); color: #fff; border-radius: 3px; padding: 0 6px; margin-left: 6px; vertical-align: 2px; }
+.sheet { position: fixed; inset: 0 0 calc(62px + env(safe-area-inset-bottom, 0px)) 0; z-index: 20; background: #000b; display: flex; align-items: flex-end; justify-content: center; }
+.sheet > div { background: #f1e9d8; color: var(--ink); width: 100%; max-width: 480px; max-height: 76%; overflow-y: auto; border-radius: 16px 16px 0 0; padding: 10px max(14px, env(safe-area-inset-left, 0px)) 16px; display: flex; flex-direction: column; gap: 8px; }
+.sheet h3 { margin: 0; font-family: var(--f-d); font-weight: 400; color: #6b4a1e; }
+/* 재판: 본 게임 폰 화면과 같은 배치(사건 제목 위, 상대 왼쪽·우리 오른쪽, 게이지, 아래 대화창) */
+#bg.court::after { background: linear-gradient(180deg, #140d0955 0%, #140d0922 35%, #140d0988 65%, #140d09e6 100%); }
+#app.court { padding: 0; display: block; bottom: calc(62px + env(safe-area-inset-bottom, 0px)); }
+#app.quake { animation: quake .5s; }
+@keyframes quake { 10%, 50%, 90% { transform: translate(-7px, 3px); } 30%, 70% { transform: translate(7px, -3px); } }
+.court .top { position: absolute; top: calc(10px + env(safe-area-inset-top, 0px)); left: 14px; right: 14px; }
+.court .bench { position: absolute; top: calc(68px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); width: 80%; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px; }
+.court .bench .no, .court .bench .who { color: #d6c6aa; font-family: var(--f-s); font-size: 11.5px; line-height: 1.5; text-shadow: 0 1px 3px #000; }
+.court .bench .tt { font-family: var(--f-s); font-weight: 700; font-size: 15px; line-height: 1.5; text-shadow: 0 2px 6px #000; }
+.court .sides { position: absolute; top: 32%; left: 10px; right: 10px; display: flex; justify-content: space-between; pointer-events: none; }
+.court .side { position: relative; width: 36%; aspect-ratio: 1; border-radius: 14px; overflow: hidden; border: 2px solid; box-shadow: 0 6px 18px #000; background: #2a1d14; }
+.court .side img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 18%; display: block; }
+.court .side span { position: absolute; left: 0; right: 0; bottom: 0; text-align: center; font-size: 11.5px; line-height: 1.5; background: #000b; padding: 2px; }
+.court .side.opp { border-color: var(--lose); } .court .side.us { border-color: var(--win); }
+.court.hit-us .side.us, .court.hit-opp .side.opp { animation: shake .45s; }
+@keyframes shake { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+.court .gw { position: absolute; left: 16px; right: 16px; top: 58.6%; }
+.gauge { position: relative; height: 34px; border-radius: 6px; overflow: hidden; background: linear-gradient(90deg, #6e2f27 0 var(--t1), #6a5426 var(--t1) var(--t2), #2f5a3a var(--t2)); border: 1px solid var(--line); }
+.gauge .needle { position: absolute; top: -2px; bottom: -2px; width: 4px; margin-left: -2px; background: var(--paper); box-shadow: 0 0 8px #000; transition: left .5s cubic-bezier(.3,1.4,.6,1); }
+.gauge-labels { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--muted); margin-top: 4px; text-shadow: 0 1px 3px #000; }
+.gauge.zw { animation: zw 1s ease-out; } .gauge.zl { animation: zl 1s ease-out; }
+@keyframes zw { 0% { box-shadow: 0 0 0 0 #8fdc9f; } 30% { box-shadow: 0 0 18px 6px #8fdc9fcc; } 100% { box-shadow: 0 0 0 0 transparent; } }
+@keyframes zl { 0% { box-shadow: 0 0 0 0 #ff7a66; } 30% { box-shadow: 0 0 18px 6px #ff7a66cc; } 100% { box-shadow: 0 0 0 0 transparent; } }
+.court .log-wrap { position: absolute; left: 10px; right: 10px; bottom: 8px; z-index: 3; max-height: calc(100% - 140px); overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+.log-line { position: relative; display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: start; background: #140d09f0; border: 1.5px solid var(--brass); border-radius: 12px; padding: 12px; font-size: 18px; line-height: 1.5; box-shadow: 0 6px 18px #000a; animation: pop .25s ease-out; }
+@keyframes pop { from { transform: translateY(6px); opacity: .3; } }
+.log-line.has-ava { grid-template-columns: 36px 1fr auto; }
+.log-line.rebut { border-color: var(--win); }
+.log-line.asking { font-size: 16px; padding: 10px 12px; }
+.log-line .ava { width: 36px; height: 36px; border-radius: 50%; overflow: hidden; border: 1.5px solid var(--brass); background: #ddd; }
+.log-line .ava img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 15%; display: block; }
+.log-line .who { font-size: 12px; color: var(--muted); display: block; }
+.log-line .d { font-variant-numeric: tabular-nums; font-weight: 600; font-size: 13px; white-space: nowrap; }
+.log-line .d.pos { color: var(--win); } .log-line .d.neg { color: var(--lose); }
+.log-line .more { position: absolute; right: 10px; bottom: 4px; font-size: 11px; color: var(--brass); }
+.court .opts { display: flex; flex-direction: column; gap: 5px; }
+.court .opts .btn { font-size: 15px; padding: 8px 12px; }
+.cutin { position: fixed; inset: 0; z-index: 25; display: flex; align-items: center; pointer-events: none; }
+.ci-band { position: relative; width: 100%; height: 150px; display: flex; align-items: center; gap: 14px; padding: 0 18px; overflow: hidden; }
+.cutin.us .ci-band { background: linear-gradient(100deg, #0b2a5ae6, #1b4fa0e6 60%, #0b2a5ae6); animation: ciL var(--ci, 1.2s) cubic-bezier(.2,.9,.3,1) forwards; }
+.cutin.opp .ci-band { flex-direction: row-reverse; background: linear-gradient(260deg, #5a0b0be6, #a01b1be6 60%, #5a0b0be6); animation: ciR var(--ci, 1.2s) cubic-bezier(.2,.9,.3,1) forwards; }
+.ci-face { width: 128px; height: 128px; flex: none; border-radius: 10px; overflow: hidden; border: 3px solid #fff; box-shadow: 0 6px 20px #000a; }
+.ci-face img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 15%; display: block; }
+.ci-txt { font-family: var(--f-d); font-size: clamp(34px, 11vw, 54px); color: #fff; text-shadow: 0 3px 0 #000, 0 0 18px #000; transform: rotate(-4deg); white-space: nowrap; }
+@keyframes ciL { 0% { transform: translateX(-100%) skewY(-4deg); } 18%, 80% { transform: translateX(0) skewY(-4deg); } 100% { transform: translateX(100%) skewY(-4deg); opacity: 0; } }
+@keyframes ciR { 0% { transform: translateX(100%) skewY(4deg); } 18%, 80% { transform: translateX(0) skewY(4deg); } 100% { transform: translateX(-100%) skewY(4deg); opacity: 0; } }
+.flash { position: fixed; inset: 0; z-index: 24; pointer-events: none; animation: flash .42s ease-out forwards; }
+.flash.white { background: #fff; } .flash.red { background: #ff2a1a; }
+@keyframes flash { 0% { opacity: .75; } 100% { opacity: 0; } }
+.closeup { position: fixed; inset: 0; z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: #0d0806e6; }
+.closeup.out { opacity: 0; transition: opacity .3s; }
+.closeup-face { width: min(220px, 60vw); aspect-ratio: 1; border-radius: 50%; overflow: hidden; border: 4px solid var(--brass); }
+.closeup-face img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 18%; }
+.closeup-txt { font-family: var(--f-s); font-size: 20px; color: var(--paper); letter-spacing: .1em; }
+.court #verdict:not(:empty) { position: absolute; inset: 0; z-index: 7; overflow-y: auto; background: #0d0806f2; padding: calc(60px + env(safe-area-inset-top, 0px)) 16px 16px; display: flex; flex-direction: column; gap: 12px; }
+.vd-top { display: grid; grid-template-columns: 112px 1fr; gap: 12px; align-items: center; }
+.vd-stamp { width: 112px; height: 112px; display: grid; place-items: center; }
+.stamp { font-family: var(--f-d); width: 104px; height: 78px; display: grid; place-items: center; font-size: 34px; line-height: 1; color: #c8322b; border: 7px double currentColor; border-radius: 10px; background: #f1eadb22; transform: rotate(-6deg); letter-spacing: .06em; animation: stamp .35s cubic-bezier(.2,1.6,.5,1); }
+@keyframes stamp { from { transform: rotate(-6deg) scale(2.2); opacity: 0; } }
+.ledger { display: grid; grid-template-columns: 1fr auto; gap: 6px 14px; font-variant-numeric: tabular-nums; background: #1f150fd1; border: 1px solid #c9a24a33; border-radius: 10px; padding: 8px 12px; font-size: 14px; }
+.ledger .r { text-align: right; font-weight: 600; }
+.ledger .sum { border-top: 1px solid var(--line); padding-top: 8px; }
+.judgment { background: var(--paper); color: var(--ink); font-family: var(--f-s); padding: 10px 12px; border-radius: 3px; font-size: 14px; line-height: 1.55; }
+.judgment .jl { font-family: var(--f-b); font-size: 11.5px; letter-spacing: .12em; color: #6a5c4a; }
+.vd-mono { display: grid; grid-template-columns: 40px 1fr; gap: 10px; align-items: start; background: #1f150fd1; border: 1px solid #c9a24a55; border-radius: 10px; padding: 10px 12px; }
+.vd-mono .ava { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; border: 1.5px solid var(--brass); background: #ddd; }
+.vd-mono .ava img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 15%; display: block; }
+.vd-mono .who { font-size: 12px; color: var(--brass); margin-bottom: 4px; }
+.vd-mono .who span { color: var(--muted); }
+.vd-mono p { margin: 0; font-family: var(--f-s); font-size: 14px; line-height: 1.6; color: #efe5d3; }
+.court #verdict .btn { flex: none; }
+.cover { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 12px; overflow-y: auto; }
+.cover h1 { font-family: var(--f-d); font-weight: 400; color: var(--brass); font-size: 34px; line-height: 1.2; margin: 0; }
+.cover p { margin: 0; color: #e6d9c2; }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head><body><div id="bg"></div>
+<main id="app"></main>
+<nav id="tabs" hidden></nav>
+<script>
+const A = "assets/", H = { m: { n: "한서준", img: A + "hero-m.webp" }, f: { n: "윤서연", img: A + "hero-f.webp" } };
+const OFF = Math.max(0, Math.min(3, +new URLSearchParams(location.search).get("office") || 0));
+const BG = { court: A + "court-2.webp", m: `${A}office-${OFF}-m.jpg`, f: `${A}office-${OFF}-f.jpg` };
+const OLD_BG = ["rec", "er", "diner", "alley", "dock", "rest"];
+const bgOf = x => OLD_BG.includes(x) ? `${A}story/story-${x}.jpg` : `${A}story/${x}.jpg`;
+const homeBg = () => G.c.bgConsult ? bgOf(G.c.bgConsult) : BG[G.c.hero];
+// 그림이 있는 증거
+const EV_IMG = { bore: "ev-settle.webp", map: "ev-board.webp", sign: "ev-sign.webp", phone: "ev-phone.webp", log: "ev-broadcast.webp" };
+const evPic = k => EV_IMG[k] ? `<img class="evpic" src="${A}story/${EV_IMG[k]}" alt="">` : "";
+const P = { judge: ["재판장", A + "judge.webp"], pros: ["검사", A + "pros.webp"] };
+// 장소별 배경(없는 곳은 사무실: 서류를 읽거나 회사에 문의하는 장면)
+const PLACE_BG = { m: { rec: "rec", hosp: "er", diner: "diner", alley: "alley" }, f: { rec: "rec", cctv: "dock", mate: "dock", rest: "rest" } };
+const placeBg = id => { const b = G.c.places[id].bg; if (b) return bgOf(b); const n = (PLACE_BG[G.k] || {})[id]; return n ? `${A}story/story-${n}.jpg` : BG[G.c.hero]; };
+function S(w, t, d) { return { k: "say", w, t, d }; }
+// 조건부 재판 단계, 증거 그림을 보여 주는 단계
+function F(cond, steps) { return { k: "if", cond, steps }; }
+function I(file, t) { return { k: "img", file, t }; }
+function D(q, card, gain, ok, miss) { return { k: "ev", q, card, gain, ok, miss }; }
+function C(q, opts) { return { k: "choice", q, opts }; }
+// 반대신문: 변호인이 묻고(q) 증인이 답하면(a) 그 답을 듣고 뭐라고 반박할지 고른다
+function X(q, a, opts, w = "w") { return { k: "cross", q, a, opts, w }; }
+
+/* ---------- 사건 대본 ---------- */
+const CH = {
+m: { hero: "m", title: "남주 1장 · 시청 과장의 음주운전", no: "2030고단1187 위험운전치상",
+  client: { n: "오명환", m: "52세 · 서해광역시 건축과장", img: A + "cut/f-exec.webp" },
+  intro: ["개업하고 얼마 안 된 동네 상가 2층 사무실. 벽에는 강도윤 교수님이 개업 선물로 써 준 액자가 걸려 있다. 수구여병. 입을 병마개처럼 지켜라.","퇴근 무렵, 짙은 양복 차림의 남자가 두리번거리며 주위를 살피더니 문을 닫고 들어왔다."],
+  greet: [["c", "안녕하십니까. 오명환이라고 합니다. 시청에서 일하고 있습니다."], ["h", "반갑습니다. 변호사 한서준입니다. 앉으시죠. 어떤 일로 오셨습니까?"]],
+  opening: "시청 사람들이 아는 변호사한테는 갈 수가 없어서요. 음주운전으로 기소됐습니다. 근데 저는 운전 안 했어요. 대리기사가 몰았고, 사고가 나니까 도망갔습니다.",
+  qs: [
+    ["대리기사는 어떻게 불렀어요?", "앱으로 불렀지요. 회식 끝나고 식당 앞에서요. 기사 얼굴은 어두워서 기억이 안 나고요.", ["app"]],
+    ["그날 술은 얼마나 드셨어요?", "부서 회식이라 소주 두어 잔요. 시청 앞 '대성식당'이었어요. 의식을 잃은 건 사고 충격 때문입니다.", ["diner"]],
+    ["전에도 음주로 처벌받은 적 있으세요?", "…7년 전에 한 번요. 이번에 유죄가 나오면 저는 끝입니다. 국장 승진 명단에 올라 있거든요.", []],
+    ["누가 과장님을 봤다는 거죠?", "우리 과 정한별 주무관이요. 사고 골목 앞에서 제가 운전석에서 내리는 걸 봤다는데, 그 친구가 저한테 감정이 좀 있어요.", ["alley"]],
+    ["왜 저를 찾아오셨어요?", "동네 약국에서 명함을 봤습니다. 시청 사람들이 모르는 변호사가 필요해서요.", []]],
+  pre: [2, 4],
+  cards0: {
+    gong: { n: "공소장", d: "혈중알코올농도 0.172% 상태로 약 1.2km 운전, 보행자를 쳐 전치 6주." },
+    note: { n: "대리기사 사실확인서", d: "의뢰인이 가져옴. \"그날 제가 운전했습니다.\" 손글씨, 연락처 없음.", bad: 1 } },
+  start: ["rec"],
+  places: {
+    rec: { n: "사건 기록 열람", s: "공소청 열람복사실", fn: null, intro: "공소청 열람복사실 창구다. 직원이 서류를 달라는 듯 손을 내민다.", items: [
+      { q: "기록 열람을 신청한다", a: ["…"], needs: "sun", lock: "변호인 선임서를 내셔야 열람하실 수 있습니다.", okLine: "선임서 확인했습니다. 저쪽 책상에서 보세요. 수사기록이 두툼하다." },
+      { q: "교통사고 실황조사서를 읽는다", after: "sun", a: ["사고 시각 밤 11시 40분. 차량은 골목 전봇대에 멈춰 있었다. 운전석 문은 열려 있었다."] },
+      { q: "목격자 진술조서를 읽는다", after: "sun", a: ["정한별 주무관. \"회식 뒤 밖에 나왔다가 과장님이 운전석에서 내리는 것을 보았다. 술은 거의 마시지 않았다.\""] },
+      { q: "혈액 감정 경위를 읽는다", after: "sun", a: ["의식 없는 피고인의 혈액을 경찰 요청으로 채취했다. 압수영장란이 비어 있다. 뒷장까지 넘겨도 사후영장을 청구한 기록이 없다.", "채혈 장소는 시립병원 응급실. 의식이 없었다면 동의는 누가 했을까. 그날 피를 뽑은 사람에게 직접 물어봐야겠다."], gives: ["nowarrant", { n: "수사기록 사본", d: "의식 없는 피고인 혈액을 경찰 요청으로 채취. 사전·사후영장 모두 없음." }], opens: ["hosp"] }] },
+    hosp: { n: "시립병원 응급실", s: "채혈한 간호사", fn: "응급실 간호사", face: A + "cut/n30f1.webp", intro: "기록 말씀이세요? 저희가 함부로 드릴 수는 없는데요.", items: [
+      { q: "그날 채혈은 누가 시켰어요?", a: ["경찰분이요. 환자는 의식이 없었어요. 보호자도 안 오셨고요."] },
+      { q: "동의서는 어떻게 됐어요?", a: ["…그건 제가 말씀드리기가."], needs: "sun", lock: "환자분 쪽 변호사님이라는 걸 확인해야 말씀드릴 수 있어요.", okLine: "변호인 선임서 확인했습니다. 잠시만요. 동의서 칸은 비어 있어요. 채혈 기록 복사해 드릴게요.", gives: ["blood", { n: "응급실 채혈 기록", d: "채혈 시각 의식 없음. 동의서 서명란 공란." }] }] },
+    app: { n: "대리 앱 회사", s: "고객센터 방문", fn: "고객센터 직원", face: A + "cut/n50f1.webp", intro: "고객 이용내역은 본인이 아니면 보여 드릴 수 없어요.", items: [
+      { q: "그날 이용내역을 확인해 달라고 한다", a: ["…"], needs: "sun", lock: "본인이 오시거나 대리인이라는 서류가 있어야 해요.", okLine: "변호인 선임서 확인했습니다. 잠시만요. …그날은 호출하신 기록이 없는데요. 출력해 드릴게요.", gives: ["nohail", { n: "대리 호출 내역", d: "사건 당일 의뢰인 계정의 호출 기록 없음." }] },
+      { q: "앱에서 기록을 지웠을 수도 있나요?", a: ["고객님이 앱에서 지우셔도 저희 서버에는 그대로 남아요."], after: "sun" }] },
+    diner: { n: "대성식당", s: "회식한 고깃집", fn: "식당 사장", face: A + "cut/n50m2.webp", intro: "손님 정보를 함부로 드릴 수가 있나요.", items: [
+      { q: "그날 회식 자료를 요청한다", a: ["…아, 그 사고요?"], needs: "sun", lock: "무슨 일이신데요? 그냥은 말씀 못 드려요.", okLine: "그 양반 사고 난 날이구먼. 그날 열두 분 오셨어요." },
+      { q: "그날 과장님은 얼마나 드셨어요?", a: ["많이 드셨죠. 대리요? 저희 앞에서 대리 부르는 건 못 봤는데."], after: "sun" },
+      { q: "끝까지 남은 사람이 있었나요?", a: ["안경 쓴 젊은 분이요. 그분도 꽤 드시던데. 마지막에 같이 나가셨어요. 영수증 드릴까요?"], after: "sun", gives: ["receipt", { n: "회식 영수증", d: "12명, 소주 11병. 사장: 안경 쓴 직원도 끝까지 함께 마심." }] },
+      { q: "요즘 시청 분들 자주 오세요?", a: ["요즘 해안 복합개발 건으로 늘 늦게들 오시죠."], after: "sun" }] },
+    alley: { n: "사고 골목", s: "직접 둘러보기", fn: null, intro: "밤 11시, 사고 시각에 맞춰 와 봤다.", items: [
+      { q: "가로등을 살핀다", a: ["가로등 하나가 고장 나 있다. 그날도 나가 있었다고 근처 슈퍼 주인이 말했다. 골목은 어둡다."] },
+      { q: "정한별이 섰던 곳을 재 본다", a: ["식당 앞에서 사고 지점까지 약 28미터. 어두우면 얼굴이 잘 안 보일 거리다."], gives: ["alley", { n: "현장 사진·거리 측정", d: "고장 난 가로등, 목격 지점까지 약 28m." }] },
+      { q: "담벼락의 현수막을 본다", a: ["'해안 복합개발 건축심의 예정.' 요즘 시내 어디를 가도 보인다."] }] } },
+  lies: [["대리기사가 운전했다는 말", -1], ["앱으로 대리기사를 불렀다는 말", 0], ["소주 두어 잔만 마셨다는 말", 1]],
+  keyLie: 1, altLie: 0, keyCard: "nohail",
+  press: { open: [["h", "과장님, 그날 대리 안 부르셨죠?"], ["c", "무슨 말씀이십니까. 앱으로 불렀다고 말씀드렸잖아요."]],
+    show: G => [["h", "대리 앱 회사에 가서 확인한 호출 내역입니다."], ["h", "그날 과장님 계정으로 대리를 부른 내역이 전혀 없습니다."],
+      ...(G.done.app1 ? [["c", "그, 그건 제가 앱에서 지워서…"], ["h", "앱에서 지우셔도 회사 서버에는 그대로 남는다고 하더군요."]] : [["c", "그, 그럴 리가요."]]),
+      ...(G.done.diner1 ? [["h", "식당 사장님도 그날 가게 앞에서 대리 부르는 건 못 봤다고 하셨습니다."]] : []),
+      ["h", "실제로는 대리를 부르신 적이 없으시지요?"]] },
+  sus: ["사고 뒤 피해자에게 돈을 건넸다", "그날 회식에 가지 않았다", "다른 사람의 차를 몰았다"],
+  confess: "…대리는 안 불렀습니다. 제가 몰았어요. 정신 차린 뒤에 아는 기사한테 전화했습니다. 50만 원 줄 테니 자기가 운전했다고 써 달라고요. 변호사님, 이번 한 번만요.",
+  after: "거짓 확인서는 법정에 낼 수 없다. 하지만 검사가 증명하지 못한 것을 다투는 건 변호사의 일이다. …그렇게 생각하기로 했다.",
+  people: { w: ["정한별", A + "cut/n30m1.webp"] },
+  trial: [
+    S("judge", "2030고단1187, 피고인 오명환. 검사, 공소사실 말씀해 주십시오."),
+    S("pros", "피고인은 혈중알코올농도 0.172% 상태로 약 1.2km를 운전해 보행자를 치었습니다. 혈액 감정서를 증거로 제출합니다."),
+    D("혈액 감정서를 무엇으로 다툴까?", "nowarrant", 12, ["영장 없이 채취한 혈액입니다. 수사기록을 보십시오."], "그 자료로는 감정서를 다툴 수 없겠군요."),
+    S("pros", "의식 없는 환자에게는 긴급한 조치가 필요했습니다. 영장 없이 채혈할 수 있는 경우였습니다."),
+    C("검사의 긴급성 주장에 어떻게 답할까?", [["긴급했다면 사후에라도 영장을 받았어야 합니다", 8, "", "judge", "사후영장 청구 기록이 없군요. 혈액 감정서는 증거로 쓰지 않겠습니다."], ["의식이 없었으니 채혈 자체가 무효입니다", -8, "", "pros", "의식이 없을 때 치료는 당연히 이뤄집니다."], ["경찰의 태도에 문제가 있었습니다", -8, "", "judge", "무슨 말씀이신지 모르겠군요."]]),
+    S("pros", "다음으로 증인 정한별을 신문하겠습니다. 증인은 피고인과 어떤 관계입니까?"),
+    S("w", "건축과에서 과장님을 모시고 일하는 주무관입니다."),
+    S("pros", "증인은 피고인의 평소 술버릇이 나쁘다고 들으셨지요?"),
+    C("이의를 제기한다. 이유는?", [["유도신문입니다", 6, "", "judge", "이의를 받아들입니다. 검사는 질문을 바꾸십시오."], ["전문진술입니다", -4, "", "judge", "그 이유로는 받아들이기 어렵군요."], ["관련 없는 질문입니다", -4, "", "judge", "관련이 없다고 보이진 않습니다."]]),
+    S("pros", "질문을 바꾸겠습니다. 사건 당일 밤 무엇을 보셨는지 말씀해 주십시오."),
+    S("w", "회식이 끝나고 식당 앞에 나와 있었습니다. 밤 11시 40분쯤 골목 쪽에서 쿵 소리가 났습니다."),
+    S("w", "돌아보니 차가 전봇대에 박혀 있었고, 과장님이 운전석에서 내리시더니 그 자리에 주저앉으셨습니다."),
+    S("pros", "피고인이 틀림없습니까?"),
+    S("w", "틀림없습니다. 가로등 밑이라 잘 보였습니다. 저는 술도 거의 마시지 않았고요."),
+    S("w", "요즘 과장님은 해안 복합개발 심의 서류를 혼자 붙들고 계셨고, 그날도…"),
+    C("정한별의 말이 사건에서 벗어난다.", [["이의 있습니다. 공소사실과 관련 없는 진술입니다.", 2, "cut", "judge", "이의를 받아들입니다. 증인은 질문에 대해서만 답하십시오."], ["그대로 둔다", 0, "", "judge", "(정한별이 입을 다물었다. 재판장이 다음으로 넘어갔다.)"]]),
+    S("judge", "변호인, 반대신문하십시오."),
+    X("증인, 그날 식당 앞에는 왜 나와 계셨습니까?", "담배 한 대 피우러 나왔습니다.", [["담배를 피우느라 사고 장면은 제대로 못 보신 것 아닙니까?", -4, "", "w", "담배 피운다고 앞을 못 보는 건 아니지요."], ["증인이 그날 회식 자리에 있었다는 증거가 없습니다.", -4, "", "w", "열두 명이 같이 있었습니다."], ["(다음 질문으로 넘어간다)", 0]]),
+    X("그날 술은 얼마나 드셨습니까?", "말씀드린 대로 거의 안 마셨습니다. 한두 잔 받아 놓기만 했습니다.", [["회식 영수증을 보십시오. 12명이 소주 11병을 마셨고, 식당 사장은 증인이 끝까지 함께 마셨다고 했습니다.", 12, "", "w", "…그, 그날은 분위기상 조금 마시기는 했습니다."], ["한두 잔이면 충분히 취할 수 있지 않습니까?", -4, "", "w", "저는 그 정도로 취하지 않습니다."], ["증인은 그날 음주 측정을 받았습니까?", -4, "", "judge", "변호인, 증인은 측정 대상이 아니었습니다."], ["(다음 질문으로 넘어간다)", 0]]),
+    X("사고 지점까지 거리가 꽤 됐을 텐데, 피고인이 잘 보였습니까?", "네. 가로등 밑이라 잘 보였습니다.", [["그 가로등은 그날 고장 나 있었습니다. 목격 지점까지는 약 28미터입니다. 현장 사진을 보십시오.", 8, "", "w", "…어두웠던 것 같기도 합니다."], ["안경을 쓰고 계셔서 잘 안 보인 것 아닙니까?", -4, "", "w", "안경을 썼으니 잘 보였습니다."], ["운전석에서 내린 사람이 대리기사일 수도 있지 않습니까?", -8, "", "pros", "변호인은 그 대리기사를 특정할 수 있습니까?"]]),
+    X("그렇다면 얼굴까지 똑똑히 보셨습니까?", "…옷차림하고 체격을 보면 압니다. 제가 매일 모시는 분입니다.", [["얼굴은 보지 못했고, 옷차림과 체격으로 짐작했다는 말씀이군요.", 6, "", "judge", "증인의 진술 취지는 그렇게 정리하겠습니다."], ["과장님께 감정이 있어서 일부러 그러시는 것 아닙니까?", -4, "", "w", "감정 때문에 없는 말을 하는 건 아닙니다."], ["(더 묻지 않는다)", 0]]),
+    S("pros", "피고인은 대리기사를 불렀다고 합니다. 그런데 호출 기록이 전혀 없습니다. 피고인이 운전한 겁니다."),
+    C("어떻게 대응할까?", [["대리 호출 기록이 없다는 것만으로 피고인이 운전했다는 증명은 되지 않습니다", 8, "", "judge", "일리 있는 지적입니다."], ["대리기사 사실확인서를 제출합니다", -20, "false", "pros", "연락처도 없는 이 사람을 증인으로 세울 수 있습니까? 재판장님, 이 확인서의 경위를 조사해 주십시오."], ["앱 오류일 수 있습니다", -8, "", "pros", "회사 회신서에는 오류 기록이 없습니다."]]),
+    S("judge", "변호인, 최후변론하십시오."),
+    C("무엇을 주장할까?", [["혈액 증거를 빼면 남는 것은 믿기 어려운 목격 진술뿐입니다. 공소사실이 증명되지 않았습니다.", 10, "", "judge", "잘 들었습니다. 선고하겠습니다."], ["대리기사가 운전했으므로 피고인은 무죄입니다.", -12, "", "pros", "그 대리기사는 어디 있습니까?"], ["피고인은 사고 충격으로 기억이 없습니다.", -6, "", "judge", "선고하겠습니다."]])],
+  res: { win: ["피고인은 무죄.", "혈액 감정서는 증거능력이 없고, 증인 정한별의 진술은 믿기 어렵다."], partial: ["피고인을 벌금 1,500만 원에 처한다.", "일부 증거의 증거능력을 부정하나, 음주운전 사실은 인정된다."], lose: ["피고인을 징역 1년, 집행유예 2년에 처한다.", "피고인의 주장은 믿기 어렵다."] },
+  ending: { win: ["법정 밖 복도, 정한별이 벽에 기대 서 있었다. 눈이 마주쳤지만 아무 말도 하지 않았다.", "며칠 뒤 사무실로 떡이 왔다. 오명환이 탄원서에 쓴 것과 똑같은 반듯한 글씨로 '은혜 잊지 않겠습니다'라고 적혀 있었다.", "맛있었다. 조금 찜찜했지만, 이 일은 원래 그런 거다."], partial: ["벌금형이면 자리는 지킬 수 있다. 오명환은 고개를 숙이고 돌아갔다."], lose: ["금고 이상의 형이면 공무원 자리는 끝이다. 오명환은 전화를 받지 않았다."] },
+  file: ["탄원서 사본: 오명환의 서명", "판결문: \"증인 정한별의 진술은 믿기 어렵다\""]
+},
+f: { hero: "f", title: "여주 1장 · 택배 한 상자", no: "2031고정342 절도",
+  client: { n: "방재호", m: "47세 · 택배 기사", img: A + "cut/n40m2.webp" },
+  intro: ["법률구조 상담 명단에서 넘어온 사건이다. 수임료는 얼마 되지 않는다. 벽의 액자, 강도윤 교수님의 수구여병 네 글자만 사무실에서 제일 비싸 보인다.","약속 시간에 맞춰, 유니폼 차림의 남자가 사무실 문을 두드렸다."],
+  greet: [["c", "저, 방재호라고 합니다. 택배 일 하고요. 상담 예약했는데요."], ["h", "네, 안녕하세요. 변호사 윤서연입니다. 앉으세요. 어떤 일이세요?"]],
+  opening: "택배 하나 없어졌다고 절도로 걸렸습니다. 스무 해 가까이 일했는데요. 배송 중에 없어진 걸 저더러 어쩌라는 겁니까.",
+  qs: [
+    ["그 상자, 직접 만지신 적은 있어요?", "스캔만 찍었죠. 차에 싣고 나서는 손도 안 댔어요.", ["cctv"]],
+    ["그날 동선을 말씀해 주세요.", "터미널에서 싣고 오전 열 시쯤 나갔어요. 점심 때 기사 휴게실 들러서 라면 하나 먹었고요.", ["app", "rest"]],
+    ["내용물이 뭐래요?", "보낸 사람이 서류라던데요. 저야 상자만 봤지. 크기는 딱 홍삼 세트만 하더만.", []],
+    ["전에도 이런 일이 있었어요?", "분실이야 1년에 몇 번은 있죠. 동료들한테 물어보세요. 그때마다 회사에서 물어 줬고요.", ["mate"]],
+    ["변호사 비용은 괜찮으세요?", "많이는 못 드려요. 상담 명단에 이름 올렸더니 여기로 연결해 주더라고요.", []]],
+  pre: [2, 4],
+  cards0: {
+    gong: { n: "공소장", d: "배송 중이던 상자 1개를 가져가 절취. 피해품 미발견." },
+    note: { n: "분실 경위서", d: "의뢰인이 회사에 낸 글. \"배송 중 차량 적재함에서 분실.\"", bad: 1 } },
+  start: ["rec"],
+  places: {
+    rec: { n: "고소 기록 열람", s: "공소청 열람복사실", fn: null, intro: "공소청 열람복사실 창구다. 직원이 서류를 달라는 듯 손을 내민다.", items: [
+      { q: "기록 열람을 신청한다", a: ["…"], needs: "sun", lock: "변호인 선임서를 내셔야 열람하실 수 있습니다.", okLine: "선임서 확인했습니다. 저쪽 책상에서 보세요. 기록은 얇다." },
+      { q: "고소장의 내용물란을 본다", after: "sun", a: ["고소인 이수아. 내용물란에 '사무 서류'라고만 적혀 있다. 가액 미상."], gives: ["comp", { n: "고소장 사본", d: "내용물 '사무 서류', 가액 미상. 구체적 설명 없음." }] },
+      { q: "수사보고서를 읽는다", after: "sun", a: ["'피해품 미발견. 피의자 차량 수색 결과 없음.' 물건이 나오지 않았다."] }] },
+    app: { n: "택배사 전산실", s: "배송 앱 기록", fn: null, intro: "회사가 보내온 앱 기록을 펼쳤다.", items: [
+      { q: "기록을 시간순으로 읽는다", a: ["10시 02분 상차 스캔. 13시 10분부터 55분간 터미널 휴게실 앞에 정차. 14시 30분 분실 처리."], gives: ["hail", { n: "배송 앱 기록", d: "휴게실 앞 55분 정차 뒤 분실 처리." }] }] },
+    cctv: { n: "터미널 상하차장", s: "CCTV 담당자", fn: "관리 직원", face: A + "cut/n40m3.webp", intro: "영상요? 회사 허락 없이는 안 돼요.", items: [
+      { q: "영상을 보여 달라고 부탁한다", a: ["…"], needs: "sun", lock: "무슨 일로 그러시는데요? 안 됩니다.", okLine: "방 기사 사건이구먼. 보세요. 상차 뒤로 40분은 카메라가 고장 나 있었어요.", gives: ["cctv", { n: "CCTV 영상", d: "상차 후 40분 녹화 없음. 다른 사람도 드나든 구간." }] },
+      { q: "상하차장은 누가 드나들어요?", a: ["아무나요. 납품업체도 들어오고 알바도 들어오고."], after: "sun" }] },
+    mate: { n: "동료 기사 탐문", s: "터미널 대기실", fn: "동료 기사", face: A + "cut/n50m2.webp", intro: "방 형님 일이요? 뭘 물어보시게요.", items: [
+      { q: "분실이 자주 있나요?", a: ["이번 달만 세 번째예요. 저기 통제가 엉망이거든요."], gives: ["mate", { n: "동료 진술", d: "같은 터미널 이번 달 분실 3건째, 출입 통제 없음." }] },
+      { q: "방 기사님은 어떤 분이세요?", a: ["성실하지요. 명절 앞두고 돈 들어갈 데가 많다고는 했어요."] },
+      { q: "그날 방 기사님, 휴게실에서 뭐 하셨어요?", a: ["…변호사님이니까 말씀드리는 건데요. 탁자에 상자 올려놓고 뜯고 계시던데요.", "홍삼 들었나 보다 했죠. 경찰한테는 말 안 했어요. 형님 곤란해질까 봐."], gives: ["saw", { n: "동료의 목격담", d: "그날 휴게실 탁자에서 의뢰인이 상자를 뜯는 것을 봄. 경찰에는 말하지 않음.", bad: 1 }] }] },
+    rest: { n: "기사 휴게실", s: "직접 둘러보기", fn: null, intro: "컵라면 냄새가 밴 좁은 방이다.", items: [
+      { q: "탁자를 살핀다", a: ["냄비가 서류 뭉치 위에 놓여 있다. 맨 위 장에는 국물이 배어 글씨가 번졌다.", "누가 쓰다 버린 종이겠지."], gives: ["stain", { n: "국물 자국 난 종이", d: "휴게실 냄비 받침. 글씨는 번져 읽을 수 없다." }] },
+      { q: "벽의 근무표를 본다", a: ["방재호, 그날 오후 근무로 적혀 있다. 특별한 건 없다."] }] } },
+  lies: [["배송 중에 없어졌다는 말", -1], ["싣고 나서 상자에 손도 안 댔다는 말", 0], ["점심 때 라면만 먹고 나왔다는 말", 1]],
+  keyLie: 1, altLie: 2, keyCard: "hail",
+  press: { open: [["h", "기사님, 그 상자에 정말 손도 안 대셨어요?"], ["c", "그렇다니까요. 스캔만 찍고 차에 실었어요."]],
+    steps: [
+      { card: "hail", show: G => [["h", "택배사에서 받은 배송 앱 기록입니다."], ["h", "그날 13시 10분부터 55분 동안 차가 터미널 휴게실 앞에 서 있었어요. 라면 하나 드신 것치고는 길죠."],
+        ["c", "밥 먹고 좀 쉬었다니까요. 그게 무슨 증거입니까."], ["h", "그러고 나서 14시 30분에 분실 처리를 하셨어요. 적재함을 언제 확인했는지는 아무 기록이 없고요."], ["c", "그, 그건 바빠서…"]] },
+      { card: "saw", show: G => [["h", "그날 휴게실에 있던 동료분 말씀입니다. 탁자에 상자를 올려놓고 뜯고 계셨다더군요."], ["c", "…그 사람이 잘못 봤겠지요."],
+        ...(G.asked.includes(2) ? [["h", "기사님, 내용물은 서류라고 들었다면서 크기는 '딱 홍삼 세트만 하다'고 하셨어요."], ["h", "상자만 스캔한 분이 그걸 왜 그렇게 기억하세요? 홍삼인 줄 아셨던 거 아닌가요?"]] : []),
+        ["c", "……"], ["h", "저한테까지 거짓말하시면 재판에서 지켜 드릴 수가 없어요. 싣고 나서 손도 안 댔다는 말, 지금도 그대로 하시겠어요?"]] }] },
+  sus: ["다른 택배도 빼돌린 적이 있다", "고소인과 아는 사이다", "배송 물량을 일부러 줄였다"],
+  confess: "…크기가 딱 홍삼 세트라 명절 선물인 줄 알았어요. 휴게실에서 뜯어 보니 서류뿐이더라고요. 그래서 버렸습니다. 진짜예요.",
+  after: "물건은 없다. 보낸 사람은 내용물을 말하지 않는다. 훔쳤다는 걸 알지만, 그걸 증명하는 건 검사의 몫이다.",
+  people: { w: ["이수아", A + "cut/n30f2.webp"] },
+  trial: [
+    S("judge", "2031고정342, 피고인 방재호. 검사, 공소사실 말씀해 주십시오."),
+    S("pros", "피고인은 배송 중이던 상자를 가져갔습니다. 상차 스캔 뒤 분실 처리까지, 상자는 피고인이 맡고 있었습니다."),
+    D("상자를 맡고 있었다는 주장을 무엇으로 다툴까?", "cctv", 12, ["상차 뒤 40분간 CCTV가 없었고, 그 구간은 다른 사람도 드나들었습니다."], "그 자료만으로는 반박이 되지 않습니다."),
+    S("pros", "앱 기록을 보십시오. 피고인은 휴게실 앞에 55분이나 서 있었습니다. 그때 상자를 뜯은 겁니다."),
+    C("어떻게 답할까?", [["점심시간에 정차한 사실만으로 상자를 뜯었다고 볼 수는 없습니다", 8, "", "judge", "그 정도로는 단정할 수 없겠군요."], ["분실 경위서를 제출합니다. 배송 중에 분실됐습니다", -20, "false", "pros", "휴게실 앞에 55분 있었는데 '배송 중' 분실입니까? 경위서가 사실과 다르군요."], ["그날은 휴게실에 들르지 않았습니다", -8, "", "pros", "앱 기록에 그대로 나와 있습니다."]]),
+    S("pros", "고소인 이수아를 신문하겠습니다. 증인은 피고인이 상자를 뜯는 것을 본 사람에게 들었지요?"),
+    C("이의를 제기한다. 이유는?", [["유도신문입니다", 6, "", "judge", "이의를 받아들입니다. 검사는 질문을 바꾸십시오."], ["관련 없는 질문입니다", -4, "", "judge", "관련이 없다고 보이진 않습니다."], ["증인이 긴장했습니다", -4, "", "judge", "그건 이의 사유가 아닙니다."]]),
+    S("pros", "질문을 바꾸겠습니다. 피고인에게 맡긴 상자에 대해 말씀해 주십시오."),
+    S("w", "제가 직접 포장해서 그날 오전에 터미널에 맡겼습니다."),
+    S("w", "받는 분께 꼭 전달되어야 하는, 아주 값나가는 물건이었습니다."),
+    S("pros", "그 상자는 어떻게 됐습니까?"),
+    S("w", "오후에 분실됐다는 연락을 받았습니다. 터미널 직원분 말로는 기사님이 마지막까지 맡고 있었다고 합니다."),
+    S("judge", "변호인, 반대신문하십시오."),
+    X("상자는 증인이 직접 포장하셨습니까?", "네. 테이프까지 제가 붙였습니다.", [["증인이 포장했다는 걸 어떻게 믿습니까?", -4, "", "w", "제가 보낸 상자를 제가 포장했다는데요."], ["포장을 허술하게 해서 없어진 것 아닙니까?", -4, "", "w", "허술하다니요. 테이프를 몇 겹이나 둘렀습니다."], ["(다음 질문으로 넘어간다)", 0]]),
+    X("값나가는 물건이라고 하셨는데, 어느 정도입니까?", "…금액으로 말씀드리기는 어렵지만, 아주 귀한 물건입니다.", [["고소장에는 내용물이 '사무 서류', 가액은 '미상'이라고 쓰셨습니다. 그런데 값나가는 물건입니까?", 12, "", "w", "…그건, 제게 중요한 서류라는 뜻이었습니다."], ["귀한 물건이면 왜 택배로 보내셨습니까?", -4, "", "w", "그건 이 사건과 상관없지 않습니까."], ["보험에는 왜 안 드셨습니까?", -4, "", "judge", "변호인, 보험은 쟁점이 아닙니다."], ["(다음 질문으로 넘어간다)", 0]]),
+    C("이수아는 내용물 얘기를 피하고 있다.", [["내용물이 구체적으로 무엇이었습니까?", 10, "ask", "w", "…사무 서류입니다. 더는 말씀드리기 어렵습니다."], ["묻지 않고 넘어간다", 0, "", "judge", "(이수아가 작게 숨을 내쉬었다.)"]]),
+    X("기사님이 마지막까지 맡고 있었다는 건 직접 보셨습니까?", "아니요. 터미널 직원분께 그렇게 들었습니다.", [["직접 보신 게 아니라 전해 들은 말이군요. 그 부분은 증거로 쓸 수 없습니다.", 8, "", "judge", "그 부분 진술은 증거로 삼지 않겠습니다."], ["터미널 직원이 거짓말을 한 겁니다.", -8, "", "judge", "변호인, 근거가 있습니까?"], ["(다음 질문으로 넘어간다)", 0]]),
+    S("pros", "터미널의 출입 관리는 엄격합니다. 피고인 말고는 그 상자에 손댈 사람이 없습니다."),
+    D("엄격하다는 주장을 무엇으로 깰까?", "mate", 10, ["같은 터미널에서 이번 달만 분실이 세 번째입니다. 출입 통제도 없었습니다."], "그 자료는 출입 관리와 관련이 없어 보입니다."),
+    S("pros", "상자가 사라진 것은 사실입니다. 피고인이 아니면 누가 가져갔습니까?"),
+    S("judge", "변호인, 최후변론하십시오."),
+    C("무엇을 주장할까?", [["물건은 발견되지 않았고, 무엇이 없어졌는지도 특정되지 않았습니다. 가져갔다는 증명이 없습니다.", 10, "", "judge", "잘 들었습니다. 선고하겠습니다."], ["피고인은 상자에 손댄 적이 없습니다.", -12, "", "pros", "앱 기록상 휴게실 앞에 55분 있었는데요?"], ["금액이 크지 않으니 선처를 구합니다.", -6, "", "judge", "선고하겠습니다."]])],
+  res: { win: ["피고인은 무죄.", "피해품이 특정되지 않고, 피고인이 이를 가져갔다는 점에 대한 증명이 부족하다."], partial: ["피고인을 벌금 100만 원에 처한다.", "피고인의 주장 일부는 받아들이나 절취 사실은 인정된다."], lose: ["피고인을 벌금 300만 원에 처한다.", "피고인의 주장은 믿기 어렵다."] },
+  ending: { win: ["방재호는 몇 번이나 고개를 숙이고 터미널로 돌아갔다.", "복도에서 고소인 이수아가 윤서연을 불러 세웠다. \"그 서류, 정말 없어진 거 맞죠?\"", "뭐라고 답해야 할지 몰라서, 그냥 고개만 끄덕였다."], partial: ["벌금이 나왔다. 방재호는 일자리를 지킬 수 있을지 걱정하며 돌아갔다."], lose: ["유죄가 나왔다. 방재호는 회사에서 계약 해지 통보를 받았다고 했다."] },
+  file: ["국물 자국 난 종이", "이수아의 고소장: 내용물 '사무 서류'"]
+}};
+
+/* ---------- 진행 ---------- */
+const $ = id => document.getElementById(id), app = $("app");
+let G = null;
+const WIN = 80, PART = 50, MISS = -8;
+function setBg(u) { $("bg").style.backgroundImage = `url("${u}")`; $("bg").classList.toggle("court", u === BG.court); }
+function view(html) { app.className = ""; app.innerHTML = html; renderTabs(); }
+// 아래 탭(본 게임과 같은 자리): 증거 서랍 · 대화 기록
+let openTab = null;
+function closeSheets() { document.querySelectorAll(".sheet").forEach(x => x.remove()); openTab = null; }
+function renderTabs() {
+  const t = $("tabs"); t.hidden = !G;
+  if (!G) { closeSheets(); return; }
+  t.innerHTML = `<button class="tab ${openTab === "ev" ? "on" : ""}" id="tabEv"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5"/></svg>증거 ${Object.keys(G.cards).length}</button>
+    <button class="tab ${openTab === "log" ? "on" : ""}" id="tabLog"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg>대화 기록</button>`;
+  $("tabEv").onclick = () => toggle("ev", openEv);
+  $("tabLog").onclick = () => toggle("log", openLog);
+}
+function toggle(k, fn) { const was = openTab === k; closeSheets(); if (!was) { openTab = k; fn(); } renderTabs(); }
+function openLog() {
+  const d = document.createElement("div"); d.className = "sheet";
+  d.innerHTML = `<div><h3>대화 기록</h3>${G.log.length ? G.log.map(([n, t]) => `<div class="ev"><b>${n}</b><span class="d">${t}</span></div>`).join("") : '<div class="ev"><span class="d">아직 기록이 없습니다.</span></div>'}</div>`;
+  d.onclick = e => { if (e.target === d) { closeSheets(); renderTabs(); } };
+  document.body.appendChild(d);
+  d.firstElementChild.scrollTop = d.firstElementChild.scrollHeight;
+}
+function topBar(right = "") { return `<div class="top"><div class="tt">${G.c.title.split(" · ")[1]}</div>${right}</div>`; }
+// 증거 이름으로 종류를 짐작해 작은 그림을 붙인다(본 게임과 같은 그림)
+const ICONS = {
+  video: '<rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3"/>',
+  photo: '<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 8"/>',
+  med: '<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 8v8M8 12h8"/>',
+  phone: '<rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M11 18.5h2"/>',
+  money: '<rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/>',
+  person: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/>',
+  stain: '<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5"/><circle cx="12" cy="14" r="3.2"/>',
+  doc: '<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h7"/>'
+};
+function evKind(n) {
+  if (/CCTV|영상/.test(n)) return "video";
+  if (/사진/.test(n)) return "photo";
+  if (/채혈|응급|진단/.test(n)) return "med";
+  if (/호출|앱/.test(n)) return "phone";
+  if (/영수증/.test(n)) return "money";
+  if (/진술|목격/.test(n)) return "person";
+  if (/자국/.test(n)) return "stain";
+  return "doc";
+}
+const evIcon = n => `<svg class="ev-ico" viewBox="0 0 24 24" aria-hidden="true">${ICONS[evKind(n)]}</svg>`;
+const evBtn = () => "";
+function bindEv() {}
+function menu() {
+  G = null; setBg(BG.m);
+  view(`<div class="cover"><h1>스토리 모드<br>시험판</h1>
+    <p>증거는 전부 찾을 수 있고, 승패는 재판에서 갈립니다. 수임료 협상과 "일반 사건 2달·명성 20" 조건은 생략했습니다.</p>
+    <p>순서: 상담 → 증거수집 → 추궁 → 직접 조종 재판</p>
+    <button class="btn go" id="m">남주 1장 · 시청 과장의 음주운전</button>
+    <button class="btn go" id="f">여주 1장 · 택배 한 상자</button></div>`);
+  $("m").onclick = () => start("m"); $("f").onclick = () => start("f");
+}
+function start(k) {
+  const c = CH[k];
+  G = { k, c, asked: [], open: [...c.start], cards: {}, done: {}, last: {}, confessed: false, g: 40, flags: {}, log: [] };
+  const q = new URLSearchParams(location.search), jump = q.get("jump");
+  const begin = () => {
+    G.prologue = false;
+    setBg(homeBg());
+    say(c.intro.map(t => [null, t]), () => say(c.greet.map(([w, t]) => [w === "h" ? H[c.hero].n : c.client.n, t]), () => { G.log.push([c.client.n, c.opening]); consult(); }, c.client.img));
+  };
+  const scenes = (list, then) => { G.prologue = true; let i = 0; const go = () => { if (i >= list.length) return then(); const s = list[i++]; setBg(s.bg); say(s.lines, go, s.who || null); }; go(); };
+  const toScenes = () => scenes((c.prologue || []).map(s => ({ bg: bgOf(s.bg), lines: s.lines })), c.decide ? () => decide(c.decide, begin) : begin);
+  if (jump) { G.prologue = true; setBg(homeBg()); say([[null, `<span style="font-family:var(--f-d);color:var(--brass);font-size:26px">${jump}년 후</span>`]], toScenes); }
+  else toScenes();
+}
+// 최종 사건 앞: 남주가 특검 증인석에서 증언 여부를 직접 고른다
+function decide(d, then) {
+  G.prologue = true;
+  setBg(bgOf(d.bg));
+  const n = H[d.hero].n;
+  say(d.lines, () => {
+    view(`<div class="top"></div><div class="stage"></div><div class="panel"><div class="say mono"><div class="n">${n}</div><p>${d.q}</p></div>
+      <button class="btn" id="yes">${d.yes[0]}</button><button class="btn" id="no">${d.no[0]}</button></div>`);
+    $("yes").onclick = () => say([[n, d.yes[1]], [null, d.yes[2]]], then);
+    $("no").onclick = () => say([[n, d.no[1]], ...d.refuseEnding.map(t => [null, t])], () => finish("refuse"));
+  });
+}
+// 스토리 시작 때 한 번 나오는 오프닝
+function openingOnly(h) {
+  G = { k: h, c: { hero: h, title: " · " }, cards: {}, log: [], flags: {} };
+  opening(() => finish("open"), h);
+}
+// 오프닝: 메인 게임 마지막 장면(박진서 긴급체포)에서 그대로 이어진다
+const OPENING = h => [
+  { bg: A + "story/op-police.jpg", who: A + "story/face-park_neutral.webp", lines: [["박진서", "참… 대단하군. 이름 없는 변호사 나부랭이가…"]] },
+  { bg: A + "story/op-police.jpg", who: A + "story/insp.webp", lines: [["수사관", "박진서 씨, 장현우 살해 혐의로 긴급체포합니다."]] },
+  { bg: A + "story/op-police.jpg", lines: [[null, "법조 카르텔의 수괴라 불리던 사내는 그렇게 끌려 나갔다."], ["그날의 변호사", "법은 때로는 느리지만… 결국 진실에 도달한다."], ["그날의 변호사", "하지만, 정말 이걸로 끝난 것일까…"]] },
+  { bg: A + "story/op-ledger.jpg", lines: [[null, "수사기관이 손에 넣은 것은 장현우의 장부였다. 커피 자국 위에 박진서의 발자국이 찍힌 그 장부."], [null, "박진서도 따로 장부를 남겼다는 사실을 아는 사람은, 그때 거의 없었다."]] },
+  { bg: `${A}story/op-news-${h}.jpg`, lines: [[null, "며칠째 TV에서는 같은 뉴스만 나왔다. '법조 카르텔 수괴 구속. 사법 정의 바로 서나.'"], [H[h].n, "…나랑은 상관없는 얘기지."], [null, "리모컨을 내려놓았다. 이번 달 월세부터 걱정할 때다."]] }
+];
+function opening(then, h) {
+  G.prologue = true;
+  const list = OPENING(h);
+  let i = 0;
+  const go = () => {
+    if (i >= list.length) return then();
+    const s = list[i++];
+    setBg(s.bg);
+    say(s.lines, go, s.who || null);
+  };
+  go();
+}
+function say(lines, then, who = null) {
+  let i = 0;
+  const show = () => {
+    if (i >= lines.length) { document.onclick = null; return then(); }
+    const [n, t] = lines[i];
+    if (n && G) G.log.push([n, t]);
+    view(`${G && G.prologue ? '<div class="top"></div>' : topBar()}<div class="stage">${who ? `<img class="who" src="${who}" alt="">` : ""}</div>
+      <div class="panel"><div class="say ${n ? "" : "mono"}">${n ? `<div class="n">${n}</div>` : ""}<p>${t}</p></div><div class="hint">화면을 누르면 넘어갑니다</div></div>`);
+    i++;
+  };
+  show();
+  setTimeout(() => { document.onclick = e => { if (!e.target.closest("button") && !e.target.closest(".sheet")) show(); }; }, 0);
+}
+function consult() {
+  const c = G.c, last = G.asked.length && !G.afterHire ? c.qs[G.asked[G.asked.length - 1]] : null;
+  const canAsk = i => !G.asked.includes(i) && (G.hired ? !c.pre.includes(i) : c.pre.includes(i));
+  view(`${topBar(evBtn())}<div class="stage"><img class="who" src="${c.client.img}" alt=""><span class="tag">${c.client.n} · ${c.client.m}</span></div>
+    <div class="panel">
+      ${last ? `<div class="say"><div class="n">${H[c.hero].n}</div><p style="font-size:15.5px">${last[0]}</p></div>` : ""}
+      <div class="say ${G.afterHire ? "mono" : ""}">${G.afterHire ? `<div class="n">상담</div><p>이제 사건 경위를 자세히 물어보자.</p>` : `<div class="n">${c.client.n}</div><p>${last ? last[1] : c.opening}</p>`}</div>
+      ${G.newPlaces ? `<div class="lbl"><span><b>갈 곳 추가</b> · ${G.newPlaces}</span></div>` : ""}
+      ${c.qs.map((q, i) => canAsk(i) ? `<button class="btn" data-q="${i}">${q[0]}</button>` : "").join("")}
+      <button class="btn go" id="next">${G.hired ? "증거를 찾으러 나간다" : "이야기를 다 들었다"}</button>
+    </div>`);
+  bindEv();
+  app.querySelectorAll("[data-q]").forEach(b => b.onclick = () => { const i = +b.dataset.q; G.asked.push(i); G.afterHire = false; G.log.push([H[c.hero].n, c.qs[i][0]], [c.client.n, c.qs[i][1]]);
+    const added = c.qs[i][2].filter(p => !G.open.includes(p)); G.open.push(...added);
+    G.newPlaces = added.map(p => c.places[p].n).join(", "); consult(); });
+  $("next").onclick = G.hired ? collect : hire;
+}
+// 상담 뒤 선임 여부를 고른다. 안 맡겠다고 해도 사정상 맡게 된다
+function hire() {
+  const c = G.c;
+  view(`${topBar()}<div class="stage"><img class="who" src="${c.client.img}" alt=""><span class="tag">${c.client.n}</span></div>
+    <div class="panel"><div class="say mono"><div class="n">선임</div><p>이 사건을 맡을까?</p></div>
+      <button class="btn" id="yes">선임한다</button><button class="btn" id="no">맡지 않는다</button></div>`);
+  const accept = () => {
+    G.hired = true;
+    Object.assign(G.cards, c.cards0);
+    G.cards.sun = c.sunCard || { n: "변호인선임서", d: `${c.client.n} 사건의 변호인으로 선임되었음을 증명하는 서류.` };
+    const got = Object.values(G.cards).map(e => evIcon(e.n) + e.n).join(", ");
+    say([[H[c.hero].n, `사건 맡겠습니다. ${c.sunCard ? "위임장" : "선임서"}부터 쓰시죠.`], [c.client.n, c.hireLine || "고맙습니다, 변호사님. 받은 서류는 여기 다 가져왔습니다."],[null, `<b style="color:var(--brass)">증거 획득</b> · ${got}`]], () => { G.afterHire = true; G.newPlaces = ""; consult(); }, c.client.img);
+  };
+  $("yes").onclick = accept;
+  $("no").onclick = () => say([[null, c.refuseLine || "…지금 먹고 살기도 어려운데. 맡아야겠지."]], accept, c.client.img);
+}
+const placeDone = (p, id) => (G.c.places[id].items || []).every((it, n) => G.done[id + n]);
+const needCards = () => Object.values(G.c.places).flatMap(p => p.items.filter(i => i.gives).map(i => i.gives[0]));
+const allFound = () => needCards().every(k => G.cards[k]);
+function collect() {
+  const c = G.c, found = needCards().filter(k => G.cards[k]).length, total = needCards().length;
+  setBg(BG[c.hero]);
+  view(`${topBar(evBtn())}<div class="stage"></div><div class="panel">
+    <div class="say mono"><div class="n">증거수집</div><p>${c.qs.some((q, i) => q[2].length && !G.asked.includes(i)) ? "의뢰인에게 아직 묻지 않은 게 있다. 말 속에 갈 곳이 더 있을지 모른다." : G.open.length < Object.keys(c.places).length ? "기록을 더 살펴보면 갈 곳이 나올지 모른다." : "어디부터 가 볼까."}</p></div>
+    <div class="lbl"><span>찾은 증거 <b>${found} / ${total}</b></span><span>${allFound() ? "다 찾았다" : "아직 찾을 게 남았다"}</span></div>
+    ${G.open.map(id => { const p = c.places[id]; return `<button class="btn" data-p="${id}">${p.n}${placeDone(p, id) ? " · 다 봄" : ""}<small>${p.s}</small></button>`; }).join("")}
+    ${c.qs.some((q, i) => !G.asked.includes(i) && !c.pre.includes(i)) ? `<button class="btn ghost" id="back">의뢰인에게 더 물어본다</button>` : ""}
+    <button class="btn go" id="next" ${allFound() ? "" : "disabled"}>${c.truth === "skip" ? "재판에 들어간다" : "의뢰인과 다시 마주 앉는다"}</button></div>`);
+  bindEv();
+  app.querySelectorAll("[data-p]").forEach(b => b.onclick = () => visit(b.dataset.p));
+  if ($("back")) $("back").onclick = () => { G.newPlaces = ""; consult(); };
+  $("next").onclick = c.truth === "skip" ? trial : judge;
+}
+function visit(id, line) {
+  const c = G.c, p = c.places[id];
+  const items = p.items.map((it, n) => [it, n]).filter(([it, n]) => !G.done[id + n] && (!it.after || G.unlocked?.[id + it.after]));
+  const name = p.fn || "조사";
+  setBg(placeBg(id));
+  view(`${topBar(evBtn())}<div class="stage">${p.face ? `<img class="who" src="${p.face}" alt="">` : ""}${p.fn ? `<span class="tag">${p.fn}</span>` : ""}</div>
+    <div class="panel"><div class="say ${p.fn ? "" : "mono"}"><div class="n">${p.fn ? name : p.n}</div><p>${line || (items.length ? G.last[id] || p.intro : "여기서 더 알아볼 건 없다.")}</p></div>
+      ${items.map(([it, n]) => `<button class="btn ${it.needs ? "lock" : ""}" data-i="${n}">${it.q}${it.needs ? "<small>증거를 보여 줘야 할 것 같다</small>" : ""}</button>`).join("")}
+      <button class="btn ghost" id="back">돌아간다</button></div>`);
+  bindEv();
+  $("back").onclick = collect;
+  app.querySelectorAll("[data-i]").forEach(b => b.onclick = () => {
+    const n = +b.dataset.i, it = p.items[n];
+    if (it.needs) return present(`무엇을 보여 줄까?`, card => {
+      if (card !== it.needs) return visit(id, it.lock);
+      G.unlocked = G.unlocked || {}; G.unlocked[id + it.needs] = true;
+      take(id, n, it, [it.okLine]);
+    });
+    take(id, n, it, it.a);
+  });
+}
+function take(id, n, it, lines) {
+  const p = G.c.places[id];
+  G.done[id + n] = true;
+  G.last[id] = lines[lines.length - 1];
+  const arr = lines.map(t => [p.fn, t]);
+  if (it.gives) { G.cards[it.gives[0]] = it.gives[1]; arr.push([null, `<b style="color:var(--brass)">증거 획득</b> · ${evIcon(it.gives[1].n)}${it.gives[1].n}`]); }
+  (it.opens || []).forEach(x => { if (!G.open.includes(x)) { G.open.push(x); arr.push([null, `<b style="color:var(--brass)">갈 곳 추가</b> · ${G.c.places[x].n}`]); } });
+  say(arr, () => visit(id), p.face);
+}
+function present(title, fn, list) {
+  const d = document.createElement("div"); d.className = "sheet";
+  const cards = list || Object.entries(G.cards);
+  d.innerHTML = `<div><h3>${title}</h3>${cards.map(([k, e]) => `<button class="ev" data-c="${k}">${evPic(k)}<b>${evIcon(e.n)}${e.n}</b>${e.bad && G.confessed ? '<span class="tagr">위험</span>' : ""}<span class="d">${e.d}</span></button>`).join("")}<button class="btn ghost" style="color:var(--text)" id="cl">닫기</button></div>`;
+  document.body.appendChild(d);
+  d.querySelector("#cl").onclick = () => d.remove();
+  d.querySelectorAll("[data-c]").forEach(b => b.onclick = () => { d.remove(); fn(b.dataset.c); });
+}
+function openEv() {
+  const d = document.createElement("div"); d.className = "sheet";
+  d.innerHTML = `<div><h3>가진 증거</h3>${Object.keys(G.cards).length ? "" : '<div class="ev"><span class="d">아직 받은 자료가 없습니다.</span></div>'}${Object.entries(G.cards).map(([k, e]) => `<div class="ev">${evPic(k)}<b>${evIcon(e.n)}${e.n}</b>${e.bad && G.confessed ? '<span class="tagr">위험</span>' : ""}<span class="d">${e.d}</span></div>`).join("")}</div>`;
+  d.onclick = e => { if (e.target === d) { closeSheets(); renderTabs(); } };
+  document.body.appendChild(d);
+}
+function judge() {
+  const c = G.c;
+  setBg(homeBg());
+  view(`${topBar(evBtn())}<div class="stage"><img class="who" src="${c.client.img}" alt=""><span class="tag">${c.client.n}</span></div><div class="panel">
+    <div class="say mono"><div class="n">추궁</div><p>이 의뢰인은…</p></div>
+    <button class="btn" id="h">진실을 말하고 있다</button><button class="btn" id="s">숨기는 게 있다</button><button class="btn" id="l">거짓말을 하고 있다</button>
+    <button class="btn ghost" id="back">증거수집으로 돌아가기</button></div>`);
+  bindEv();
+  $("back").onclick = collect;
+  $("h").onclick = () => say([[c.client.n, "믿어 주시니 고맙습니다."], [null, "정말 그럴까. 증거를 다시 보자."]], judge, c.client.img);
+  $("s").onclick = pickSus;
+  $("l").onclick = pickLie;
+}
+function pickSus() {
+  const c = G.c;
+  view(`${topBar(evBtn())}<div class="stage"></div><div class="panel"><div class="say mono"><div class="n">숨기는 게 있다</div><p>무엇을 숨기고 있나</p></div>
+    ${c.sus.map((s, i) => `<button class="btn" data-s="${i}">${Array.isArray(s) ? s[0] : s}</button>`).join("")}<button class="btn ghost" id="back">다시 생각하기</button></div>`);
+  bindEv(); $("back").onclick = judge;
+  app.querySelectorAll("[data-s]").forEach(b => b.onclick = () => {
+    const s = c.sus[+b.dataset.s];
+    if (!(Array.isArray(s) && s[1])) return say([[c.client.n, "그런 건 없는데요. 다른 거 물어보세요."]], judge, c.client.img);
+    const named = a => a.map(([w, t]) => [w === "h" ? H[c.hero].n : c.client.n, t]);
+    G.confessed = true;
+    say([...named(c.press.open), ...named(c.press.show(G)), [c.client.n, c.confess], [null, c.after]], trial, c.client.img);
+  });
+}
+function pickLie() {
+  const c = G.c;
+  if (!c.lies) return say([[c.client.n, "거짓말이요? 제가 무슨 거짓말을 합니까."]], judge, c.client.img);
+  const heard = c.lies.map((l, i) => [l, i]).filter(([l]) => l[1] < 0 || G.asked.includes(l[1]));
+  view(`${topBar(evBtn())}<div class="stage"></div><div class="panel"><div class="say mono"><div class="n">거짓말을 하고 있다</div><p>들은 말 중에서 무엇이 거짓인가</p></div>
+    ${heard.map(([l, i]) => `<button class="btn" data-l="${i}">${l[0]}</button>`).join("")}<button class="btn ghost" id="back">다시 생각하기</button></div>`);
+  bindEv(); $("back").onclick = judge;
+  app.querySelectorAll("[data-l]").forEach(b => b.onclick = () => {
+    const i = +b.dataset.l;
+    if (i !== c.keyLie && i !== c.altLie) return say([[c.client.n, "그건 진짜 그랬다니까요. 확인해 보셔도 돼요."]], judge, c.client.img);
+    const named = a => a.map(([w, t]) => [w === "h" ? H[c.hero].n : c.client.n, t]);
+    const steps = c.press.steps || [{ card: c.keyCard, show: c.press.show }];
+    const ask = n => present(n ? "더 내밀 증거는?" : "어떤 증거를 보여 줄까?", card => {
+      if (card !== steps[n].card) return say([[c.client.n, "그게 뭐 어쨌다는 겁니까."]], judge, c.client.img);
+      if (n + 1 < steps.length) return say(named(steps[n].show(G)), () => ask(n + 1), c.client.img);
+      G.confessed = true;
+      say([...named(steps[n].show(G)), [c.client.n, c.confess], [null, c.after]], trial, c.client.img);
+    });
+    say(named(c.press.open), () => ask(0), c.client.img);
+  });
+}
+/* ---------- 직접 조종 재판 ---------- */
+// 양쪽 얼굴: 주인공·상대(검사/대리인/특검)는 표정 그림, 표정이 있는 증인도 표정 그림
+const SIDE_EXPR = { opponent: "expr/opponent_", citylaw: "story/face-citylaw_", special: "story/face-special_" };
+const courtFace = (s, e) => s === "us" ? `${A}expr/hero-${G.c.hero}_${e}.webp` : `${A}${SIDE_EXPR[G.c.side && G.c.side[1]] || "expr/prosecutor_"}${e}.webp`;
+const witnessFace = (img, e) => /face-(jung-40|lee|kang)\.webp$/.test(img) ? img.replace(".webp", `_${e}.webp`) : img;
+const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const zoneOf = g => g >= WIN ? 2 : g >= PART ? 1 : 0;
+function cutIn(img, txt, side, then) {
+  if (REDUCED) return then();
+  const ov = document.createElement("div");
+  ov.className = "cutin " + side;
+  ov.style.setProperty("--ci", "1500ms");
+  ov.innerHTML = `<div class="ci-band"><div class="ci-face"><img src="${img}" alt=""></div><div class="ci-txt">${txt}</div></div>`;
+  document.body.appendChild(ov);
+  setTimeout(() => { ov.remove(); then(); }, 1500);
+}
+function flash(color) {
+  const f = document.createElement("div");
+  f.className = "flash " + color;
+  document.body.appendChild(f);
+  setTimeout(() => f.remove(), 420);
+}
+function trial() {
+  setBg(BG.court);
+  const c = G.c, steps = c.trial.slice(), hero = H[c.hero];
+  let i = 0, typing = null, left = "pros", fx = ["neutral", "neutral"], zone = zoneOf(G.g);
+  const sideName = c.side ? c.side[0] : "검사";
+  const whoOf = w => w === "judge" ? P.judge : w === "pros" ? [sideName, ""] : w === "us" ? [hero.n + " 변호사", hero.img] : w === "n" ? ["", ""] : c.people[w];
+  ["neutral", "confident", "flustered", "serious", "relieved"].forEach(e => { new Image().src = courtFace("us", e); if (e !== "relieved") new Image().src = courtFace("opp", e); });
+  const labels = c.labels || ["유죄", "감형", "무죄"];
+  view(`${topBar()}
+    <div class="bench"><div class="no">${c.no}</div><div class="tt">${c.tt || "공판기일"}</div><div class="who">${c.benchWho || "재판장 · 검사"}</div></div>
+    <div class="sides"><div class="side opp"><img id="oppF" alt=""><span id="oppN"></span></div><div class="side us"><img id="usF" alt=""><span>${hero.n} 변호사</span></div></div>
+    <div class="gw"><div class="gauge" id="gauge" style="--t1:${PART}%;--t2:${WIN}%"><div class="needle" id="needle"></div></div><div class="gauge-labels"><span>${labels[0]}</span><span>${labels[1]}</span><span>${labels[2]}</span></div></div>
+    <div class="log-wrap" id="logw"></div><div id="verdict"></div>`);
+  app.classList.add("court");
+  const faces = () => {
+    $("usF").src = courtFace("us", fx[0]);
+    const p = c.people && c.people[left];
+    $("oppF").src = p ? witnessFace(p[1], fx[1]) : courtFace("opp", fx[1]);
+    $("oppN").textContent = p ? p[0] : sideName;
+  };
+  const tilt = () => { $("needle").style.left = Math.max(0, Math.min(100, G.g)) + "%"; };
+  const adj = d => {
+    G.g += d; tilt();
+    const z = zoneOf(G.g), g = $("gauge");
+    if (z !== zone) { g.classList.remove("zw", "zl"); void g.offsetWidth; g.classList.add(z > zone ? "zw" : "zl"); }
+    zone = z;
+  };
+  const hit = k => { app.classList.remove("hit-us", "hit-opp", "quake"); void app.offsetWidth; app.classList.add(k); };
+  const finishType = () => { if (typing) { typing.el.textContent = typing.full; clearInterval(typing.t); typing = null; } };
+  // 대화창 한 칸. 검사·증인과 반박하는 우리 측은 작은 얼굴을 함께 보여 준다
+  const show = (w, t, d = 0, cut, extra = "", top = "") => {
+    finishType();
+    const p = whoOf(w), isP = c.people && c.people[w];
+    G.log.push([p[0] || "해설", t]);
+    if (isP) left = w; else if (w === "pros") left = "pros";
+    faces();
+    const ava = w === "pros" ? courtFace("opp", "confident") : isP ? witnessFace(p[1], fx[1]) : cut === "us" ? courtFace("us", "confident") : "";
+    const cls = w === "judge" || w === "n" ? "null" : w === "us" ? "ours" : "opp";
+    $("logw").innerHTML = `${top}<div class="log-line ${cls} ${ava ? "has-ava" : ""} ${cut === "us" ? "rebut" : ""} ${extra ? "asking" : ""}">${ava ? `<div class="ava"><img src="${ava}" alt=""></div>` : ""}<div>${p[0] ? `<span class="who">${p[0]}</span>` : ""}<span class="tx"></span></div><span class="d ${d > 0 ? "pos" : d < 0 ? "neg" : ""}">${d > 0 ? "+" + d : d < 0 ? "−" + -d : ""}</span>${extra ? "" : '<span class="more">▼</span>'}</div>${extra}`;
+    const tx = $("logw").querySelector(".tx");
+    if (REDUCED) tx.textContent = t;
+    else { const ch = [...t]; let n = 0; typing = { el: tx, full: t, t: setInterval(() => { tx.textContent = ch.slice(0, ++n).join(""); if (n >= ch.length) finishType(); }, 18) }; }
+  };
+  const prompt = (label, text, extra) => {
+    finishType(); faces();
+    $("logw").innerHTML = `<div class="log-line null asking"><div><span class="who">${label}</span><span class="tx">${text}</span></div><span class="d"></span></div>${extra}`;
+  };
+  const tapNext = fn => setTimeout(() => { document.onclick = e => {
+    if (e.target.closest("button") || e.target.closest(".sheet")) return;
+    if (typing) return finishType();
+    document.onclick = null; fn();
+  }; }, 0);
+  // 줄 형식: [말하는 사람, 대사, 심증 변화, 컷인 쪽("us"|"opp")]
+  const lineThen = (arr, fn) => {
+    let j = 0;
+    const go = () => {
+      if (j >= arr.length) return fn();
+      const [w, t, d = 0, cut] = arr[j++];
+      const run = () => {
+        if (cut === "us") { fx = ["confident", "flustered"]; hit("hit-opp"); }
+        else if (cut === "opp" || d < 0) { fx = ["flustered", "confident"]; hit("hit-us"); }
+        else if (d > 0) fx = ["confident", "serious"];
+        else if (w === "pros") fx = ["serious", "confident"];
+        if (d) adj(d);
+        if (d < 0) { flash("red"); if (d <= -12) hit("quake"); }
+        show(w, t, d, cut);
+        tapNext(go);
+      };
+      if (!cut) return run();
+      document.onclick = null; finishType();
+      if (cut === "us") flash("white");
+      cutIn(courtFace(cut, "confident"), cut === "us" ? "이의 있음!" : "반박!", cut, run);
+    };
+    go();
+  };
+  const judgeCard = (card, s, after) => {
+    if (G.cards[card].bad) { G.flags.false = true; return lineThen([["pros", "그 자료의 작성 경위를 조사해 주십시오. 피고인의 말과 맞지 않습니다.", -20, "opp"]], after); }
+    if (card === s.card) return lineThen(s.ok.map((t, n) => t.startsWith("(") ? ["w", t] : ["us", t, n ? 0 : s.gain, n ? undefined : "us"]), after);
+    lineThen([["judge", s.miss, MISS]], after);
+  };
+  // 정답이 늘 같은 자리에 있지 않게 섞고, 넘어가는 선택지만 맨 아래에 둔다
+  const isPass = o => o[0].startsWith("(") || /넘어간다|그대로 둔다/.test(o[0]);
+  const optsHtml = opts => {
+    const all = opts.map((o, n) => [o, n]);
+    const order = all.filter(([o]) => !isPass(o)).map(x => [Math.random(), x]).sort((a, b) => a[0] - b[0]).map(x => x[1]).concat(all.filter(([o]) => isPass(o)));
+    return `<div class="opts">${order.map(([o, n]) => `<button class="btn" data-o="${n}">${o[0].replace(/^\((.*)\)$/, "$1")}</button>`).join("")}</div>`;
+  };
+  const bindOpts = (s, then) => app.querySelectorAll("[data-o]").forEach(b => b.onclick = () => {
+    const o = s.opts[+b.dataset.o];
+    const box = app.querySelector(".opts"); if (box) box.remove();
+    if (o[0].startsWith("(")) return then();
+    if (o[2]) G.flags[o[2]] = true;
+    const rebut = o[1] > 0 && (s.k === "cross" || /이의/.test(s.q + o[0]));
+    const arr = [["us", o[0], o[1], rebut ? "us" : undefined]];
+    if (o[4]) arr.push([o[3], o[4], 0, o[1] < 0 && o[3] === "pros" ? "opp" : undefined]);
+    lineThen(arr, then);
+  });
+  const next = () => {
+    if (i >= steps.length) return verdict();
+    const s = steps[i++];
+    if (s.k === "if") { if (s.cond(G)) steps.splice(i, 0, ...s.steps); return next(); }
+    if (s.k === "say") return lineThen([[s.w, s.t, s.d || 0]], next);
+    if (s.k === "img") { show("n", s.t, 0, undefined, "", `<img class="evshow" src="${A}story/${s.file}" alt="">`); return tapNext(next); }
+    if (s.k === "ev") {
+      prompt("증거 제시", s.q, `<div class="opts"><button class="btn go" id="pr">증거를 고른다</button></div>`);
+      $("pr").onclick = () => present(s.q, card => { const box = app.querySelector(".opts"); if (box) box.remove(); judgeCard(card, s, next); }, Object.entries(G.cards));
+      return;
+    }
+    if (s.k === "choice") {
+      prompt("변호인", s.q, optsHtml(s.opts));
+      return bindOpts(s, next);
+    }
+    if (s.k === "cross") lineThen([["us", s.q]], () => {
+      show(s.w, s.a, 0, undefined, optsHtml(s.opts));
+      bindOpts(s, next);
+    });
+  };
+  tilt(); faces();
+  next();
+}
+function finish(res) {
+  if (window.parent !== window) window.parent.postMessage({ story: "done", res }, "*");
+  else menu();
+}
+function verdict() {
+  document.onclick = null;
+  const c = G.c, r = c.resBy ? c.resBy(G) : G.g >= WIN ? "win" : G.g >= PART ? "partial" : "lose", V = c.res[r];
+  const stamps = c.stamps || { win: "무죄", partial: "감형", lose: "유죄" };
+  const label = stamps[r], hero = H[c.hero], cleared = r !== "lose";
+  const truthTxt = { hiding: "불리한 사실을 숨긴 의뢰인", skip: "" }[c.truth] ?? "거짓말을 한 의뢰인";
+  const fin = () => {
+    $("usF").src = courtFace("us", cleared ? "relieved" : "serious");
+    const file = (cleared ? c.file : c.file.slice(0, 1)).concat(G.flags.cut ? ["재판 조서: 정한별의 말을 이의로 끊음"] : [], G.flags.ask ? ["재판 조서: 이수아는 내용물을 말하지 않음"] : []);
+    $("verdict").innerHTML = `<div class="vd-top"><div class="vd-stamp"><div class="stamp ${label.length > 2 ? "long" : ""}">${label}</div></div>
+      <div class="ledger"><span>재판부 심증</span><span class="r">${Math.max(0, Math.min(100, Math.round(G.g)))} / 100</span><span>거짓 자료</span><span class="r">${G.flags.false ? "제출함" : "없음"}</span><span class="sum">판결</span><span class="r sum">${label}</span></div></div>
+      <div class="judgment"><div class="jl">주문</div>${V[0]}<br>${V[1]}</div>
+      <div class="vd-mono"><div class="ava"><img src="${hero.img}" alt=""></div><div><div class="who">${hero.n} 변호사${truthTxt ? ` · <span>${truthTxt}</span>` : ""}</div><p>${c.ending[r].join(" ")}</p></div></div>
+      <div class="vd-mono" style="grid-template-columns:1fr"><div><div class="who">기록철에 남은 것</div><p>${file.join("<br>")}</p></div></div>
+      ${cleared ? `<button class="btn go" id="ok">계속</button><button class="btn ghost" id="re">재판부터 다시</button>` : `<button class="btn go" id="re">재판부터 다시</button><button class="btn ghost" id="ok">사무실로 돌아가기</button>`}`;
+    $("re").onclick = () => { G.g = 40; G.flags = {}; trial(); };
+    $("ok").onclick = () => {
+      const out = cleared && c.outro && c.outro[r];
+      if (!out) return finish(r);
+      setBg(bgOf(out.bg));
+      say(out.lines, () => finish(r));
+    };
+  };
+  if (REDUCED) return fin();
+  const ov = document.createElement("div");
+  ov.className = "closeup";
+  ov.innerHTML = `<div class="closeup-face"><img src="${A}judge-close.webp" alt=""></div><div class="closeup-txt">판결을 선고합니다</div>`;
+  document.body.appendChild(ov);
+  setTimeout(() => { ov.classList.add("out"); setTimeout(() => { ov.remove(); fin(); }, 300); }, 1500);
+}
+// 남주 2장 · 돈은 어디로 갔는가 (2034년 말, 붕괴 약 8개월 뒤)
+// 그림 파일명은 _story/스토리모드_그림지시어_2026-11-09.md 기준
+CH.m2 = { hero: "m", title: "남주 2장 · 돈은 어디로 갔는가", no: "2034가합58213 사해행위취소",
+  tt: "변론기일", benchWho: "재판장 · 피고 측 소송대리인", side: ["피고 측 대리인", "opponent"], labels: ["패소", "일부승소", "승소"], stamps: { win: "승소", partial: "일부승소", lose: "패소" },
+  sunCard: { n: "소송위임장", d: "조경숙이 사해행위취소 소송을 맡긴다는 위임장." },
+  client: { n: "조경숙", m: "58세 · 스타포트 타워 붕괴 유족", img: A + "story/face-mother.webp" },
+  prologue: [
+    { bg: "m2-tower", lines: [[null, "2034년 4월 11일 오후 3시 12분. 서해광역시 해안 복합개발의 상징, 49층 스타포트 타워가 무너졌다."], [null, "상업시설을 먼저 연 지 19일째였다. 사망자 143명."]] },
+    { bg: "m2-altar", lines: [[null, "시행사 해성개발의 회장과 임원, 시공 책임자가 구속됐다. 회장 구본태는 법정에서 모든 것을 인정했다."], [null, "세상은 책임자가 처벌됐다고 했다."]] }
+  ],
+  intro: ["사무실은 여전히 상가 2층이다. 4년 동안 간판만 한 번 바꿨다.", "오후에 검은 옷을 입은 여자가 찾아왔다. 서류 봉투를 가슴에 안고 있었다."],
+  greet: [["c", "조경숙이라고 합니다. 저, 약국 하는 분이 여기 변호사님이 끈질기시다고 해서요."], ["h", "한서준입니다. 앉으세요. 무슨 일로 오셨습니까?"]],
+  opening: "저희 딸이 타워 지하 1층 화장품 가게에서 일했어요. 회사 상대로 이겼습니다. 판결문에 3억 2천만 원이라고 나왔어요. 그런데 회사에 돈이 한 푼도 없대요. 이겼는데 받을 돈이 없다는 게 무슨 말입니까.",
+  qs: [
+    ["따님 이야기를 조금 해 주시겠어요?", "다은이요. 스물아홉이었어요. 그 가게 부점장 달았다고 좋아했는데… 죄송합니다.", []],
+    ["다른 유족분들은 어떻게 하고 계세요?", "큰 로펌 변호사들이 단체로 합의를 받으러 다녀요. 얼마 받고 더는 책임을 묻지 않는다고 도장을 찍으래요. 저는 안 찍었습니다.", []],
+    ["회사 재산은 어떻게 된 건지 들으셨어요?", "압류하러 갔더니 논현동 빌딩이 이미 다른 회사 앞으로 넘어갔대요. 한결에셋이라던가. 회사가 무너지기 전에 판 거라서 어쩔 수 없다고요.", ["registry"]],
+    ["한결에셋은 어떤 회사예요?", "저도 찾아가 봤어요. 주소지에 가니까 문이 잠겨 있고 우편물만 쌓였더라고요.", ["shell"]],
+    ["회사 돈 흐름을 알 만한 자료가 있을까요?", "파산관재인이 회계 서류는 법원을 통해 신청하면 볼 수 있다고 했어요.", ["acct"]],
+    ["사고 당일 일을 아시는 분이 있습니까?", "방재실에 계시던 분이 분향소에 오셨어요. 제 손을 잡고 우시더라고요. 뭔가 말을 하려다 못 했어요.", ["control"]],
+    ["합의를 안 하시는 이유가 뭡니까?", "왜 못 나왔는지 몰라서요. 불이 난 것도 아니고 건물이 무너지는 데 몇 분이나 걸렸는데, 왜 우리 애가 못 나왔는지 아무도 말을 안 해 줘요.", []]],
+  pre: [0, 1, 6],
+  cards0: {
+    judg: { n: "손해배상 확정판결", d: "해성개발은 조경숙에게 3억 2천만 원을 지급하라. 2034년 9월 확정." },
+    fail: { n: "강제집행 불능조서", d: "해성개발 본사 집기뿐. 압류할 재산 없음." } },
+  start: ["rec"],
+  places: {
+    rec: { n: "해성개발 파산 기록", s: "법원 기록 열람실", fn: null, bg: "m2-registry", intro: "파산 사건 기록 열람실이다. 재산 목록이 든 파일이 벽돌만 하다.", items: [
+      { q: "기록 열람을 신청한다", a: ["…"], needs: "sun", lock: "이해관계인이라는 서류가 있어야 합니다.", okLine: "위임장 확인했습니다. 저쪽에서 보세요." },
+      { q: "재산 목록을 읽는다", after: "sun", a: ["붕괴 1년 전 자산 3,100억. 붕괴 석 달 뒤 자산 2억. 대출은 그대로 남아 있다.", "가장 큰 처분은 논현동 빌딩 72억. 등기를 확인해 봐야겠다."], opens: ["registry"] },
+      { q: "매매계약서 사본을 읽는다", after: "sun", a: ["해성개발이 한결에셋에 논현동 빌딩을 72억에 판다는 계약서. 계약일 2034년 3월 2일. 붕괴 40일 전이다.", "뒤에 해성개발 법인인감증명서가 붙어 있다. 발급일… 2034년 4월 15일?", "붕괴 나흘 뒤에 뗀 증명서가 3월 계약서에 붙어 있다."], gives: ["seal", { n: "법인인감증명서", d: "3월 2일자 매매계약서에 붙은 증명서. 발급일은 붕괴 나흘 뒤인 4월 15일." }] }] },
+    registry: { n: "등기소", s: "논현동 빌딩 등기부", fn: "등기소 직원", face: A + "cut/n40f1.webp", bg: "m2-registry", intro: "어떤 부동산 찾으세요?", items: [
+      { q: "논현동 빌딩 등기부를 뗀다", a: ["소유권 이전 접수일이 2034년 4월 19일이네요. 원인은 3월 2일 매매요."], gives: ["reg", { n: "논현동 빌딩 등기부", d: "3월 2일 매매를 원인으로 붕괴 8일 뒤인 4월 19일 소유권 이전." }] },
+      { q: "계약하고 등기까지 보통 얼마나 걸려요?", a: ["잔금 치르면 바로 하죠. 72억짜리를 48일이나 안 하는 건 드물어요."] },
+      { q: "이 건물에 대출이 있나요?", a: ["근저당이 58억 잡혀 있어요. 은행이 먼저 가져가겠네요."] }] },
+    shell: { n: "한결에셋 사무실", s: "주소지 찾아가기", fn: "건물 관리인", face: A + "cut/n60f1.webp", bg: "m2-shell", intro: "그 회사요? 사람 있는 거 본 적 없는데.", items: [
+      { q: "이 회사 직원을 보신 적 있어요?", a: ["없어요. 책상 하나 갖다 놓은 게 다예요. 임대료는 꼬박꼬박 들어오고요."] },
+      { q: "우편물은 누가 가져가요?", a: ["한 달에 한 번 검은 차가 와요. 운전하는 분이 내려서 가져가요. 그 사람 명함을 저한테 줬는데… 해성개발 회장실 수행기사더라고요."], gives: ["driver", { n: "관리인의 말·수행기사 명함", d: "한결에셋 우편물을 해성개발 회장실 수행기사가 수거해 감." }] },
+      { q: "대표라는 사람은 보셨어요?", a: ["남기철 씨요? 작년에 계약할 때 한 번 왔어요. 회장님 처남이라고 자랑하던데요."], gives: ["bro", { n: "한결에셋 대표의 신분", d: "대표이사 남기철은 구본태 회장의 처남." }] }] },
+    acct: { n: "해성개발 회계 서류", s: "법원을 통해 받은 자료", fn: null, bg: "m2-registry", intro: "파산관재인을 통해 받은 회계 서류가 상자 세 개로 도착했다.", items: [
+      { q: "논현동 빌딩 대금을 추적한다", a: ["3월 2일 계약이라면서 72억은 4월 18일에 들어왔다.", "같은 날 그 돈이 구은정 계좌로 나갔다. 구은정은 회장의 딸이다.", "다음 날 같은 금액에서 수수료를 뺀 돈이 한결에셋으로 돌아왔다. 돈이 한 바퀴 돌았을 뿐이다."], gives: ["flow", { n: "72억 계좌 흐름", d: "해성개발→구은정→한결에셋으로 하루 만에 순환. 실제 대금 지급 없음." }] },
+      { q: "용역비 항목을 살핀다", a: ["도원컨설팅이라는 회사로 5년간 86억이 나갔다. 품목은 '사업 자문'.", "보고서는 몇 장 없다. 무엇을 자문했는지 알 수 없다."], gives: ["dowon", { n: "도원컨설팅 용역비 86억", d: "5년간 '사업 자문' 명목 지급. 결과물 거의 없음." }] },
+      { q: "함께 묶인 영수증 묶음을 넘겨 본다", a: ["지반조사 용역 정산서가 섞여 있다. 시추공 24개분. 돈 추적과는 상관없다.", "일단 기록철에 넣어 둔다."], gives: ["bore", { n: "지반조사 정산서", d: "지반조사 용역 대금 정산. 시추공 24개분." }] }] },
+    control: { n: "방재실 근무자", s: "분향소 앞 벤치", fn: "전 방재실 직원", face: A + "cut/n50m3.webp", bg: "m2-control", intro: "…그 어머니 변호사님이세요?", items: [
+      { q: "그날 방재실에서 무슨 일이 있었습니까?", a: ["오후 2시 40분쯤 지하에서 쿵 하는 소리가 나고 벽에 금이 갔다는 신고가 몇 건 들어왔어요.", "위에서 영업 중단하면 안 된다고 했습니다. 방송 문구를 불러 주더라고요."] },
+      { q: "방송 내용이 남아 있습니까?", a: ["일지는 제가 사진 찍어 뒀어요. 언젠가 누가 물어볼 줄 알고요.", "'설비 점검 중이니 고객님들은 안심하고 쇼핑을 계속하시기 바랍니다.' 2시 44분, 2시 58분. 두 번요."], gives: ["log", { n: "방송 일지 사진", d: "2시 44분과 2시 58분에 '안심하고 쇼핑을 계속' 방송. 붕괴는 3시 12분." }] },
+      { q: "왜 지금까지 말씀을 안 하셨어요?", a: ["…제가 마이크를 잡았으니까요."] }] } },
+  truth: "hiding",
+  sus: [["따님이 사고 직전에 연락을 해 왔다", true], ["대형 로펌에서 따로 돈을 받기로 했다", false], ["따님이 회사와 다툼이 있었다", false]],
+  press: { open: [["h", "어머니, 아직 말씀 안 하신 게 있으시죠. 방재실 일지를 보면 2시 40분부터 건물에 이상이 있었습니다."], ["c", "……"], ["h", "그때 따님한테서 연락이 온 건 아닙니까?"]],
+    show: G => [["c", "…벽에 금이 갔대요. 2시 50분에 전화가 왔어요. 방송에선 괜찮다는데 무섭다고."]] },
+  keyCard: null,
+  confess: "제가 그랬어요. 네가 부점장인데 먼저 나오면 어떡하냐고, 조금만 있어 보라고. 그게 마지막이었어요. 그래서 합의 못 합니다. 왜 괜찮다고 했는지 알아야, 제가… 제가 살 수 있을 것 같아서요.",
+  after: "방송 일지를 드려야 한다. 재판에는 쓸 수 없지만, 이 사람이 소송을 건 진짜 이유는 저 종이 한 장이다.",
+  people: { w: ["남기철", A + "cut/n50m1.webp"] },
+  trial: [
+    S("judge", "2034가합58213 사건 변론을 시작합니다. 원고 대리인, 청구 취지 말씀해 주십시오."),
+    S("us", "피고 한결에셋이 해성개발로부터 넘겨받은 논현동 빌딩 매매는 채권자를 해치는 행위이므로 취소를 구합니다."),
+    S("pros", "매매계약일은 2034년 3월 2일로 사고 40일 전입니다. 그때는 원고의 손해배상채권 자체가 없었습니다. 채권 성립 전 행위는 취소 대상이 아닙니다."),
+    D("3월 2일 계약이라는 주장을 무엇으로 다툴까?", "seal", 12, ["계약서에 붙은 해성개발 인감증명서의 발급일을 보십시오. 2034년 4월 15일입니다. 사고 나흘 뒤에 발급된 증명서가 3월 계약서에 붙어 있습니다."], "그 자료로는 계약일을 다툴 수 없습니다."),
+    S("pros", "증명서는 등기 준비 과정에서 나중에 첨부했을 뿐입니다. 계약은 3월에 체결됐습니다."),
+    C("어떻게 답할까?", [["3월에 계약했다면 72억 거래의 등기가 48일 늦어질 이유가 없습니다. 등기는 사고 8일 뒤에야 접수됐습니다.", 8, "", "judge", "피고 측은 지연 사유를 소명하십시오."], ["계약서 글씨체가 이상합니다.", -8, "", "pros", "무슨 근거로 하시는 말씀입니까?"], ["사고 전 계약이어도 무조건 취소됩니다.", -8, "", "judge", "채권 성립 전 행위가 어떤 경우에 취소되는지 법리를 다시 보시지요."]]),
+    S("pros", "피고 대표이사 남기철을 증인으로 신청합니다."),
+    S("pros", "증인, 논현동 빌딩은 어떤 경위로 사셨습니까?"),
+    S("w", "좋은 매물이라고 해서 3월 초에 계약했습니다. 투자 목적이었습니다."),
+    S("pros", "대금은 지급하셨습니까?"),
+    S("w", "네. 72억을 전부 제대로 지급했습니다. 해성개발 사정은 전혀 몰랐습니다."),
+    S("w", "한결에셋은 직원도 있고 부동산 임대업을 정상적으로 하는 회사입니다."),
+    S("judge", "원고 대리인, 반대신문하십시오."),
+    X("증인은 부동산 투자를 언제부터 하셨습니까?", "한결에셋을 세운 게 재작년이니까 그때부터입니다.", [["재작년부터라면 초보인데 72억을 어떻게 판단했습니까?", -4, "", "w", "자문을 받았습니다."], ["투자 수익은 얼마나 나셨습니까?", -4, "", "pros", "본건과 관련 없는 질문입니다."], ["(다음 질문으로 넘어간다)", 0]]),
+    X("한결에셋에 직원은 몇 명입니까?", "상시 직원이… 몇 명 있습니다.", [["주소지 관리인에 따르면 사무실엔 책상 하나뿐이고 직원을 본 적이 없다고 합니다. 우편물은 해성개발 회장실 수행기사가 한 달에 한 번 가져갔습니다.", 10, "", "w", "…그건, 회장님 쪽에서 편의를 봐 주신 겁니다."], ["직원 급여대장을 왜 안 내셨습니까?", -4, "", "pros", "제출 의무 없는 자료입니다."], ["직원이 없으면 회사가 아닙니다.", -4, "", "judge", "변호인, 질문을 하십시오."]]),
+    X("해성개발 사정을 전혀 몰랐다고 하셨습니다. 구본태 회장과 어떤 사이입니까?", "…사업상 아는 사이입니다.", [["구본태 회장은 증인의 매형이지요. 증인이 한결에셋 계약 때 '회장님 처남'이라고 직접 말했습니다.", 10, "", "w", "……처남은 맞습니다. 그렇다고 회사 사정까지 아는 건 아닙니다."], ["사업상 아는 사이면 위법입니까?", -4, "", "w", "위법이라니요."], ["(다음 질문으로 넘어간다)", 0]]),
+    X("72억은 어떻게 지급하셨습니까?", "회사 계좌에서 해성개발 계좌로 송금했습니다.", [["4월 18일에 들어온 72억은 같은 날 회장의 딸 구은정에게 갔고, 다음 날 한결에셋으로 돌아왔습니다. 돈은 한 바퀴 돌았을 뿐입니다.", 12, "", "w", "……"], ["송금 영수증을 내 보십시오.", -4, "", "w", "회사에 있습니다."], ["매매대금이 시세보다 쌉니까?", -4, "", "pros", "감정가대로의 거래입니다."]]),
+    S("pros", "거래의 적법성에 대해서는 법률 자문을 받았습니다. 법무법인 청람의 자문의견서를 제출합니다."),
+    S("n", "의견서에 판례가 인용돼 있다. '대법원 2011. 2. 30. 선고 2010다77417 판결.' 2월 30일? 오타겠지."),
+    C("자문의견서에 어떻게 대응할까?", [["자문 내용과 상관없이 실제 대금이 지급되지 않았다는 사실이 바뀌지는 않습니다.", 6, "", "judge", "그 점은 사실관계로 판단하겠습니다."], ["의견서를 쓴 로펌을 증인으로 불러야 합니다.", -6, "", "judge", "지금 단계에서 필요해 보이지 않습니다."], ["자문을 받았다는 것 자체가 악의의 증거입니다.", -6, "", "pros", "비약입니다."]]),
+    S("pros", "채권 성립 전이든 후든, 피고는 거래 당시 채권자를 해친다는 사실을 몰랐습니다. 선의의 수익자입니다."),
+    D("선의라는 주장을 깨는 자료는?", "bro", 8, ["한결에셋 대표는 회장의 처남이고, 사고 나흘 뒤 인감을 떼어 계약서를 만들었습니다. 모를 수가 없습니다."], "그 자료는 선의 여부와 관계가 멀어 보입니다."),
+    S("judge", "원고 대리인, 마지막으로 말씀하십시오."),
+    C("무엇을 주장할까?", [["계약일은 사고 뒤에 만들어졌고, 대금은 지급되지 않았으며, 수익자는 회장의 처남입니다. 이 매매는 취소되어야 합니다.", 10, "", "judge", "잘 들었습니다. 선고기일을 지정하겠습니다."], ["유족의 고통을 생각해 주십시오.", -6, "", "judge", "그 사정은 충분히 압니다만, 쟁점에 대해 말씀해 주십시오."], ["회장 일가는 전부 처벌받아야 합니다.", -8, "", "pros", "여기는 형사 법정이 아닙니다."]])],
+  res: { win: ["논현동 빌딩 매매계약을 취소한다. 피고는 소유권이전등기를 말소하라.", "계약일은 사고 이후에 소급 작성된 것으로 보이고, 실제 대금 지급이 없으며, 피고는 악의의 수익자이다."], partial: ["매매계약을 원고의 채권액 범위에서 취소한다.", "일부 사정만 인정한다."], lose: ["원고의 청구를 기각한다.", "매매가 원고의 채권 성립 후에 이루어졌다고 보기 부족하다."] },
+  ending: { win: ["빌딩은 해성개발 앞으로 돌아왔다. 58억은 은행이 먼저 가져갔고, 남은 돈을 수백 명의 채권자와 나눴다.", "조경숙이 받은 돈은 4,200만 원이었다. 판결문의 3억 2천은 종이에만 있었다.", "방송 일지를 건넸다. 어머니는 한참을 읽고, 다 읽고도 읽었다. \"…안심하고 계속이라고요.\" 울지는 않았다.",], partial: ["일부만 취소됐다. 조경숙이 받은 돈은 천만 원이 되지 않았다.", "방송 일지를 건네자 어머니는 말없이 받아 들었다."], lose: ["돈은 돌아오지 않았다. 조경숙은 고개를 숙이고 방송 일지만 받아 갔다."] },
+  outro: { win: { bg: "m2-hall", lines: [[null, "위로 행사장에서 낯익은 사람이 다가왔다. 서해광역시 도시국장 오명환."], ["오명환", "변호사님, 그때 신세 많이 졌습니다."], [null, "명함이 두꺼웠다. 도원컨설팅으로 간 86억은 끝내 설명되지 않았다."]] } },
+  file: ["지반조사 정산서: 시추공 24개분", "도원컨설팅 용역비 86억", "청람 자문의견서: 대법원 2011. 2. 30. 판결 인용"]
+};
+
+// 여주 2장 · 태웠다는 장부 (2035년 초). 박진서는 장현우 살해 건으로 이미 수감 중
+CH.f2 = { hero: "f", title: "여주 2장 · 태웠다는 장부", no: "2035고단2204 증거인멸",
+  client: { n: "이수아", m: "36세 · 전 도원컨설팅 직원", img: A + "story/face-lee.webp" },
+  people: { w: ["권태훈", A + "story/insp.webp"], w2: ["최동규", A + "cut/n50m4.webp"] },
+  intro: ["개인 사무실을 낸 지 2년째다. 법률구조 사건은 줄었고, 이혼 사건은 늘었다.", "낯이 익은 사람이 예약 명단에 있었다. 4년 전, 택배 절도 사건의 고소인."],
+  greet: [["c", "오랜만이에요, 변호사님. 이수아입니다. 기억하세요?"], ["h", "…네. 방재호 씨 사건 고소인이셨죠. 앉으세요."]],
+  opening: "증거인멸로 기소됐어요. 제가 일하던 회사 장부를 없앴다고요. 변호사님, 그 택배가 어디로 갔는지는 저보다 변호사님이 더 잘 아시잖아요.",
+  qs: [
+    ["저는 그 사건에 대해 말씀드릴 수 없어요. 무슨 장부예요?", "도원컨설팅 비밀 장부요. 대표가 손으로 쓰던 거예요. 박진서요. 뉴스에 나온 그 사람. 구속된 뒤로는 제가 접견 때 받아 적어서 이어 썼어요.", []],
+    ["왜 하필 저한테 오셨어요?", "다른 변호사들은 도원 얘기만 나오면 전화를 안 받아요. 그리고 변호사님은 4년 전에 저를 이겼잖아요.", []],
+    ["장부는 어떻게 하셨어요?", "태웠어요. 회사 나올 때 불안해서요. 집 앞 드럼통에서요. 그런 거 갖고 있으면 위험하니까.", ["home"]],
+    ["누가 장부를 찾고 있어요?", "대표가 구속되고 나서 최동규 상무가 회사를 맡았어요. 그 사람이 수사기관에서 제가 빼돌렸다고 진술했어요.", ["office"]],
+    ["수사기관과 연락한 적 있어요?", "…없어요.", ["insp"]],
+    ["택배로 뭘 보내신 거예요?", "회사 서류요. 말씀드렸잖아요. 사무 서류.", []]],
+  pre: [0, 1],
+  cards0: {
+    gong: { n: "공소장", d: "피고인은 박진서 등의 형사사건 증거인 회계 장부를 빼돌려 소각. 2031년 1월경." },
+    st: { n: "최동규 진술조서", d: "\"이수아가 퇴사하며 장부를 들고 나갔다. 태웠다고 들었다.\"" } },
+  start: ["rec"],
+  places: {
+    rec: { n: "수사 기록 열람", s: "공소청 열람복사실", fn: null, bg: "rec", intro: "공소청 열람복사실이다. 이번엔 기록이 제법 두껍다.", items: [
+      { q: "기록 열람을 신청한다", a: ["…"], needs: "sun", lock: "변호인 선임서를 내셔야 열람하실 수 있습니다.", okLine: "선임서 확인했습니다. 저쪽 책상에서 보세요." },
+      { q: "수사보고서를 읽는다", after: "sun", a: ["'장부 실물 미발견. 피고인 진술에 따르면 소각.'", "소각했다는 증거는 이수아 본인의 진술뿐이다."], gives: ["onlysaid", { n: "수사보고서", d: "장부 미발견. 소각의 근거는 피고인 진술뿐." }] },
+      { q: "참고인 권태훈의 진술을 읽는다", after: "sun", a: ["공소청 수사관 권태훈. 4년 전 이수아가 자기에게 서류를 보냈다는 소문에 대해: '받은 적 없습니다. 이수아라는 사람과 연락한 적도 없습니다.'"], opens: ["insp"] }] },
+    home: { n: "이수아의 옛 집", s: "짐을 빼는 원룸", fn: null, bg: "f2-storage", intro: "이수아가 곧 뺄 원룸이다. 상자가 절반쯤 쌓여 있다.", items: [
+      { q: "드럼통을 쓴 곳을 살핀다", a: ["집 앞 공터에 드럼통 같은 건 없다. 건물 주인이 말한다. '여기서 뭘 태워요. 불나면 내가 먼저 알지.'"], gives: ["noburn", { n: "건물 주인의 말", d: "2031년 무렵 집 앞에서 뭘 태운 일 없음." }] },
+      { q: "서랍을 열어 본다", a: ["금 간 옛 휴대폰이 있다. 이수아는 '그거 안 켜져요' 하면서도 뺏어 가지는 않는다.", "충전기를 꽂자 한참 만에 불이 들어왔다. 2031년 1월 메시지가 남아 있다.", "수신인 '권 수사관님'. '서류 오늘 택배로 보냅니다. 받으시면 연락 주세요.' 답장: '알겠습니다. 다른 번호로 보내지 마세요.'"], gives: ["phone", { n: "이수아의 옛 휴대폰", d: "2031년 1월 '권 수사관님'과 주고받은 메시지. 택배로 서류를 보낸다는 내용." }] }] },
+    office: { n: "도원컨설팅", s: "전 직장 찾아가기", fn: "최동규 상무", face: A + "cut/n50m4.webp", bg: "f2-consult", intro: "이수아 씨 변호사요? 드릴 말씀 없습니다.", items: [
+      { q: "장부가 어떤 건지 묻는다", a: ["그런 건 없습니다. 있었다면 그 여자가 없앴겠죠."] },
+      { q: "장부가 없다면서 왜 없앴다고 진술하셨어요?", a: ["…말씀이 이상하시네. 그만 돌아가시죠."] },
+      { q: "복도 CCTV 기록을 살핀다", a: ["직원이 슬쩍 건넨다. 이수아 퇴사일에 그가 든 건 작은 쇼핑백뿐이었다. 다만 며칠 전 대표실에서 상자를 들고 나오는 모습이 있다."] }] },
+    insp: { n: "권태훈 수사관", s: "공소청 수사과", fn: "권태훈 수사관", face: A + "story/insp.webp", bg: "f2-investigator", intro: "변호사님이 저를 왜 찾아오십니까.", items: [
+      { q: "이수아가 서류를 보낸 적이 있습니까?", a: ["받은 적 없습니다."] },
+      { q: "받은 적이 없다는 건 알겠습니다. 연락도 없었습니까?", a: ["…없었습니다. 바쁩니다."] },
+      { q: "책상 위 사진을 본다", a: ["아이 둘과 찍은 사진이다. 수사관은 사진을 슬쩍 돌려놓았다."] }] } },
+  lies: [["장부를 태웠다는 말", 2], ["수사기관과 연락한 적 없다는 말", 4], ["최동규가 진술했다는 말", 3]],
+  keyLie: 0, altLie: 1, keyCard: "phone",
+  press: { open: [["h", "이수아 씨, 정말 태우셨어요?"], ["c", "말씀드렸잖아요."]],
+    steps: [
+      { card: "noburn", show: G => [["h", "건물 주인분 말이, 집 앞에서 뭘 태운 일이 없대요."], ["c", "밤에 몰래 했으니까요."]] },
+      { card: "phone", show: G => [["h", "옛 휴대폰을 켰어요. 2031년 1월, 권 수사관에게 택배로 서류를 보낸다는 메시지가 있습니다."], ["c", "……"], ["h", "태운 게 아니죠. 보내셨죠. 제가 맡았던 그 택배로요."]] }] },
+  sus: ["장부를 팔려고 했다", "최동규와 사귀었다", "회사 돈을 횡령했다"],
+  confess: "…맞아요. 수사관한테 보냈어요. 없어졌다는 연락을 받고 고소했고요. 태웠다고 한 건, 세상에 남아 있다고 하면 그 사람들이 끝까지 찾아다닐 테니까요. 우리 어머니 집까지요.",
+  after: "장부를 수사기관에 보낸 사람은 증거를 없앤 게 아니다. 그걸 증명하면 무죄다. 그리고 그 택배를 훔친 사람이 누구인지, 나는 입도 뻥끗할 수 없다.",
+  trial: [
+    S("judge", "2035고단2204, 피고인 이수아. 검사, 공소사실 말씀해 주십시오."),
+    S("pros", "피고인은 2031년 1월 박진서 등의 형사사건 증거인 장부를 회사에서 빼돌려 소각했습니다. 피고인 스스로 수사 과정에서 태웠다고 진술했습니다."),
+    C("피고인의 '태웠다' 진술을 어떻게 다룰까?", [["그 진술은 사실이 아닙니다. 피고인은 장부를 수사기관에 보냈으며, 태웠다고 한 경위를 밝히겠습니다.", 10, "", "judge", "변호인, 입증 계획을 말씀해 주십시오."], ["진술을 그대로 인정하고 선처를 구합니다.", -12, "", "pros", "자백을 확인했습니다."], ["불법 체포 상태의 진술입니다.", -8, "", "pros", "체포된 적이 없습니다."]]),
+    S("pros", "변호인은 4년 전 이 장부가 든 택배가 사라진 절도 사건에서 '내용물을 특정할 수 없다'고 주장해 무죄를 받은 분입니다. 이제 와서 그 내용물이 장부라고 말씀하십니까?"),
+    S("n", "그 사건의 진실을 나는 안다. 방재호의 비밀을 말할 수는 없다."),
+    C("과거 변론을 꼬집는 검사에게 어떻게 답할까?", [["그 사건은 피해품이 특정되지 않아 무죄가 된 것일 뿐입니다. 이 사건에서는 피고인이 장부를 보낸 사실만 다투겠습니다.", 8, "", "judge", "좋습니다. 그 사건은 이 법정의 쟁점이 아닙니다."], ["방재호 씨가 실제로 훔쳤습니다.", -20, "secret", "judge", "변호인, 지금 전 의뢰인에 대해 뭐라고 하신 겁니까?"], ["그때와 지금은 시대가 다릅니다.", -8, "", "pros", "4년 전입니다."]]),
+    S("pros", "참고인 최동규를 증인으로 신청합니다. 증인, 피고인이 장부를 어떻게 했다고 들으셨습니까?"),
+    S("w2", "퇴사하면서 대표실 장부를 들고 나갔습니다. 나중에 직원들한테 태웠다고 했다더군요."),
+    S("w2", "대표께서 손으로 직접 쓰시던 중요한 자료입니다. 회사로서는 큰 손실입니다."),
+    S("judge", "변호인, 반대신문하십시오."),
+    X("장부를 들고 나가는 걸 직접 보셨습니까?", "복도에서 쇼핑백을 들고 나가는 걸 봤습니다.", [["쇼핑백만 보셨군요. 그 안에 장부가 있는지는 어떻게 아셨습니까?", 6, "", "w2", "…정황상 그렇다는 겁니다."], ["쇼핑백이 얼마짜리입니까?", -4, "", "pros", "무의미한 질문입니다."], ["(다음 질문으로 넘어간다)", 0]], "w2"),
+    X("증인은 수사 초기에 장부 자체가 없다고 진술하셨지요? 저에게도 그렇게 말씀하셨고요.", "…없다는 뜻이 아니라, 말씀드리기 곤란했다는 겁니다.", [["있는지 없는지도 말을 바꾸는 분이, 없어진 경위는 어떻게 그렇게 정확히 아십니까?", 8, "", "w2", "……"], ["증인은 거짓말쟁이입니다.", -8, "", "judge", "변호인, 질문을 하십시오."], ["(다음 질문으로 넘어간다)", 0]], "w2"),
+    S("pros", "검찰 측 증인으로 권태훈 수사관을 신청합니다. 증인은 피고인으로부터 서류를 받은 사실이 있습니까?"),
+    S("w", "받은 적 없습니다."),
+    S("pros", "피고인과 연락한 적은 있습니까?"),
+    S("w", "없습니다."),
+    S("judge", "변호인, 반대신문하십시오."),
+    X("증인, 2031년 1월에 피고인에게서 서류를 받으셨습니까?", "아까 말씀드렸습니다. 받은 적 없습니다.", [["저도 받지 못하셨다고 생각합니다. 택배가 도중에 분실됐으니까요. 받은 적 없다는 말은 사실일 겁니다.", 8, "", "w", "……?"], ["받아 놓고 거짓말하는 것 아닙니까?", -8, "", "pros", "근거 없는 추궁입니다."], ["(다음 질문으로 넘어간다)", 0]]),
+    X("그렇다면 연락한 적도 없다는 말씀도 같습니까?", "네. 같습니다.", [["이 휴대폰을 보십시오. '서류 오늘 택배로 보냅니다.' 답장 '알겠습니다. 다른 번호로 보내지 마세요.' 수신인 저장명 '권 수사관님', 번호는 증인의 업무용 휴대폰입니다.", 16, "", "w", "……"], ["연락 기록은 통신사에 조회해 보겠습니다.", -6, "", "judge", "4년이 지나 통신사에는 남아 있지 않을 텐데요."], ["증인은 위증했습니다.", -6, "", "judge", "결론부터 말씀하지 마시고요."]]),
+    C("권태훈이 말을 잇지 못한다. 무엇을 더 물을까?", [["누가 장부를 받으라고 지시했는지는 묻지 않겠습니다. 증인, 그 서류가 도착했다면 증인이 수사하셨을 것이 맞습니까?", 8, "spare", "w", "…맞습니다."], ["누구 지시로 연락을 숨겼습니까? 말하십시오!", -4, "", "pros", "이 재판의 범위를 벗어났습니다."]]),
+    S("pros", "연락 사실이 있었더라도, 서류가 장부라는 증거는 없습니다. 피고인이 태웠다는 자백이 더 믿을 만합니다."),
+    D("태웠다는 자백을 믿을 수 없게 하는 자료는?", "noburn", 8, ["피고인이 태웠다는 장소의 건물 주인은 그런 일이 없었다고 합니다. 수사기관 역시 자백 외의 증거를 찾지 못했습니다."], "그 자료로는 자백을 탄핵할 수 없습니다."),
+    S("judge", "변호인, 최후변론하십시오."),
+    C("무엇을 주장할까?", [["자기가 가진 자료를 수사기관에 넘긴 사람은 증거를 없앤 것이 아닙니다. 공소사실은 피고인 자신의 거짓 자백 말고는 근거가 없습니다.", 10, "", "judge", "선고기일을 지정하겠습니다."], ["장부는 박진서의 범죄 증거입니다.", -6, "", "judge", "본건에 집중해 주십시오."], ["선처를 부탁드립니다.", -6, "", "judge", "알겠습니다."]])],
+  res: { win: ["피고인은 무죄.", "피고인은 장부를 수사기관에 송부하려 한 것으로 보이고, 소각했다는 자백은 믿기 어렵다. 다만 송부한 택배는 배송 중 분실된 것으로 보인다."], partial: ["피고인을 징역 6월, 집행유예 1년에 처한다.", "일부 사정을 참작한다."], lose: ["피고인을 징역 1년에 처한다.", "피고인의 자백은 믿을 만하다."] },
+  ending: { win: ["판결문에 한 줄이 남았다. '택배는 배송 중 분실된 것으로 보인다.'", "이수아가 복도에서 물었다. \"그 택배, 정말 없어진 거 맞죠?\" 4년 전과 같은 질문이었다. 이번에도 고개만 끄덕였다.", "며칠 뒤 방재호가 전화했다. \"변호사님, 양복 입은 사람들이 와서 그 서류 어디 있냐고 묻길래 쓰레기봉투에 버렸다고 했어요. 잘했죠?\"", "수사관 권태훈은 복도 끝에서 한참 서 있었다. 인사도, 변명도 없었다."], partial: ["실형은 면했다. 이수아는 고개를 숙이고 돌아갔다."], lose: ["이수아는 구속됐다. 면회실에서 아무 말도 하지 않았다."] },
+  file: ["판결문: 택배는 배송 중 분실", "방재호: 서류는 쓰레기봉투에 버렸다고 말함", "권태훈의 업무용 번호"]
+};
+
+// 남주 3장 · 자기 판결문과의 싸움 (2035년). 시 상대 국가배상. 이 장에서 완결(항소심 없음)
+CH.m3 = { hero: "m", title: "남주 3장 · 자기 판결문과의 싸움", no: "2035가합71406 손해배상(국)",
+  tt: "변론기일", benchWho: "재판장 · 피고 서해광역시 소송대리인", side: ["시 측 대리인", "citylaw"], labels: ["패소", "일부승소", "승소"], stamps: { win: "승소", partial: "일부승소", lose: "패소" },
+  sunCard: { n: "소송위임장", d: "유족 31명이 서해광역시를 상대로 한 국가배상 소송을 맡긴다는 위임장." },
+  client: { n: "조경숙", m: "유족 대표", img: A + "story/face-mother.webp" },
+  people: { w: ["정한별", A + "story/face-jung-40.webp"], w2: ["오명환", A + "story/face-oh-50.webp"] },
+  truth: "skip",
+  prologue: [{ bg: "m3-cityhall", lines: [[null, "서해광역시청 복도에는 지금도 해안 복합개발 조감도가 걸려 있다. 타워가 멀쩡히 서 있는 그림이다."]] }],
+  intro: ["회사에 돈이 없다는 건 지난 소송으로 분명해졌다. 유족 서른한 명이 돈을 모아 다시 찾아왔다.", "이번 상대는 서해광역시다."],
+  greet: [["c", "변호사님, 사람들이 이제 시청을 상대로 해 보자고 해요. 허가를 내준 게 시청이잖아요."], ["h", "쉬운 소송은 아닙니다. 공무원의 위법을 증명해야 합니다."]],
+  opening: "돈이 전부는 아니에요. 그 건물을 누가 지어도 된다고 했는지, 그 사람 이름을 판결문에서 보고 싶어요.",
+  qs: [
+    ["심의 자료는 받아 보셨어요?", "유족회가 정보공개를 청구했는데 '영업비밀'이라고 안 줘요. 법원에서 내놓으라고 하면 다르겠죠.", ["cityfile"]],
+    ["시청에서 일하던 분 중에 말을 해 줄 사람이 있을까요?", "고발했다가 지하로 쫓겨난 주무관이 있대요. 정한별 씨라고. 유족회에 편지를 보낸 적 있어요.", ["jung"]],
+    ["현장 지반에 대해 들은 게 있으세요?", "그 땅이 원래 바다였잖아요. 전문가 교수님이 유족회에서 설명해 주셨어요.", ["site"]],
+    ["유족분들 사정은 어떠세요?", "다들 지쳤어요. 합의한 집도 많고요. 남은 사람들끼리 끝까지 하자고 했어요.", []]],
+  pre: [3],
+  cards0: { base: { n: "국가배상 소장 초안", d: "건축허가 과정에서 담당 공무원의 위법한 직무집행을 주장." },
+    bore: { n: "지반조사 정산서", d: "지난 사건 기록철에 남아 있던 회계 서류. 시추공 24개분." } },
+  start: ["cityfile"],
+  places: {
+    cityfile: { n: "건축 심의 자료", s: "법원 문서제출명령으로 받음", fn: null, bg: "m3-archive", intro: "법원의 문서제출명령으로 시청 문서고가 열렸다.", items: [
+      { q: "심의 자료를 신청한다", a: ["…"], needs: "sun", lock: "소송 당사자의 대리인이라는 서류가 필요합니다.", okLine: "위임장 확인했습니다. 저 책상에서 보세요." },
+      { q: "지반조사 결과를 읽는다", after: "sun", a: ["심의에 제출된 시추공은 9개. 모두 적합 판정이다.", "9개? 어디서 숫자를 본 것 같다. 해성개발 회계 서류에… 24개분을 정산한 영수증이 있었다."], gives: ["nine", { n: "심의 제출 지반조사", d: "건축위원회에 제출된 시추공 9개. 모두 적합." }] },
+      { q: "결재란을 본다", after: "sun", a: ["결재자: 건축과장 오명환. 결재일 2030년 11월 8일.", "2030년 11월. 내가 그 사람을 무죄로 받아 낸 판결이 그해 7월이었다. 넉 달 뒤다.", "기록철에서 탄원서 사본을 꺼냈다. 똑같은 반듯한 글씨, 똑같은 서명."], gives: ["sign", { n: "결재란·탄원서 서명", d: "심의 자료 결재자 오명환. 2030년 11월 결재. 지난 사건 탄원서의 서명과 일치." }] },
+      { q: "설계변경 승인 서류를 본다", after: "sun", a: ["지하층 흙막이 설계변경 승인일 2032년 5월 3일. 같은 공사의 감리일지엔 그 공사가 2032년 3월에 끝났다고 적혀 있다.", "다 지어 놓고 나서 승인했다는 뜻이다."], gives: ["late", { n: "설계변경 승인일 대조", d: "공사는 3월 완료, 승인은 5월. 사후 승인." }] },
+      { q: "첨부된 법률검토의견서를 읽는다", after: "sun", a: ["법무법인 정헌. '일부 지점의 조사 결과만으로도 심의 자료로 족하다.'", "인용 판례가 또 있다. '대법원 2011. 2. 30. 선고 2010다77417 판결.' 2월 30일. …청람 의견서랑 똑같이 틀렸네."], gives: ["opin2", { n: "정헌 법률검토의견서", d: "시추공 일부 제출을 적법하다고 포장. 대법원 2011. 2. 30. 판결 인용." }] }] },
+    site: { n: "매립지 시추 현장", s: "지반 전문가 동행", fn: "지반공학 교수", face: A + "cut/n60f2.webp", bg: "m3-site", intro: "여긴 바다를 메운 땅이에요. 지하철까지 지나가고요.", items: [
+      { q: "시추공 24개와 9개는 어떻게 다릅니까?", a: ["원본 조사표 없인 몰라요. 그런데 단단한 지점만 골랐다면 9개로도 전부 합격이 나옵니다."] },
+      { q: "빠진 곳이 어디인지 알 방법이 있나요?", a: ["번호요. 시추공엔 번호가 붙습니다. 9개 번호가 띄엄띄엄이면 빠진 게 있는 거죠. 이것 보세요. 빠진 번호 15개가 전부 바다 쪽이에요."], gives: ["map", { n: "시추공 번호 대조", d: "제출 9개와 정산서 24개의 번호 대조. 빠진 15개는 전부 연약한 바다 쪽." }] }] },
+    jung: { n: "정한별 찾아가기", s: "시청 지하 기록실", fn: "정한별", face: A + "story/face-jung-40.webp", bg: "m3-sideline", intro: "……그때 그 변호사죠.", items: [
+      { q: "증언을 부탁드리러 왔습니다", a: ["4년 전에 법정에서 제가 술에 취해 헛것을 봤다고 하셨잖아요. 그 판결문 때문에 저 여기 있습니다."] },
+      { q: "(그날 제가 틀렸다고 말하고 싶지만 말할 수 없다) 고발은 어떻게 된 겁니까?", a: ["심의 자료 이상해서 고발했더니 불기소요. 내부 문서 들고 나갔다고 감사받고, 지하로 왔습니다."] },
+      { q: "유족분들이 증언을 기다리고 있습니다", a: ["…알아요. 편지도 제가 썼으니까.", "나갈게요. 다만 변호사님을 믿어서 나가는 건 아닙니다."], gives: ["jungok", { n: "정한별의 증언 동의", d: "심의 자료의 이상을 처음 발견한 내부 증인." }] }] } },
+  trial: [
+    S("judge", "2035가합71406 사건 변론을 시작합니다. 원고 대리인, 청구 원인을 말씀해 주십시오."),
+    S("us", "담당 공무원은 연약 지반을 뺀 조사 자료만 심의에 올려 건축허가가 나오게 했습니다. 위법한 직무집행입니다."),
+    S("pros", "법무법인 목멱 차윤희 변호사입니다. 피고는 제출된 시추공 9개 모두 적합 판정을 받았음을 확인하고 절차대로 심의했습니다."),
+    S("n", "목멱. 교수님 사무실이다."),
+    D("9개로 절차를 지켰다는 말을 무엇으로 깰까?", "bore", 12, ["해성개발 회계 서류의 지반조사 정산서를 보십시오. 실제로는 시추공 24개를 조사하고 대금을 치렀습니다. 15개가 심의 자료에서 빠졌습니다."], "그 자료로는 시추공 수를 다툴 수 없습니다."),
+    S("pros", "정산 금액이 24개분이라 해도 조사 실적과 다를 수 있습니다. 빠진 지점이 위험하다는 증거도 없습니다."),
+    D("빠진 지점이 위험하다는 자료는?", "map", 10, ["번호를 대조해 보십시오. 빠진 15개는 전부 바다 쪽 매립지입니다. 제출된 9개는 모두 육지 쪽입니다."], "그 자료로는 위험을 증명할 수 없습니다."),
+    S("pros", "심의 자료 구성은 법률 검토까지 거쳤습니다. 법무법인 정헌의 의견서를 보십시오."),
+    C("의견서에 어떻게 대응할까?", [["법률 의견이 있다고 해서 사실을 뺀 위법이 사라지지는 않습니다. 인용 판례는 날짜부터 존재할 수 없는 날입니다.", 8, "date", "judge", "2월 30일이군요. 피고 측, 확인해 보십시오."], ["의견서는 증거가 아닙니다.", -6, "", "pros", "참고자료로 제출한 것입니다."], ["(대응하지 않는다)", 0]]),
+    S("us", "원고 측 증인으로 정한별을 신청합니다. 증인은 심의 자료를 언제 보셨습니까?"),
+    S("w", "2030년 말 건축과에서 근무할 때입니다. 시추공 번호가 띄엄띄엄 있어 이상하다고 생각했습니다."),
+    S("w", "과장님께 보고했지만, 위에서 정리된 일이니 넘어가라고 하셨습니다. 그 뒤 고발했고 불기소됐습니다."),
+    S("judge", "피고 측, 반대신문하십시오."),
+    S("pros", "증인, 2030년에 증인은 같은 오명환 과장을 음주운전으로 지목했다가, 법원에서 '믿기 어렵다'는 판단을 받았지요?"),
+    S("w", "……네."),
+    S("pros", "재판장님, 2030고단1187 판결문을 제출합니다. 증인은 4년 전에도 같은 상사를 모함한 사람입니다."),
+    S("n", "그 판결문을 받아 낸 사람은 나다. 그 증언이 사실이었다는 건 나만 안다. 의뢰인의 비밀이다."),
+    C("자기 판결문을 어떻게 받아칠까?", [["그 판결은 야간에 술자리에서 본 목격 진술을 다룬 것입니다. 오늘 증언은 서류에 근거하고, 서류는 지금 법정에 있습니다.", 14, "", "judge", "목격 진술의 신빙성과 서류의 신빙성은 별개로 보겠습니다."], ["그 증언은 사실이었습니다. 제가 압니다.", -20, "secret", "judge", "변호인, 무슨 뜻입니까? 지금 하신 말씀은 전 의뢰인의 비밀 아닙니까?"], ["오래전 판결은 효력이 없습니다.", -8, "", "pros", "확정판결입니다."]]),
+    S("pros", "피고 측 증인으로 오명환 도시국장을 신청합니다. 증인, 심의 자료는 어떻게 결재하셨습니까?"),
+    S("w2", "실무진이 올린 자료를 규정대로 결재했을 뿐입니다."),
+    S("w2", "그 시추공 수가 몇 개였는지까지 과장이 일일이 살필 수는 없습니다."),
+    S("judge", "원고 대리인, 반대신문하십시오."),
+    S("n", "증인석에서 오명환과 눈이 마주쳤다. 그 사람은 살짝, 정말로 살짝 고개를 숙였다."),
+    X("이 결재란의 서명은 증인의 것입니까?", "네. 제 서명입니다.", [["서명이 다르게 보입니다.", -4, "", "w2", "제 서명이라고 말씀드렸는데요."], ["(다음 질문으로 넘어간다)", 0], ["그럼 이 자료를 직접 읽어 보셨겠군요.", 4, "", "w2", "대략은 봤지요."]], "w2"),
+    X("실무진이 올렸다고 하셨는데, 15개가 빠진 경위를 모르십니까?", "처음 듣습니다. 아마 실무자가 판단했겠지요.", [["정한별 주무관이 번호가 이상하다고 보고했을 때 '위에서 정리된 일이니 넘어가라'고 하셨지요. 처음 듣는 일이 아닙니다.", 10, "", "w2", "그런 기억은 없습니다."], ["실무자 이름을 대십시오.", -4, "", "pros", "증인의 기억 범위를 넘습니다."], ["(다음 질문으로 넘어간다)", 0]], "w2"),
+    X("지하 공사의 설계변경은 정상적으로 승인됐습니까?", "물론입니다. 절차대로 승인했습니다.", [["감리일지엔 공사가 3월에 끝났다고 돼 있는데 승인은 5월입니다. 다 지은 뒤 승인 도장을 찍으셨습니다.", 10, "", "w2", "……서류 처리가 늦어진 겁니다."], ["승인 수수료는 내셨습니까?", -4, "", "judge", "관련 없는 질문입니다."], ["(다음 질문으로 넘어간다)", 0]], "w2"),
+    S("judge", "원고 대리인, 마지막으로 말씀하십시오."),
+    C("무엇을 주장할까?", [["위험한 땅을 뺀 자료가 결재되어 심의를 통과했고, 다 지은 뒤에 승인이 났습니다. 공무원의 위법한 직무집행과 참사 사이의 인과관계는 분명합니다.", 10, "", "judge", "잘 들었습니다."], ["시장이 책임져야 합니다.", -6, "", "pros", "정치적 주장입니다."], ["유족을 봐서 판결해 주십시오.", -6, "", "judge", "알겠습니다."]])],
+  res: { win: ["피고는 원고들에게 합계 94억 원을 지급하라.", "담당 공무원은 연약 지반의 조사 결과를 제외한 자료를 심의에 제출하게 하였고, 이는 위법한 직무집행이다."], partial: ["피고는 원고들에게 합계 31억 원을 지급하라.", "책임을 일부 제한한다."], lose: ["원고들의 청구를 기각한다.", "공무원의 고의 또는 과실을 인정하기 부족하다."] },
+  ending: { win: ["판결문에 오명환의 이름이 적혔다. 조경숙은 그 줄을 손가락으로 짚고 오래 있었다.", "복도에서 오명환이 말했다. \"변호사님이 절 살려 주셨잖습니까. 이번 일은 서운해하지 않겠습니다.\"", "정한별은 인사 없이 지나갔다. 다만 엘리베이터 앞에서 한 번 돌아봤다.", "밤에 전화가 왔다. 강도윤 교수였다. \"서준아, 잘했다. 그런데 비밀 얘기는 끝까지 안 했더구나. 그게 제일 잘한 거다.\"", "사무실 벽의 액자를 봤다. 수구여병(守口如甁). 입을 병마개처럼 지켜라. 왜 그 말이 오늘따라 차갑게 읽히는지 몰랐다."], partial: ["절반의 책임이 인정됐다. 오명환의 이름은 판결문에 짧게 남았다."], lose: ["패소했다. 유족들은 아무 말 없이 흩어졌다."] },
+  file: ["심의 자료 결재란: 오명환", "정헌 의견서: 대법원 2011. 2. 30. 판결 인용", "강도윤의 전화"]
+};
+
+// 여주 3장 · S 프로젝트 (2035년 말). 금융 층. 장부는 나오지 않음. 후반에 붕괴와 접점
+CH.f3 = { hero: "f", title: "여주 3장 · S 프로젝트", no: "2035고합913 특정경제범죄법위반(배임)",
+  client: { n: "송민규", m: "41세 · 한누리캐피탈 PF 심사역", img: A + "story/face-pf.webp" },
+  people: { w: ["양기석", A + "cut/n50m2.webp"], w2: ["공제회 회원", A + "cut/n60m1.webp"] },
+  intro: ["이수아가 전화를 걸어 왔다. \"돈을 댄 쪽 사람을 한 명 알아요. 곧 기소될 거예요.\"", "다음 날 찾아온 남자의 사원증 줄은 빨았는지 색이 바래 있었다."],
+  greet: [["c", "송민규입니다. 한누리캐피탈에서 부동산 금융을 심사했습니다. 이수아 씨 소개로 왔습니다."], ["h", "윤서연입니다. 무슨 일이에요?"]],
+  opening: "대출 하나가 부실이 돼서 회사가 1,200억을 날렸습니다. 회사는 저 혼자 부실 심사를 했다고 합니다. 저는 규정대로 심사했습니다.",
+  qs: [
+    ["어떤 대출이었어요?", "저희끼리는 'S 프로젝트'라고만 불렀습니다. 해안 복합개발의 브릿지론이에요. 저는 서류만 봤고요.", []],
+    ["심사보고서는 혼자 쓰신 거예요?", "실무 작성은 제가 하고, 팀장 전무 결재를 거칩니다. 규정대로요.", ["minutes"]],
+    ["위험 요소는 없었어요?", "있었으면 썼겠죠. 최종본에 적힌 그대로입니다.", ["vlog"]],
+    ["돈은 누가 맡긴 거예요?", "저희는 공제회 돈을 받아서 대출합니다. 교직원, 소방관 노후자금 같은 거요.", ["member"]],
+    ["전무님은 이 사건에서 어떻게 됐어요?", "조사를 받긴 했는데 아무 일 없어요. 저만 기소됐습니다.", []]],
+  pre: [0, 4],
+  cards0: {
+    gong: { n: "공소장", d: "임무에 위배해 위험 요소를 누락한 심사보고서를 작성, 회사에 1,200억 손해." },
+    final: { n: "심사보고서 최종본", d: "담보·사업성 양호. 지반 위험 항목 없음. 작성자 송민규." } },
+  start: ["docs"],
+  places: {
+    docs: { n: "공소청 기록 열람", s: "수사 기록", fn: null, bg: "rec", intro: "공소청 열람복사실이다. 표지에 '2035고합913'이 찍혀 있다.", items: [
+      { q: "기록 열람을 신청한다", a: ["…"], needs: "sun", lock: "변호인 선임서를 내셔야 열람하실 수 있습니다.", okLine: "선임서 확인했습니다." },
+      { q: "결재선을 읽는다", after: "sun", a: ["작성 송민규, 검토 팀장, 승인 양기석 전무, 위원회 승인. 다섯 도장.", "공소장에 이름이 있는 건 맨 아래 한 사람뿐이다."], gives: ["line", { n: "결재선", d: "작성자 송민규부터 전무, 위원회까지 결재. 기소는 송민규 1인." }] },
+      { q: "법률자문 회신을 읽는다", after: "sun", a: ["법무법인 서진. '심사보고서에 지반 위험을 기재할 법적 의무는 없다.' 작성일은 보고서 결재 사흘 전.", "인용 판례. '대법원 2011. 2. 30. 선고 2010다77417 판결.' 뭐지, 2월 30일? 오타겠지."], gives: ["opin3", { n: "서진 법률자문 회신", d: "전무가 받아 온 자문. 지반 위험을 쓸 의무가 없다는 내용. 대법원 2011. 2. 30. 판결 인용." }] }] },
+    minutes: { n: "한누리캐피탈 임원 회의록", s: "회사 준법팀 직원", fn: "준법팀 직원", face: A + "cut/n30f3.webp", bg: "f3-bank", intro: "저희 회사 자료는 함부로…", items: [
+      { q: "회의록을 보여 달라고 한다", a: ["…"], needs: "sun", lock: "변호사님이 맡으신 건지 확인해야 합니다.", okLine: "송 대리님 변호사시군요. 이거, 제가 드렸다고 하지 마세요." },
+      { q: "회의록을 읽는다", after: "sun", a: ["양 전무: 'S는 무조건 간다. 위에서 이미 약속된 건이다. 실무는 토 달지 말 것.'"], gives: ["min", { n: "임원 회의록", d: "양기석 전무: 'S는 무조건 간다. 실무는 토 달지 말 것.'" }] },
+      { q: "전무님은 왜 기소가 안 됐을까요?", after: "sun", a: ["자문을 받았다는 서류가 있으니까요. 자기는 법률 검토를 믿었을 뿐이라고."] }] },
+    vlog: { n: "회사 문서 시스템", s: "버전 이력 조회", fn: "전산 담당", face: A + "cut/n20m2.webp", bg: "f3-bank", intro: "보고서 이력이요? 지운 것도 다 남아요.", items: [
+      { q: "보고서 수정 이력을 뽑아 달라고 한다", a: ["초안 3번째 버전에 '지반 위험: 연약 매립층 다수, 시추 전체 결과 재확인 필요' 항목이 있었어요.", "그다음 버전에서 삭제. 삭제한 계정은… 송민규 대리요."], gives: ["vers", { n: "보고서 버전 이력", d: "초안의 '지반 위험' 항목이 송민규 계정으로 삭제됨.", bad: 1 }] },
+      { q: "초안은 볼 수 있어요?", a: ["네. 복원해 드릴게요. 위험 항목에 '시추 24공 결과 중 15공 부적합'이라고 돼 있네요."], gives: ["draft", { n: "심사보고서 초안", d: "'시추 24공 결과 중 15공 부적합. 재확인 필요.' 송민규 작성." }] },
+      { q: "삭제 직전에 메일이 있어요?", a: ["양 전무 메일이 와 있네요. 제목 '초안 3 수정 요망'. 본문은 한 줄이에요. '지반 부분 빼.'"], gives: ["mail", { n: "전무의 메일", d: "삭제 직전 양기석 전무: '지반 부분 빼.'" }] }] },
+    member: { n: "공제회 회원", s: "노후자금을 맡긴 사람", fn: "퇴직 소방관", face: A + "cut/n60m1.webp", bg: "f3-stall", intro: "서른두 해 불 끄고 받은 돈입니다.", items: [
+      { q: "손실이 얼마나 됩니까?", a: ["연금 일부가 깎인다고 통지 왔어요. 다들 그래요. 그 건물에서 죽은 사람들 생각하면 말도 못 하겠고."], gives: ["hurt", { n: "공제회 회원의 사연", d: "S 프로젝트 손실로 퇴직자 연금 감액. 피해의 실제 얼굴." }] },
+      { q: "그 건물이요?", a: ["S 뭔가 하는 거요. 뉴스에 나온 그 타워 아닙니까. 지하에서 애들 죽은 데."] }] } },
+  lies: [["규정대로 심사했다는 말", 0], ["최종본에 적힌 그대로라는 말", 2], ["실무 작성은 혼자 했다는 말", 1]],
+  keyLie: 1, altLie: 0, keyCard: "vers",
+  press: { open: [["h", "위험 요소가 없었다는 말씀, 다시 묻겠습니다."], ["c", "말씀드렸습니다. 최종본에 없는 건 없는 거예요."]],
+    steps: [
+      { card: "vers", show: G => [["h", "수정 이력입니다. 초안에 '지반 위험' 항목이 있었고, 송민규 씨 계정으로 삭제됐습니다."], ["c", "그건…"]] },
+      { card: "mail", show: G => [["h", "삭제 직전 전무님 메일이에요. '지반 부분 빼.' 혼자 판단하신 게 아니죠."], ["c", "……"]] }] },
+  sus: ["업체에서 금품을 받았다", "대출 서류를 위조했다", "다른 대출도 부실이다"],
+  confess: "…제가 지웠어요. 전무님이 빼라고 했습니다. 첫 번째는 거절했어요. 두 번째엔 애가 수술을 앞두고 있어서… 그냥 지웠습니다. 저도 지워야 되는 줄 아니까 '규정대로'라는 말만 외우고 있었어요.",
+  after: "지운 사실은 숨길 수 없다. 대신 왜 지웠는지, 누가 시켰는지를 끝까지 밝혀야 한다.",
+  trial: [
+    S("judge", "2035고합913, 피고인 송민규. 검사, 공소사실 말씀해 주십시오."),
+    S("pros", "피고인은 연약 지반의 위험을 알면서 심사보고서에서 삭제했고, 그 결과 회사에 1,200억 원의 손해를 입혔습니다."),
+    C("공소사실에 어떻게 대응할까?", [["삭제 사실은 인정합니다. 다만 피고인은 위험을 적어 상신했고, 지시에 따라 삭제했을 뿐 회사에 손해를 입힐 고의는 없었습니다.", 10, "", "judge", "입증 계획을 내십시오."], ["피고인은 삭제한 적이 없습니다.", -16, "false", "pros", "수정 이력이 있습니다."], ["보고서는 참고자료에 불과합니다.", -8, "", "pros", "대출 승인의 근거 서류입니다."]]),
+    D("피고인이 위험을 상신했다는 자료는?", "draft", 12, ["복원한 초안을 보십시오. '시추 24공 결과 중 15공 부적합. 재확인 필요.' 피고인이 직접 쓴 문장입니다."], "그 자료로는 상신 사실을 알 수 없습니다."),
+    S("pros", "초안이 있어 봐야 최종본에서 지운 건 피고인입니다. 양기석 전무를 증인으로 신청합니다."),
+    S("pros", "증인은 지반 위험 삭제를 지시한 사실이 있습니까?"),
+    S("w", "없습니다. 심사보고서의 표현은 전적으로 담당자가 결정합니다."),
+    S("w", "저는 S 프로젝트의 지반에 대해 들은 바 없습니다. 법률 자문을 받아 절차를 지켰을 뿐입니다."),
+    S("judge", "변호인, 반대신문하십시오."),
+    X("증인은 S 프로젝트에 특별히 관여하셨습니까?", "다른 건과 똑같이 결재만 했습니다.", [["임원 회의록에 증인 발언이 있습니다. 'S는 무조건 간다. 실무는 토 달지 말 것.' 위에서 약속됐다고도 하셨습니다.", 12, "", "w", "…분위기를 다잡으려고 한 말입니다."], ["결재를 왜 빨리 하셨습니까?", -4, "", "w", "빠르지 않았습니다."], ["(다음 질문으로 넘어간다)", 0]]),
+    X("지반에 대해 들은 바가 없다고 하셨지요?", "네. 없습니다.", [["'지반 부분 빼.' 삭제 직전 증인이 피고인에게 보낸 메일입니다. 들은 바 없는 분이 어떻게 뺄 것을 아십니까?", 14, "", "w", "……"], ["지반공학을 전공하셨습니까?", -4, "", "pros", "무관합니다."], ["증인은 지금 거짓말을 하고 있습니다.", -6, "", "judge", "질문을 하십시오."]]),
+    X("법률 자문은 언제 받으셨습니까?", "보고서 결재 전에 받았습니다.", [["자문 회신은 결재 사흘 전 날짜입니다. 위험을 지우고 나서 지워도 된다는 서류를 받아 온 것 아닙니까?", 8, "", "w", "순서를 왜곡하지 마십시오."], ["자문료가 얼마입니까?", -4, "", "pros", "무관합니다."], ["(다음 질문으로 넘어간다)", 0]]),
+    S("pros", "지시가 있었다 해도 위험을 안 사람이 지웠다면 공범입니다. 피해자들은 평생 모은 돈을 잃었습니다."),
+    C("피해를 앞세우는 검사에게 어떻게 답할까?", [["피해의 크기는 인정합니다. 그래서 더더욱, 맨 아래 직원 한 사람에게만 책임을 지우면 안 됩니다.", 8, "", "judge", "그 점은 유념하겠습니다."], ["공제회가 위험을 감수한 겁니다.", -10, "", "pros", "연금을 맡긴 퇴직자에게 그렇게 말씀하십니까?"], ["피고인도 피해자입니다.", -6, "", "pros", "그렇게 보기는 어렵습니다."]]),
+    S("judge", "변호인, 최후변론하십시오."),
+    C("무엇을 주장할까?", [["피고인은 위험을 적어 보고했고, 상사의 지시와 사후 자문 앞에서 지웠습니다. 결정권도 이득도 없는 실무자에게 회사에 손해를 입힐 고의를 인정할 수는 없습니다.", 10, "", "judge", "선고하겠습니다."], ["전무를 처벌해 주십시오.", -6, "", "judge", "기소되지 않은 분입니다."], ["규정대로 했습니다.", -12, "", "pros", "지운 사실을 인정하지 않았습니까."]])],
+  res: { win: ["피고인은 무죄.", "피고인은 위험을 기재하여 상신했고, 삭제는 상급자의 지시에 따른 것으로 손해 발생의 고의를 인정하기 부족하다."], partial: ["피고인을 징역 2년, 집행유예 3년에 처한다.", "지시에 따른 점을 참작한다."], lose: ["피고인을 징역 5년에 처한다.", "피고인의 주장은 믿기 어렵다."] },
+  ending: { win: ["판결 뒤 기록을 정리하다가 초안의 한 줄에서 손이 멈췄다. 사업지: 서해광역시 해안 매립지.", "S 프로젝트는 스타포트였다. 143명이 죽은 그 타워. 나는 그 돈의 길을 대 준 사람을 변호했다.", "법원 복도에서 남자 변호사와 부딪혔다. 시추공 24개로 시청을 이긴 사람, 한서준.", "\"…사무실에 수구여병 액자 걸려 있지 않습니까? 강도윤 교수님 제자시죠.\"", "\"어떻게 아세요.\" \"제 사무실에도 있거든요.\" 둘 다 웃지 않았다."], partial: ["집행유예가 나왔다. 초안의 사업지가 눈에 들어왔다. 해안 매립지, 스타포트였다."], lose: ["실형이 나왔다. 초안의 사업지를 보고서야 알았다. S는 스타포트였다."] },
+  file: ["서진 자문 회신: 대법원 2011. 2. 30. 판결 인용", "초안: 24공 중 15공 부적합", "한서준의 이름"]
+};
+
+// 여주 4장 · 선서 (2036년). 특검 박진서 사건. 장현우 살해와 별건, 박진서는 수감 중
+// 판정은 저울이 아니라 resBy로 결정: 진실 경로(유죄) / 입 다문 경로(무죄, 일반 엔딩)
+// 여주 루트만으로 완결되도록 한서준의 증언은 고정. 증언 여부 선택은 남주 루트(m4의 decide)에 있음
+CH.f4 = { hero: "f", title: "여주 4장 · 선서", no: "2036고합47 특정범죄가중처벌법위반(알선수재) 등",
+  benchWho: "재판장 · 특별검사", side: ["특별검사", "special"], labels: ["유죄", "일부 유죄", "무죄"],
+  stamps: { truth: "유죄", quiet: "무죄", lose: "유죄" },
+  resBy: G => G.flags.betray ? "lose" : G.flags.oath && G.flags.warned ? "truth" : "quiet",
+  refuseLine: "…의뢰인을 고를 처지가 아니다. 맡아야겠지.", hireLine: "고맙습니다, 변호사님. 기록은 사무장을 통해 받으실 수 있습니다.",
+  client: { n: "박진서", m: "수감 중 · 전 도원컨설팅 대표", img: A + "story/face-park_neutral.webp" },
+  people: { w: ["이수아", A + "story/face-lee.webp"], w2: ["방재호", A + "cut/n40m2.webp"], w3: ["한서준", A + "hero-m.webp"] },
+  truth: "liar",
+  prologue: [{ bg: "f4-court-press", lines: [[null, "타워 로비 특검 재판 첫날. 법원 복도에 카메라 삼각대가 빈틈없이 늘어섰다."]] }],
+  intro: ["특별검사 임명 뒤, 전직 부시장과 전직 부장검사, 금융회사 임원이 차례로 기소됐다.", "그리고 장현우 살해로 복역 중인 박진서가 타워 로비의 총책으로 다시 법정에 서게 됐다.", "큰 로펌은 모두 사건을 사양했다. 구치소에서 접견 신청이 왔다."],
+  greet: [["c", "윤서연 변호사님. 구치소까지 와 주셔서 감사합니다. 박진서입니다."], ["h", "왜 저예요?"]],
+  opening: "변호사님은 택배 사건부터 이수아 사건까지 그 장부가 어디로 갔는지 가장 가까이 있었던 분이니까요. 그리고 다들 도망갔습니다. 강도윤 쪽에서도 저를 버렸고요. 저는 컨설팅만 했습니다. 장부 같은 건 없어요.",
+  bgConsult: "f4-detention",
+  qs: [
+    ["공소사실에 대해 어떻게 보세요?", "용역비를 받은 건 맞습니다. 컨설팅 대가지요. 무슨 대가인지, 누구에게 갔는지 증명할 게 있습니까?", ["rec"]],
+    ["장부를 쓴 적이 있으세요?", "없습니다. 그런 건 애초에 없어요. 있었다 해도 5년 전 쓰레기봉투에 들어가 태워졌겠지요.", ["jae"]],
+    ["특검이 가진 건 뭐예요?", "돈이 들어온 흐름, 그리고 이수아의 입 하나입니다.", ["lee"]],
+    ["강도윤 변호사와 어떤 관계세요?", "모르는 분은 아닙니다. 그 얘기는 더 안 하겠습니다.", []],
+    ["변호사 비용은요?", "걱정 안 하셔도 됩니다. 제일 걱정하실 건 제 말을 어디까지 믿을지겠지요.", []]],
+  pre: [3, 4],
+  cards0: {
+    gong: { n: "공소장", d: "인허가·사건 처리를 알선한다며 해성개발에서 86억 수수, 공무원 등에게 전달. 옥중에서도 지시." },
+    con: { n: "컨설팅 보고서 묶음", d: "박진서 측이 제출. 형식은 갖췄지만 내용이 빈약." } },
+  start: ["rec"],
+  places: {
+    rec: { n: "특검 수사 기록", s: "기록 열람", fn: null, bg: "f4-special", intro: "특검 사무실 복사실이다. 복도에 기자들 삼각대가 늘어서 있다.", items: [
+      { q: "기록 열람을 신청한다", a: ["…"], needs: "sun", lock: "변호인 선임서를 내셔야 열람하실 수 있습니다.", okLine: "선임서 확인했습니다." },
+      { q: "돈의 흐름을 읽는다", after: "sun", a: ["해성개발에서 도원으로 86억. 그 뒤로는 전부 현금 인출. 어디로 갔는지 끊겼다."], gives: ["cut", { n: "현금 인출 뒤 끊긴 돈", d: "도원에서 현금 인출된 뒤 사용처 불명." }] },
+      { q: "이수아의 진술을 읽는다", after: "sun", a: ["'대표의 장부를 직접 봤습니다. 구속 뒤엔 제가 이어 썼습니다. 현금을 누구에게 줬는지 적혀 있었습니다.'", "실물은 없다."], gives: ["leest", { n: "이수아 진술조서", d: "장부를 직접 봤고 일부 이어 썼다는 진술. 실물 없음." }] },
+      { q: "방재호의 수사 진술을 읽는다", after: "sun", a: ["'서류라서 쓰레기봉투에 버렸습니다. 소각장으로 갔을 겁니다.'"], gives: ["jaest", { n: "방재호 수사 진술", d: "\"서류는 쓰레기봉투에 버렸다.\"" }], opens: ["jae"] },
+      { q: "불기소 관련 자료를 읽는다", after: "sun", a: ["2031년 정한별 고발의 불기소 참고자료로 법무법인 한강로의 의견서가 붙어 있다.", "인용 판례… '대법원 2011. 2. 30. 선고 2010다77417 판결.' 또 2월 30일. 이번엔 오타라고 넘길 수가 없다.", "권태훈 수사관이 이 사건을 맡았었다."], gives: ["opin4", { n: "한강로 의견서", d: "정한별 고발의 불기소 참고자료. 대법원 2011. 2. 30. 판결 인용." }], opens: ["kwon"] }] },
+    lee: { n: "이수아 면담", s: "수임 동의를 구하러", fn: "이수아", face: A + "story/face-lee.webp", bg: "f2-storage", intro: "소식 들었어요. 그 사람 변호사가 되셨다고.", items: [
+      { q: "제가 이 사건을 맡아도 되겠습니까?", a: ["전 의뢰인인 제가 동의하지 않으면 못 맡으시겠죠.", "…하세요. 동의서 써 드릴게요. 그 사람 옆에 변호사님이 서 계시면, 그 사람이 뭘 어떻게 하는지 보시겠죠."], gives: ["agree", { n: "이수아의 수임 동의서", d: "전 의뢰인 이수아의 동의." }] },
+      { q: "법정에서 장부 얘기를 하실 건가요?", a: ["네. 전부요. 변호사님이 물어보실 땐 저를 깨 보세요. 그게 변호사님 일이니까."] }] },
+    jae: { n: "방재호 찾아가기", s: "터미널 휴게실", fn: "방재호", face: A + "cut/n40m2.webp", bg: "rest", intro: "어, 변호사님! 이게 몇 년 만이에요. 그 사람들이 또 왔었어요.", items: [
+      { q: "그 서류, 정말 버리셨어요?", a: ["…네. 버렸다니까요. 쓰레기봉투에요."] },
+      { q: "휴게실을 둘러본다", a: ["냄비가 놓여 있던 탁자. 그때 본 국물 자국 난 종이가 떠올랐다. 지금은 없다.", "뒤쪽 창고 문이 잠겨 있다. 방재호의 시선이 그쪽으로 잠깐 갔다가 돌아온다."] }] },
+    kwon: { n: "권태훈 수사관", s: "퇴근길 주차장", fn: "권태훈 수사관", face: A + "story/insp.webp", bg: "f2-investigator", intro: "…변호사님. 왜 또 저를.", items: [
+      { q: "불기소 때 누가 지시했습니까?", a: ["말할 수 없습니다. 애가 둘입니다."] },
+      { q: "그때 법정에서 물을 수 있었는데 묻지 않았습니다", a: ["…압니다. 감사하다는 말은 못 합니다.", "언젠가, 말해야 하는 날이 오면 말하겠습니다."], gives: ["kwono", { n: "권태훈의 약속", d: "\"말해야 하는 날이 오면 말하겠다.\"" }] }] } },
+  sus: ["강도윤에게 돈을 주었다", "이수아를 협박했다", "옥중에서 지시를 내렸다"],
+  lies: [["장부 같은 건 없다는 말", -1], ["컨설팅만 했다는 말", 0]],
+  keyLie: 0, altLie: 1, keyCard: "leest",
+  press: { open: [["h", "대표님, 장부가 없었다는 말씀, 저한테도 그렇게 하실 건가요?"], ["c", "변호인에게 뭘 더 듣고 싶으신지요."]],
+    show: G => [["h", "이수아 씨는 구속 뒤에 본인이 이어 썼다고 진술했습니다. 저한테 숨기면 법정에서 지킬 수가 없습니다."], ["c", "…변호사님, 있었다고 치지요. 그게 뭐가 달라집니까."]] },
+  confess: "있었습니다. 그런데 그게 5년 전에 쓰레기로 소각됐어요. 특검도 그걸 확인했습니다. 없는 물건으로는 저를 못 잡아요. 이수아의 입 하나만 막으면 끝납니다.",
+  after: "이 사람은 유죄다. 그리고 이대로 가면 무죄다. 택배 하나를 지켜 준 뒤로 나는 내가 이긴 재판의 값을 안다. 그래도 변호인은 의뢰인 편에 서야 한다.",
+  trial: [
+    S("judge", "2036고합47, 피고인 박진서. 특별검사, 공소사실 말씀해 주십시오."),
+    S("pros", "피고인은 타워 인허가와 수사 무마를 알선한다며 86억 원을 수수하고 공무원 등에게 전달했습니다. 전달 내역을 기록한 장부가 있었으나 실물은 아직 확보하지 못했습니다."),
+    C("공소사실에 어떻게 답할까?", [["돈이 들어온 사실만으로 무엇의 대가인지, 누구에게 갔는지는 증명되지 않습니다.", 10, "", "judge", "특별검사는 대가성을 입증하십시오."], ["피고인은 돈을 받은 적이 없습니다.", -10, "", "pros", "계좌 흐름이 있습니다."], ["특검 자체가 정치적입니다.", -8, "", "judge", "변호인, 본건에 집중하십시오."]]),
+    S("pros", "증인 이수아를 신청합니다. 증인은 장부를 직접 보았습니까?"),
+    S("w", "네. 대표가 손으로 썼고, 구속 뒤로는 접견 때 받아 적어서 제가 이어 썼습니다."),
+    S("w", "누구에게 얼마를 줬는지 적혀 있었습니다. 시청과 공소청 쪽 이름들이 있었습니다."),
+    S("judge", "변호인, 반대신문하십시오."),
+    S("n", "전 의뢰인이다. 나는 저 사람을 무죄로 만들었다. 지금은 저 사람의 말을 무너뜨려야 한다."),
+    X("증인은 장부 내용을 지금 정확히 기억하십니까?", "주요한 부분은 기억합니다.", [["기록 어디에도 없는 내용을 5년 뒤에 기억으로만 증언하시는 겁니다. 그 항목들을 증명할 자료가 있습니까?", 10, "", "w", "…실물은 없습니다."], ["증인은 기억력이 나쁩니다.", -6, "", "w", "그렇지 않습니다."], ["(다음 질문으로 넘어간다)", 0]]),
+    X("증인은 도원컨설팅에서 어떤 대우를 받았습니까?", "해고에 가깝게 나왔습니다.", [["퇴사 뒤 피고인 측과 소송·고소로 다퉜고 증인은 기소까지 됐습니다. 피고인에게 나쁜 감정이 있지 않습니까?", 8, "", "w", "감정은 있습니다. 그렇다고 거짓말은 안 합니다."], ["해고는 왜 당했습니까?", -4, "", "pros", "피고인 측이 잘 아시겠지요."], ["(다음 질문으로 넘어간다)", 0]]),
+    S("n", "접견실. 박진서가 재판 쟁점을 정리했다. \"이수아 진술만 깨면 됩니다. 택배 기사를 세우세요. 수사기록에서 버렸다고 했으니 위험은 없습니다.\""),
+    S("n", "합리적인 지시다. 나는 방재호를 증인으로 신청했다."),
+    S("n", "신문 전날, 방재호를 만났다. 변호인으로서 증인에게 할 수 있는 말의 범위를 생각했다."),
+    C("방재호에게 무엇이라고 말할까?", [["그 사건은 무죄가 확정돼서 다시 처벌받지 않습니다. 다만 법정에서 선서하고 거짓말을 하면 위증입니다.", 0, "warned", "w2", "…위증이요. 네. 알겠습니다."], ["수사 때 말씀 그대로 하시면 됩니다. 걱정 마세요.", 0, "coach", "w2", "네, 그렇게 할게요."], ["진실을 말씀하세요. 제 의뢰인은 신경 쓰지 마시고요.", -10, "betray", "w2", "변호사님, 그래도 되는 거예요?"]]),
+    S("us", "변호인 측 증인 방재호를 신청합니다."),
+    S("n", "방재호가 증인선서서를 읽었다. 목소리가 작았다. 증인석 앞에서 택배 유니폼의 소매를 만지작거렸다."),
+    X("증인은 2031년 분실된 택배 건으로 조사받으셨지요?", "네. 5년 전에 무죄 받았습니다.", [["(다음 질문으로 넘어간다)", 0], ["증인, 그때 훔치지 않으셨습니까?", -20, "secret", "judge", "변호인! 전 의뢰인에게 무슨 질문입니까."]], "w2"),
+    C("증인에게 마지막으로 무엇을 확인할까?", [["증인은 수사기관에서 그 서류를 버렸다고 진술했지요? 오늘 선서하셨습니다. 그 진술, 지금도 같습니까?", 0, "oath", "w2", "……"], ["증인은 수사기관에서 버렸다고 진술하셨지요. 이상입니다.", 8, "quiet", "w2", "네, 맞습니다."], ["증인, 그 서류 어디 있는지 사실대로 말하십시오.", -20, "betray", "judge", "변호인, 자기 측 증인에게 지금 뭐 하시는 겁니까."]]),
+    F(G => G.flags.oath && !G.flags.warned, [S("w2", "…네. 같습니다. 버렸습니다.")]),
+    F(G => G.flags.oath && G.flags.warned, [
+      S("w2", "……안 버렸습니다.", -30),
+      S("w2", "죄송합니다, 변호사님. 라면 받침으로 쓰다가 터미널 창고에 뒀습니다."),
+      S("n", "법정이 조용해졌다. 박진서가 처음으로 천천히 고개를 돌렸다. 나를 보고 있었다."),
+      S("pros", "재판장님, 터미널 창고에 대한 압수수색영장을 청구하겠습니다."),
+      I("ev-ramen.webp", "이틀 뒤, 창고에서 장부가 나왔다. 표지에 둥근 국물 자국이 있었다."),
+      S("pros", "압수된 장부를 증거로 제출합니다."),
+      C("변호인으로서 장부를 어떻게 다툴까?", [["작성자와 작성 시기가 특정되지 않았고 훼손이 심합니다. 진정성립을 부인합니다.", 8, "", "judge", "특별검사는 진정성립을 입증하십시오."], ["장부를 인정합니다.", -12, "betray", "judge", "변호인, 피고인과 협의하셨습니까?"]]),
+      S("pros", "장부의 첫 장 맨 윗줄을 보십시오. 구속 뒤 첫 기록입니다. '오 과장 정리비 50.' 이 항목이 외부 사실과 일치하면 장부 전체가 믿을 만합니다. 한서준 변호사를 증인으로 신청합니다."),
+      S("n", "복도에서 한서준이 말했다. \"그 50, 뭔지 압니다. 내 의뢰인이 대리기사에게 주려던 돈이에요.\" 그 말을 내가 들어도 되는 말이었는지 모르겠다."),
+      S("n", "한서준이 증인석에 섰다. 한참 동안 아무 말도 하지 않았다."),
+      S("w3", "2030년 음주운전 사건에서 제 의뢰인이 대리기사에게 50만 원을 주고 대신 운전했다고 해 달라고 했습니다. 저는 그 일을 알고도 무죄를 받아 냈습니다."),
+      S("n", "법정에 앉은 정한별이 고개를 들었다."),
+      S("judge", "변호인, 반대신문하십시오."),
+      X("증인은 변호사로서 의뢰인의 비밀을 지킬 의무가 있지 않습니까?", "있습니다.", [["그런데도 증언하셨군요. 증언의 대가로 특별검사와 약속한 것이 있습니까?", 4, "", "w3", "없습니다. 제가 처벌받게 될 일입니다."], ["증인은 비밀누설죄를 저지른 겁니다.", 0, "", "w3", "압니다."]], "w3")
+    ]),
+    S("judge", "변호인, 최후변론하십시오."),
+    C("무엇을 주장할까?", [["피고인을 위해 말씀드립니다. 돈의 대가성과 전달 사실에 대해서는 합리적 의심이 남습니다. 무죄를 선고해 주십시오.", 6, "", "judge", "선고하겠습니다."], ["피고인은 유죄입니다.", -30, "betray", "judge", "변호인?"]])],
+  res: { truth: ["피고인을 징역 12년에 처한다.", "압수된 장부의 기재는 증인 한서준의 증언 등 외부 사실과 일치해 신빙성이 있다."], quiet: ["피고인은 무죄.", "수수한 금원의 대가성과 전달 사실에 대한 증명이 부족하다."], lose: ["피고인을 징역 15년에 처한다.", "변호인의 변론 태도에 관하여 대한변호사협회에 통보한다."] },
+  ending: { truth: ["박진서는 나를 보지 않았다. 호송되며 한마디 했다. \"수사기록을 믿은 내가 잘못이지요.\" 칭찬인지 아닌지 몰랐다.", "나는 지시대로 증인을 세웠고, 법이 정한 설명을 했고, 당연한 질문을 했다. 그런데 왜 손이 떨릴까.", "\"변호사님, 저 잘한 거죠?\" 방재호가 물었다. 대답 대신 라면 값을 냈다.", "복도에 혼자 서 있는데 한서준에게 문자가 왔다. '오명환이 고소했습니다. 업무상비밀누설. 변호인 구합니다.'"], quiet: ["무죄였다. 박진서가 처음으로 활짝 웃었다.", "며칠 뒤 사무실로 떡이 왔다. 맛있었다. 조금 찜찜했지만, 이 일은 원래 그런 거다.", "(일반 엔딩)"], lose: ["의뢰인의 이익을 저버린 변호인은 징계 절차에 넘겨졌다. 재판부터 다시 해야 한다."] },
+  file: ["국물 자국 난 장부 실물", "장부 첫 줄: 오 과장 정리비 50", "장부 '남산' 항목: S 고발 건", "한강로 의견서: 대법원 2011. 2. 30. 판결 인용"]
+};
+
+// 남주 4장 = 최종 사건 · 수구여병 (2036년). 피고인 한서준, 변호인 윤서연(플레이어)
+// 이야기는 여주 4장과 이어지지만 남주 루트만으로 플레이 가능. 사건 앞에서 특검 증인석 장면을 남주로 직접 고른다
+CH.m4 = { hero: "f", title: "최종 사건 · 수구여병", no: "2036고단3318 업무상비밀누설",
+  decide: { hero: "m", bg: "m4-court",
+    lines: [[null, "박진서 특검 재판. 터미널 창고에서 장부가 나왔다. 첫 줄은 '오 과장 정리비 50.'"], [null, "그 50의 뜻을 아는 사람은 나뿐이다. 특별검사가 나를 증인으로 신청했다."], [null, "증인석까지 열두 걸음. 의뢰인의 비밀은 무덤까지 가져가라고 배웠다. 벽에 걸린 네 글자가 떠오른다."]],
+    q: "증언할 것인가?",
+    yes: ["증언한다. 143명이다.", "2030년 음주운전 사건에서 제 의뢰인이 대리기사에게 50만 원을 주고 대신 운전했다고 해 달라고 했습니다. 저는 그 일을 알고도 무죄를 받아 냈습니다.", "방청석의 정한별이 고개를 들었다. 일주일 뒤 고소장이 도착했다."],
+    no: ["증언을 거부한다. 업무상 비밀이다.", "증인은 변호사로서 업무상 알게 된 비밀에 관해 증언을 거부합니다."],
+    refuseEnding: ["장부의 첫 줄은 끝내 설명되지 않았다. 장부는 힘을 잃었고 박진서는 가벼운 형을 받았다.", "며칠 뒤 교수님이 전화를 했다. \"서준아, 잘했다.\"", "벽의 액자는 그대로 걸려 있다. (일반 엔딩)"] },
+  benchWho: "재판장 · 검사", labels: ["유죄", "선고유예", "무죄"], stamps: { win: "무죄", partial: "선고유예", lose: "유죄" },
+  client: { n: "한서준", m: "피고인 · 변호사", img: A + "hero-m.webp" },
+  people: { w: ["오명환", A + "story/face-oh-50.webp"], w2: ["강도윤", A + "story/face-kang.webp"], w3: ["권태훈", A + "story/insp.webp"], w4: ["정한별", A + "story/face-jung-40.webp"], h: ["한서준", A + "hero-m.webp"] },
+  truth: "skip",
+  intro: ["업무상비밀누설. 피고인 한서준. 고소인 오명환.", "한서준이 내 사무실 의자에 앉았다. 벽에 같은 액자가 걸려 있는 걸 보고, 쓴웃음을 지었다."],
+  greet: [["c", "이번엔 제가 의뢰인이네요."], ["h", "변호인 윤서연입니다. 하실 말씀 다 하세요. 이번엔 저한테 숨기지 마시고요."]],
+  opening: "오명환이 고소했습니다. 뒤에 목멱이 있습니다. 제가 비밀을 깬 건 사실입니다. 유죄가 나와도 할 말은 없어요. 다만 정한별 씨 일만은 이번에 끝내고 싶습니다.",
+  qs: [
+    ["증언 전에 오명환 승낙을 받을 수 없었어요?", "물어봤죠. 전화를 끊더군요.", []],
+    ["누가 이 고소를 설계한 것 같아요?", "교수님입니다. 고소장 문장이 수업 때 듣던 그대로예요. 강도윤 교수님 사무실에 가 봐야 합니다.", ["kang"]],
+    ["권태훈 수사관은요?", "변호사님이 더 잘 아시겠지요. 말해야 할 날이 왔다고 전해 주십시오.", ["kwon"]],
+    ["정한별 씨는 뭐라고 해요?", "연락이 안 닿습니다. 저를 보고 싶겠습니까.", ["jung"]],
+    ["교수님 강의안, 아직 가지고 계세요?", "그 비매품 강의안요? 책장 어딘가에 있을 텐데요. 왜요?", ["books"]]],
+  pre: [0],
+  cards0: {
+    gong: { n: "공소장", d: "피고인은 업무상 알게 된 전 의뢰인 오명환의 비밀을 특검 재판에서 누설." },
+    trans: { n: "한서준 증언 조서", d: "'50만 원을 주고 대신 운전했다고 해 달라고 했습니다.'" } },
+  start: ["rec"],
+  places: {
+    rec: { n: "장부와 사건 기록", s: "공소청 열람복사실", fn: null, bg: "rec", intro: "특검 사건 판결이 확정돼 장부 사본을 볼 수 있다.", items: [
+      { q: "기록 열람을 신청한다", a: ["…"], needs: "sun", lock: "변호인 선임서를 내셔야 열람하실 수 있습니다.", okLine: "선임서 확인했습니다." },
+      { q: "장부의 '남산' 항목을 읽는다", after: "sun", a: ["'남산 / S 고발 건 / 3,000.' 날짜는 2030년 12월.", "정한별 고발이 불기소된 게 이듬해 2월이다."], gives: ["nam", { n: "장부 '남산' 항목", d: "2030년 12월 '남산 / S 고발 건 / 3,000.' 불기소 두 달 전." }] },
+      { q: "불기소 결정서를 읽는다", after: "sun", a: ["사건 담당 수사관 권태훈. 지휘 부장검사 서명. 결정 근거로 한강로 의견서가 붙어 있다."], gives: ["nop", { n: "불기소 결정서", d: "2031년 2월. 근거로 한강로 의견서 첨부." }] },
+      { q: "고소장을 읽는다", after: "sun", a: ["고소대리인 법무법인 목멱. 오명환의 비밀을 지키는 데 그렇게 열심인 사무실이, 왜 하필 같은 사무실일까."], gives: ["comp", { n: "오명환 고소장", d: "고소대리인 법무법인 목멱. 국가배상 소송의 시 측 대리인과 같은 사무실." }] }] },
+    kang: { n: "강도윤의 집무실", s: "법무법인 목멱", fn: "강도윤", face: A + "story/face-kang.webp", bg: "m4-kang-office", intro: "서연이 왔구나. 앉아라. 차가 식는다.", items: [
+      { q: "한서준 변호사 사건 때문에 왔습니다", a: ["안타까운 일이다. 내가 가르친 제일 큰 것을 어겼어."] },
+      { q: "벽의 액자를 본다", a: ["수구여병. 내 사무실에 있는 것과 같은 글씨. 교수님은 벽 맨 위에 같은 글씨로 '목멱'이라고 쓰신 현판을 걸어 두었다."] },
+      { q: "사무실 이름 '목멱'은 무슨 뜻입니까?", a: ["남산의 옛 이름이다. 우리 사무실이 그 아래 있지. 몰랐느냐."], gives: ["mok", { n: "목멱 = 남산", d: "강도윤 본인의 설명: 목멱은 남산의 옛 이름." }] },
+      { q: "타워 사업에 관여하신 적 있습니까?", a: ["전혀. 그런 데 얽히기엔 내 나이가 많다."] }] },
+    kwon: { n: "권태훈 수사관", s: "공소청 앞 공원", fn: "권태훈 수사관", face: A + "story/insp.webp", bg: "f2-investigator", intro: "말해야 하는 날이 왔습니까.", items: [
+      { q: "불기소는 누가 지시했습니까?", a: ["부장님이 '남산에서 정리된 건'이라고 했습니다. 택배가 안 왔을 때 차라리 다행이라고 생각했어요. 그게 제가 평생 부끄러운 일입니다."], gives: ["kwon2", { n: "권태훈의 진술 약속", d: "\"남산에서 정리된 건이라는 지시를 받았다.\"" }] },
+      { q: "법정에 나오시겠습니까?", a: ["네. 애들한테도 이야기했습니다."] }] },
+    jung: { n: "정한별 찾아가기", s: "복직 심사 대기 중", fn: "정한별", face: A + "story/face-jung-40.webp", bg: "m3-sideline", intro: "한 변호사 대신 오셨습니까.", items: [
+      { q: "한서준 변호사가 법정에서 할 말이 있답니다", a: ["…들었어요. 특검 법정에서요. 그날 그 사람 처음으로 저를 봤습니다."] },
+      { q: "이번 재판에서 증인이 되어 주시겠습니까?", a: ["필요 없어요. 제 증언은 이제 판결문에 다시 쓰이면 됩니다."], gives: ["jungn", { n: "정한별의 말", d: "\"제 증언은 판결문에 다시 쓰이면 됩니다.\"" }] }] },
+    books: { n: "한서준의 책장", s: "강의안 찾기", fn: null, bg: "m4-frame", intro: "오래된 책장이다. 비매품 강의안이 맨 아래 칸에 끼어 있다.", items: [
+      { q: "강의안 민법 파트를 읽는다", a: ["'대법원 2011. 2. 30. 선고 2010다77417 판결.' 여기다.", "기억났다. 교수님이 수업 때 웃으면서 하신 말씀. '이 강의안엔 일부러 틀린 판례 하나를 넣었다. 복사해 간 놈은 내가 잡는다.'"], gives: ["lect", { n: "강도윤 강의안", d: "비매품. 일부러 넣은 틀린 판례 '대법원 2011. 2. 30.' 강도윤 제자 외엔 갖고 있지 않음." }] },
+      { q: "지금까지 모은 의견서를 나란히 놓는다", a: ["청람, 정헌, 서진, 한강로. 이름이 다른 네 로펌. 해성의 돈, 시청의 심의, 금융의 대출, 공소청의 불기소.", "네 장 모두 같은 틀린 판례를 인용했다. 2월 30일에 선고된 판결."], gives: ["four", { n: "네 의견서 대조", d: "청람·정헌·서진·한강로 의견서가 모두 존재하지 않는 2011. 2. 30. 판결을 인용." }] }] } },
+  trial: [
+    S("judge", "2036고단3318, 피고인 한서준. 검사, 공소사실 말씀해 주십시오."),
+    S("pros", "피고인은 변호사로서 알게 된 전 의뢰인 오명환의 비밀을 특검 재판에서 공개했습니다. 변호사의 비밀유지 의무는 사법제도의 근간입니다."),
+    C("어떻게 답할까?", [["누설 사실은 다투지 않습니다. 다만 143명이 죽은 참사의 로비 구조를 밝히는 데 꼭 필요한 증언이었고, 형사소송법도 중대한 공익상 필요가 있으면 증언을 거부할 수 없다고 정합니다.", 12, "", "judge", "위법성 조각 주장으로 정리하겠습니다."], ["비밀이 아니었습니다.", -10, "", "pros", "본인이 숨기려 했던 사실입니다."], ["의뢰인이 나쁜 사람입니다.", -10, "", "judge", "변호인, 법률 주장을 하십시오."]]),
+    S("pros", "고소인 오명환을 증인으로 신청합니다. 증인은 피고인에게 비밀 공개를 승낙했습니까?"),
+    S("w", "아닙니다. 변호사를 믿고 털어놓은 이야기를 온 세상이 알게 됐습니다."),
+    S("w", "저는 4년 전 판결로 무죄를 받은 사람입니다. 그 뒤로 성실히 공직을 수행했습니다."),
+    S("judge", "변호인, 반대신문하십시오."),
+    X("증인, 고소를 먼저 생각하신 건 증인 본인입니까?", "물론입니다.", [["고소대리인은 법무법인 목멱이고, 국가배상 소송 때 시 측을 대리한 그 사무실입니다. 증인이 찾아가셨습니까, 그쪽이 찾아왔습니까?", 10, "", "w", "……그쪽에서 도와주겠다고 했습니다."], ["고소 비용은 얼마입니까?", -4, "", "pros", "관련 없습니다."], ["(다음 질문으로 넘어간다)", 0]]),
+    X("대리기사에게 50만 원 건은 사실입니까?", "……그건 대답하지 않겠습니다.", [["증언 거부로 기록해 주십시오. 사실이 아니라면 비밀이 누설될 일도 없었을 겁니다.", 8, "", "judge", "증인의 답변 거부를 기록합니다."], ["거짓말하지 마십시오.", -6, "", "judge", "질문이 아닙니다."]]),
+    S("us", "변호인 측에서 피고인을 신문하겠습니다."),
+    C("(한서준) 4년 전 그 재판에 대해 무엇을 말할까?", [["정한별 씨의 증언은 사실이었습니다. 제가 술자리 일을 들춰 무너뜨렸습니다.", 12, "honor", "h", "그때 저는 알고 있었습니다. 판결문의 '믿기 어렵다'는 제가 만든 문장입니다."], ["저는 변호인으로서 할 일을 했을 뿐입니다.", -4, "", "h", "(방청석의 정한별이 눈을 감았다.)"]]),
+    S("pros", "재판장님, 피고인의 은사이자 변호사 윤리의 권위자인 강도윤 변호사를 증인으로 신청합니다."),
+    S("w2", "서준이는 제 제자입니다. 의뢰인의 비밀은 무덤까지 가져가라고 가르쳤습니다. 가르친 제가 부끄럽습니다."),
+    S("w2", "참사는 안타깝지만, 원칙이 무너지면 앞으로 어떤 의뢰인이 변호사에게 진실을 말하겠습니까."),
+    S("judge", "변호인, 반대신문하십시오."),
+    C("은사에게 첫 질문을 어떻게 던질까?", [["교수님, 원칙을 말씀하시는 분이 타워 사업과는 어떤 관계셨습니까?", 6, "", "w2", "아무 관계가 없습니다."], ["교수님, 정말 죄송합니다.", -4, "", "w2", "알면 됐다."]]),
+    S("pros", "이의 있습니다. 공소사실과 관계없는 질문입니다."),
+    C("이의에 어떻게 답할까?", [["증인은 공익을 위한 증언이 아니라고 말씀하셨습니다. 그 공익의 내용과 증인의 이해관계는 증언의 신빙성에 직결됩니다.", 8, "", "judge", "이의를 기각합니다. 계속하십시오."], ["철회하겠습니다.", -12, "", "judge", "다음으로 넘어가십시오."]]),
+    X("타워 관련 사건에서 증인 사무실이 일한 적이 없다는 말씀입니까?", "시청 소송을 맡은 것 말고는 없다.", [["그런데 2030년 심의 자료의 '법률검토의견서', 2032년 PF 대출의 '법률자문', 2034년 재산 이전의 '자문의견서', 2031년 불기소의 '의견서'에 전부 같은 판례가 나옵니다.", 8, "", "w2", "그게 나와 무슨 상관이냐. 넷 다 다른 로펌이다."], ["증인은 돈을 받았습니까?", -6, "", "pros", "근거 없는 추궁입니다."]], "w2"),
+    D("넷 다 다른 로펌이라는 말을 무엇으로 깰까?", "lect", 18, ["'대법원 2011. 2. 30.' 2월 30일에 선고된 판결은 세상에 없습니다. 이 틀린 판례가 나오는 곳은 단 하나, 교수님의 비매품 강의안뿐입니다.", "교수님이 직접 말씀하셨습니다. '복사해 간 놈은 내가 잡는다.' 네 로펌의 의견서는 전부 같은 사무실에서 나왔습니다."], "그 자료로는 넷의 연결을 증명할 수 없습니다."),
+    S("n", "교수님의 얼굴에서 처음으로 웃음기가 사라졌다."),
+    S("w2", "……내 제자들이 잘못 베껴 썼을 수는 있겠지. 나는 그 문서들을 본 적이 없다."),
+    I("ev-s-file.webp", "장부의 한 장. S 표시가 붙은 줄이 있다."),
+    S("us", "장부에 '남산 / S 고발 건 / 3,000'이라는 항목이 있습니다. 증인은 남산에 대해 아십니까?"),
+    S("w2", "남산이야 서울에 있지."),
+    D("'남산'이 누구인지 무엇으로 밝힐까?", "mok", 14, ["교수님이 제게 직접 말씀하셨습니다. 목멱은 남산의 옛 이름이라고요. 고발이 불기소되기 두 달 전, 3,000만 원이 '남산'으로 갔습니다."], "그 자료로는 남산을 특정할 수 없습니다."),
+    S("us", "변호인 측 증인으로 공소청 수사관 권태훈을 신청합니다."),
+    S("w3", "지난번 법정에서 변호사님은 더 묻지 않으셨습니다. 그래서 오늘은 제가 답합니다."),
+    S("w3", "2031년 정한별 씨 고발 사건을 맡았습니다. 부장검사가 '남산에서 정리된 건'이라고 했고, 저는 불기소 의견을 올렸습니다."),
+    S("w3", "장부가 택배로 온다는 연락을 받았을 때, 저는 답장을 보냈습니다. 그 택배가 안 왔을 때 안도했습니다. 그게 제 죄입니다."),
+    S("judge", "변호인, 최후변론하십시오."),
+    C("무엇을 주장할까?", [["피고인은 원칙을 깼습니다. 그 원칙을 무기로 쓰던 사람은 이 법정에 있었습니다. 143명의 죽음을 밝히는 데 꼭 필요한 증언은 처벌의 대상이 아닙니다.", 14, "", "judge", "선고하겠습니다."], ["피고인은 불쌍합니다.", -8, "", "judge", "알겠습니다."], ["강도윤을 구속해 주십시오.", -6, "", "judge", "이 법정의 일이 아닙니다."]])],
+  res: { win: ["피고인은 무죄.", "피고인의 증언은 다수의 생명이 희생된 범죄의 진상을 밝히기 위해 불가피했고 정당행위에 해당한다. 또한 2030고단1187 사건 증인 정한별의 진술은 사실이었던 것으로 보인다."], partial: ["피고인에 대한 형의 선고를 유예한다.", "공익 목적을 참작한다."], lose: ["피고인을 벌금 500만 원에 처한다.", "비밀유지 의무 위반이 인정된다."] },
+  ending: { win: ["판결문에 문장 하나가 다시 쓰였다. '정한별의 진술은 사실이었던 것으로 보인다.' 정한별은 그 줄을 사진 찍어 어딘가로 보냈다.", "한서준은 대한변협에서 정직 2년을 받았다. 무죄여도 그것까지는 피할 수 없었다.", "강도윤은 구속 기소됐다. 면회를 신청했더니 메모 한 장이 돌아왔다. 낯익은 글씨였다. '서연아, 2월은 28일까지다. 잘했다.'", "조경숙이 사무실에 떡을 들고 왔다. 그 떡은 찜찜하지 않았다.",], partial: ["형의 선고는 유예됐다. 한서준은 변협 징계를 받았고, 강도윤은 수사를 받기 시작했다.", "진실의 절반쯤이 판결문에 남았다."], lose: ["유죄였다. 하지만 재판에서 나온 것들은 지워지지 않았다. 강도윤에 대한 수사가 시작됐다."] },
+  outro: { win: { bg: "m4-rooftop", lines: [[null, "옥상에서 한서준과 커피를 마셨다. 스카이라인에 타워가 있던 자리가 비어 있었다."], [null, "법은 때로는 느리지만, 결국 진실에 도달한다. 누가 처음 그렇게 말했는지는 몰라도, 틀린 말은 아니었다."], [null, "내일 찾아올 의뢰인도 자기에게 유리한 이야기만 할 것이다. 그 이야기 뒤에 숨은 진실을 찾는 일. 그건 우리 일이다."]] } },
+  file: ["정한별의 명예", "수구여병"]
+};
+
+
+CH.m1 = CH.m; CH.f1 = CH.f;
+(function boot() {
+  const q = new URLSearchParams(location.search), ch = q.get("ch"), op = q.get("open");
+  if (op) return openingOnly(op === "f" ? "f" : "m");
+  if (ch && CH[ch]) return start(ch);
+  if (q.get("dev") !== null) return menu();
+  location.replace("./");
+})();
+</script>
+</body></html>

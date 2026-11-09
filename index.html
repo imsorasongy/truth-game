@@ -22367,10 +22367,68 @@ function startNew() {
   ov.className = "staff-pop";
   ov.innerHTML = `<div class="sp-card"><div class="sp-name">모드 고르기</div>
     <button class="btn primary" id="mdSpeed" style="text-align:center">스피드 모드</button>
-    <button class="btn ghost" id="mdOps" style="text-align:center">운영 모드</button></div>`;
+    <button class="btn ghost" id="mdOps" style="text-align:center">운영 모드</button>
+    <button class="btn ghost" id="mdStory" style="text-align:center">스토리 모드</button></div>`;
   document.body.appendChild(ov);
+  ov.querySelector("#mdStory").onclick = () => { ov.remove(); S.mode = "story"; S.story = { next: 0 }; screenCreate(); };
   ov.querySelector("#mdSpeed").onclick = () => { ov.remove(); screenCreate(); };
   ov.querySelector("#mdOps").onclick = () => { ov.remove(); S.mode = "opsNew"; screenCreate(); };
+}
+
+/* ---------- 스토리 모드: 일반 사건을 하다가 명성 조건이 되면 story.html의 해당 장이 열린다 ---------- */
+const isStory = () => !!S && S.mode === "story";
+// need: 열리는 명성, after: 깬 뒤 명성, day: 이야기 시점(게임 내 달)
+const STORY_STEPS = [
+  { need: 20, after: 30 },
+  { need: 50, after: 60, jump: 4, day: { m: 59, f: 61 } },
+  { need: 75, after: 85, day: { m: 66, f: 71 } },
+  { need: 100, after: 100, day: { m: 75, f: 75 } }
+];
+function storyFrame(query, done) {
+  const f = document.createElement("iframe");
+  f.src = "story.html?" + query;
+  f.title = "스토리";
+  f.style.cssText = "position:fixed;inset:0;width:100%;height:100%;border:0;z-index:9999;background:#1b120d";
+  const h = e => {
+    if (e.source !== f.contentWindow || !e.data || e.data.story !== "done") return;
+    removeEventListener("message", h);
+    f.remove();
+    done(e.data.res);
+  };
+  addEventListener("message", h);
+  document.body.appendChild(f);
+}
+function storyCheck(next) {
+  const st = S.story || (S.story = { next: 0 });
+  if (st.done || st.next >= STORY_STEPS.length || st.snooze === S.day) return false;
+  const step = STORY_STEPS[st.next], n = st.next;
+  // 1장은 일반 사건 2달 뒤 명성 20이면 열리고, 미달이어도 5개월째에는 열린다
+  if (!(n === 0 ? (S.rep >= step.need && S.day >= 3) || S.day >= 5 : S.rep >= step.need)) return false;
+  const hero = S.hero || "m";
+  let q = `ch=${hero}${n + 1}&office=${S.office || 0}`;
+  if (step.jump && !st.jumped) q += `&jump=${step.jump}`;
+  if (step.day) S.day = Math.max(S.day, step.day[hero]);
+  st.jumped = !!step.jump || st.jumped;
+  save();
+  storyFrame(q, res => {
+    if (res === "lose") { st.snooze = S.day; save(); return next(); }
+    st.jumped = false;
+    S.rep = Math.max(S.rep, step.after);
+    st.next++;
+    if (st.next >= STORY_STEPS.length || res === "refuse" || res === "quiet") { st.done = true; save(); return storyEnd(next); }
+    save();
+    next();
+  });
+  return true;
+}
+function storyEnd(next) {
+  const ov = document.createElement("div");
+  ov.className = "staff-pop";
+  ov.innerHTML = `<div class="sp-card"><div class="sp-name">스토리 완결</div><div class="sp-row">${esc(S.name || heroOf().name)} 변호사의 이야기가 끝났습니다.</div>
+    <div class="row2"><button class="btn ghost" id="stTitle">처음 화면으로</button><button class="btn primary" id="stGo">일반 사건 계속</button></div></div>`;
+  document.body.appendChild(ov);
+  ov.querySelector("#stTitle").onclick = () => { ov.remove(); screenCover(); };
+  ov.querySelector("#stGo").onclick = () => { ov.remove(); next(); };
 }
 
 /* ---------- 주인공·이름·사무소 정하기 ---------- */
@@ -22387,7 +22445,7 @@ function screenCreate() {
       <button class="hero ${k === h ? "on" : ""}" data-hero="${k}" aria-pressed="${k === h}">
         <img src="${v.img}" alt=""><span>${v.label}</span></button>`).join("")}</div>
     <div class="feebox">
-      <label class="field"><span class="lbl">변호사 이름을 정해 주세요</span><input id="heroName" maxlength="8" placeholder="예) ${esc(HEROES[h].name)}" value="${esc(S.name || "")}"></label>
+      <label class="field"><span class="lbl">변호사 이름을 정해 주세요</span><input id="heroName" maxlength="8" placeholder="예) ${esc(HEROES[h].name)}" value="${esc(S.mode === "story" ? HEROES[h].name : S.name || "")}"${S.mode === "story" ? " readonly" : ""}></label>
       <label class="field"><span class="lbl">${S.mode === "opsNew" ? "법무법인" : "법률사무소"} 이름을 정해 주세요</span><input id="firmName" maxlength="14" placeholder="예) ${S.mode === "opsNew" ? "새벽 법무법인" : "새벽 법률사무소"}" value="${esc(S.firm || "")}"></label>
     </div>`,
     `<button class="btn primary" id="create">이대로 개업하기</button>`, "office", "opening");
@@ -22402,7 +22460,7 @@ function screenCreate() {
     if (S.mode === "opsNew") { if (!/(사무소|법인|로펌)$/.test(S.firm)) S.firm += " 법무법인"; return opsStart(); }
     if (!/(사무소|법인|로펌)$/.test(S.firm)) S.firm += " 법률사무소";
     // 튜토리얼을 이미 해 봤으면 건너뛸지 묻는다
-    const begin = withTut => { planDay(); if (withTut) S.today.unshift({ id: TUT_ID, status: "wait" }); save(); screenOpening(screenDayIntro); };
+    const begin = withTut => { planDay(); if (withTut) S.today.unshift({ id: TUT_ID, status: "wait" }); save(); if (S.mode === "story") return storyFrame("open=" + S.hero, () => screenDayIntro()); screenOpening(screenDayIntro); };
     if (!tutDoneBefore()) return begin(true);
     const ov = document.createElement("div");
     ov.className = "staff-pop";
@@ -22544,6 +22602,7 @@ function closeIfFull() {
   if ((S.taken || 0) >= intakeCap()) S.today.forEach(t => { if (t.status === "wait") t.status = "full"; });
 }
 function screenDayIntro() {
+  if (isStory() && storyCheck(screenDayIntro)) return;
   if (!CASES.length) { show(`<h2>사건 자료가 없습니다</h2>`); return; }
   closeIfFull();
   const statusText = { done: "수임", refused: "돌려보냄", left: "떠남", full: "일정 꽉 참" };
@@ -23547,7 +23606,7 @@ function finishCase(status, d) {
   C = null;
   closeIfFull();
   save();
-  if (!S.ended && S.rep >= 100) return endingRoll(screenEnding);
+  if (!S.ended && S.rep >= 100 && !isStory()) return endingRoll(screenEnding);
   const go = () => monthDone() ? screenDayEnd() : screenDayIntro();
   if (t.id === TUT_ID) return tutOutro(go);
   go();
