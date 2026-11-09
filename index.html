@@ -362,9 +362,9 @@ html[data-scene^="end"] #backdrop::after { background: linear-gradient(180deg, #
 .er-n-top { position: absolute; left: 8%; right: 8%; top: 7%; height: 23.5%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.2vh; text-align: center; }
 .er-n-mast { font-family: var(--f-doc); font-weight: 700; font-size: min(6.4vw, 3.6vh); letter-spacing: .3em; margin-right: -.3em; border-bottom: 2px solid #2a1c0c; padding-bottom: .15em; }
 .er-n-date { font-size: min(2.9vw, 1.6vh); color: #5b4630; }
-.er-n-head { font-family: var(--f-display); font-size: min(7.6vw, 4.2vh); line-height: 1.22; word-break: keep-all; }
+.er-n-head { font-family: var(--f-doc); font-weight: 700; font-size: min(7.2vw, 4vh); line-height: 1.28; word-break: keep-all; }
 .er-news > img.photo { position: absolute; left: 4.6%; top: 32.3%; width: 90.8%; height: 29%; object-fit: cover; object-position: 50% 28%; display: block; filter: sepia(.32) contrast(1.04); }
-.er-n-body { position: absolute; left: 4.6%; top: 62.6%; width: 90.8%; height: 20.6%; padding: 1.2% 2%; background: #ecdcbdf5; font-family: var(--f-doc); font-size: min(3.5vw, 1.95vh); line-height: 1.62; columns: 2; column-gap: 5%; word-break: keep-all; overflow: hidden; }
+.er-n-body { position: absolute; left: 4.6%; top: 62.6%; width: 90.8%; max-height: 20.6%; padding: 1.4% 2.4% 3.6%; background: #e9d8b8; -webkit-mask-image: linear-gradient(#000 calc(100% - 12px), transparent); mask-image: linear-gradient(#000 calc(100% - 12px), transparent); font-family: var(--f-doc); font-size: min(3.85vw, 2.15vh); line-height: 1.62; text-align: justify; word-break: normal; overflow-wrap: anywhere; overflow: hidden; }
 @keyframes fadeout { to { opacity: 0; } }
 .cover.end-cover { min-height: 100%; justify-content: flex-end; gap: 14px; padding-top: 52vh; }
 .cover.end-cover h1 { font-size: clamp(36px, 10vw, 56px); }
@@ -25171,23 +25171,23 @@ function opsNet() {
 }
 const josaI = w => hasJong(w) ? "이" : "가";
 const OPS_END = {
-  S: (f, r) => ({ head: `「${f}」, 창립 3년 만에 업계 정상`, body: `법조계의 판도가 바뀌었다. 창립 3년 차 「${f}」${josaI(f)} 올해의 로펌으로 꼽혔다. 경쟁사 「${r}」${josaGwa(r)}의 합병 논의도 오가는 것으로 알려졌다.`, lines: [
+  S: (f, r) => ({ head: `「${f}」, 창립 3년 만에 업계 정상`, body: `법조계의 판도가 바뀌었다. 창립 3년 차 「${f}」${josaI(f)} 올해의 로펌으로 꼽혔다. 승소율과 수임 규모 모두 업계 선두다. 경쟁사 「${r}」${josaGwa(r)}의 합병 논의도 오가는 것으로 알려졌다.`, lines: [
     { text: "유리창 너머로 불이 하나씩 꺼진다. 이 건물에서 제일 늦게 꺼지는 불은 늘 우리 층이었다." },
     { text: `오늘 오후 「${r}」에서 합병 제안서가 왔다. 3년 전 맞은편에서 우리 간판을 비웃던 곳이다.` },
-    { text: "식은 차를 마저 마신다. 내일 아침에도 누군가는 자기 편한 대로 말하러 올 것이다. 그 말 뒤를 들여다보는 일, 아직은 내가 제일 잘한다." }] }),
-  A: (f, r) => ({ head: `「${f}」, 10대 로펌에 이름 올려`, body: `신생 법인 「${f}」${josaI(f)} 국내 10대 로펌에 진입했다. 업계에서는 꼼꼼한 사건 검토를 비결로 꼽는다.`, lines: [
+    { text: "내일 찾아올 의뢰인 역시 자기에게 유리한 이야기만 할지도 모른다. 하지만 걱정하지 않는다. 그 이야기 뒤에 숨은 진실을 찾는 일, 그건 내가 한국 최고니까." }] }),
+  A: (f, r) => ({ head: `「${f}」, 10대 로펌에 이름 올려`, body: `신생 법인 「${f}」${josaI(f)} 국내 10대 로펌에 이름을 올렸다. 창립 3년 만의 일이다. 업계에서는 꼼꼼한 사건 검토를 비결로 꼽는다. 최근에는 기업 사건까지 잇달아 맡고 있다.`, lines: [
     { text: "로비에 들어서면 먼저 인사하는 사람이 많아졌다. 이름을 다 외우는 데만 한 달이 걸렸다." },
     { text: "오늘 아침에도 서류철을 안은 후배들이 뒤따라온다. 처음엔 나 혼자 들던 무게였다." },
     { text: "대한민국 10대 로펌. 아직 위에 아홉 곳이나 있다는 뜻이기도 하다. 자, 오늘 첫 재판이다." }] }),
-  B: (f, r) => ({ head: `「${f}」, 지역 대표 법인으로 자리매김`, body: `창립 3년 차 「${f}」${josaI(f)} 안정적인 중견 법인으로 자리 잡았다. 지역 의뢰인들 사이에서 입소문이 이어지고 있다.`, lines: [
+  B: (f, r) => ({ head: `「${f}」, 지역 대표 법인으로 자리매김`, body: `창립 3년 차 「${f}」${josaI(f)} 안정적인 중견 법인으로 자리 잡았다. 소속 변호사와 직원도 꾸준히 늘었다. 지역 의뢰인들 사이에서는 믿고 맡길 수 있는 곳이라는 입소문이 이어지고 있다.`, lines: [
     { text: "저녁 6시 반. 3년 전이라면 상상도 못 했을 퇴근 시간이다." },
     { text: "직원들이 먼저 손을 흔든다. 월급날을 한 번도 어긴 적이 없다. 그거면 됐다 싶다가도, 내일이면 또 더 큰 사건을 욕심낼 것이다." },
     { text: "크지도 작지도 않은 법인. 이 동네에서 변호사가 필요하면 다들 우리 이름을 먼저 말한다." }] }),
-  C: (f, r) => ({ head: `동네 변호사 「${f}」, 오늘도 문을 열다`, body: `큰 사건은 드물어도 「${f}」의 문턱은 낮다. 단골 어르신들은 변호사 사무실이 아니라 사랑방이라고 부른다.`, lines: [
+  C: (f, r) => ({ head: `동네 변호사 「${f}」, 오늘도 문을 열다`, body: `큰 사건은 드물어도 「${f}」의 문턱은 낮다. 단골 어르신들은 변호사 사무실이 아니라 사랑방이라고 부른다. 수임료가 부담스러운 동네 주민의 작은 사건도 마다하지 않는다는 평이다.`, lines: [
     { text: "오늘도 형광등 하나가 깜박인다. 갈아야지, 갈아야지 하고 석 달째다." },
     { who: "단골 어르신", text: "변호사님, 이거 별거 아니에요. 그때 우리 일 봐 주신 게 고마워서." },
     { text: "큰돈은 못 벌었다. 그래도 문을 열고 들어오는 사람의 이름을 전부 안다. 이 일을 시작할 때 바란 게 어쩌면 이거였다." }] }),
-  D: (f, r) => ({ head: `「${f}」, 3년 만에 문 닫아`, body: `법률시장 경쟁이 거세지면서 문을 닫는 소형 법인이 늘고 있다. 창립 3년 차 「${f}」도 이달 간판을 내렸다.`, lines: [
+  D: (f, r) => ({ head: `「${f}」, 3년 만에 문 닫아`, body: `법률시장 경쟁이 거세지면서 문을 닫는 소형 법인이 늘고 있다. 창립 3년 차 「${f}」도 이달 간판을 내렸다. 업계에서는 변호사 수 증가와 수임료 하락이 겹친 결과로 보고 있다.`, lines: [
     { text: "마지막 짐은 상자 하나로 충분했다." },
     { text: "간판을 떼러 온 사람이 여기 오래 있었냐고 물었다. 3년이라고 했다. 짧지도 않은 시간이었다." },
     { text: "돈은 남기지 못했다. 그래도 의뢰인 말 뒤를 들여다보는 법은 남았다. 비가 그쳤다. 내일은 어디로든 가서, 다시 문을 두드려 볼 것이다." }] })
@@ -25272,7 +25272,7 @@ function opsEndingRoll() {
       return;
     }
     if (p.news) {
-      ov.insertAdjacentHTML("beforeend", `<div class="er-news"><img class="paper" src="${paper}" alt=""><div class="er-n-top"><div class="er-n-mast">서초일보</div><div class="er-n-date">${monthLabel(S.day)}</div><div class="er-n-head">${esc(end.head)}</div></div><img class="photo" src="${scene}" alt=""><div class="er-n-body">${esc(end.body)}</div></div>${tap}${skipBtn}`);
+      ov.insertAdjacentHTML("beforeend", `<div class="er-news"><img class="paper" src="${paper}" alt=""><div class="er-n-top"><div class="er-n-mast">서초일보</div><div class="er-n-date">${monthLabel(S.day)}</div><div class="er-n-head"${end.head.length > 28 ? ' style="font-size:min(5.6vw,3.1vh)"' : ""}>${esc(end.head)}</div></div><img class="photo" src="${scene}" alt=""><div class="er-n-body">${esc(end.body)}</div></div>${tap}${skipBtn}`);
       bindSkip();
       return;
     }
