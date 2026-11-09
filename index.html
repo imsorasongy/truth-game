@@ -22377,32 +22377,60 @@ function startNew() {
 
 /* ---------- 스토리 모드: 일반 사건을 하다가 명성 조건이 되면 story.html의 해당 장이 열린다 ---------- */
 const isStory = () => !!S && S.mode === "story";
-// need: 열리는 명성, after: 깬 뒤 명성, day: 이야기 시점(게임 내 달)
+// need: 열리는 명성, after: 깬 뒤 명성, day: 이야기 시점(게임 내 달), fee: 이겼을 때 받는 돈(만 원)
 const STORY_STEPS = [
-  { need: 20, after: 30 },
-  { need: 50, after: 60, jump: 4, day: { m: 59, f: 61 } },
-  { need: 75, after: 85, day: { m: 66, f: 71 } },
-  { need: 100, after: 100, day: { m: 75, f: 75 } }
+  { need: 20, after: 30, fee: { m: 500, f: 100 } },
+  { need: 50, after: 60, jump: 4, day: { m: 59, f: 61 }, fee: { m: 3000, f: 1500 } },
+  { need: 75, after: 85, day: { m: 66, f: 71 }, fee: { m: 5000, f: 4000 } },
+  { need: 100, after: 100, day: { m: 75, f: 75 }, fee: { m: 3000, f: 10000 } }
 ];
+// 판결 결과별로 받는 비율: 일부승소·감형과 특검 사건의 유죄 결말은 절반
+const STORY_PAY = { win: 1, quiet: 1, partial: 0.5, truth: 0.5 };
+const storyBlack = op => { const b = document.createElement("div"); b.style.cssText = `position:fixed;inset:0;z-index:10000;background:#000;pointer-events:none;opacity:${op};transition:opacity .42s`; document.body.appendChild(b); return b; };
 function storyFrame(query, done) {
-  const f = document.createElement("iframe");
-  f.src = "story.html?" + query;
-  f.title = "스토리";
-  f.style.cssText = "position:fixed;inset:0;width:100%;height:100%;border:0;z-index:9999;background:#1b120d";
-  const h = e => {
-    if (e.source !== f.contentWindow || !e.data || e.data.story !== "done") return;
-    removeEventListener("message", h);
-    f.remove();
-    done(e.data.res);
-  };
-  addEventListener("message", h);
-  document.body.appendChild(f);
+  // 본 게임 화면을 검게 닫고 이야기를 연다. 이야기 쪽은 검은 화면에서 시작한다
+  const out = storyBlack(0);
+  void out.offsetWidth;
+  out.style.opacity = 1;
+  setTimeout(() => {
+    const f = document.createElement("iframe");
+    f.src = "story.html?" + query;
+    f.title = "스토리";
+    f.style.cssText = "position:fixed;inset:0;width:100%;height:100%;border:0;z-index:9999;background:#000";
+    f.onload = () => out.remove();
+    const h = e => {
+      if (e.source !== f.contentWindow || !e.data || e.data.story !== "done") return;
+      removeEventListener("message", h);
+      const back = storyBlack(1);
+      f.remove();
+      done(e.data.res);
+      void back.offsetWidth;
+      back.style.opacity = 0;
+      setTimeout(() => back.remove(), 450);
+    };
+    addEventListener("message", h);
+    document.body.appendChild(f);
+  }, 430);
+}
+function storyNotice(title, rows, next) {
+  const ov = document.createElement("div");
+  ov.className = "staff-pop";
+  ov.innerHTML = `<div class="sp-card"><div class="sp-name">${title}</div>${rows.map(r => `<div class="sp-row">${r}</div>`).join("")}<div class="row2"><button class="btn primary" id="stOk">확인</button></div></div>`;
+  document.body.appendChild(ov);
+  ov.querySelector("#stOk").onclick = () => { ov.remove(); next(); };
 }
 function storyCheck(next) {
   const st = S.story || (S.story = { next: 0 });
   if (st.done || st.next >= STORY_STEPS.length || st.snooze === S.day) return false;
   const step = STORY_STEPS[st.next], n = st.next;
   // 1장은 일반 사건 2달 뒤 명성 20이면 열리고, 미달이어도 5개월째에는 열린다
+  // 2장은 명성 50을 채우고 서초동으로 옮기는 순간 4년 뒤로 넘어가며 열린다
+  if (n === 1 && S.rep >= step.need && (S.office || 0) < 2) {
+    if (st.hint) return false;
+    st.hint = true; save();
+    storyNotice("명성 50 달성", ["서초동 법조타운으로 사무실을 옮기면 다음 이야기가 시작됩니다."], next);
+    return true;
+  }
   if (!(n === 0 ? (S.rep >= step.need && S.day >= 3) || S.day >= 5 : S.rep >= step.need)) return false;
   const hero = S.hero || "m";
   let q = `ch=${hero}${n + 1}&office=${S.office || 0}`;
@@ -22411,13 +22439,19 @@ function storyCheck(next) {
   st.jumped = !!step.jump || st.jumped;
   save();
   storyFrame(q, res => {
-    if (res === "lose") { st.snooze = S.day; save(); return next(); }
+    if (res === "lose") { st.snooze = S.day; save(); return storyNotice("패소", ["다음 달에 이 사건을 다시 맡을 수 있습니다."], next); }
     st.jumped = false;
+    const pay = Math.round(step.fee[hero] * (STORY_PAY[res] || 0));
+    S.money += pay;
+    const before = S.rep;
     S.rep = Math.max(S.rep, step.after);
     st.next++;
-    if (st.next >= STORY_STEPS.length || res === "refuse" || res === "quiet") { st.done = true; save(); return storyEnd(next); }
+    const over = st.next >= STORY_STEPS.length || res === "refuse" || res === "quiet";
+    if (over) st.done = true;
     save();
-    next();
+    const rows = [pay ? `보수 <b>${won(pay)}</b> 입금` : "받은 보수가 없습니다."];
+    if (S.rep > before) rows.push(`명성 ${before} → <b>${S.rep}</b>`);
+    storyNotice("사건 종결", rows, () => over ? storyEnd(next) : next());
   });
   return true;
 }
@@ -23170,7 +23204,7 @@ function screenTrial() {
       <span><div class="ev-name">${evIcon(e)}제${i + 1}호증 ${esc(e.name)}${danger ? `<span class="tag-danger">위험</span>` : ""}${inv}</div>
       <div class="ev-desc">${esc(e.desc)}</div>${e.detail ? `<div class="ev-detail">${esc(e.detail)}</div>` : ""}</span></label>`;
   }).join("");
-  const args = C.argOrder.map(i => c.arguments[i]).map(a => `<label class="arg pick"><input type="radio" name="arg" id="arg-${esc(a.id)}" data-arg="${esc(a.id)}" ${C.arg === a.id ? "checked" : ""}><span>${esc(a.text)}</span></label>`).join("");
+  const args = C.argOrder.map(i => c.arguments[i]).map(a => `<label class="arg pick"><input type="radio" name="arg" id="arg-${esc(a.id)}" data-arg="${esc(a.id)}" ${C.arg === a.id ? "checked" : ""}><span>${esc(formal(a.text))}</span></label>`).join("");
   const scout = !isOps() && hired("ha") ? c.opponent.slice().sort((a, b) => b.power - a.power)[0] : null;
   show(`${trialHead(c)}
     ${isOps() ? opsScoutSay(c) : scout ? staffSay("inv", `상대 쪽은 「${esc(scout.name)}」${josaEul(scout.name)} 준비했대요.`) : ""}
@@ -23547,7 +23581,7 @@ function officePop(i) {
   ov.addEventListener("click", e => { if (e.target === ov) close(); });
   ov.querySelector("#opClose").onclick = close;
   const mv = ov.querySelector("#opMove");
-  if (mv) mv.onclick = () => { close(); S.money -= o.cost; S.office = (S.office || 0) + 1; S.moveNote = false; save(); screenOffice(); };
+  if (mv) mv.onclick = () => { close(); S.money -= o.cost; S.office = (S.office || 0) + 1; S.moveNote = false; save(); if (isStory() && storyCheck(screenOffice)) return; screenOffice(); };
 }
 
 // 사무실 그림의 직원 얼굴을 누르면: 고용한 직원은 정보 카드, 빈자리는 후보 고르기
