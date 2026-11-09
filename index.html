@@ -343,6 +343,28 @@ html[data-scene^="end"] #backdrop::after { background: linear-gradient(180deg, #
 .er-line p { font-family: var(--f-doc); font-size: 16.5px; line-height: 1.8; color: #efe5d3; margin: 0; }
 .er-tap { position: absolute; bottom: 28px; font-size: 12px; color: #8a7a64; }
 .er-skip { position: absolute; top: 14px; right: 14px; background: none; border: 1px solid #c9a24a55; color: #c9b593; border-radius: 6px; padding: 6px 10px; font: inherit; font-size: 12px; }
+/* 운영 모드 엔딩: 장면 사이는 암전, 배경 위 대사는 화면 아래 */
+.er-bg { position: absolute; inset: 0; background: center / cover no-repeat; animation: er-fade 1.1s ease-out; }
+.er-bg::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 58%, #0d0806d9 78%, #0d0806f2 100%); }
+.er-bg.out { animation: fadeout .5s forwards; }
+.er-c { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; }
+.endroll.has-bg .er-c { margin-top: auto; padding-bottom: calc(44px + env(safe-area-inset-bottom, 0px)); }
+.er-box { width: min(100%, 460px); background: #140d09e6; border: 1.5px solid var(--brass); border-radius: 12px; padding: 13px 16px; box-shadow: 0 6px 18px #000a; animation: fadein .6s; }
+.er-box .who { font-size: 13px; color: var(--brass); margin-bottom: 5px; }
+.er-box p { font-family: var(--f-doc); font-size: 17px; line-height: 1.75; color: #f3e9da; margin: 0; }
+.endroll.has-bg .er-tap { bottom: calc(14px + env(safe-area-inset-bottom, 0px)); color: #cdbb98; }
+.endroll .er-skip { z-index: 2; background: #000a; top: calc(14px + env(safe-area-inset-top, 0px)); }
+.endroll.is-news { background: #2b1a10; }
+.endroll.is-news .er-tap { color: #e8dcc6; text-shadow: 0 1px 3px #000; z-index: 2; }
+.er-news { position: absolute; inset: 0; margin: auto; width: min(100vw, 56.28vh); width: min(100vw, 56.28dvh); aspect-ratio: 941 / 1672; color: #2a1c0c; animation: er-fade 1.1s ease-out; }
+@keyframes er-fade { from { opacity: 0; } }
+.er-news > img.paper { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.er-n-top { position: absolute; left: 8%; right: 8%; top: 7%; height: 23.5%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.2vh; text-align: center; }
+.er-n-mast { font-family: var(--f-doc); font-weight: 700; font-size: min(6.4vw, 3.6vh); letter-spacing: .3em; margin-right: -.3em; border-bottom: 2px solid #2a1c0c; padding-bottom: .15em; }
+.er-n-date { font-size: min(2.9vw, 1.6vh); color: #5b4630; }
+.er-n-head { font-family: var(--f-display); font-size: min(7.6vw, 4.2vh); line-height: 1.22; word-break: keep-all; }
+.er-news > img.photo { position: absolute; left: 4.6%; top: 32.3%; width: 90.8%; height: 29%; object-fit: cover; object-position: 50% 28%; display: block; filter: sepia(.32) contrast(1.04); }
+.er-n-body { position: absolute; left: 4.6%; top: 62.6%; width: 90.8%; height: 20.6%; padding: 1.2% 2%; background: #ecdcbdf5; font-family: var(--f-doc); font-size: min(3.5vw, 1.95vh); line-height: 1.62; columns: 2; column-gap: 5%; word-break: keep-all; overflow: hidden; }
 @keyframes fadeout { to { opacity: 0; } }
 .cover.end-cover { min-height: 100%; justify-content: flex-end; gap: 14px; padding-top: 52vh; }
 .cover.end-cover h1 { font-size: clamp(36px, 10vw, 56px); }
@@ -3101,7 +3123,7 @@ window.CASES.push(
   ],
   suspicions: ["밭은 빌려서 도지를 내며 부쳤다", "다른 사람이 함께 경작했다", "이미 땅값을 일부 돌려받았다"],
   hiddenIndex: null,
-  lies: ["마당 땅은 98년에 돈 주고 샀다는 말", "98년 무렵부터 그 밭을 부쳐 왔다는 말", "밭도 말로 사들인 내 땅이라는 말"],
+  lies: ["마당 땅은 98년에 돈 주고 샀다는 말", "98년 무렵부터 그 밭을 부쳐 왔다는 말", "밭도 구두로 산 내 땅이라는 말"],
   lieIndex: 2,
   touchIndex: 0,
   confession: "…밭은 도지 받고 빌린 거여유. 쌀 다섯 가마씩 냈지유. 주인 영감 죽고 나니께 내 땅 되는 줄 알았어유.",
@@ -19706,6 +19728,7 @@ window.CASES.push(
   id: "w09", kind: "civil", category: "이행강제금 부과 취소", court: "admin", tier: 1, truth: "honest", ops: true,
   client: { name: "김영순", age: 63, job: "주부", face: "c5" },
   fee: 330, bonus: 200,
+  stake: 480,
   opening: "2년 전에 산 단독주택 옥상 창고가 불법 증축이라고 구청이 이행강제금 480만 원을 매겼어요. 그건 전 주인이 지은 거고, 나는 시정명령 한 장 받은 적이 없어요.",
   questions: [
     { q: "옥상 창고는 누가 지었어요?", a: "전 주인이요. 살 때부터 있었어요." },
@@ -21035,7 +21058,7 @@ window.CASES.push(
   questions: [
     { q: "시골집은 누구 명의예요?", a: "집사람 형제 넷이 4분의 1씩 나눠 가졌어요. 처남이 거기 살고요." },
     { q: "아파트는 언제부터 사셨어요?", a: "12년 전에 사서 쭉 살았죠. 애들 학교도 거기서 다 다녔어요." },
-    { q: "다른 집이나 오피스텔은 없으세요?", a: "집은 없어요. 오피스텔 하나 있긴 한데… 그건 사무실로 세 준 거라 집이 아니고요." },
+    { q: "다른 집이나 오피스텔은 없으세요?", a: "집이라고 할 만한 건 그 아파트가 다예요. 시골집도 제 앞으로 된 게 아니고요." },
     { q: "조세심판원엔 내 보셨어요?", a: "냈는데 기각됐어요. 그래서 소송까지 온 거예요." }
   ],
   evidence: [
@@ -22272,6 +22295,7 @@ function sceneImage(name) {
   if (name === "court") return "assets/court-2.webp";
   if (name === "end-top") return `assets/end-top-${heroKey()}.jpg`;
   if (name === "end-close") return `assets/end-close-${heroKey()}.jpg`;
+  if (name.startsWith("end-ops-")) return `assets/ops-end/grade-${name.slice(8)}-${heroKey()}.jpg`;
   if (!S) return "assets/bg-office.webp";
   const o = S.office || 0;
   // 사무실 4단계 모두 고른 주인공(남·여)이 나오는 그림
@@ -22794,13 +22818,16 @@ function screenSuspect() {
   on("#back", screenJudge);
   tutSet(() => ({ t: "통장에 들어온 200만 원. <b>이미 일부를 돌려받았다</b>를 고르자.", sel: `[data-s="${c.hiddenIndex}"]` }));
 }
-// 거짓말을 하고 있다: 의뢰인이 한 말 중 무엇이 거짓인지 고른다
+// 지금까지 들은 말인가: 처음 한 말(-1)이거나 이미 물어본 질문의 답에서 나온 말
+const lieHeard = (c, i) => { const s = (window.LIE_SRC[c.base || c.id] || [])[i]; return s == null || s < 0 || C.asked.includes(s); };
+// 거짓말을 하고 있다: 의뢰인에게 들은 말 중 무엇이 거짓인지 고른다
 function screenLie() {
   const c = C.c, lies = c.lies || [];
   if (!C.lieOrder) C.lieOrder = shuffle(lies.map((_, i) => i));
+  const heard = C.lieOrder.filter(i => lieHeard(c, i));
   show(`${clientCard(c)}
     <div><div class="eyebrow">거짓말을 하고 있다</div><h2>무엇이 거짓말인가</h2></div>
-    <div class="stack">${C.lieOrder.map(i => `<button class="btn" data-l="${i}">${esc(lies[i])}</button>`).join("")}</div>
+    <div class="stack">${heard.length ? heard.map(i => `<button class="btn" data-l="${i}">${esc(lies[i])}</button>`).join("") : `<p class="note">아직 의뢰인에게 들은 말이 없습니다. 질문을 먼저 해 보세요.</p>`}</div>
     <button class="btn ghost" id="back">다시 생각하기</button>
     ${caseRefs()}`);
   on("[data-l]", e => { if (tutWarn(true, "차용증도 날짜도 증거와 맞는다. 거짓말은 아니다.")) return; C.verdict = "liar"; C.lie = +e.currentTarget.dataset.l; react(); });
@@ -23002,8 +23029,7 @@ function counterOffer(c, F, B) {
 const STAKE_CAP = 0.4, STAKE_ASK = 0.3;
 // 털어놓은 뒤에는 실제로 받을 수 있는 돈(stakeTrue)이 기준
 const effStake = c => C && C.confessed && c.stakeTrue ? c.stakeTrue : c.stake;
-function fitStake(c, [f, b]) {
-  const sk = effStake(c);
+function fitStake(c, [f, b], sk = effStake(c)) {
   if (!sk || f + b <= sk * STAKE_ASK) return [f, b];
   const st = STEP[c.tier], k = sk * STAKE_ASK / (f + b);
   return [Math.max(st, Math.floor(f * k / st) * st), Math.max(0, Math.floor(b * k / st) * st)];
@@ -23086,9 +23112,9 @@ function screenTrial() {
       <div class="ev-desc">${esc(e.desc)}</div>${e.detail ? `<div class="ev-detail">${esc(e.detail)}</div>` : ""}</span></label>`;
   }).join("");
   const args = C.argOrder.map(i => c.arguments[i]).map(a => `<label class="arg pick"><input type="radio" name="arg" id="arg-${esc(a.id)}" data-arg="${esc(a.id)}" ${C.arg === a.id ? "checked" : ""}><span>${esc(a.text)}</span></label>`).join("");
-  const scout = hired("ha") ? c.opponent.slice().sort((a, b) => b.power - a.power)[0] : null;
+  const scout = !isOps() && hired("ha") ? c.opponent.slice().sort((a, b) => b.power - a.power)[0] : null;
   show(`${trialHead(c)}
-    ${scout ? staffSay("inv", `상대 쪽은 「${esc(scout.name)}」${josaEul(scout.name)} 준비했대요.`) : ""}
+    ${isOps() ? opsScoutSay(c) : scout ? staffSay("inv", `상대 쪽은 「${esc(scout.name)}」${josaEul(scout.name)} 준비했대요.`) : ""}
     <div class="stack"><div class="section-head"><span class="eyebrow">제출할 증거 고르기</span>${hired("ma") ? `<span class="eyebrow">${C.inv ? "마동철 뒷조사 끝" : "마동철 뒷조사 1회"}</span>` : hired("yu") ? `<span class="eyebrow">유성진 디지털 감정</span>` : ""}</div>
       <div class="evlist">${evs}</div></div>
     <div class="stack"><div class="eyebrow">주장 하나 고르기</div>${args}</div>`,
@@ -23655,6 +23681,8 @@ function screenEnding() {
   on("#cont", () => { if (monthDone()) screenDayEnd(); else screenDayIntro(); });
 }
 
+// 거짓말 후보(lies)가 나온 곳: 사건별 세 문장 각각 -1은 처음 한 말, 0~3은 그 번호 질문의 답
+window.LIE_SRC = {"a01":[1,2,3],"a02":[0,1,2],"a03":[1,0,3],"a04":[0,2,3],"a05":[0,2,1],"a06":[1,3,-1],"a07":[1,2,0],"a08":[3,1,2],"a09":[-1,3,-1],"a10":[1,2,3],"a11":[2,1,-1],"a12":[0,1,2],"a13":[1,0,3],"a14":[0,1,2],"a15":[0,1,2],"a16":[0,1,3],"b01":[0,3,2],"b02":[2,1,3],"b03":[-1,2,3],"b04":[0,1,3],"b05":[-1,1,3],"b06":[1,-1,3],"b07":[0,1,3],"b08":[3,-1,-1],"b09":[-1,1,3],"b10":[0,-1,3],"b11":[0,1,3],"b12":[0,3,-1],"b13":[1,2,0],"b14":[0,1,3],"b15":[0,-1,-1],"b16":[-1,2,-1],"c01":[0,2,3],"c02":[-1,2,3],"c03":[0,2,3],"c04":[0,1,2],"c05":[0,3,1],"c06":[2,0,1],"c07":[0,2,3],"c08":[0,2,1],"c09":[0,3,2],"c10":[3,1,2],"c11":[0,2,2],"c12":[0,1,2],"c13":[2,0,3],"c14":[0,1,2],"c15":[3,1,0],"c16":[0,2,3],"d01":[0,1,2],"d02":[0,1,2],"d03":[-1,0,3],"d04":[0,1,3],"d05":[0,3,3],"d06":[0,-1,3],"d07":[0,1,3],"d08":[2,-1,2],"d09":[0,2,3],"d10":[0,1,2],"d11":[2,0,3],"d12":[2,-1,0],"d13":[0,2,3],"e01":[0,1,2],"e02":[1,1,-1],"e03":[-1,1,3],"e04":[1,2,3],"e05":[-1,2,3],"e06":[0,2,3],"e07":[1,3,0],"e08":[3,-1,2],"e09":[-1,-1,3],"e10":[0,1,3],"e11":[0,2,3],"e12":[0,2,1],"e13":[2,0,1],"f01":[0,2,-1],"f02":[0,1,3],"f03":[-1,2,-1],"f04":[0,2,2],"f05":[1,0,3],"f06":[0,1,3],"f07":[0,1,2],"f08":[2,-1,0],"f09":[0,2,2],"f10":[0,1,3],"f11":[0,2,-1],"f12":[0,1,3],"f13":[0,1,2],"g01":[0,1,2],"g02":[0,1,0],"g03":[0,1,3],"g04":[0,2,3],"g05":[1,2,1],"g06":[-1,3,2],"g07":[2,-1,-1],"g08":[0,-1,3],"g09":[0,2,-1],"g10":[0,2,3],"g11":[1,2,0],"g12":[-1,0,1],"g13":[2,3,0],"h01":[1,3,0],"h02":[0,1,3],"h03":[0,2,3],"h04":[0,1,2],"h05":[0,1,3],"h06":[0,1,3],"h07":[0,1,2],"h08":[1,0,3],"h09":[2,1,0],"h10":[0,1,2],"h11":[0,3,1],"h12":[0,1,3],"h13":[0,2,3],"h14":[1,-1,0],"h15":[0,1,3],"h16":[0,1,2],"h17":[3,2,-1],"h18":[0,2,3],"h19":[2,1,-1],"h20":[0,1,2],"h21":[0,2,3],"h22":[0,1,2],"h23":[2,3,-1],"h24":[0,3,-1],"h25":[1,2,3],"i01":[0,1,2],"i02":[-1,2,0],"i03":[-1,2,3],"i04":[0,1,2],"i05":[0,1,3],"i06":[-1,1,3],"i07":[-1,-1,3],"i08":[2,3,0],"i09":[-1,-1,1],"i10":[0,3,3],"i11":[0,1,2],"i12":[3,0,2],"i13":[0,2,3],"i14":[-1,1,2],"i15":[0,-1,2],"i16":[3,2,-1],"i17":[-1,1,2],"i18":[-1,1,3],"i19":[0,1,3],"i20":[-1,0,3],"i21":[0,-1,2],"i22":[-1,1,2],"i23":[-1,2,0],"i24":[0,2,3],"i25":[-1,1,2],"j01":[1,0,1],"j02":[1,3,2],"j03":[0,3,3],"j04":[1,3,0],"j05":[3,2,1],"j06":[2,0,3],"j07":[1,3,0],"j08":[0,1,2],"j09":[2,3,0],"j10":[-1,2,3],"j11":[-1,0,1],"j12":[0,1,2],"j13":[0,-1,3],"j14":[1,0,3],"j15":[3,0,2],"j16":[3,-1,0],"j17":[2,1,3],"j18":[0,3,2],"j19":[1,2,-1],"j20":[3,0,2],"j21":[2,1,3],"j22":[1,2,2],"j23":[1,0,3],"j24":[1,3,-1],"j25":[-1,1,2],"k01":[0,3,1],"k02":[1,0,2],"k03":[0,2,3],"k04":[0,2,1],"k05":[1,0,3],"k06":[0,3,1],"k07":[1,3,-1],"k08":[2,-1,-1],"k09":[3,2,-1],"k10":[0,2,3],"k11":[0,2,1],"k12":[0,2,1],"k13":[-1,-1,3],"k14":[1,2,3],"k15":[0,1,3],"k16":[1,0,3],"k17":[2,0,1],"k18":[0,2,0],"k19":[2,3,0],"k20":[-1,0,2],"k21":[1,0,3],"k22":[-1,2,0],"k23":[-1,0,1],"k24":[0,2,1],"k25":[2,0,3],"l01":[0,0,2],"l02":[0,-1,1],"l03":[0,2,3],"l04":[2,0,-1],"l05":[0,3,-1],"l06":[0,1,2],"l07":[2,1,0],"l08":[0,2,2],"l09":[-1,2,1],"l10":[0,-1,0],"l11":[1,3,0],"l12":[-1,-1,3],"l13":[0,-1,2],"l14":[0,2,3],"l15":[0,2,3],"l16":[3,2,-1],"l17":[-1,1,2],"l18":[1,0,3],"l19":[0,2,1],"l20":[0,1,3],"l21":[-1,2,3],"l22":[0,2,3],"l23":[0,1,3],"l24":[1,2,3],"l25":[0,1,3],"m01":[-1,2,3],"m02":[1,3,2],"m03":[1,-1,2],"m04":[-1,0,3],"m05":[-1,-1,3],"m06":[-1,1,3],"m07":[0,2,-1],"m08":[1,2,3],"m09":[-1,2,1],"m10":[0,2,-1],"m11":[-1,1,2],"m12":[-1,-1,1],"m13":[-1,2,-1],"m14":[-1,2,1],"m15":[-1,1,2],"m16":[-1,-1,-1],"m17":[0,2,-1],"m18":[-1,3,-1],"m19":[3,-1,1],"m20":[0,-1,3],"m21":[-1,-1,3],"m22":[2,1,3],"m23":[-1,2,1],"m24":[1,-1,1],"m25":[1,0,3],"n01":[0,1,2],"n02":[0,1,2],"n03":[-1,2,3],"n04":[0,1,2],"n05":[-1,1,3],"n06":[0,0,2],"n07":[2,1,-1],"n08":[-1,2,3],"n09":[0,2,1],"n10":[1,0,2],"n11":[1,2,-1],"n12":[0,2,3],"n13":[0,1,2],"n14":[-1,2,1],"n15":[0,1,3],"n16":[1,2,-1],"n17":[-1,0,2],"n18":[0,1,2],"n19":[1,0,3],"n20":[0,3,2],"n21":[0,2,3],"n22":[-1,1,2],"n23":[-1,1,3],"n24":[0,1,2],"n25":[1,2,-1],"o01":[-1,1,0],"o02":[0,3,2],"o03":[1,2,-1],"o04":[0,3,2],"o05":[0,3,2],"o06":[0,1,2],"o07":[2,0,3],"o08":[0,2,3],"o09":[-1,1,0],"o10":[0,1,2],"o11":[0,2,1],"o12":[0,2,3],"o13":[0,-1,3],"o14":[-1,1,2],"o15":[0,1,3],"o16":[0,1,3],"o17":[0,2,3],"o18":[0,3,1],"o19":[0,2,3],"o20":[2,-1,1],"o21":[0,3,0],"o22":[1,2,3],"o23":[2,0,3],"o24":[-1,1,2],"o25":[0,2,3],"p01":[-1,3,2],"p02":[0,2,-1],"p03":[-1,0,3],"p04":[0,3,1],"p05":[-1,2,3],"p06":[0,1,2],"p07":[0,-1,3],"p08":[0,1,3],"p09":[-1,1,3],"p10":[0,1,2],"p11":[1,3,-1],"p12":[0,2,3],"p13":[0,1,2],"p14":[-1,0,3],"p15":[0,-1,1],"p16":[0,3,2],"p17":[-1,0,3],"p18":[0,2,3],"p19":[0,3,-1],"p20":[0,-1,3],"q01":[-1,2,0],"q02":[0,2,3],"q03":[-1,3,-1],"q04":[0,2,-1],"q05":[-1,1,3],"q06":[-1,1,3],"q07":[0,2,3],"q08":[3,0,2],"q09":[0,2,-1],"q10":[0,2,3],"q11":[0,2,3],"q12":[0,2,3],"q13":[-1,1,3],"q14":[2,-1,3],"q15":[0,1,2],"q16":[0,2,3],"q17":[0,1,3],"q18":[0,-1,3],"q19":[0,3,-1],"q20":[-1,3,2],"r01":[-1,-1,3],"r02":[0,1,2],"r03":[0,3,2],"r04":[0,-1,2],"r05":[3,-1,1],"r06":[0,2,0],"r07":[-1,-1,3],"r08":[0,-1,2],"r09":[-1,1,0],"r10":[-1,-1,3],"r11":[0,2,3],"r12":[-1,3,0],"r13":[-1,2,3],"r14":[-1,0,3],"r15":[1,3,2],"r16":[0,1,3],"r17":[-1,0,2],"r18":[-1,1,3],"r19":[0,1,3],"r20":[-1,2,3],"s01":[0,2,3],"s02":[1,0,3],"s03":[-1,2,3],"s04":[0,1,3],"s05":[0,0,3],"s06":[0,2,3],"s07":[0,1,3],"s08":[1,3,0],"s09":[0,1,2],"s10":[0,1,2],"s11":[0,3,1],"s12":[0,3,2],"s13":[0,1,2],"s14":[0,1,2],"s15":[0,1,3],"s16":[0,1,3],"s17":[0,1,3],"s18":[-1,-1,1],"s19":[-1,3,2],"s20":[0,2,3],"t01":[0,1,2],"t02":[0,1,3],"t03":[-1,2,-1],"t04":[0,1,3],"t05":[0,3,2],"t06":[1,3,0],"t07":[0,1,2],"t08":[0,1,3],"t09":[0,2,3],"t10":[0,1,3],"t11":[0,1,0],"t12":[0,0,-1],"t13":[0,1,2],"t14":[-1,1,3],"t15":[-1,2,3],"t16":[0,1,3],"t17":[-1,1,3],"t18":[0,2,3],"t19":[0,2,-1],"t20":[0,-1,1],"u01":[0,3,1],"u02":[0,1,3],"u03":[-1,3,1],"u04":[0,2,3],"u05":[0,1,3],"u06":[0,1,3],"u07":[0,1,3],"u08":[0,1,3],"u09":[-1,2,-1],"u10":[1,0,2],"u11":[0,2,3],"u12":[0,3,0],"u13":[-1,1,3],"u14":[0,3,1],"u15":[0,1,3],"u16":[0,1,2],"u17":[0,2,3],"u18":[2,0,3],"u19":[0,2,3],"u20":[0,1,3],"v01":[-1,0,2],"v02":[1,3,2],"v03":[0,2,1],"v04":[2,1,3],"v05":[3,2,1],"v06":[2,3,0],"v07":[0,1,2],"v08":[1,2,3],"v09":[1,-1,2],"v10":[1,2,3],"v11":[-1,-1,3],"v12":[0,-1,2],"v13":[0,3,-1],"v14":[1,0,3],"v15":[1,2,3],"v16":[2,-1,3],"v17":[2,-1,3],"v18":[1,0,3],"v19":[1,2,0],"v20":[1,-1,3],"w01":[1,2,3],"w02":[1,-1,-1],"w03":[0,1,3],"w04":[-1,2,3],"w05":[0,1,2],"w06":[-1,0,1],"w07":[0,2,3],"w08":[-1,2,3],"w09":[-1,-1,2],"w10":[1,2,3],"w11":[-1,1,3],"w12":[-1,3,2],"w13":[0,1,2],"w14":[1,3,0],"w15":[0,2,2],"w16":[1,1,2],"w17":[-1,1,3],"w18":[2,3,-1],"w19":[2,-1,3],"w20":[2,3,-1],"x01":[-1,1,2],"x02":[2,0,3],"x03":[1,0,-1],"x04":[3,0,1],"x05":[-1,-1,1],"x06":[-1,1,2],"x07":[0,3,2],"x08":[0,1,3],"x09":[0,2,3],"x10":[0,1,2],"x11":[2,0,3],"x12":[-1,1,3],"x13":[3,1,-1],"x14":[1,0,3],"x15":[1,2,3],"x16":[-1,1,3],"x17":[0,2,3],"x18":[-1,2,3],"x19":[0,-1,1],"x20":[0,1,3],"y01":[1,3,-1],"y02":[-1,0,1],"y03":[1,2,3],"y04":[-1,0,0],"y05":[1,0,2],"y06":[0,2,3],"y07":[0,2,3],"y08":[0,2,3],"y09":[0,-1,3],"y10":[-1,2,3],"y11":[0,1,3],"y12":[0,2,3],"y13":[1,1,-1],"y14":[0,1,3],"y15":[0,2,3],"y16":[0,2,3],"y17":[2,-1,3],"y18":[0,1,3],"y19":[0,2,3],"y20":[-1,3,-1]};
 // 운영 모드 보고서의 사건 개요(사건 id별). docs/summaries/*.json 을 합친 것
 window.CASE_SUMMARY = {"a01":"의뢰인이 전 직장 동료에게 빌려준 800만 원을 변제기가 1년 넘게 지나도록 돌려받지 못해 반환을 구하는 사안.",
 "a02":"사과 도매상인 의뢰인이 동네 마트에 세 차례 납품한 사과 대금 1,500만 원을 석 달째 받지 못해 지급을 구하는 사안.",
@@ -24270,33 +24298,23 @@ const opsFace = who => who === "me" ? heroOf().img : (myAssoc(who) || {}).face;
 const opsName = who => who === "me" ? (S.name || heroOf().name) : (myAssoc(who) || {}).name;
 
 
-/* ---------- 다시 나오는 사건: 쟁점은 같고 의뢰인 성과 금액만 바꾼다 ---------- */
+/* ---------- 다시 나오는 사건: 쟁점과 금액은 그대로 두고 의뢰인 성만 바꾼다(금액을 바꾸면 말과 증거가 어긋난다) ---------- */
 const SURN = ["김", "이", "박", "최", "정", "강", "조", "윤", "장", "임", "한", "오", "서", "신", "권", "황", "안", "송", "전", "홍"];
-const VAR_F = [1, 1.3, 0.8, 1.6, 0.7, 1.2];
-function fmtMan(m) { m = Math.max(10, Math.round(m / 10) * 10); const e = Math.floor(m / 10000), r = m % 10000; return (e ? e + "억" + (r ? " " : "") : "") + (r ? r.toLocaleString("en-US") + "만" : "") + " 원"; }
-function scaleText(t, f) {
-  if (typeof t !== "string") return t;
-  return t
-    .replace(/(?:(\d+)억\s*)?(\d{1,3}(?:,\d{3})+|\d+)만\s?원/g, (all, e, m) => fmtMan(((+e || 0) * 10000 + +m.replace(/,/g, "")) * f))
-    .replace(/(\d+)억\s?원/g, (all, e) => fmtMan(+e * 10000 * f))
-    .replace(/(\d{1,3}(?:,\d{3}){2,})원/g, (all, d) => (Math.round(+d.replace(/,/g, "") * f / 10000) * 10000).toLocaleString("en-US") + "원");
-}
 function variantOf(base, k) {
-  const f = VAR_F[k % VAR_F.length], old = base.client.name, sur = old[0];
+  const old = base.client.name, sur = old[0];
   const pool = SURN.filter(x => x !== sur), nsur = pool[(hash(base.id) + k * 7) % pool.length];
   const name = nsur + old.slice(1);
-  const walk = v => typeof v === "string" ? scaleText(v.split(old).join(name).split(sur + " 씨").join(nsur + " 씨"), f)
+  const walk = v => typeof v === "string" ? v.split(old).join(name).split(sur + " 씨").join(nsur + " 씨")
     : Array.isArray(v) ? v.map(walk) : v && typeof v === "object" ? Object.fromEntries(Object.entries(v).map(([a, b]) => [a, ["id", "face", "kind", "truth", "court"].includes(a) ? b : walk(b)])) : v;
   const c = walk(base);
-  c.id = base.id + "~" + k; c.base = base.id; c.client = { ...base.client, name }; c.varF = f;
-  const num = n => n == null ? n : roundTo(n * f, STEP[base.tier]);
-  c.fee = num(base.fee); c.bonus = num(base.bonus); if (base.stake) c.stake = Math.round(base.stake * f / 10) * 10; if (base.stakeTrue) c.stakeTrue = Math.round(base.stakeTrue * f / 10) * 10;
+  c.id = base.id + "~" + k; c.base = base.id; c.client = { ...base.client, name };
   return c;
 }
 function ensureCase(id) {
   if (BY_ID[id] || !String(id).includes("~")) return BY_ID[id];
   const [b, k] = id.split("~"); BY_ID[id] = variantOf(BY_ID[b], +k); return BY_ID[id];
 }
+const ensureAllWon = () => (S.wonLog || []).forEach(w => ensureCase(w.id));
 function opsEnsureAll() {
   [].concat(S.list || [], S.today || [], S.reports || [], S.recv || [], S.back || [], S.thinkers || [], S.ev ? [S.ev] : []).forEach(x => x && x.id && ensureCase(x.id));
 }
@@ -24320,7 +24338,7 @@ function opsResume() {
     [].concat(S.list || [], S.reports || []).forEach(x => { if (x.who === old) x.who = nw.id; });
   });
   if (S.gameover) return screenBankrupt();
-  if (S.opsEnd) return opsFinal();
+  if (S.opsEnd) return S.opsRolled ? opsFinal() : opsEndingRoll();
   if (!S.list) { opsNewMonth(); save(); }
   if (S.phase === "assign") return opsAssign();
   if (S.phase === "results") return opsResults();
@@ -24456,7 +24474,7 @@ function opsScoutBlock() {
   if (sc.kind === "warn") {
     const p = pickPerson("inv", crewOf("inv")[0]);
     return { html: staffSayP(p, `대표님, ${a.name} 변호사가 ${firm} 사람을 만나는 걸 봤어요.`),
-      btns: [[`미리 올려 준다 (월 +${won(sc.raise)})`, () => { a.pay += sc.raise; a.slights = 0; S.scout = null; toast(`${a.name} 변호사 월급을 올렸습니다.`); }],
+      btns: [[`미리 월급을 ${won(sc.raise)} 올려 준다`, () => { a.pay += sc.raise; a.slights = 0; S.scout = null; toast(`${a.name} 변호사 월급을 올렸습니다.`); }],
              ["모른 척한다", () => { S.scoutNext = { id: a.id, rival: sc.rival }; S.scout = null; }]] };
   }
   return { html: `<div class="sec staff-say"><div class="sf"><img src="${a.face}" alt=""></div><div><div class="who">${esc(a.name)}</div>"대표님, ${firm}에서 연락이 왔습니다. 월급을 ${won(sc.raise)} 올려 주시면 남겠습니다."</div></div>`,
@@ -24590,19 +24608,34 @@ function opsDebtPops(done) {
   const d = opsPop(`<div class="k-pop"><div class="k-ev-face"><div class="portrait">${portrait(c)}</div></div><h3>${esc(x.name)} 씨 · ${won(x.amt)}</h3><div>"${esc(DEBT_EXCUSE[hash(x.id + S.day) % DEBT_EXCUSE.length])}"</div>${hint}
     <div class="k-act"><button class="mini" data-a="dun">독촉</button><button class="mini gold" data-a="suit">지급명령 50만</button><button class="mini" data-a="drop">포기</button></div></div>`);
   const next = () => { x.popDay = S.day; save(); renderHud(); d.remove(); opsDebtPops(done); };
+  const suit = () => { if (S.money < 50) return toast("돈이 모자랍니다."); S.money -= 50; x.state = "suit"; x.due = S.day + 1; next(); };
+  const drop = () => { x.state = "lost"; next(); };
   d.querySelectorAll("[data-a]").forEach(b => b.onclick = () => {
     const a = b.dataset.a;
-    if (a === "suit") { if (S.money < 50) return toast("돈이 모자랍니다."); S.money -= 50; x.state = "suit"; x.due = S.day + 1; return next(); }
-    if (a === "drop") { x.state = "lost"; return next(); }
+    if (a === "suit") return suit();
+    if (a === "drop") return drop();
     const paid = Math.random() < (crewOf("mgr").includes("yoon") ? 0.6 : 0.3);
-    if (paid) { x.state = "paid"; S.money += x.amt; }
-    d.innerHTML = `<div class="k-pop"><div>${paid ? `${esc(x.name)} 씨가 ${won(x.amt)}을 보냈습니다.` : "연락이 없습니다."}</div><button class="btn primary" id="dbOk" style="text-align:center">확인</button></div>`;
-    d.querySelector("#dbOk").onclick = next;
+    if (paid) {
+      x.state = "paid"; S.money += x.amt;
+      d.innerHTML = `<div class="k-pop"><div>${esc(x.name)} 씨가 ${won(x.amt)}을 보냈습니다.</div><button class="btn primary" id="dbOk" style="text-align:center">확인</button></div>`;
+      d.querySelector("#dbOk").onclick = next;
+      return;
+    }
+    // 독촉이 안 먹히면 그 자리에서 지급명령으로 넘어갈 수 있다
+    d.innerHTML = `<div class="k-pop"><h3>${esc(x.name)} 씨 · ${won(x.amt)}</h3><div>독촉했지만 연락이 없습니다.</div>${hint}
+      <div class="k-act"><button class="mini gold" id="dbSuit">지급명령 50만</button><button class="mini" id="dbLater">다음 달에</button><button class="mini" id="dbDrop">포기</button></div></div>`;
+    d.querySelector("#dbSuit").onclick = suit;
+    d.querySelector("#dbLater").onclick = next;
+    d.querySelector("#dbDrop").onclick = drop;
   });
 }
 /* ---------- 이벤트: 달 시작 팝업의 맨 끝. 3년에 10회 미만, 플레이 잘못 없이 손해 보는 일은 없게 ---------- */
 const EV_MAX = 9, EV_RATE = 0.25, JG_PAY = 1500, JG_MONTHS = 12;
-const GIFTS = [["떡", "건물에 떡을 돌렸습니다"], ["과일", "과일 상자를 보냈습니다"], ["손편지", "손편지를 보냈습니다"]];
+const GIFTS = [
+  ["떡", "건물에 떡을 돌렸습니다", "변호사님 덕분에 이제 두 다리 뻗고 잡니다. 떡 좀 맞췄어요. 직원분들이랑 같이 드세요."],
+  ["과일", "과일 상자를 보냈습니다", "그때 정말 고마웠어요. 올해 과일이 달아서 한 상자 보냅니다."],
+  ["손편지", "손편지를 보냈습니다", "말로는 다 못 할 것 같아 글로 씁니다. 그때 제 얘기를 끝까지 들어 주셔서 고맙습니다."]
+];
 const EV = {
   broker: { t: "수상한 제안", body: () => "\"대표님, 사건 좀 몰아 드릴게요. 소개비만 챙겨 주시면 됩니다.\"",
     btns: () => [["받는다", () => { S.brokerLeft = 3; return "당분간 손님이 늘어납니다."; }], ["거절한다", () => "돌려보냈습니다."]] },
@@ -24615,7 +24648,7 @@ const EV = {
     btns: () => [["방송에 나간다", () => { S.evGuest = (S.evGuest || 0) + 3; return "다음 달 손님이 늘어납니다."; }], ["그냥 둔다", () => "지나갔습니다."]] },
   jg: { t: "전관 영입 제안", body: () => `고등법원 부장판사 출신 변호사가 1년 계약을 제안했습니다. 월 ${won(JG_PAY)}입니다.`,
     btns: () => [["영입한다", () => { S.jg = { left: JG_MONTHS }; return "큰 사건이 늘어납니다."; }], ["거절한다", () => "정중히 거절했습니다."]] },
-  gift: { t: "고마운 의뢰인", face: true, body: e => `${BY_ID[e.id].client.name} 씨가 고맙다며 ${GIFTS[e.g][1]}.`,
+  gift: { t: "고마운 의뢰인", face: true, body: e => `${BY_ID[e.id].client.name} 씨가 고맙다며 ${GIFTS[e.g][1]}.`, say: e => GIFTS[e.g][2],
     btns: () => [["확인", () => { S.evGuest = (S.evGuest || 0) + 1; return ""; }]] },
   visit: { t: "다시 찾아온 의뢰인", face: true, body: e => { const c = BY_ID[e.id]; return `"변호사님, 그때 ${c.category} 사건 정말 감사했습니다. 제 지인이 변호사를 찾길래 여기를 소개했어요."`; },
     btns: () => [["확인", () => { S.evGood = (S.evGood || 0) + 1; S.evGuest = (S.evGuest || 0) + 1; return ""; }]] }
@@ -24645,7 +24678,7 @@ function opsPickEvent(last) {
 function opsEventPop() {
   const e = S.ev; if (!e) return;
   const v = EV[e.k], btns = v.btns(e);
-  const d = opsPop(`<div class="k-pop">${v.face ? `<div class="k-ev-face"><div class="portrait">${portrait(BY_ID[e.id])}</div></div>` : ""}<h3>${v.t}</h3><div>${esc(v.body(e))}</div>${btns.map((b, i) => `<button class="btn" data-ev="${i}" style="text-align:center">${esc(b[0])}</button>`).join("")}</div>`);
+  const d = opsPop(`<div class="k-pop">${v.face ? `<div class="k-ev-face"><div class="portrait">${portrait(BY_ID[e.id])}</div></div>` : ""}<h3>${v.t}</h3><div>${esc(v.body(e))}</div>${v.say ? `<div class="bubble" style="max-width:100%;text-align:left">"${esc(v.say(e))}"</div>` : ""}${btns.map((b, i) => `<button class="btn" data-ev="${i}" style="text-align:center">${esc(b[0])}</button>`).join("")}</div>`);
   const end = () => { S.ev = null; save(); renderHud(); d.remove(); };
   d.querySelectorAll("[data-ev]").forEach(b => b.onclick = () => {
     const r = btns[+b.dataset.ev][1]();
@@ -24669,17 +24702,20 @@ function opsAssign() {
   };
   show(`<div class="k-head"><h2>${monthLabel(S.day)} 의뢰인 ${S.list.length}명</h2><div class="k-cap">${head}</div></div>
     <div class="k-list">${S.list.map(card).join("")}</div>`,
-    S.assocs.length ? `<div class="row2"><button class="btn" id="asAuto">자동 배정</button><button class="btn primary" id="asDone">이대로 맡기기</button></div>` : `<button class="btn primary" id="asDone">이대로 맡기기</button>`);
-  // 자동 배정: 아직 안 정한 사건만 고용 변호사에게. 분야 맞는 사건 먼저, 나머지는 큰 사건부터 단계 높은 변호사에게
+    `<div class="row2"><button class="btn" id="asAuto">자동 배정</button><button class="btn primary" id="asDone">이대로 맡기기</button></div>`);
+  // 자동 배정: 아직 안 정한 사건만. 분야 맞는 사건은 그 변호사에게, 나머지는 큰 사건부터 대표 → 단계 높은 변호사 순으로
   on("#asAuto", () => {
     const todo = S.list.filter(x => !x.who).sort((a, b) => BY_ID[b.id].tier - BY_ID[a.id].tier);
     const free = () => S.assocs.filter(a => usedOf(a.id) < capOf(a.id));
     let done = 0;
     todo.forEach(x => { const a = free().find(p => p.trait === "field" && groupOf(BY_ID[x.id]).includes(p.field)); if (a) { x.who = a.id; done++; } });
-    todo.filter(x => !x.who).forEach(x => { const a = free().sort((p, q) => q.lvl - p.lvl || usedOf(p.id) - usedOf(q.id))[0]; if (a) { x.who = a.id; done++; } });
+    todo.filter(x => !x.who).forEach(x => {
+      if (usedOf("me") < capOf("me")) { x.who = "me"; done++; return; }
+      const a = free().sort((p, q) => q.lvl - p.lvl || usedOf(p.id) - usedOf(q.id))[0]; if (a) { x.who = a.id; done++; }
+    });
     const left = S.list.filter(x => !x.who).length;
     save(); opsAssign();
-    toast(!done ? (left ? "고용 변호사 자리가 없습니다." : "배정할 사건이 없습니다.") : left ? `${done}건 배정 · ${left}건은 자리가 없어 남았습니다.` : `${done}건 배정했습니다.`);
+    toast(!done ? (left ? "맡을 사람이 없습니다." : "배정할 사건이 없습니다.") : left ? `${done}건 배정 · ${left}건은 자리가 없어 남았습니다.` : `${done}건 배정했습니다.`);
   });
   on("[data-as]", e => {
     const x = S.list[+e.currentTarget.dataset.as], p = e.currentTarget.dataset.p;
@@ -24759,6 +24795,11 @@ function opsAfterCase(status) {
 }
 
 /* ---------- ③ 보고서 ---------- */
+// 보고서의 수임료. 진실을 알아챘다면 의뢰인이 말한 금액이 아니라 실제로 받을 수 있는 돈(stakeTrue)을 기준으로 잡는다
+function opsReportFee(c, knows) {
+  const mF = Math.round(marketFee(c) * feeMult(S.rep) * PRICE[S.price].fee), mB = Math.round(marketBonus(c) * feeMult(S.rep) * PRICE[S.price].fee);
+  return fitStake(c, [roundTo(mF, STEP[c.tier]), roundTo(mB, STEP[c.tier])], knows && c.stakeTrue ? c.stakeTrue : c.stake);
+}
 function opsMakeReport(x) {
   const c = BY_ID[x.id], a = myAssoc(x.who);
   const qs = shuffle([0, 1, 2, 3]).slice(0, assocQ(a)).sort();
@@ -24771,15 +24812,15 @@ function opsMakeReport(x) {
     if (c.truth === "honest") { verdict = Math.random() < 0.5 ? "hiding" : "liar"; pickI = Math.floor(Math.random() * 3); }
     else { verdict = a.trait === "nice" || Math.random() < 0.7 ? "honest" : (c.truth === "hiding" ? "liar" : "hiding"); pickI = verdict === "honest" ? null : Math.floor(Math.random() * 3); }
   }
-  const mF = Math.round(marketFee(c) * feeMult(S.rep) * PRICE[S.price].fee), mB = Math.round(marketBonus(c) * feeMult(S.rep) * PRICE[S.price].fee);
-  const [fee, bonus] = fitStake(c, [roundTo(mF, STEP[c.tier]), roundTo(mB, STEP[c.tier])]);
+  const [fee, bonus] = opsReportFee(c, right);
   return { id: x.id, who: x.who, pay: x.pay, qs, verdict, pickI, right, fixed: false, status: "pending", extra: null, fee, bonus, recWrong: !right && Math.random() < opsDoomRate() };
 }
-// 사건 개요(case-summary.js). 다시 나오는 사건은 금액만 바꿔 씀
-const opsSummary = c => { const s = (window.CASE_SUMMARY || {})[c.base || c.id]; return s ? (c.varF ? scaleText(s, c.varF) : s) : `${kindLabel(c)} · ${c.category}`; };
+// 사건 개요(case-summary.js). 다시 나오는 사건은 원래 사건의 개요를 그대로 쓴다
+const opsSummary = c => (window.CASE_SUMMARY || {})[c.base || c.id] || `${kindLabel(c)} · ${c.category}`;
 // 의뢰인이 한 말("~라는 말")을 진술 요지 문장으로
 const saidOf = s => String(s).replace(/이라는 말$/, "이다.").replace(/라는 말$/, "다.").replace(/다는 말$/, "다.").replace(/는 말$/, "다.");
-const susOf = s => String(s) + "는 점";
+// "~사이다"·"~돈이다"·"~아니다"처럼 '이다/아니다'로 끝나면 '~라는 점', 그 밖에는 '~다는 점'
+const susOf = s => /(이|아니|로|의|기)다$/.test(s) ? String(s).slice(0, -1) + "라는 점" : String(s) + "는 점";
 // 진술 요지는 고용 변호사가 물어본 질문 수만큼. 거짓 의뢰인의 거짓말과 보고서가 짚은 말은 항상 들어간다
 function opsSaidIdx(r) {
   const c = BY_ID[r.id], must = c.truth === "liar" ? [c.lieIndex] : [];
@@ -24794,7 +24835,7 @@ function opsReportLines(r) {
   if (r.verdict === "honest") L = [`${ev[0].name} 등 증거가 의뢰인 진술과 맞습니다.`, "숨기거나 사실과 다르게 말한 부분은 없어 보입니다."];
   else if (r.verdict === "hiding") L = [`의뢰인이 말하지 않은 사실이 있어 보입니다. ${susOf(c.suspicions[r.pickI])}입니다.`];
   else L = [`의뢰인 진술 중 "${saidOf(c.lies[r.pickI]).replace(/\.$/, "")}"는 부분은 사실과 다릅니다.`];
-  if (r.verdict !== "honest") L.push(r.verdict === "hiding" ? "재판에서는 이 점을 조심하겠습니다." : "그 부분과 닿는 증거는 빼고 가겠습니다.");
+  if (r.verdict !== "honest") L.push(r.verdict === "hiding" ? "재판에서는 이 점을 조심하겠습니다." : "그 부분과 관련된 증거는 빼고 가겠습니다.");
   return L;
 }
 // 지는 사건을 알아챈 보고서는 돌려보내자고 권한다(대표가 '잘못됐다'로 그 줄을 짚어 그냥 맡을 수 있음)
@@ -24822,40 +24863,34 @@ function opsReports() {
   on("[data-rp]", e => opsReport(+e.currentTarget.dataset.rp));
   on("#rBack", opsHub);
 }
-function opsReport(i, mode) {
+function opsReport(i) {
   const r = S.reports[i], c = BY_ID[r.id], a = myAssoc(r.who);
-  const pick = mode === "pick";
   const said = opsSaidIdx(r).map(k => formal(saidOf(c.lies[k])) + ".").concat(r.joint ? [`(동석 상담) ${r.joint}`] : []);
   const lines = opsReportLines(r);
-  const sent = (t, k) => `<span class="k-st ${pick ? "chk" : ""}" data-ln="${k}">${esc(t)}</span>`;
-  const hint = crewOf("sec").length ? staffSayP(pickPerson("sec", crewOf("sec")[0]), opsSecHint(c, r)) : "";
+  const hint = (crewOf("sec").length ? staffSayP(pickPerson("sec", crewOf("sec")[0]), opsSecHint(c, r)) : "") + opsScoutSay(c);
   const done = r.status !== "pending";
   show(`<div class="k-doc">
       <div class="k-dh"><img src="${a.face}" alt=""><div><div class="eyebrow">사건 검토 보고서 · 담당 ${esc(a.name)} 변호사</div><h2>${esc(c.client.name)} · ${esc(c.category)}</h2></div></div>
       <div class="k-sec">사건 개요</div><p class="k-p">${esc(opsSummary(c))}</p>
       <div class="k-sec">진술 요지</div><ol class="k-ol">${said.map(s => `<li>${esc(s)}</li>`).join("")}</ol>
       <div class="k-sec">증거 목록</div><div class="k-evl">${c.evidence.map((e, n) => `<button class="k-evr" data-evd="${e.id}"><b>${n + 1}. ${esc(e.name)}</b> <span>${esc(e.desc)}</span></button><div class="k-evd" id="evd-${e.id}" hidden>${esc(e.detail || "")}</div>`).join("")}</div>
-      <div class="k-sec">검토 의견 <span class="k-vtag ${r.verdict}">${VD_TXT[r.verdict]}</span></div><p class="k-p">${lines.map(sent).join(" ")} ${opsRecBack(r) ? sent(REC_BACK, 8) : sent(`착수금 ${won(r.fee)}, 성공보수 ${won(r.bonus)}으로 계약하겠습니다.`, 9)}</p>
+      <div class="k-sec">검토 의견 <span class="k-vtag ${r.verdict}">${VD_TXT[r.verdict]}</span></div><p class="k-p">${esc(lines.join(" "))} ${esc(opsRecBack(r) ? REC_BACK : `착수금 ${won(r.fee)}, 성공보수 ${won(r.bonus)}으로 계약하겠습니다.`)}</p>
     </div>
-    ${hint}
-    ${pick ? `<div class="note" style="text-align:center">잘못된 문장을 누르세요</div>` : ""}`,
+    ${hint}`,
     done ? `<button class="btn primary" id="rpBack">목록으로</button>`
-      : pick ? `<button class="btn ghost" id="rpCancel">취소</button>`
       : `<div class="k-acts"><button class="btn" id="rpOk">컨펌</button><button class="btn" id="rpBad">잘못됐다</button><button class="btn" id="rpJoint">동석 상담<small>${S.joint}회 남음</small></button><button class="btn" id="rpOut">돌려보내기</button></div>`);
   // 증거: 누르면 펼치고 한 번 더 누르면 접는다
   on("[data-evd]", e => { const d = document.getElementById("evd-" + e.currentTarget.dataset.evd); d.hidden = !d.hidden; e.currentTarget.classList.toggle("on", !d.hidden); });
   on("#rpBack", opsReports);
-  on("#rpCancel", () => opsReport(i));
   // 컨펌: 돌려보내자는 보고서면 돌려보냄
   on("#rpOk", () => { if (opsRecBack(r)) { r.status = "out"; S.mon.out++; } else r.status = "ok"; save(); opsReports(); });
   on("#rpOut", () => { r.status = "out"; S.mon.out++; save(); opsReports(); });
-  on("#rpBad", () => opsReport(i, "pick"));
+  on("#rpBad", () => opsWhy(i));
   on("#rpJoint", () => {
     if (S.joint <= 0) return toast("이번 달 동석 상담을 다 썼습니다.");
     if (r.extra != null || !opsJointLeft(r).length) return toast("이 의뢰인은 이미 만났습니다.");
     opsJoint(i);
   });
-  if (pick) on("[data-ln]", e => +e.currentTarget.dataset.ln === 8 ? opsKeep(i) : opsWhy(i));
 }
 // 동석 상담: 고용 변호사가 묻지 않은 질문 가운데 하나를 대표가 직접 묻는다
 const opsJointLeft = r => [0, 1, 2, 3].filter(q => !r.qs.includes(q));
@@ -24881,8 +24916,14 @@ function opsSecHint(c, r) {
   const st = payStyle(c);
   return { rich: "형편은 괜찮아 보여요.", poor: "형편이 빠듯해 보여요.", mid: "형편은 보통 같아요." }[st];
 }
-// 잘못된 문장을 짚으면 고용 변호사가 이유를 묻는다(보고서 위에 뜨는 창)
-// 돌려보내자는 줄을 짚음 → 그냥 맡는다
+// 하유리 조사원: 상대 반박 중 가장 센 것 하나를 미리 알려 준다(내 사건 재판 준비 · 보고서)
+const opsScoutOn = () => crewOf("inv").includes("ha");
+function opsScoutSay(c) {
+  if (!opsScoutOn()) return "";
+  const o = c.opponent.slice().sort((a, b) => b.power - a.power)[0];
+  return staffSayP(pickPerson("inv", "ha"), `상대 쪽은 「${o.name}」${josaEul(o.name)} 준비했대요.`);
+}
+// '돌려보내자'는 권고를 뒤집고 그냥 맡는다
 function opsKeep(i) {
   const r = S.reports[i], a = myAssoc(r.who);
   const d = document.createElement("div"); d.className = "k-dim";
@@ -24897,13 +24938,15 @@ function opsWhy(i) {
   const close = () => d.remove();
   const head = t => `<div class="k-ask"><img src="${a.face}" alt=""><div><b>${esc(a.name)}</b>${esc(t)}</div></div>`;
   const step = kind => {
-    const opts = !kind ? [["honest", "의뢰인 말이 맞다"], ["hiding", "숨기는 게 있다"], ["liar", "사실과 다르게 말했다"]]
-      : (kind === "hiding" ? c.suspicions : c.lies.map(saidOf)).map((s, k) => [k, s]);
-    d.innerHTML = `<div class="k-pop k-why">${head(kind ? (kind === "hiding" ? "무엇을 숨기고 있습니까?" : "어느 말이 사실과 다릅니까?") : "대표님, 어디가 잘못됐습니까?")}
+    // 거짓말은 보고서 진술 요지에 적힌 말 가운데서만 고른다. 돌려보내자는 보고서는 그 권고를 뒤집을 수도 있다
+    const opts = !kind ? [["honest", "의뢰인 말이 맞다"], ["hiding", "숨기는 게 있다"], ["liar", "사실과 다르게 말했다"]].concat(opsRecBack(r) ? [["keep", "돌려보내지 말고 맡는다"]] : [])
+      : kind === "hiding" ? c.suspicions.map((s, k) => [k, s]) : opsSaidIdx(r).map(k => [k, saidOf(c.lies[k])]);
+    d.innerHTML = `<div class="k-pop k-why">${head(kind ? (kind === "hiding" ? "무엇을 숨기고 있습니까?" : "어느 말이 사실과 다릅니까?") : "대표님, 무엇이 잘못됐습니까?")}
       ${opts.map(([v, t]) => `<button class="btn" data-o="${v}">${esc(t)}</button>`).join("")}<button class="btn ghost" data-o="x">취소</button></div>`;
     d.querySelectorAll("[data-o]").forEach(b => b.onclick = () => {
       const v = b.dataset.o;
       if (v === "x") return close();
+      if (v === "keep") { close(); return opsKeep(i); }
       if (!kind) return v === "honest" ? answer("honest", null) : step(v);
       answer(kind, +v);
     });
@@ -24911,15 +24954,23 @@ function opsWhy(i) {
   const answer = (kind, k) => {
     const ok = kind === c.truth && (kind === "honest" || k === (c.truth === "hiding" ? c.hiddenIndex : c.lieIndex))
       || (c.truth === "liar" && kind === "hiding" && k === c.touchIndex);
-    if (ok) { r.verdict = c.truth; r.pickI = c.truth === "hiding" ? c.hiddenIndex : c.truth === "liar" ? c.lieIndex : null; r.fixed = true; }
+    if (ok) { r.verdict = c.truth; r.pickI = c.truth === "hiding" ? c.hiddenIndex : c.truth === "liar" ? c.lieIndex : null; r.fixed = true; [r.fee, r.bonus] = opsReportFee(c, true); }
+    else if (Math.random() < 0.5) {
+      // 틀린 지적 절반: 고용 변호사가 제 판단을 지키고 보고서대로 진행한다
+      if (opsRecBack(r)) { r.status = "out"; S.mon.out++; } else r.status = "ok";
+      save();
+      d.innerHTML = `<div class="k-pop k-why">${head("제 생각은 다른데요. 이번에는 제 생각대로 진행해 보겠습니다.")}<button class="btn primary" id="wOk">목록으로</button></div>`;
+      d.querySelector("#wOk").onclick = () => { close(); opsReports(); };
+      return;
+    }
     else {
-      // 틀린 지적: 고용 변호사가 지시대로 고치고, 진실을 모른 채 재판한다. 쌓이면 다른 법인으로 옮길 마음이 커진다
+      // 틀린 지적 나머지: 고용 변호사가 지시대로 고치고, 진실을 모른 채 재판한다. 쌓이면 다른 법인으로 옮길 마음이 커진다
       r.verdict = kind; r.pickI = kind === "honest" ? null : k; r.right = false; r.fixed = false; r.keep = false;
       r.recWrong = Math.random() < opsDoomRate();
       a.slights = (a.slights || 0) + 1;
+      [r.fee, r.bonus] = opsReportFee(c, false);
     }
     save();
-    // 맞게 짚든 틀리게 짚든 같은 말만 한다
     d.innerHTML = `<div class="k-pop k-why">${head("대표님 말씀대로 보고서를 고치겠습니다.")}<button class="btn primary" id="wOk">보고서 보기</button></div>`;
     d.querySelector("#wOk").onclick = () => { close(); opsReport(i); };
   };
@@ -25108,21 +25159,167 @@ function opsSettle() {
 }
 // 정산 뒤 다음 달(또는 결산)로
 function opsAfterYear() {
-  if (S.day >= OPS_MONTHS) return opsDebtPops(() => { S.opsEnd = true; save(); opsFinal(); });
+  if (S.day >= OPS_MONTHS) return opsDebtPops(() => { S.opsEnd = true; save(); opsEndingRoll(); });
   S.day++; opsNewMonth(); save(); opsAssign();
 }
-function opsFinal() {
+// 3년 결산: 순자산과 등급
+function opsNet() {
   const recv = S.recv.filter(x => x.state === "wait" || x.state === "suit").reduce((a, x) => a + x.amt, 0);
   const moved = OFFICES.slice(1, (S.office || 0) + 1).reduce((a, o) => a + o.cost, 0);
   const net = S.money + Math.round(recv / 2) + Math.round(moved / 2);
-  const g = GRADES.find(x => net >= x.min);
+  return { recv, moved, net, g: GRADES.find(x => net >= x.min) };
+}
+const josaI = w => hasJong(w) ? "이" : "가";
+const OPS_END = {
+  S: (f, r) => ({ head: `「${f}」, 창립 3년 만에 업계 정상`, body: `법조계의 판도가 바뀌었다. 창립 3년 차 「${f}」${josaI(f)} 올해의 로펌으로 꼽혔다. 경쟁사 「${r}」${josaGwa(r)}의 합병 논의도 오가는 것으로 알려졌다.`, lines: [
+    { text: "유리창 너머로 불이 하나씩 꺼진다. 이 건물에서 제일 늦게 꺼지는 불은 늘 우리 층이었다." },
+    { text: `오늘 오후 「${r}」에서 합병 제안서가 왔다. 3년 전 맞은편에서 우리 간판을 비웃던 곳이다.` },
+    { text: "식은 차를 마저 마신다. 내일 아침에도 누군가는 자기 편한 대로 말하러 올 것이다. 그 말 뒤를 들여다보는 일, 아직은 내가 제일 잘한다." }] }),
+  A: (f, r) => ({ head: `「${f}」, 10대 로펌에 이름 올려`, body: `신생 법인 「${f}」${josaI(f)} 국내 10대 로펌에 진입했다. 업계에서는 꼼꼼한 사건 검토를 비결로 꼽는다.`, lines: [
+    { text: "로비에 들어서면 먼저 인사하는 사람이 많아졌다. 이름을 다 외우는 데만 한 달이 걸렸다." },
+    { text: "오늘 아침에도 서류철을 안은 후배들이 뒤따라온다. 처음엔 나 혼자 들던 무게였다." },
+    { text: "대한민국 10대 로펌. 아직 위에 아홉 곳이나 있다는 뜻이기도 하다. 자, 오늘 첫 재판이다." }] }),
+  B: (f, r) => ({ head: `「${f}」, 지역 대표 법인으로 자리매김`, body: `창립 3년 차 「${f}」${josaI(f)} 안정적인 중견 법인으로 자리 잡았다. 지역 의뢰인들 사이에서 입소문이 이어지고 있다.`, lines: [
+    { text: "저녁 6시 반. 3년 전이라면 상상도 못 했을 퇴근 시간이다." },
+    { text: "직원들이 먼저 손을 흔든다. 월급날을 한 번도 어긴 적이 없다. 그거면 됐다 싶다가도, 내일이면 또 더 큰 사건을 욕심낼 것이다." },
+    { text: "크지도 작지도 않은 법인. 이 동네에서 변호사가 필요하면 다들 우리 이름을 먼저 말한다." }] }),
+  C: (f, r) => ({ head: `동네 변호사 「${f}」, 오늘도 문을 열다`, body: `큰 사건은 드물어도 「${f}」의 문턱은 낮다. 단골 어르신들은 변호사 사무실이 아니라 사랑방이라고 부른다.`, lines: [
+    { text: "오늘도 형광등 하나가 깜박인다. 갈아야지, 갈아야지 하고 석 달째다." },
+    { who: "단골 어르신", text: "변호사님, 이거 별거 아니에요. 그때 우리 일 봐 주신 게 고마워서." },
+    { text: "큰돈은 못 벌었다. 그래도 문을 열고 들어오는 사람의 이름을 전부 안다. 이 일을 시작할 때 바란 게 어쩌면 이거였다." }] }),
+  D: (f, r) => ({ head: `「${f}」, 3년 만에 문 닫아`, body: `법률시장 경쟁이 거세지면서 문을 닫는 소형 법인이 늘고 있다. 창립 3년 차 「${f}」도 이달 간판을 내렸다.`, lines: [
+    { text: "마지막 짐은 상자 하나로 충분했다." },
+    { text: "간판을 떼러 온 사람이 여기 오래 있었냐고 물었다. 3년이라고 했다. 짧지도 않은 시간이었다." },
+    { text: "돈은 남기지 못했다. 그래도 의뢰인 말 뒤를 들여다보는 법은 남았다. 비가 그쳤다. 내일은 어디로든 가서, 다시 문을 두드려 볼 것이다." }] })
+};
+// 함께한 사람들의 마지막 한마디 [잘된 판, 안된 판]
+const OPS_END_ASSOC = {
+  careful: ["3년 동안 보고서 한 장 허투루 쓴 적 없습니다. 함께 일해서 좋았습니다.", "끝까지 챙기지 못해 죄송합니다. 그래도 대표님께 많이 배웠습니다."],
+  sloppy: ["제 보고서 고치시느라 고생 많으셨죠. 이제 오타는 좀 줄었습니다.", "제가 좀 더 잘했어야 했는데요. 그래도 재미있었습니다, 대표님."],
+  nice: ["의뢰인들이 대표님 얘기를 참 좋게 하세요. 저도 그렇고요.", "힘든 때도 한 번을 화 안 내셨잖아요. 잊지 않을게요."],
+  field: ["제 분야를 믿고 맡겨 주셔서 마음껏 일했습니다. 감사합니다.", "맡겨 주신 사건들, 끝까지 제 일처럼 했습니다."]
+};
+const OPS_END_CREW = {
+  mgr: [" 사무장", "대표님, 오늘 저녁은 제가 삽니다. 다들 기다리고 있어요.", "대표님, 밥은 드시고 다니세요. 장부는 제가 마무리해 둘게요."],
+  sec: [" 비서", "축하 화환이 또 왔어요. 이제 둘 데가 없어요.", "전화는 제가 끝까지 받을게요. 마지막 한 통까지요."],
+  inv: [" 조사원", "상대 쪽이 우리 뒤를 캐려다 포기했대요. 이름값이죠.", "어디로 가시든 필요하면 연락 주세요. 뭐든 찾아 드릴게요."]
+};
+const OPS_END_THANKS = [
+  ["변호사님 아니었으면 저 정말 끝났을 거예요.", "그때 제 말을 끝까지 들어 주신 분은 변호사님뿐이었어요."],
+  ["신문에서 봤어요. 그때 그 변호사님 맞죠? 정말 축하드려요.", "소식 들었어요. 그래도 저한테는 좋은 변호사님이셨어요."]
+];
+// 운영 모드 엔딩: 암전 → 달력 36개월 → 첫 사무실 → 함께한 사람들 → 의뢰인 → 신문 → 등급별 결말 → 결산 화면
+function opsEndingRoll() {
+  const { g } = opsNet(), up = "SAB".includes(g.g) ? 0 : 1, hero = heroKey();
+  const scene = `assets/ops-end/grade-${g.g.toLowerCase()}-${hero}.jpg`, first = `assets/office-0-${hero}.jpg`, paper = "assets/ops-end/newspaper.jpg";
+  const name = S.name || heroOf().name, me = name + " 변호사";
+  const top = (S.rivals || []).slice().sort((a, b) => b.rep - a.rep)[0];
+  const end = OPS_END[g.g](S.firm, top ? shortFirm(top.name) : "경쟁 법인");
+  ensureAllWon();
+  const people = (S.assocs || []).slice().sort((a, b) => (b.wins || 0) - (a.wins || 0)).slice(0, 3)
+    .map(a => ({ img: a.face, who: a.name + " 변호사", text: OPS_END_ASSOC[a.trait][up] }))
+    .concat(Object.keys(OPS_END_CREW).filter(k => crewOf(k).length).map(k => {
+      const p = pickPerson(k, crewOf(k)[0]), t = OPS_END_CREW[k];
+      return { img: `assets/staff/${p.face}.webp`, who: p.name + t[0], text: t[1 + up] };
+    }));
+  // 이긴 사건 중 규모가 큰 의뢰인 둘
+  const seen = new Set();
+  const clients = (S.wonLog || []).map(w => BY_ID[w.id]).filter(Boolean).sort((a, b) => b.tier - a.tier)
+    .filter(c => !seen.has(c.base || c.id) && seen.add(c.base || c.id)).slice(0, 2)
+    .map((c, k) => ({ html: portrait(c), who: `${c.client.name} 씨 · ${c.category}`, text: OPS_END_THANKS[k][up] }));
+  const pages = [
+    { cal: true },
+    { bg: first, who: me, text: "처음 문을 열던 날이 생각난다. 손님 하나 없는 사무실에서 하루 종일 전화만 기다렸었지." },
+    { bg: first, who: me, text: `3년 동안 ${S.w || 0}번 이겼고 ${S.l || 0}번 졌다. 이상하게도 진 사건이 더 오래 기억에 남는다.` },
+    ...people, ...clients,
+    { news: true },
+    ...end.lines.map(l => ({ bg: scene, who: l.who || me, text: l.text }))
+  ];
+  [first, paper, scene].forEach(src => { new Image().src = src; });
+  music("ending");
+  const ov = document.createElement("div");
+  ov.className = "endroll";
+  document.body.appendChild(ov);
+  let i = 0, busy = false, over = false, curBg = null;
+  const skipBtn = `<button class="er-skip">건너뛰기</button>`, tap = `<div class="er-tap">화면을 누르면 넘어갑니다</div>`;
+  const bindSkip = () => { const b = ov.querySelector(".er-skip"); if (b) b.onclick = e => { e.stopPropagation(); finish(); }; };
+  const setBg = src => {
+    if (src === curBg) return;
+    curBg = src;
+    ov.querySelectorAll(".er-bg").forEach(x => x.remove());
+    if (src) { const d = document.createElement("div"); d.className = "er-bg"; d.style.backgroundImage = `url("${src}")`; ov.prepend(d); }
+  };
+  const render = () => {
+    const p = pages[i];
+    busy = false;
+    ov.classList.toggle("has-bg", !!p.bg);
+    ov.classList.toggle("is-news", !!p.news);
+    setBg(p.bg || null);
+    ov.querySelectorAll(":scope > :not(.er-bg)").forEach(x => x.remove());
+    if (p.cal) {
+      busy = true;
+      ov.insertAdjacentHTML("beforeend", `<div class="er-c"><div class="flip-card"><div class="flip-y"></div><div class="flip-m"></div><div class="flip-f">${esc(S.firm)}</div></div></div>${skipBtn}`);
+      bindSkip();
+      const y = ov.querySelector(".flip-y"), m = ov.querySelector(".flip-m");
+      let t = REDUCED ? S.day : 1;
+      const tick = () => {
+        if (over) return;
+        y.textContent = 2030 + Math.floor((t - 1) / 12) + "년"; m.textContent = ((t - 1) % 12 + 1) + "월";
+        if (t >= S.day) return setTimeout(() => { if (!over) advance(); }, 1100);
+        t++; setTimeout(tick, 75);
+      };
+      setTimeout(tick, 900);
+      return;
+    }
+    if (p.news) {
+      ov.insertAdjacentHTML("beforeend", `<div class="er-news"><img class="paper" src="${paper}" alt=""><div class="er-n-top"><div class="er-n-mast">서초일보</div><div class="er-n-date">${monthLabel(S.day)}</div><div class="er-n-head">${esc(end.head)}</div></div><img class="photo" src="${scene}" alt=""><div class="er-n-body">${esc(end.body)}</div></div>${tap}${skipBtn}`);
+      bindSkip();
+      return;
+    }
+    const ava = p.html ? `<div class="ava er-cl">${p.html}</div>` : p.img ? `<div class="ava"><img src="${p.img}" alt=""></div>` : "";
+    const body = p.bg ? `<div class="er-box"><div class="who">${esc(p.who)}</div><p>${esc(p.text)}</p></div>`
+      : `<div class="er-line"><div>${ava}</div><div><div class="who">${esc(p.who)}</div><p>${esc(p.text)}</p></div></div>`;
+    ov.insertAdjacentHTML("beforeend", `<div class="er-c">${body}</div>${tap}${skipBtn}`);
+    bindSkip();
+  };
+  const finish = () => {
+    if (over) return;
+    over = true; ov.onclick = null;
+    S.opsRolled = true; save();
+    opsFinal();
+    ov.classList.add("out"); setTimeout(() => ov.remove(), 1200);
+  };
+  // 배경이 바뀌는 지점은 잠깐 암전했다가 다음 장면으로
+  const advance = () => {
+    if (over) return;
+    if (i + 1 >= pages.length) return finish();
+    const a = pages[i], b = pages[i + 1], change = (a.bg || (a.news && "n") || null) !== (b.bg || (b.news && "n") || null);
+    if (!change || REDUCED) { i++; return render(); }
+    busy = true;
+    ov.querySelectorAll(":scope > :not(.er-bg)").forEach(x => x.remove());
+    ov.querySelectorAll(".er-bg").forEach(x => x.classList.add("out"));
+    ov.classList.remove("is-news");
+    setTimeout(() => { if (over) return; i++; render(); }, 650);
+  };
+  ov.onclick = () => { if (!busy) advance(); };
+  render();
+}
+function opsFinal() {
+  const { recv, moved, net, g } = opsNet();
+  // 주인공 얼굴을 가리지 않게 등급만 화면 아래에 두고, 금액은 [결산 보기]에서 본다
   show(`<div class="eyebrow">${OPS_MONTHS}개월 결산</div><h2>${esc(S.firm)}</h2>
-    <div class="pn k-big"><div class="l">순자산</div><div class="v">${won(net)}</div></div>
-    <div class="vd-top" style="justify-content:center"><div class="vd-stamp"><div class="stamp win long">${g.g}</div></div></div>
-    <div class="pn" style="text-align:center;font-family:var(--f-display);font-size:22px;color:var(--brass)">${g.t}</div>
-    <div class="ledger"><span>현금</span><span class="r">${won(S.money)}</span><span>받을 돈의 절반</span><span class="r">${won(Math.round(recv / 2))}</span><span>사무실 보증금</span><span class="r">${won(Math.round(moved / 2))}</span>
-      <span class="sum">재판</span><span class="r sum">${S.w || 0}승 ${S.p || 0}일부 ${S.l || 0}패</span></div>`,
-    `<button class="btn primary" id="toTitle">처음으로</button>`, "end-top");
+    <div style="margin-top:auto;display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;justify-content:center"><div class="stamp win long">${g.g}</div></div>
+      <div class="pn" style="text-align:center;font-family:var(--f-display);font-size:22px;color:var(--brass)">${g.t}</div>
+    </div>`,
+    `<div class="row2"><button class="btn" id="finLedger">결산 보기</button><button class="btn primary" id="toTitle">처음으로</button></div>`, "end-ops-" + g.g.toLowerCase(), "ending");
+  on("#finLedger", () => {
+    const d = opsPop(`<div class="k-pop"><div class="pn k-big"><div class="l">순자산</div><div class="v">${won(net)}</div></div>
+      <div class="ledger"><span>현금</span><span class="r">${won(S.money)}</span><span>받을 돈의 절반</span><span class="r">${won(Math.round(recv / 2))}</span><span>사무실 보증금</span><span class="r">${won(Math.round(moved / 2))}</span>
+      <span class="sum">재판</span><span class="r sum">${S.w || 0}승 ${S.p || 0}일부 ${S.l || 0}패</span></div>
+      <button class="btn primary" id="finClose" style="text-align:center">닫기</button></div>`);
+    d.querySelector("#finClose").onclick = () => d.remove();
+  });
   on("#toTitle", () => { S = null; screenCover(); });
 }
 
