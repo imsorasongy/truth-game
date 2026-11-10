@@ -22420,7 +22420,7 @@ function storyFrame(query, done) {
       removeEventListener("message", h);
       const back = storyBlack(1);
       f.remove();
-      done(e.data.res);
+      done(e.data.res, e.data.end);
       void back.offsetWidth;
       back.style.opacity = 0;
       setTimeout(() => back.remove(), 450);
@@ -22450,13 +22450,17 @@ function storyCheck(next) {
   }
   if (!(n === 0 ? (S.rep >= step.need && S.day >= 3) || S.day >= 5 : S.rep >= step.need)) return false;
   const hero = S.hero || "m";
-  let q = `ch=${hero}${n + 1}&office=${S.office || 0}`;
+  // 앞 장에서 어떤 결말을 봤는지 넘겨 뒤 장의 대사와 엔딩이 달라지게 한다
+  st.hist = st.hist || {};
+  let q = `ch=${hero}${n + 1}&office=${S.office || 0}&hist=${Object.entries(st.hist).map(([k, v]) => k + "." + v).join(",")}`;
   if (step.jump && !st.jumped) q += `&jump=${step.jump}`;
   if (step.day) S.day = Math.max(S.day, step.day[hero]);
   st.jumped = !!step.jump || st.jumped;
   save();
-  storyFrame(q, res => {
+  storyFrame(q, (res, end) => {
     if (res === "lose") { st.snooze = S.day; save(); return storyNotice("패소", ["다음 달에 이 사건을 다시 맡을 수 있습니다."], next); }
+    if (res === "left") { st.snooze = S.day; S.rep = Math.max(0, S.rep - 3); save(); return storyNotice("의뢰인이 떠났습니다", ["보수 없이 사건이 끝났습니다. 명성 −3", "다음 달에 의뢰인이 다시 찾아올 수 있습니다."], next); }
+    st.hist[hero + (n + 1)] = end || res;
     st.jumped = false;
     const pay = Math.round(step.fee[hero] * (STORY_PAY[res] || 0));
     S.money += pay;
