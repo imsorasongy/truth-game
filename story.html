@@ -173,7 +173,7 @@ const OFF = Math.max(0, Math.min(3, +new URLSearchParams(location.search).get("o
 const BG = { court: A + "court-2.webp", m: `${A}office-${OFF}-m.jpg`, f: `${A}office-${OFF}-f.jpg` };
 const OLD_BG = ["rec", "er", "diner", "alley", "dock", "rest"];
 // 아직 그림이 없는 장소는 비슷한 그림으로 대신한다(그림이 들어오면 여기서 지운다)
-const PENDING_BG = { "f-bookshop": "f2-storage", "f-hospital": "er", "f-lee-home": "f2-storage" };
+const PENDING_BG = {};
 const bgOf = x => { x = PENDING_BG[x] || x; return OLD_BG.includes(x) ? `${A}story/story-${x}.jpg` : `${A}story/${x}.jpg`; };
 const homeBg = () => G.c.bgConsult ? bgOf(G.c.bgConsult) : BG[G.c.hero];
 // 그림이 있는 증거
@@ -462,6 +462,8 @@ function doTopic(it, who, back) {
     if (it.qi != null) G.asked.push(it.qi);
     if (it.flag) G.flags[it.flag] = true;
     const pops = [];
+    // 조사한 물건을 그림으로 보여 줄 때(증거는 아님)
+    if (it.pic) pops.push({ k: "조사", t: it.picT || "", pic: `${A}story/${it.pic}` });
     if (it.gives) { G.cards[it.gives[0]] = it.gives[1]; pops.push(evGain(it.gives[0], it.gives[1])); }
     (it.opens || []).forEach(x => { if (G.c.places[x] && !G.open.includes(x)) { G.open.push(x); pops.push(placeGain(G.c.places[x])); } });
     say([...ask, ...linesOf(extra, who)], () => gains(pops, back), who && who.face);
@@ -1233,7 +1235,7 @@ CH.f1 = { hero: "f", title: "여주 1장 · 택배 한 상자", no: "2031고정3
             gives: ["saw", { n: "동료의 목격담", d: "그날 휴게실 탁자에서 의뢰인이 상자를 뜯는 것을 봤다. 경찰에는 말하지 않았다.", bad: 1, img: "ev/f1-saw.webp" }] },
           { id: "sold", q: "요즘 방 기사님은 일 나오세요?", req: ["t:gone"], a: ["나오죠. 아까도 잠깐 왔다 갔어요.", "헌책 몇 권 끈으로 묶어서 들고 가던데요. 동네 헌책방에 넘기면 라면 두 개 값은 나온다나.", "그 형님 요새 그래요. 돈 되는 건 뭐든.", [null, "벌금에 병원비에 등록금이다. 라면값도 아쉬울 것이다."]] }] }],
       looks: [
-        { id: "pot", q: "탁자를 살핀다", req: ["!cctvv"], a: ["탁자 한가운데 찌그러진 양은냄비가 있다. 받침으로 깔린 건 책 한 권이다.", "문고판 두 권을 겹친 만큼 두툼하다. 공책 여러 권을 묶어 표지를 씌운 것처럼 생겼다. 표지에는 『남산 아래 봄』이라고 적혀 있다.", "냄비 바닥 모양대로 둥글게 국물 자국이 배었다. 펼쳐 보니 손글씨가 빽빽하다. 누가 쓰다 만 소설인 모양이다.", "기사 누군가 두고 간 책이겠지. 냄비를 도로 올려놓았다."] },
+        { id: "pot", q: "탁자를 살핀다", req: ["!cctvv"], pic: "ev/f1-book.webp", picT: "냄비 받침으로 쓰인 책", a: ["탁자 한가운데 찌그러진 양은냄비가 있다. 받침으로 깔린 건 책 한 권이다.", "문고판 두 권을 겹친 만큼 두툼하다. 공책 여러 권을 묶어 표지를 씌운 것처럼 생겼다. 표지에는 『남산 아래 봄』이라고 적혀 있다.", "냄비 바닥 모양대로 둥글게 국물 자국이 배었다. 펼쳐 보니 손글씨가 빽빽하다. 누가 쓰다 만 소설인 모양이다.", "기사 누군가 두고 간 책이겠지. 냄비를 도로 올려놓았다."] },
         { id: "gone", q: "탁자를 다시 본다", req: ["t:pot", "t:cctvv"], a: ["양은냄비가 맨 탁자 위에 놓여 있다. 받침으로 깔려 있던 책이 없다.", "탁자에는 둥근 국물 자국만 남았다. 누가 치웠나 보다."] },
         { id: "shelf", q: "벽 선반을 본다", a: ["누렇게 바랜 잡지와 만화책이 쌓여 있다. 기사들이 돌려 보는 모양이다.", "선반 밑 바닥에는 다 읽은 잡지들이 끈으로 묶여 있다. 내다 팔 생각인 모양이다."] },
         { id: "duty", q: "벽의 근무표를 본다", a: ["방재호, 그날 오후 근무로 적혀 있다. 특별한 건 없다.", "근무표 옆에 '분실 시 기사 부담'이라고 인쇄된 공지가 붙어 있다. 누군가 볼펜으로 욕을 적어 놓았다."] }] } },
