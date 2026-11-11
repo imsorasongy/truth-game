@@ -22373,7 +22373,6 @@ function startNew() {
   document.body.appendChild(ov);
   // 스토리 모드는 바로 들어간다(비밀번호 입력은 잠시 꺼 둠)
   ov.querySelector("#mdStory").onclick = () => { ov.remove(); S.mode = "story"; S.story = { next: 0 }; screenCreate(); };
-  };
   ov.querySelector("#mdSpeed").onclick = () => { ov.remove(); screenCreate(); };
   ov.querySelector("#mdOps").onclick = () => { ov.remove(); S.mode = "opsNew"; screenCreate(); };
 }
