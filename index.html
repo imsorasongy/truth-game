@@ -368,12 +368,13 @@ html[data-scene^="end"] #backdrop::after { background: linear-gradient(180deg, #
 @keyframes fadeout { to { opacity: 0; } }
 .cover.end-cover { min-height: 100%; justify-content: flex-end; gap: 14px; padding-top: 52vh; }
 .cover.end-cover h1 { font-size: clamp(36px, 10vw, 56px); }
-.tutb { position: fixed; left: 10px; right: 10px; z-index: 22; display: grid; grid-template-columns: 34px 1fr auto; gap: 8px; align-items: center; background: #2a1d10f2; border: 1px solid var(--brass); border-radius: 10px; padding: 7px 10px; box-shadow: 0 6px 18px #000b; animation: fadein .3s; max-width: 520px; margin: 0 auto; }
-.tutb .ava { width: 34px; height: 34px; border-radius: 50%; overflow: hidden; border: 2px solid var(--brass); background: #ddd; }
+.tutb { position: fixed; left: 10px; right: 10px; z-index: 22; display: grid; grid-template-columns: 52px 1fr auto; gap: 12px; align-items: center; background: #1d140ef7; border: 1.5px solid var(--brass); border-radius: 12px; padding: 12px 14px; box-shadow: 0 6px 18px #000b; animation: fadein .3s; max-width: 520px; margin: 0 auto; }
+.tutb .ava { width: 52px; height: 52px; border-radius: 50%; overflow: hidden; border: 2px solid var(--brass); background: #ddd; }
 .tutb .ava img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 15%; display: block; }
-.tutb p { margin: 0; font-size: 14px; line-height: 1.5; color: #f1e6cf; }
+.tutb .tn { font-size: 13px; color: var(--brass); margin-bottom: 2px; }
+.tutb p { margin: 0; font-family: "Nanum Myeongjo", "Batang", serif; font-size: 17px; line-height: 1.6; color: #f3e9da; }
 .tutb p b { color: var(--brass); }
-.tutb-next { background: var(--brass); color: #1a120c; border: 0; border-radius: 6px; padding: 6px 10px; font: inherit; font-size: 13px; font-weight: 700; }
+.tutb-next { background: var(--brass); color: #1a120c; border: 0; border-radius: 8px; padding: 9px 14px; font: inherit; font-size: 15px; font-weight: 700; }
 .tut { display: grid; grid-template-columns: 44px 1fr; gap: 10px; align-items: start; background: #2a1d10f0; border: 1px solid var(--brass); border-radius: 10px; padding: 10px 12px; box-shadow: 0 0 0 1px #c9a24a33, 0 6px 18px #000a; animation: fadein .4s; }
 .tut .ava { width: 44px; height: 44px; border-radius: 50%; overflow: hidden; border: 2px solid var(--brass); background: #ddd; }
 .tut .ava img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 15%; display: block; }
@@ -22680,7 +22681,7 @@ function screenDayIntro() {
     monthDone() ? `<button class="btn primary" id="toEnd">이번 달 장부 보기</button>`
       : `<button class="btn ghost" id="closeMonth">남은 손님은 돌려보내고 달 마감</button>`);
   on("[data-meet]", e => { S.idx = +e.currentTarget.dataset.meet; startCase(S.today[S.idx].id); });
-  tutSet(() => S.today[0] && S.today[0].id === TUT_ID && S.today[0].status === "wait" ? { t: "첫 손님이 왔다. <b>상담</b>을 누르자.", sel: '[data-meet="0"]' } : null);
+  tutSet(() => S.today[0] && S.today[0].id === TUT_ID && S.today[0].status === "wait" ? { t: "첫 손님이 왔다. <b>상담</b>을 눌러 이야기를 들어 보자.", sel: '[data-meet="0"]' } : null);
   on("[data-skip]", e => {
     const t = S.today[+e.currentTarget.dataset.skip]; t.status = "refused";
     S.dayLog.push({ id: t.id, status: "refused", rep: 0, money: 0, res: null }); save(); screenDayIntro();
@@ -22760,7 +22761,7 @@ function tutRefresh() {
   const tip = tutMsg ? { t: tutMsg, tap: "warn" } : tutScreen(); if (!tip) return;
   const b = document.createElement("div");
   b.id = "tutb"; b.className = "tutb";
-  b.innerHTML = `<div class="ava"><img src="${heroOf().img}" alt=""></div><p>${tip.t}</p>${tip.tap ? `<button class="tutb-next">다음</button>` : ""}`;
+  b.innerHTML = `<div class="ava"><img src="${heroOf().img}" alt=""></div><div><div class="tn">${esc((S && S.name) || heroOf().name)}</div><p>${tip.t}</p></div>${tip.tap ? `<button class="tutb-next">다음</button>` : ""}`;
   document.body.appendChild(b);
   b.style.top = ((hud.getBoundingClientRect().bottom || 0) + 6) + "px";
   if (tip.tap) b.querySelector(".tutb-next").addEventListener("click", e => { e.stopPropagation(); if (tip.tap === "warn") tutMsg = null; else { C.tutK = C.tutK || {}; C.tutK[tip.tap] = true; } tutRefresh(); });
@@ -22883,9 +22884,9 @@ function screenConsult() {
     const opened = Object.values(C.opened).some(Boolean), drawer = typeof showEv !== "undefined";
     if (!opened && drawer && !showEv) return { t: "의뢰인이 가져온 증거부터 보자. 아래 <b>증거</b> 탭을 누르자.", sel: '#tabs [data-tab="ev"]' };
     if (!opened) return { t: "카드를 누르면 자세한 내용이 나온다.", sel: ".evlist .ev" };
-    if (!C.asked.length && drawer && showEv) return { t: "다 봤으면 <b>증거</b> 탭을 다시 눌러 닫자.", sel: '#tabs [data-tab="ev"]' };
-    if (!C.asked.length) return { t: "이제 질문이다. 말과 증거가 어긋나는 데를 물어보자.", sel: "[data-q]" };
-    return { t: "질문은 세 번까지. 다 들었으면 <b>판단 내리기</b>.", sel: "#judge", ok: "[data-q]" };
+    if (!C.asked.length && drawer && showEv) return { t: "다 봤으면 <b>증거</b> 탭을 한 번 더 눌러 닫자.", sel: '#tabs [data-tab="ev"]' };
+    if (!C.asked.length) return { t: "이제 질문할 차례다. 말과 증거가 어긋나는 곳을 물어보자.", sel: "[data-q]" };
+    return { t: "질문은 세 번까지 할 수 있다. 다 들었으면 <b>판단 내리기</b>를 누르자.", sel: "#judge", ok: "[data-q]" };
   });
 }
 
@@ -22929,7 +22930,7 @@ function screenSuspect() {
     ${caseRefs()}`);
   on("[data-s]", e => { if (tutWarn(+e.currentTarget.dataset.s !== c.hiddenIndex, "그건 증거 어디에도 없는 얘기다. 통장에 찍힌 돈을 떠올려 보자.")) return; C.verdict = "hiding"; C.susp = +e.currentTarget.dataset.s; react(); });
   on("#back", screenJudge);
-  tutSet(() => ({ t: "통장에 들어온 200만 원. <b>이미 일부를 돌려받았다</b>를 고르자.", sel: `[data-s="${c.hiddenIndex}"]` }));
+  tutSet(() => ({ t: "통장에 들어온 200만 원 얘기는 끝내 안 했다. <b>이미 일부를 돌려받았다</b>를 고르자.", sel: `[data-s="${c.hiddenIndex}"]` }));
 }
 // 지금까지 들은 말인가: 처음 한 말(-1)이거나 이미 물어본 질문의 답에서 나온 말
 const lieHeard = (c, i) => { const s = (window.LIE_SRC[c.base || c.id] || [])[i]; return s == null || s < 0 || C.asked.includes(s); };
@@ -22945,7 +22946,7 @@ function screenLie() {
     ${caseRefs()}`);
   on("[data-l]", e => { if (tutWarn(true, "차용증도 날짜도 증거와 맞는다. 거짓말은 아니다.")) return; C.verdict = "liar"; C.lie = +e.currentTarget.dataset.l; react(); });
   on("#back", screenJudge);
-  tutSet(() => ({ t: "이 의뢰인은 거짓말을 한 건 아니다. <b>다시 생각하기</b>.", sel: "#back" }));
+  tutSet(() => ({ t: "이 의뢰인이 거짓말을 한 건 아니다. <b>다시 생각하기</b>를 누르자.", sel: "#back" }));
 }
 
 // 반응 대사: 같은 상황에도 몇 가지 중 하나가 나와서, 말투만으로 바로 가려내지 못하게 한다
@@ -22979,12 +22980,12 @@ function screenDeny(kind, apply, step = 0) {
     ${caseRefs()}`, step ? "" : `<button class="btn primary" id="denyNext">다음</button>`);
   if (!step) {
     on("#denyNext", () => screenDeny(kind, apply, 1));
-    tutSet(() => ({ t: "털어놓을 줄 알았는데 발뺌한다. <b>다음</b>.", sel: "#denyNext" }));
+    tutSet(() => ({ t: "순순히 털어놓을 줄 알았는데 발뺌한다. <b>다음</b>을 누르자.", sel: "#denyNext" }));
     return;
   }
   on("#press", () => screenProof(kind, apply));
   on("#letgo", () => { C.reaction = { say: c.deny.say, note: "더 캐묻지 않았습니다." }; C.fxOnce = true; screenFee(); });
-  tutSet(() => ({ t: "통장 거래내역을 보여 주며 따져 보자. <b>증거를 들이밀며 추궁한다</b>.", sel: "#press" }));
+  tutSet(() => ({ t: "통장 거래내역을 보여 주며 따져 보자. <b>증거를 들이밀며 추궁한다</b>를 누르자.", sel: "#press" }));
 }
 function screenProof(kind, apply) {
   const c = C.c;
@@ -23122,8 +23123,8 @@ function screenFee(extra) {
   on("#propose", () => { sync(); if (tutWarn(C.offerF + C.offerB > (effStake(c) || Infinity), `${won(effStake(c))} 받자고 온 사람한테 이렇게 부르면 안 맡긴다.`)) return; propose(); });
   tutSet(() => C.card && !tutK("f0") ? { t: "털어놓았다. 재판에 낼 카드가 하나 생겼다.", tap: "f0" }
     : !tutK("f1") ? { t: "<b>착수금</b>은 맡을 때 받는 돈, <b>성공보수</b>는 이기면 받는 돈이다. 일부만 이기면 절반.", tap: "f1", sel: ".feerow" }
-    : !tutK("f2") ? { t: "처음 금액은 시세에 내 명성을 얹은 값. 비싸면 깎자고 하고, 너무 비싸면 떠난다.", tap: "f2" }
-    : { t: "<b>이 금액으로 제시</b>를 누르자.", sel: "#propose" });
+    : !tutK("f2") ? { t: "처음 금액은 시세에 내 명성을 얹은 값이다. 비싸면 의뢰인이 깎자고 하고, 너무 비싸면 그냥 떠난다.", tap: "f2" }
+    : { t: "이대로 불러 보자. <b>이 금액으로 제시</b>를 누르자.", sel: "#propose" });
   on("#refuse", () => {
     S.refused++;
     finishCase("refused", { rep: 0, money: 0 });
@@ -23159,7 +23160,7 @@ function propose() {
       `<button class="btn primary" id="toTrial">재판 준비하기</button>`);
     S.taken = (S.taken || 0) + 1; save();
     on("#toTrial", screenTrial);
-    tutSet(() => ({ t: "계약했다. <b>재판 준비하기</b>.", sel: "#toTrial" }));
+    tutSet(() => ({ t: "계약했다. 이제 <b>재판 준비하기</b>를 누르자.", sel: "#toTrial" }));
   } else if (!C.haggled && (overStake ? C.offerF + C.offerB <= effStake(c) : val <= ceil * 1.3)) {
     // 비싸면 의뢰인이 금액을 맞제안한다(마음속 상한보다 조금 낮게)
     C.haggled = true;
@@ -23244,10 +23245,10 @@ function screenTrial() {
     C.inv = e.currentTarget.dataset.inv; const y = window.scrollY; screenTrial(); window.scrollTo({ top: y });
   }));
   on("#plead", () => { if (tutWarn(C.sub.has("e4"), "가게 장부가 아직 들어가 있다. 빼고 가자.") || tutWarn(C.card && C.arg !== "a3", "200만 원 받은 걸 털어놓았는데 이렇게 말하면 바로 걸린다. 받은 돈을 뺀 주장으로 가자.")) return; if (isOps()) return opsSavePrep(); runTrial(); });
-  tutSet(() => !tutK("t1") ? { t: "체크된 증거가 재판에 나간다. 불리한 증거는 눌러서 빼면 된다.", tap: "t1" }
+  tutSet(() => !tutK("t1") ? { t: "체크된 증거만 재판에 나간다. 불리한 증거는 눌러서 빼면 된다.", tap: "t1" }
     : C.sub.has("e4") ? { t: "가게 장부의 '투자'라는 메모는 상대 말을 거든다. <b>가게 장부</b>를 눌러 빼자.", sel: 'label.ev:has([data-sub="e4"])' }
     : !C.arg || (C.card && C.arg !== "a3") ? { t: C.card ? "200만 원은 이미 받았다. 그 돈을 뺀 주장을 고르자." : "주장을 하나 고르자.", sel: C.card ? 'label.arg:has([data-arg="a3"])' : ".arg" }
-    : { t: "<b>변론 시작</b>.", sel: "#plead" });
+    : { t: "준비는 끝났다. <b>변론 시작</b>을 누르자.", sel: "#plead" });
 }
 
 /* ---------- 재판 진행 ---------- */
