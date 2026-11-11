@@ -22447,10 +22447,11 @@ function storyCheck(next) {
   if (!(n === 0 ? (S.rep >= step.need && S.day >= 3) || S.day >= 5 : S.rep >= step.need)) return false;
   const hero = S.hero || "m";
   // 명성 50이 되면 4년 뒤로 넘어가면서 사무실도 서초동 법조타운으로 옮겨 놓는다
+  const prevOffice = S.office || 0;
   if (step.jump && !st.jumped) S.office = Math.max(S.office || 0, 2);
   // 앞 장에서 어떤 결말을 봤는지 넘겨 뒤 장의 대사와 엔딩이 달라지게 한다
   st.hist = st.hist || {};
-  let q = `ch=${hero}${n + 1}&office=${S.office || 0}&hist=${Object.entries(st.hist).map(([k, v]) => k + "." + v).join(",")}`;
+  let q = `ch=${hero}${n + 1}&office=${S.office || 0}&prev=${prevOffice}&hist=${Object.entries(st.hist).map(([k, v]) => k + "." + v).join(",")}`;
   if (step.jump && !st.jumped) q += `&jump=${step.jump}`;
   if (step.day) S.day = Math.max(S.day, step.day[hero]);
   st.jumped = !!step.jump || st.jumped;
@@ -23600,7 +23601,7 @@ function officePop(i) {
   ov.addEventListener("click", e => { if (e.target === ov) close(); });
   ov.querySelector("#opClose").onclick = close;
   const mv = ov.querySelector("#opMove");
-  if (mv) mv.onclick = () => { close(); S.money -= o.cost; S.office = (S.office || 0) + 1; S.moveNote = false; save(); if (isStory() && storyCheck(screenOffice)) return; screenOffice(); };
+  if (mv) mv.onclick = () => { close(); S.money -= o.cost; S.office = (S.office || 0) + 1; S.moveNote = false; save(); screenOffice(); };
 }
 
 // 사무실 그림의 직원 얼굴을 누르면: 고용한 직원은 정보 카드, 빈자리는 후보 고르기
