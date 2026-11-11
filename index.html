@@ -22476,6 +22476,8 @@ function storyResult(res, end, step, n, hero, next) {
     const before = S.rep;
     S.rep = Math.max(S.rep, step.after);
     st.next++;
+    // 장을 끝낸 달에는 다음 장을 열지 않는다(다음 달 초에 열림)
+    st.snooze = S.day;
     const over = st.next >= STORY_STEPS.length || res === "refuse" || res === "quiet";
     if (over) st.done = true;
     save();
