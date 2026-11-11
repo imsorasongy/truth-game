@@ -22416,7 +22416,10 @@ function storyFrame(query, done) {
     f.style.cssText = "position:fixed;inset:0;width:100%;height:100%;border:0;z-index:9999;background:#000";
     f.onload = () => out.remove();
     const h = e => {
-      if (e.source !== f.contentWindow || !e.data || e.data.story !== "done") return;
+      if (e.source !== f.contentWindow || !e.data) return;
+      // 스토리 장면이 바뀔 때마다 곡을 바꾼다(force면 같은 종류라도 새 곡으로)
+      if (e.data.story === "music" && TRACKS[e.data.mode]) { if (e.data.force) audioMode = null; return music(e.data.mode); }
+      if (e.data.story !== "done") return;
       removeEventListener("message", h);
       const back = storyBlack(1);
       f.remove();

@@ -207,6 +207,21 @@ const CH = {};
 const $ = id => document.getElementById(id), app = $("app");
 let G = null;
 const WIN = 80, PART = 50, MISS = -8;
+// 음악: 본 게임 안이면 본 게임에 곡을 바꾸라고 알리고, 주소로 바로 열었으면 여기서 직접 튼다
+const TRACKS = { opening: ["bgm/opening-theme.mp3"], normal: ["bgm/bgm1.mp3", "bgm/bgm2.mp3", "bgm/bgm6.mp3"], trial: ["bgm/trialtheme.mp3"], ending: ["bgm/ending-theme.mp3"] };
+let bgmAudio = null, bgmMode = null;
+function bgm(mode, force) {
+  if (window.parent !== window) return window.parent.postMessage({ story: "music", mode, force: !!force }, "*");
+  if (mode === bgmMode && bgmAudio && !force) return;
+  bgmMode = mode;
+  if (bgmAudio) bgmAudio.pause();
+  const list = TRACKS[mode];
+  bgmAudio = new Audio(list[Math.floor(Math.random() * list.length)]);
+  bgmAudio.volume = 0.35;
+  bgmAudio.addEventListener("ended", () => bgm(bgmMode, true));
+  bgmAudio.play().catch(() => {});
+}
+document.addEventListener("pointerdown", () => { if (bgmAudio && bgmAudio.paused) bgmAudio.play().catch(() => {}); });
 // 장면 전환: 검게 닫았다가(fade) 다음 장면을 깔고 다시 연다. title을 주면 검은 화면에 제목을 띄운다
 const FADE = 420;
 function fade(then, { title = "", sub = "", hold = 1100, stay = false } = {}) {
@@ -329,11 +344,13 @@ function start(k) {
   const q = new URLSearchParams(location.search), jump = q.get("jump");
   (q.get("hist") || "").split(",").filter(Boolean).forEach(x => { const [a, b] = x.split("."); G.hist[a] = b; });
   const begin = () => fade(() => {
+    bgm("normal", true);
     G.prologue = false;
     setBg(homeBg());
     say(linesOf(c.intro, null), () => say([...c.greet.map(([w, t]) => [w === "h" ? H[c.hero].n : c.client.n, t]), [c.client.n, c.opening]], () => topicMenu(G.P._office.people[0]), c.client.img));
   }, { title: c.title.split(" · ")[1], sub: c.no });
   const toScenes = () => playScenes((c.prologue || []).map(s => ({ bg: bgOf(s.bg), lines: s.lines })), c.decide ? () => decide(c.decide, begin) : begin);
+  bgm(jump || c.prologue ? "opening" : "normal", true);
   if (jump) card(`${jump}년 후`, OFF >= 2 ? "서초동 법조타운" : "", 1400, toScenes);
   else toScenes();
 }
@@ -341,7 +358,7 @@ function start(k) {
 function decide(d, then) {
   G.prologue = true;
   const n = H[d.hero].n;
-  fade(() => { setBg(bgOf(d.bg)); say(d.lines, () => {
+  fade(() => { bgm("trial"); setBg(bgOf(d.bg)); say(d.lines, () => {
     view(`<div class="top"></div><div class="stage"></div><div class="panel"></div>`);
     popup({ k: n, t: d.q, btns: [
       [d.yes[0], () => say([[n, d.yes[1]], [null, d.yes[2]]], then)],
@@ -351,6 +368,7 @@ function decide(d, then) {
 // 스토리 시작 때 한 번 나오는 오프닝
 function openingOnly(h) {
   G = { k: h, c: { hero: h, title: " · " }, cards: {}, log: [], flags: {} };
+  bgm("opening", true);
   opening(() => finish("open"), h);
 }
 // 오프닝: 메인 게임 마지막 장면(박진서 긴급체포)에서 그대로 이어진다
@@ -391,7 +409,7 @@ const courtCard = c => ({ title: (curRound() && curRound().tt) || c.tt || "공�
 function toTrial() {
   const c = G.c, lines = (curRound() && curRound().toCourt) || c.toCourt || ["기록을 한 번 더 훑었다. 더 챙길 것은 없다.", "재판 날 아침, 서류 가방을 들고 법원으로 향했다."];
   setBg(homeBg());
-  say(lines.map(t => [null, t]), () => fade(trial, courtCard(c)));
+  say(lines.map(t => [null, t]), () => fade(() => { bgm("trial"); trial(); }, courtCard(c)));
 }
 /* ---------- 탐색: 장소마다 사람(대화)과 자료(조사) ---------- */
 // 예전 형식(fn·items)도 받아서 사람/자료로 나눈다
@@ -519,6 +537,7 @@ function missed(line, then) {
   say(reply, then, img);
 }
 function leaveCase() {
+  bgm("normal", true);
   const c = G.c, lines = (c.ending.left || [[c.client.n, "저를 못 믿으시는 분께 사건을 맡길 수는 없겠습니다."], "의뢰인은 선임 계약을 해지하고 사무실을 나갔다."]).map(nameLine);
   playScenes([{ bg: homeBg(), lines }], () => finish("left", "left"));
 }
@@ -755,6 +774,7 @@ function betweenRound(b) {
   G.open.push(...added);
   const lines = (typeof b.lines === "function" ? b.lines(G) : b.lines || []).map(nameLine);
   fade(() => {
+    bgm("normal", true);
     G.prologue = false;
     setBg(b.bg ? bgOf(b.bg) : homeBg());
     say(lines, () => { G.loc = "_office"; collect(); gains(added.map(id => placeGain(c.places[id])), () => {}); });
@@ -789,6 +809,7 @@ function verdict() {
     // 후일담은 판결 화면이 아니라 대화 장면으로
     $("ok").onclick = () => {
       const key = endKey(r);
+      bgm(/4$/.test(G.k) || c.decide ? "ending" : "normal", true);
       const scenes = [{ bg: c.endBg ? bgOf(c.endBg) : homeBg(), lines: (c.ending[key] || c.ending[r] || []).map(nameLine) }];
       const out = cleared && c.outro && (c.outro[key] || c.outro[r]);
       if (out) scenes.push({ bg: bgOf(out.bg), lines: out.lines.map(nameLine) });
