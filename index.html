@@ -22429,6 +22429,15 @@ function storyCheck(next) {
   const st = S.story || (S.story = { next: 0 });
   if (st.done || st.next >= STORY_STEPS.length || st.snooze === S.day) return false;
   const step = STORY_STEPS[st.next], n = st.next;
+  const hero0 = S.hero || "m";
+  // 재판 기일 사이: 지난달에 멈춘 장이 있으면 이번 달 시작에 이어서 연다
+  if (st.adjourn && st.adjourn.n === n) {
+    if (S.day <= st.adjourn.day) return false;
+    st.hist = st.hist || {};
+    const q = `ch=${hero0}${n + 1}&office=${S.office || 0}&resume=1&hist=${Object.entries(st.hist).map(([k, v]) => k + "." + v).join(",")}`;
+    storyFrame(q, (res, end) => storyResult(res, end, step, n, hero0, next));
+    return true;
+  }
   // 1장은 일반 사건 2달 뒤 명성 20이면 열리고, 미달이어도 5개월째에는 열린다
   if (!(n === 0 ? (S.rep >= step.need && S.day >= 3) || S.day >= 5 : S.rep >= step.need)) return false;
   const hero = S.hero || "m";
@@ -22442,8 +22451,15 @@ function storyCheck(next) {
   if (step.day) S.day = Math.max(S.day, step.day[hero]);
   st.jumped = !!step.jump || st.jumped;
   save();
-  storyFrame(q, (res, end) => {
-    if (res === "lose") { st.snooze = S.day; save(); return storyNotice("패소", ["다음 달에 이 사건을 다시 맡을 수 있습니다."], next); }
+  storyFrame(q, (res, end) => storyResult(res, end, step, n, hero, next));
+  return true;
+}
+function storyResult(res, end, step, n, hero, next) {
+  const st = S.story;
+  {
+    if (res === "adjourn") { st.adjourn = { n, day: S.day }; save(); return storyNotice("다음 기일", ["재판이 다음 달로 이어집니다. 그동안 일반 사건을 맡을 수 있습니다."], next); }
+    delete st.adjourn;
+    if (res === "lose") { st.snooze = S.day; save(); return storyNotice("배드 엔딩", ["이 사건을 이기지 못했습니다. 다음 달에 다시 맡을 수 있습니다."], next); }
     if (res === "left") { st.snooze = S.day; S.rep = Math.max(0, S.rep - 3); save(); return storyNotice("의뢰인이 떠났습니다", ["보수 없이 사건이 끝났습니다. 명성 −3", "다음 달에 의뢰인이 다시 찾아올 수 있습니다."], next); }
     st.hist[hero + (n + 1)] = end || res;
     st.jumped = false;
@@ -22458,8 +22474,7 @@ function storyCheck(next) {
     const rows = [pay ? `보수 <b>${won(pay)}</b> 입금` : "받은 보수가 없습니다."];
     if (S.rep > before) rows.push(`명성 ${before} → <b>${S.rep}</b>`);
     storyNotice("사건 종결", rows, () => over ? storyEnd(next) : next());
-  });
-  return true;
+  }
 }
 function storyEnd(next) {
   const ov = document.createElement("div");
@@ -22880,8 +22895,8 @@ function screenConsult() {
   tutSet(() => {
     const opened = Object.values(C.opened).some(Boolean), drawer = typeof showEv !== "undefined";
     if (!opened && drawer && !showEv) return { t: "의뢰인이 가져온 증거부터 보자. 아래 <b>증거</b> 탭을 누르자.", sel: '#tabs [data-tab="ev"]' };
-    if (!opened) return { t: "카드를 누르면 자세한 내용이 나온다.", sel: ".evlist .ev" };
-    if (!C.asked.length && drawer && showEv) return { t: "다 봤으면 <b>증거</b> 탭을 한 번 더 눌러 닫자.", sel: '#tabs [data-tab="ev"]' };
+    if (!opened) return { t: "카드를 누르면 자세한 내용이 나온다.", sel: ".evlist .ev", ok: ".evlist" };
+    if (!C.asked.length && drawer && showEv) return { t: "다른 카드도 눌러 볼 수 있다. 다 봤으면 <b>증거</b> 탭을 한 번 더 눌러 닫자.", sel: '#tabs [data-tab="ev"]', ok: ".evlist" };
     if (!C.asked.length) return { t: "이제 질문할 차례다. 말과 증거가 어긋나는 곳을 물어보자.", sel: "[data-q]" };
     return { t: "질문은 세 번까지 할 수 있다. 다 들었으면 <b>판단 내리기</b>를 누르자.", sel: "#judge", ok: "[data-q]" };
   });
