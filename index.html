@@ -482,6 +482,14 @@ html[data-scene^="end"] #backdrop::after { background: linear-gradient(180deg, #
 .gal-open .gal-head .portrait { width: 56px; height: 56px; }
 .howto { display: flex; flex-direction: column; gap: 6px; }
 .howto .note { font-size: 14px; line-height: 1.6; color: var(--text); margin: 0; }
+.howto summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 2px 0; }
+.howto summary::-webkit-details-marker { display: none; }
+.howto summary::after { content: "+"; font-family: var(--f-body, inherit); font-size: 20px; color: #c9a24a; line-height: 1; }
+.howto[open] summary::after { content: "−"; }
+.howto[open] summary { margin-bottom: 4px; }
+details.pn.howto { display: block; }
+details.howto .note { margin-top: 6px; }
+.howto-tip { font-size: 13px; color: var(--muted, #b9a98f); margin: 0; }
 .file { background: #1f150fd1; border: 1px solid #c9a24a33; border-radius: 10px; }
 .file summary { display: grid; grid-template-columns: 44px 1fr; gap: 10px; align-items: center; padding: 8px 12px; cursor: pointer; list-style: none; }
 .file summary::-webkit-details-marker { display: none; }
@@ -22539,7 +22547,7 @@ const OPS_OPENING = [
   { scene: "office", step: "설립", img: h => `assets/op/o2-${h}.webp`, body: () => "하지만 동기들은 어느 순간 법조계에 관심이 없어졌는지 이름만 걸어놨을 뿐 출근도 안 한다." },
   { scene: "office", step: "설립", img: "assets/op/o3.webp", body: () => "내가 혼자 이 법인을 살려 내야 한다. 아니, 3년 안에 한빛, 정의, 우리들을 넘어서 우리 법인을 한국 최고의 로펌으로 만들겠다." }
 ];
-// 게임 방법: 지금 규칙 그대로 한 화면에
+// 게임 방법: 항목을 누르면 펼쳐진다
 const HOWTO = [
   ["스피드 모드", [
     "가장 기본이 되는 모드입니다. 동네 상가 2층에서 막 개업한 변호사가 되어, 매달 찾아오는 의뢰인의 사건을 하나씩 해결하며 사무소를 키웁니다.",
@@ -22552,7 +22560,9 @@ const HOWTO = [
     "주인공 변호사의 이야기를 따라가는 모드입니다. 일반 사건으로 이름을 쌓다 보면, 주인공이 예전에 맡았던 사건과 이어진 큰 사건들이 하나씩 찾아옵니다.",
     "목표는 서로 이어진 사건들 뒤에 숨은 진실을 밝히는 것입니다. 직접 돌아다니며 사람을 만나고 증거를 찾아야 하고, 의뢰인을 믿을지 의심할지에 따라 이야기와 결말이 달라집니다.",
     "스피드 모드와 다른 점: 일반 사건은 스피드 모드와 같습니다. 스토리 사건은 수임료 협상이 없고 이기면 정해진 보수를 받습니다. 증거는 화면 아래 '이동·대화·조사'로 직접 찾아야 하고, 이야기하거나 다른 곳을 다녀오면 새로 물어볼 것이 생깁니다.",
-    "판단을 틀려도 바로 끝나지 않고 그대로 이야기가 이어집니다. 다만 의뢰인의 말을 네 번 헛짚으면 의뢰인이 떠납니다. 재판은 증거와 주장을 미리 고르는 대신, 증인 신문 중에 매번 어떻게 반박할지 고릅니다. 뒤로 갈수록 재판이 여러 번 열리고 기일 사이에 증거를 더 찾아야 합니다. 지면 다음 달에 다시 도전합니다."]],
+    "판단을 틀려도 바로 끝나지 않고 그대로 이야기가 이어집니다. 다만 의뢰인의 말을 네 번 헛짚으면 의뢰인이 떠납니다. 재판은 증거와 주장을 미리 고르는 대신, 증인 신문 중에 매번 어떻게 반박할지 고릅니다.",
+    "뒤로 갈수록 재판이 여러 번 열립니다. 기일이 끝나면 본 게임으로 돌아가 한 달을 보내고, 다음 달에 의뢰인과 이야기하며 다음 기일을 준비합니다. 그 대화에서 새로 갈 곳이 생깁니다.",
+    "무죄나 승소가 아니면 배드 엔딩입니다. 그 사건은 다음 달에 처음부터 다시 도전합니다."]],
   ["한 달의 흐름", [
     "매달 손님이 찾아옵니다. 상담할 사람을 고르고, 맡지 않을 사람은 돌려보냅니다.",
     "한 달에 맡을 수 있는 사건 수는 사무실마다 다릅니다(4·5·6·7건, 고용 변호사가 있으면 +2~3건).",
@@ -22587,7 +22597,7 @@ const HOWTO = [
 ];
 function screenHowto(back) {
   show(`<div><div class="eyebrow">벼넥시트 외전 : 의뢰인의 진실</div><h2>게임 방법</h2></div>
-    ${HOWTO.map(([h, ps]) => `<div class="pn howto"><div class="pn-name">${esc(h)}</div>${ps.map(p => `<p class="note">${esc(p)}</p>`).join("")}</div>`).join("")}`,
+    <p class="note howto-tip">궁금한 항목을 누르면 설명이 펼쳐집니다.</p>${HOWTO.map(([h, ps]) => `<details class="pn howto"><summary class="pn-name">${esc(h)}</summary>${ps.map(p => `<p class="note">${esc(p)}</p>`).join("")}</details>`).join("")}`,
     `<button class="btn primary" id="howBack">돌아가기</button>`, "office");
   on("#howBack", back);
 }
