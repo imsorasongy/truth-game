@@ -22170,8 +22170,9 @@ const trials = () => S.w + S.p + S.l;
 const winRate = () => trials() ? Math.round((S.w + S.p * 0.5) / trials() * 100) : 0;
 // 한 달에 찾아오는 의뢰인 수: 명성 0이면 1~2명, 100이면 10~20명
 const visitorRange = rep => [1 + Math.floor(rep * 9 / 100), 2 + Math.floor(rep * 18 / 100)];
-// 진행은 월 단위. S.day는 1부터 세는 달 번호(1 = 2030년 1월)
-const monthLabel = m => `${2030 + Math.floor((m - 1) / 12)}년 ${((m - 1) % 12) + 1}월`;
+// 진행은 월 단위. S.day는 1부터 세는 달 번호(1 = 2030년 1월). 스토리 모드 여주는 1 = 2031년 1월
+const baseYear = () => (S && S.mode === "story" && S.hero === "f") ? 2031 : 2030;
+const monthLabel = m => `${baseYear() + Math.floor((m - 1) / 12)}년 ${((m - 1) % 12) + 1}월`;
 const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const isCrim = c => c.kind === "criminal";
 // 형사 사건에서 이긴 판결이 무죄가 아니면(감형·공소기각 등) 그 이름으로 부른다
@@ -22382,9 +22383,9 @@ const isStory = () => !!S && S.mode === "story";
 // need: 열리는 명성, after: 깬 뒤 명성, day: 이야기 시점(게임 내 달), fee: 이겼을 때 받는 돈(만 원)
 const STORY_STEPS = [
   { need: 20, after: 30, fee: { m: 500, f: 100 } },
-  { need: 50, after: 60, jump: 4, day: { m: 59, f: 61 }, fee: { m: 3000, f: 1500 } },
-  { need: 75, after: 85, day: { m: 66, f: 71 }, fee: { m: 5000, f: 4000 } },
-  { need: 100, after: 100, day: { m: 75, f: 75 }, fee: { m: 3000, f: 10000 } }
+  { need: 50, after: 60, jump: 4, day: { m: 59, f: 49 }, fee: { m: 3000, f: 1500 } },
+  { need: 75, after: 85, day: { m: 66, f: 59 }, fee: { m: 5000, f: 4000 } },
+  { need: 100, after: 100, day: { m: 75, f: 63 }, fee: { m: 3000, f: 10000 } }
 ];
 // 판결 결과별로 받는 비율: 일부승소·감형과 특검 사건의 유죄 결말은 절반
 const STORY_PAY = { win: 1, quiet: 1, partial: 0.5, truth: 0.5 };
@@ -23200,7 +23201,7 @@ function caseNo(c) {
     : k === "hold" ? "카단"
     : k === "gahap" ? "가합"
     : (c.tier === 1 ? "가소" : c.tier === 2 ? "가단" : "가합");
-  return `${2030 + Math.floor((((S && S.day) || 1) - 1) / 12)}${code}${(1000 + hash(c.id) % 9000)}`;
+  return `${baseYear() + Math.floor((((S && S.day) || 1) - 1) / 12)}${code}${(1000 + hash(c.id) % 9000)}`;
 }
 function trialHead(c) {
   return `<div class="bench no-ava"><div><div class="no">${caseNo(c)} ${esc(c.category)}</div><div class="tt">${isCrim(c) ? "공판기일" : "변론기일"}</div><div class="who">재판장 · 상대측 ${isCrim(c) ? "검사" : "소송대리인"}${!isCrim(c) && C && C.vs ? ` <b class="k-vs">「${esc(C.vs)}」</b>` : ""}</div></div></div>`;
@@ -23719,7 +23720,7 @@ function monthFlip(next) {
   if (REDUCED) return next();
   const ov = document.createElement("div");
   ov.className = "flip";
-  ov.innerHTML = `<div class="flip-card"><div class="flip-y">${2030 + Math.floor((S.day - 1) / 12)}년</div><div class="flip-m">${((S.day - 1) % 12) + 1}월</div><div class="flip-f">${esc(S.firm || "")}</div></div>`;
+  ov.innerHTML = `<div class="flip-card"><div class="flip-y">${baseYear() + Math.floor((S.day - 1) / 12)}년</div><div class="flip-m">${((S.day - 1) % 12) + 1}월</div><div class="flip-f">${esc(S.firm || "")}</div></div>`;
   document.body.appendChild(ov);
   setTimeout(next, 450);
   setTimeout(() => { ov.classList.add("out"); setTimeout(() => ov.remove(), 350); }, 1000);
@@ -25531,7 +25532,7 @@ const TAB_ICON = {
 };
 function renderHud() {
   if (!S) { hud.innerHTML = ""; return; }
-  const ym = `${2030 + Math.floor((S.day - 1) / 12)}.${((S.day - 1) % 12) + 1}`;
+  const ym = `${baseYear() + Math.floor((S.day - 1) / 12)}.${((S.day - 1) % 12) + 1}`;
   hud.innerHTML = `<div class="pills">
       <span class="pill"><i>₩</i>${won(S.money)}</span>
       <span class="pill"><i>★</i>${S.rep}${office().repCap < 100 ? `<small>/${office().repCap}</small>` : ""}</span>

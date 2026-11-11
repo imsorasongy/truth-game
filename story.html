@@ -393,7 +393,7 @@ function decide(d, then) {
 function openingOnly(h) {
   G = { k: h, c: { hero: h, title: " · " }, cards: {}, log: [], flags: {} };
   bgm("opening", true);
-  opening(() => frameAndCalendar(() => finish("open")), h);
+  opening(() => frameAndCalendar(() => finish("open"), h), h);
 }
 // 오프닝: 메인 게임 마지막 장면(박진서 긴급체포)에서 그대로 이어진다
 const OPENING = h => [
@@ -407,7 +407,7 @@ const OPENING = h => [
     [null, "하지만 그 사건은 집요하게 사건에 매달렸던 한 변호사의 노력으로 진상이 밝혀졌다. 박진서의 알리바이는 대질신문에서 무너졌다. 비서의 휴대폰 위치, 끝없이 걸려 온 부재중 전화, 그리고 장부 위에 찍힌 발자국."],
     [null, "법조 카르텔의 수괴라 불리던 사람은 그렇게 자신의 자리에서 추락하고 말았다."], ["그날의 변호사", "법은 때로는 느리지만… 결국 진실에 도달한다."], ["그날의 변호사", "하지만, 정말 이걸로 끝난 것일까…"]] },
   { bg: A + "story/op-ledger.jpg", lines: [[null, "박진서는 살인 혐의로 구속 기소됐고, 그 뒤로 구치소 밖으로 나오지 못했다."], [null, "수사기관이 손에 넣은 것은 장현우가 찍어 둔 장부 사진 몇 장이었다. 그 장부의 진짜 몸통이 어디에 있는지 아는 사람은 그때 거의 없었다."]] },
-  { bg: `${A}story/op-news-${h}.jpg`, lines: [[null, "며칠째 TV에서는 같은 뉴스만 나온다. '법조 카르텔 수괴 구속. 사법 정의 바로 설 수 있나.' '신뢰 잃은 법조계, 어떻게 해야 할 것인가.'"],
+  { bg: `${A}story/op-news-${h}.jpg`, lines: [h === "f" ? [null, "그로부터 1년이 지났는데도 TV에서는 아직 같은 뉴스가 나온다. '법조 카르텔 수괴 재판 1년째. 사법 정의 바로 설 수 있나.' '신뢰 잃은 법조계, 어떻게 해야 할 것인가.'"] : [null, "며칠째 TV에서는 같은 뉴스만 나온다. '법조 카르텔 수괴 구속. 사법 정의 바로 설 수 있나.' '신뢰 잃은 법조계, 어떻게 해야 할 것인가.'"],
     ["앵커", "수사기관은 박진서 씨가 실소유한 도원컨설팅을 압수수색했지만, 이른바 로비 장부의 원본은 찾지 못한 것으로 알려졌습니다."],
     ["앵커", "박진서 씨 측은 살인 혐의를 전면 부인하고 있으며, 장부는 존재하지 않는다는 입장입니다."],
     [null, "화면이 바뀌자 패널 셋이 나와 비리 장부가 실제 있느냐 없느냐로 한 시간을 싸웠다. 당연히 셋 다 장부를 본 적은 없겠지."],
@@ -427,11 +427,11 @@ const OPENING = h => [
     [null, "미용실 원장님의 수다만이 떠도는 사무실의 한쪽 벽에는 개업 선물로 받은 교수님의 액자가 걸려 있다."]] }
 ];
 // 오프닝 뒤: 액자 → 달력이 2030년 1월로 넘어가며 시작
-function frameAndCalendar(then) {
+function frameAndCalendar(then, h) {
   G.prologue = true;
   fade(() => {
     setBg(A + "story/m4-frame.jpg");
-    say([[null, "수구여병(守口如甁). 입을 병마개처럼 지켜라."]], () => fade(() => calendar(then)));
+    say([[null, "수구여병(守口如甁). 입을 병마개처럼 지켜라."]], () => fade(() => calendar(then, h === "f" ? 2031 : 2030)));
   });
 }
 function calPage(y, m) {
@@ -439,9 +439,9 @@ function calPage(y, m) {
   const cells = [..."일월화수목금토"].map(d => `<b>${d}</b>`).concat(Array(first).fill("<i></i>"), Array.from({ length: days }, (_, i) => `<i>${i + 1}</i>`));
   return `<div class="cal-y">${y}</div><div class="cal-m">${m}월</div><div class="cal-g">${cells.join("")}</div>`;
 }
-function calendar(then) {
+function calendar(then, y = 2030) {
   setBg("");
-  view(`<div class="calbox"><div class="cal-wrap"><div class="cal">${calPage(2030, 1)}</div><div class="cal top">${calPage(2029, 12)}</div></div></div>`);
+  view(`<div class="calbox"><div class="cal-wrap"><div class="cal">${calPage(y, 1)}</div><div class="cal top">${calPage(y - 1, 12)}</div></div></div>`);
   setTimeout(() => { const t = app.querySelector(".cal.top"); if (t) t.classList.add("flip"); }, 900);
   setTimeout(then, 3000);
 }
