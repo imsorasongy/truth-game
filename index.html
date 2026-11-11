@@ -22441,15 +22441,10 @@ function storyCheck(next) {
   if (st.done || st.next >= STORY_STEPS.length || st.snooze === S.day) return false;
   const step = STORY_STEPS[st.next], n = st.next;
   // 1장은 일반 사건 2달 뒤 명성 20이면 열리고, 미달이어도 5개월째에는 열린다
-  // 2장은 명성 50을 채우고 서초동으로 옮기는 순간 4년 뒤로 넘어가며 열린다
-  if (n === 1 && S.rep >= step.need && (S.office || 0) < 2) {
-    if (st.hint) return false;
-    st.hint = true; save();
-    storyNotice("명성 50 달성", ["서초동 법조타운으로 사무실을 옮기면 다음 이야기가 시작됩니다."], next);
-    return true;
-  }
   if (!(n === 0 ? (S.rep >= step.need && S.day >= 3) || S.day >= 5 : S.rep >= step.need)) return false;
   const hero = S.hero || "m";
+  // 명성 50이 되면 4년 뒤로 넘어가면서 사무실도 서초동 법조타운으로 옮겨 놓는다
+  if (step.jump && !st.jumped) S.office = Math.max(S.office || 0, 2);
   // 앞 장에서 어떤 결말을 봤는지 넘겨 뒤 장의 대사와 엔딩이 달라지게 한다
   st.hist = st.hist || {};
   let q = `ch=${hero}${n + 1}&office=${S.office || 0}&hist=${Object.entries(st.hist).map(([k, v]) => k + "." + v).join(",")}`;
