@@ -22482,8 +22482,12 @@ function storyResult(res, end, step, n, hero, next) {
       save(); return storyNotice("다음 기일", ["재판이 다음 달로 이어집니다. 그동안 일반 사건을 맡을 수 있습니다."], next);
     }
     delete st.adjourn;
-    if (res === "lose") { st.snooze = S.day; save(); return storyNotice("배드 엔딩", ["이 사건을 이기지 못했습니다. 다음 달에 다시 맡을 수 있습니다."], next); }
-    if (res === "left") { st.snooze = S.day; S.rep = Math.max(0, S.rep - 3); save(); return storyNotice("의뢰인이 떠났습니다", ["보수 없이 사건이 끝났습니다. 명성 −3", "다음 달에 의뢰인이 다시 찾아올 수 있습니다."], next); }
+    // 배드 엔딩(패소·일부승소, 의뢰인이 떠남)은 그 자리에서 이야기가 끝난다. 같은 사건을 다시 맡는 일은 없다
+    if (res === "lose" || res === "left") {
+      if (res === "left") S.rep = Math.max(0, S.rep - 3);
+      st.done = true; st.bad = res; save();
+      return storyEnd(next, res === "left" ? "의뢰인이 떠났습니다" : "이 사건을 이기지 못했습니다");
+    }
     st.hist[hero + (n + 1)] = end || res;
     st.jumped = false;
     const pay = Math.round(step.fee[hero] * (STORY_PAY[res] || 0));
@@ -22502,10 +22506,10 @@ function storyResult(res, end, step, n, hero, next) {
     storyNotice("사건 종결", rows, () => over ? storyEnd(next) : next());
   }
 }
-function storyEnd(next) {
+function storyEnd(next, bad) {
   const ov = document.createElement("div");
   ov.className = "staff-pop";
-  ov.innerHTML = `<div class="sp-card"><div class="sp-name">스토리 완결</div><div class="sp-row">${esc(S.name || heroOf().name)} 변호사의 이야기가 끝났습니다.</div>
+  ov.innerHTML = `<div class="sp-card"><div class="sp-name">${bad ? "배드 엔딩" : "스토리 완결"}</div>${bad ? `<div class="sp-row">${bad}.</div>` : ""}<div class="sp-row">${esc(S.name || heroOf().name)} 변호사의 이야기${bad ? "는 여기서" : "가"} 끝났습니다.</div>${bad ? `<div class="sp-row">처음부터 다시 하려면 새 게임을 시작하세요.</div>` : ""}
     <div class="row2"><button class="btn ghost" id="stTitle">처음 화면으로</button><button class="btn primary" id="stGo">일반 사건 계속</button></div></div>`;
   document.body.appendChild(ov);
   ov.querySelector("#stTitle").onclick = () => { ov.remove(); screenCover(); };
@@ -22580,7 +22584,7 @@ const HOWTO = [
     "스피드 모드와 다른 점: 일반 사건은 스피드 모드와 같습니다. 스토리 사건은 수임료 협상이 없고 이기면 정해진 보수를 받습니다. 증거는 화면 아래 '이동·대화·조사'로 직접 찾아야 하고, 이야기하거나 다른 곳을 다녀오면 새로 물어볼 것이 생깁니다.",
     "판단을 틀려도 바로 끝나지 않고 그대로 이야기가 이어집니다. 다만 의뢰인의 말을 네 번 헛짚으면 의뢰인이 떠납니다. 재판은 증거와 주장을 미리 고르는 대신, 증인 신문 중에 매번 어떻게 반박할지 고릅니다.",
     "뒤로 갈수록 재판이 여러 번 열립니다. 기일이 끝나면 본 게임으로 돌아가 한 달을 보내고, 다음 달에 의뢰인과 이야기하며 다음 기일을 준비합니다. 그 대화에서 새로 갈 곳이 생깁니다.",
-    "무죄나 승소가 아니면 배드 엔딩입니다. 그 사건은 다음 달에 처음부터 다시 도전합니다."]],
+    "무죄나 승소가 아니면 배드 엔딩입니다. 이야기는 거기서 끝납니다. 판결이 나온 화면의 '다시' 버튼을 누르면 그 재판이나 기일로 돌아가 다시 해 볼 수 있습니다."]],
   ["한 달의 흐름", [
     "매달 손님이 찾아옵니다. 상담할 사람을 고르고, 맡지 않을 사람은 돌려보냅니다.",
     "한 달에 맡을 수 있는 사건 수는 사무실마다 다릅니다(4·5·6·7건, 고용 변호사가 있으면 +2~3건).",
