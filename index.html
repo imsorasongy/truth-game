@@ -84,10 +84,10 @@ p { margin: 0; }
 
 /* 버튼 */
 .btn { display: block; width: 100%; padding: 14px 16px; border-radius: 10px; border: 1px solid var(--brass-dim); background: var(--wood-2); text-align: left; font-size: 15px; transition: background .15s, border-color .15s; }
-.btn:hover:not(:disabled) { border-color: var(--brass); background: #3d2c21; }
+@media (hover: hover) { .btn:hover:not(:disabled) { border-color: var(--brass); background: #3d2c21; } }
 .btn:disabled { opacity: .38; cursor: default; }
 .btn.primary { background: var(--brass); color: var(--ink); border-color: var(--brass); font-weight: 600; text-align: center; }
-.btn.primary:hover:not(:disabled) { background: #d8b35c; }
+@media (hover: hover) { .btn.primary:hover:not(:disabled) { background: #d8b35c; } }
 .btn.ghost { background: transparent; text-align: center; }
 .btn small { display: block; color: var(--muted); font-size: 12.5px; }
 .btn.primary small { color: #3b3020; }
@@ -206,11 +206,11 @@ html[data-scene="court"] #backdrop::after { background: linear-gradient(180deg, 
 .snd { border: 1px solid #c9a24a66; background: transparent; color: var(--brass); border-radius: 99px; font-size: 11.5px; padding: 1px 9px; margin-left: auto; }
 
 .btn { border-style: solid; border-color: transparent; border-width: 9px 14px 9px 16px; border-image: url("assets/frame-choice.png") 32 42 32 46 fill / 9px 14px 9px 16px stretch; border-radius: 0; background: none; padding: 9px 10px; color: #f3e6cf; text-shadow: 0 1px 2px #000a; transition: filter .15s, transform .1s; }
-.btn:hover:not(:disabled) { background: none; filter: brightness(1.18); }
+@media (hover: hover) { .btn:hover:not(:disabled) { background: none; filter: brightness(1.18); } }
 .btn:active:not(:disabled) { transform: translateY(1px); }
 .btn small { color: #c9b89c; }
 .btn.primary { border: 1px solid #f1d98f; border-image: none; border-radius: 6px; background: linear-gradient(#e4c46e, #b38a34); color: #2a1c0c; text-shadow: none; padding: 14px 16px; box-shadow: inset 0 0 0 2px #7a5a1f40, 0 6px 18px #000a; }
-.btn.primary:hover:not(:disabled) { background: linear-gradient(#ecd081, #bf963d); filter: none; }
+@media (hover: hover) { .btn.primary:hover:not(:disabled) { background: linear-gradient(#ecd081, #bf963d); filter: none; } }
 .btn.ghost { border: 1px solid #c9a24a80; border-image: none; border-radius: 6px; background: #140d0999; padding: 13px 16px; }
 
 .scene { border: 16px solid transparent; border-image: url("assets/frame-modal.webp") 100 / 16px stretch; border-radius: 0; background: #1a120d; box-shadow: 0 14px 36px #000c; aspect-ratio: auto; width: min(100%, 260px); height: min(calc(100vw - 32px), 260px); max-height: none; margin-inline: auto; }
@@ -243,7 +243,8 @@ html[data-scene="court"] #backdrop::after { background: linear-gradient(180deg, 
 @supports (height: 100dvh) { .title-box { max-height: 100dvh; } }
 .title-box > img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .hot { position: absolute; left: 26.6%; width: 46.8%; height: 4.7%; background: transparent; border: none; border-radius: 6px; cursor: pointer; }
-.hot:hover, .hot:focus-visible { background: #c9a24a26; box-shadow: 0 0 0 2px #c9a24a99; outline: none; }
+.hot:focus-visible { background: #c9a24a26; box-shadow: 0 0 0 2px #c9a24a99; outline: none; }
+@media (hover: hover) { .hot:hover { background: #c9a24a26; box-shadow: 0 0 0 2px #c9a24a99; outline: none; } }
 .hot:active { background: #c9a24a40; }
 .title-snd { position: absolute; top: calc(10px + env(safe-area-inset-top, 0px)); right: 10px; }
 .title-snd .snd { background: #0b0806aa; }
@@ -468,11 +469,14 @@ html[data-scene^="end"] #backdrop::after { background: linear-gradient(180deg, #
 .v-act { display: flex; flex-direction: column; gap: 4px; }
 .visitor.dim { opacity: .6; }
 .gal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 6px; }
-.gal-tabs { display: flex; flex: none; gap: 6px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
-.gal-tabs::-webkit-scrollbar { display: none; }
-.gal-tab { flex: none; display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 6px 10px; border-radius: 8px; border: 1px solid #c9a24a44; background: #140d09cc; color: #c9b593; font: inherit; font-size: 13px; cursor: pointer; white-space: nowrap; }
+/* 서류철 모양: 분야 탭이 서류철 위로 비죽 나오고 겹친다. 탭은 줄을 바꿔 다 보이고, 서류철 본문은 높이가 고정이라 분야를 바꿔도 창 크기가 그대로다 */
+.folders { flex: none; display: flex; flex-direction: column; }
+.gal-tabs { display: flex; flex-wrap: wrap; padding: 0 6px; row-gap: 2px; position: relative; z-index: 1; margin-bottom: -1px; }
+.gal-tab { flex: none; display: flex; flex-direction: column; align-items: center; gap: 1px; margin-right: -6px; padding: 6px 12px 5px; border-radius: 9px 9px 0 0; border: 1px solid #c9a24a55; border-bottom: none; background: linear-gradient(#2a1d14, #1d140e); color: #a8916b; font: inherit; font-size: 13px; cursor: pointer; white-space: nowrap; box-shadow: -2px 0 4px #0006; position: relative; }
 .gal-tab small { font-size: 11px; opacity: .7; }
-.gal-tab.on { background: var(--brass); color: #1a120c; border-color: var(--brass); }
+.gal-tab.on { background: #3a291c; color: var(--brass); border-color: #c9a24a99; z-index: 3; padding-bottom: 7px; }
+.folder-body { border: 1px solid #c9a24a99; border-radius: 0 10px 10px 10px; background: #3a291c; padding: 10px; height: min(52vh, 460px); overflow-y: auto; box-shadow: 0 4px 10px #0007, inset 0 1px 0 #c9a24a33; }
+.folder-body.text { height: min(56vh, 520px); line-height: 1.7; font-size: 14px; color: #e8dcc2; }
 .gal-t { position: relative; aspect-ratio: 3 / 4; border-radius: 8px; overflow: hidden; border: 1px solid #c9a24a55; background: #2a1d14; padding: 0; cursor: pointer; }
 .gal-t img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 12%; }
 .gal-t span { position: absolute; left: 0; right: 0; bottom: 0; padding: 2px 3px; font-size: 10px; line-height: 1.3; color: #f1e6cf; background: #000c; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -611,16 +615,16 @@ details.howto .note { margin-top: 6px; }
    폰 화면판 규칙보다 앞서도록 html body 를 붙인다 */
 html body .btn { border:1px solid #c9a24a88; border-image:none; border-radius:10px; background:#2b1e15; color:#f3e6cf; text-shadow:none; box-shadow:none; filter:none;
   min-height:42px; padding:10px 14px; font-size:15px; line-height:1.4; text-align:center; display:block; }
-html body .btn:hover:not(:disabled) { background:#3a291c; border-color:#c9a24a; filter:none; }
+@media (hover: hover) { html body .btn:hover:not(:disabled) { background:#3a291c; border-color:#c9a24a; filter:none; } }
 html body .btn.ghost { background:#2b1e15; border:1px solid #c9a24a88; }
 html body .btn.primary { background:#d4b05a; border-color:#d4b05a; color:#1b120d; font-weight:600; min-height:46px; padding:10px 16px; }
-html body .btn.primary:hover:not(:disabled) { background:#ddba66; }
+@media (hover: hover) { html body .btn.primary:hover:not(:disabled) { background:#ddba66; } }
 html body .btn small { color:#c9b89c; font-size:12px; }
 html body .btn.primary small { color:#4a3a1c; }
 /* 대화 선택지: 상담 화면의 질문·판단 고르기, 이유 묻는 창의 보기 */
 html body .vn .vn-bottom .btn:not(.primary):not(.ghost), html body .k-why .btn:not(.primary):not([data-o="x"]), html body .stack .btn[data-k], html body .stack .btn[data-w] {
   border:none; border-left:3px solid #c9a24a; border-radius:4px; background:#3a281bee; text-align:left; padding:10px 14px; min-height:42px; }
-html body .vn .vn-bottom .btn:not(.primary):not(.ghost):hover:not(:disabled) { background:#4a3423; }
+@media (hover: hover) { html body .vn .vn-bottom .btn:not(.primary):not(.ghost):hover:not(:disabled) { background:#4a3423; } }
 html body .mini { display:inline-flex; align-items:center; justify-content:center; flex:none; white-space:nowrap; height:30px; padding:0 12px; border-radius:15px; border:1px solid #c9a24a88; background:#2b1e15; color:#f3e6cf; font-size:13px; }
 html body .mini.gold { background:#d4b05a; border-color:#d4b05a; color:#1b120d; font-weight:600; }
 html body .k-acts .btn { height:42px; min-height:42px; padding:0 6px; display:flex; flex-direction:row; align-items:center; justify-content:center; }
@@ -641,6 +645,10 @@ html, body { height: 100%; overflow: hidden; }
 #app.vn { top: 0; padding: 0; overflow: hidden; display: block; }
 .dock { left: 0; right: 0; margin: 0 auto; max-width: 480px; bottom: calc(62px + env(safe-area-inset-bottom, 0px)); padding-bottom: 0; background: linear-gradient(transparent, #0d0806f0 40%); }
 .dock .wrap { padding-block: 14px 8px; }
+/* 아래 버튼 띠의 투명한 윗부분이 입력 칸이나 버튼을 덮어 누름을 가로채지 않게 한다. 띠가 있으면 본문 아래에 그만큼 여백을 둔다 */
+.dock { pointer-events: none; }
+.dock .wrap { pointer-events: auto; }
+body.has-dock #app:not(.vn) { padding-bottom: 96px; }
 
 /* 아래 탭 */
 #tabs { position: fixed; left: 0; right: 0; bottom: 0; margin: 0 auto; max-width: 480px; z-index: 8; display: grid; grid-template-columns: repeat(5, 1fr); height: calc(62px + env(safe-area-inset-bottom, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); background: #0d0806f5; border-top: 1px solid #c9a24a44; }
@@ -22264,8 +22272,9 @@ function renderHud() {
   on("#hudTap", () => { hudOpen = !hudOpen; renderHud(); });
 }
 function setDock(html) {
-  if (!html) { dock.hidden = true; dockInner.innerHTML = ""; return; }
+  if (!html) { dock.hidden = true; dockInner.innerHTML = ""; document.body.classList.remove("has-dock"); return; }
   dock.hidden = false; dockInner.innerHTML = html;
+  document.body.classList.add("has-dock");
 }
 
 /* ---------- 음악 (예전 게임 배경음악) ---------- */
@@ -22393,7 +22402,7 @@ const STORY_STEPS = [
   { need: 20, after: 30, fee: { m: 500, f: 100 } },
   { need: 50, after: 60, jump: 4, day: { m: 59, f: 49 }, fee: { m: 3000, f: 1500 } },
   { need: 75, after: 85, day: { m: 66, f: 59 }, fee: { m: 5000, f: 4000 } },
-  { need: 100, after: 100, day: { m: 75, f: 63 }, fee: { m: 3000, f: 10000 } }
+  { need: 100, after: 100, day: { m: 75, f: 63 }, fee: { m: 0, f: 10000 } }
 ];
 // 판결 결과별로 받는 비율: 일부승소·감형과 특검 사건의 유죄 결말은 절반
 const STORY_PAY = { win: 1, quiet: 1, partial: 0.5, truth: 0.5 };
@@ -22433,6 +22442,8 @@ function storyNotice(title, rows, next) {
   document.body.appendChild(ov);
   ov.querySelector("#stOk").onclick = () => { ov.remove(); next(); };
 }
+// 남주 4장(비밀누설 사건) 기일 사이: 의뢰인 비밀을 법정에서 공개한 변호사라는 보도 뒤로 일반 의뢰인이 오지 않는다
+function noGuests() { const st = S && S.story; return isStory() && (S.hero || "m") === "m" && !!(st && st.adjourn && st.adjourn.n === 3); }
 function storyCheck(next) {
   const st = S.story || (S.story = { next: 0 });
   if (st.done || st.next >= STORY_STEPS.length || st.snooze === S.day) return false;
@@ -22465,7 +22476,11 @@ function storyCheck(next) {
 function storyResult(res, end, step, n, hero, next) {
   const st = S.story;
   {
-    if (res === "adjourn") { st.adjourn = { n, day: S.day }; save(); return storyNotice("다음 기일", ["재판이 다음 달로 이어집니다. 그동안 일반 사건을 맡을 수 있습니다."], next); }
+    if (res === "adjourn") {
+      st.adjourn = { n, day: S.day };
+      if (noGuests()) { S.today = (S.today || []).filter(t => t.status !== "wait"); save(); return storyNotice("다음 기일", ["재판이 다음 달로 이어집니다.", "의뢰인의 비밀을 법정에서 공개한 변호사라는 기사가 나간 뒤로, 사무실을 찾는 의뢰인이 없습니다."], next); }
+      save(); return storyNotice("다음 기일", ["재판이 다음 달로 이어집니다. 그동안 일반 사건을 맡을 수 있습니다."], next);
+    }
     delete st.adjourn;
     if (res === "lose") { st.snooze = S.day; save(); return storyNotice("배드 엔딩", ["이 사건을 이기지 못했습니다. 다음 달에 다시 맡을 수 있습니다."], next); }
     if (res === "left") { st.snooze = S.day; S.rep = Math.max(0, S.rep - 3); save(); return storyNotice("의뢰인이 떠났습니다", ["보수 없이 사건이 끝났습니다. 명성 −3", "다음 달에 의뢰인이 다시 찾아올 수 있습니다."], next); }
@@ -22481,7 +22496,8 @@ function storyResult(res, end, step, n, hero, next) {
     const over = st.next >= STORY_STEPS.length || res === "refuse" || res === "quiet";
     if (over) st.done = true;
     save();
-    const rows = [pay ? `보수 <b>${won(pay)}</b> 입금` : "받은 보수가 없습니다."];
+    // 남주 4장은 한서준 자신이 피고인인 사건이라 보수가 없다
+    const rows = [pay ? `보수 <b>${won(pay)}</b> 입금` : hero === "m" && n === 3 ? "내가 피고인이었던 사건이라 받은 보수는 없습니다." : "받은 보수가 없습니다."];
     if (S.rep > before) rows.push(`명성 ${before} → <b>${S.rep}</b>`);
     storyNotice("사건 종결", rows, () => over ? storyEnd(next) : next());
   }
@@ -22597,10 +22613,14 @@ const HOWTO = [
   ["사건 갤러리", [
     "이긴 사건은 갤러리에 분류별로 모입니다. 새 게임을 시작해도 남습니다."]]
 ];
-function screenHowto(back) {
+function screenHowto(back, i = 0) {
+  // 서류철 모양: 항목 탭을 누르면 그 서류철이 앞으로 오고, 본문 크기는 그대로다
+  const [h, ps] = HOWTO[i];
+  const tabs = `<div class="gal-tabs">${HOWTO.map(([t], k) => `<button class="gal-tab ${k === i ? "on" : ""}" data-ht="${k}">${esc(t.split(":")[0])}</button>`).join("")}</div>`;
   show(`<div><div class="eyebrow">벼넥시트 외전 : 의뢰인의 진실</div><h2>게임 방법</h2></div>
-    <p class="note howto-tip">궁금한 항목을 누르면 설명이 펼쳐집니다.</p>${HOWTO.map(([h, ps]) => `<details class="pn howto"><summary class="pn-name">${esc(h)}</summary>${ps.map(p => `<p class="note">${esc(p)}</p>`).join("")}</details>`).join("")}`,
+    <div class="folders">${tabs}<div class="folder-body text"><div class="pn-name" style="margin-bottom:8px">${esc(h)}</div>${ps.map(p => `<p class="note" style="margin:0 0 8px">${esc(p)}</p>`).join("")}</div></div>`,
     `<button class="btn primary" id="howBack">돌아가기</button>`, "office");
+  on("[data-ht]", e => screenHowto(back, +e.currentTarget.dataset.ht));
   on("#howBack", back);
 }
 function screenOpening(next, i = 0, doneLabel = "개업하기", cards = OPENING) {
@@ -22628,11 +22648,13 @@ function resume() {
   S.office = S.office || 0; S.staff = S.staff || {};
   if (S.gameover) return screenBankrupt();
   if (!S.today || !S.today.length) planDay();
-  if (monthDone()) screenDayEnd(); else screenDayIntro();
+  // 손님이 없는 달(남주 4장 기일 사이)도 달 시작 화면을 거쳐야 이어 할 기일이 열린다
+  if (monthDone() && !(noGuests() && S.paid !== S.day)) screenDayEnd(); else screenDayIntro();
 }
 
 /* ---------- 하루 계획 ---------- */
 function planDay() {
+  if (noGuests()) { S.today = []; S.idx = 0; S.dayLog = []; S.taken = 0; S.rumorShown = 0; return; }
   const [lo, hi] = visitorRange(S.rep);
   const n = Math.max(1, lo + Math.floor(Math.random() * (hi - lo + 1)) + office().guests - (S.rumor || 0));
   S.rumorShown = S.rumor || 0; S.rumor = 0;
@@ -22701,6 +22723,7 @@ function screenDayIntro() {
       ${full ? `<div class="note">이번 달 일정이 꽉 찼습니다.</div>` : ""}</div>
     <div class="visitors">${list}</div>
     ${S.rumorShown ? `<div class="pn warn">나쁜 소문이 돌아 이번 달 손님이 ${S.rumorShown}명 줄었습니다.</div>` : ""}
+    ${noGuests() ? `<div class="pn warn">'의뢰인 비밀 법정에서 폭로한 변호사' 기사가 나간 뒤로 사무실 전화가 울리지 않습니다. 이번 달에도 찾아온 의뢰인이 없습니다.</div>` : ""}
 `,
     monthDone() ? `<button class="btn primary" id="toEnd">이번 달 장부 보기</button>`
       : `<button class="btn ghost" id="closeMonth">남은 손님은 돌려보내고 달 마감</button>`);
@@ -22760,7 +22783,7 @@ function screenArchive(back, openId, tab) {
         ? `<button class="gal-t ${sel === c ? "on" : ""}" data-g="${c.id}">${portrait(c)}<span>${esc(c.category)}</span></button>`
         : `<div class="gal-t lock">?</div>`).join("")}</div>`;
   show(`<div><div class="eyebrow">모은 사건 ${got} / ${CASES.length}</div><h2>사건 갤러리</h2></div>
-    ${tabs}${detail}${secs}`,
+    ${detail}<div class="folders">${tabs}<div class="folder-body">${secs}</div></div>`,
     `<button class="btn primary" id="archBack">돌아가기</button>`, S && S.ended && back === screenEnding ? "end-top" : "office");
   on("[data-g]", e => screenArchive(back, e.currentTarget.dataset.g, cur));
   on("[data-gt]", e => screenArchive(back, null, e.currentTarget.dataset.gt));
@@ -23717,7 +23740,8 @@ function screenDayEnd() {
   // 고정비는 달마다 한 번만 뺀다
   if (S.paid !== S.day) {
     S.cost = monthlyCost(); S.tax = Math.round(money * TAX_RATE / 10) * 10; S.money -= S.cost + S.tax; S.paid = S.day;
-    S.deficit = S.money < 0 ? (S.deficit || 0) + 1 : 0;
+    // 남주 4장 기일 사이(의뢰인이 오지 않는 달)는 적자 개월 수를 세지 않는다
+    S.deficit = S.money < 0 ? (S.deficit || 0) + (noGuests() ? 0 : 1) : 0;
     S.moveNote = !!nextOffice() && S.rep >= nextOffice().need && !S.notified?.[S.office + 1];
     if (S.moveNote) { S.notified = S.notified || {}; S.notified[S.office + 1] = true; }
     save();
@@ -24838,11 +24862,7 @@ function opsAssign() {
       + `<i class="${x.who === "out" ? "on" : ""}" data-as="${i}" data-p="out">✕</i>`;
     return `<div class="k-card"><div class="portrait">${portrait(c)}</div><div style="min-width:0"><div class="nm">${esc(c.client.name)}${x.back ? ` <small class="note">다시 옴</small>` : ""}<span class="ct"><b class="k-tier">${"★".repeat(c.tier)}</b> ${kindLabel(c)} · ${esc(c.category)}</span></div><div class="k-pick">${picks}</div></div></div>`;
   };
-  show(`<div class="k-head"><h2>${monthLabel(S.day)} 의뢰인 ${S.list.length}명</h2><div class="k-cap">${head}</div></div>
-    <div class="k-list">${S.list.map(card).join("")}</div>`,
-    `<div class="row2"><button class="btn" id="asAuto">자동 배정</button><button class="btn primary" id="asDone">이대로 맡기기</button></div>`);
-  // 자동 배정: 아직 안 정한 사건만. 분야 맞는 사건은 그 변호사에게, 나머지는 큰 사건부터 대표 → 단계 높은 변호사 순으로
-  on("#asAuto", () => {
+  function autoAssign() {
     const todo = S.list.filter(x => !x.who).sort((a, b) => BY_ID[b.id].tier - BY_ID[a.id].tier);
     const free = () => S.assocs.filter(a => usedOf(a.id) < capOf(a.id));
     let done = 0;
@@ -24851,6 +24871,16 @@ function opsAssign() {
       if (usedOf("me") < capOf("me")) { x.who = "me"; done++; return; }
       const a = free().sort((p, q) => q.lvl - p.lvl || usedOf(p.id) - usedOf(q.id))[0]; if (a) { x.who = a.id; done++; }
     });
+    return done;
+  }
+  // 그달 배정 화면을 처음 열면 자동 배정을 먼저 해 둔다(바꾸고 싶으면 칸을 눌러 고친다)
+  if (S.autoDay !== S.day) { S.autoDay = S.day; if (!S.list.some(x => x.who)) autoAssign(); save(); }
+  show(`<div class="k-head"><h2>${monthLabel(S.day)} 의뢰인 ${S.list.length}명</h2><div class="k-cap">${head}</div></div>
+    <div class="k-list">${S.list.map(card).join("")}</div>`,
+    `<div class="row2"><button class="btn" id="asAuto">자동 배정</button><button class="btn primary" id="asDone">이대로 맡기기</button></div>`);
+  // 자동 배정: 아직 안 정한 사건만. 분야 맞는 사건은 그 변호사에게, 나머지는 큰 사건부터 대표 → 단계 높은 변호사 순으로
+  on("#asAuto", () => {
+    const done = autoAssign();
     const left = S.list.filter(x => !x.who).length;
     save(); opsAssign();
     toast(!done ? (left ? "맡을 사람이 없습니다." : "배정할 사건이 없습니다.") : left ? `${done}건 배정 · ${left}건은 자리가 없어 남았습니다.` : `${done}건 배정했습니다.`);
@@ -24867,6 +24897,9 @@ function opsAssign() {
     save(); renderHud();
   });
   on("#asDone", () => {
+    // 아무에게도 안 맡기고 누르면 의뢰인이 모두 돌아간다. 한 번 더 묻는다
+    if (!S.list.some(x => x.who && x.who !== "out") && !S.confirmOut) { S.confirmOut = true; return toast("맡긴 사건이 없습니다. 한 번 더 누르면 의뢰인을 모두 돌려보냅니다."); }
+    S.confirmOut = false;
     S.list.forEach(x => { if (!x.who || x.who === "out") { x.who = "out"; x.status = "out"; S.mon.out++; } });
     S.today = S.list.filter(x => x.who === "me").map(x => ({ id: x.id, status: "wait", pay: x.pay }));
     S.reports = S.list.filter(x => x.who !== "me" && x.who !== "out").map(x => opsMakeReport(x));
