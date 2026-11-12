@@ -471,8 +471,8 @@ html[data-scene^="end"] #backdrop::after { background: linear-gradient(180deg, #
 .gal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 6px; }
 /* 서류철 모양: 분야 탭이 서류철 위로 비죽 나오고 겹친다. 탭은 줄을 바꿔 다 보이고, 서류철 본문은 높이가 고정이라 분야를 바꿔도 창 크기가 그대로다 */
 .folders { flex: none; display: flex; flex-direction: column; }
-.gal-tabs { display: flex; flex-wrap: wrap; padding: 0 6px; row-gap: 2px; position: relative; z-index: 1; margin-bottom: -1px; }
-.gal-tab { flex: none; display: flex; flex-direction: column; align-items: center; gap: 1px; margin-right: -6px; padding: 6px 12px 5px; border-radius: 9px 9px 0 0; border: 1px solid #c9a24a55; border-bottom: none; background: linear-gradient(#2a1d14, #1d140e); color: #a8916b; font: inherit; font-size: 13px; cursor: pointer; white-space: nowrap; box-shadow: -2px 0 4px #0006; position: relative; }
+.gal-tabs { display: grid; grid-template-columns: repeat(var(--cols, 3), 1fr); gap: 3px 3px; padding: 0 2px; position: relative; z-index: 1; margin-bottom: -1px; }
+.gal-tab { min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; height: 46px; padding: 4px 4px; border-radius: 9px 9px 0 0; border: 1px solid #c9a24a55; border-bottom: none; background: linear-gradient(#2a1d14, #1d140e); color: #a8916b; font: inherit; font-size: 13px; line-height: 1.2; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; position: relative; }
 .gal-tab small { font-size: 11px; opacity: .7; }
 .gal-tab.on { background: #3a291c; color: var(--brass); border-color: #c9a24a99; z-index: 3; padding-bottom: 7px; }
 .folder-body { border: 1px solid #c9a24a99; border-radius: 0 10px 10px 10px; background: #3a291c; padding: 10px; height: min(52vh, 460px); overflow-y: auto; box-shadow: 0 4px 10px #0007, inset 0 1px 0 #c9a24a33; }
@@ -22392,8 +22392,18 @@ function startNew() {
     <button class="btn ghost" id="mdOps" style="text-align:center">운영 모드</button>
     <button class="btn ghost" id="mdStory" style="text-align:center">스토리 모드</button></div>`;
   document.body.appendChild(ov);
-  // 스토리 모드는 바로 들어간다(비밀번호 입력은 잠시 꺼 둠)
-  ov.querySelector("#mdStory").onclick = () => { ov.remove(); S.mode = "story"; S.story = { next: 0 }; screenCreate(); };
+  // 스토리 모드: 남주·여주 이야기와, 둘 다 리얼 엔딩으로 깨야 열리는 마지막 사건을 함께 보여 준다
+  ov.querySelector("#mdStory").onclick = () => {
+    const t = trueLoad(), open = hiddenOpen(), both = !!(t.m && t.f);
+    const mark = ok => ok ? "깸" : "아직";
+    ov.innerHTML = `<div class="sp-card"><div class="sp-name">스토리 모드</div>
+      <button class="btn primary" id="stNew" style="text-align:center">이야기 시작<small style="display:block;font-weight:400;opacity:.8">남주 4장 · 여주 4장</small></button>
+      <button class="btn ${open ? "primary" : "ghost"}" id="stLast" style="text-align:center"${open ? "" : " disabled"}>${open ? "" : "🔒 "}마지막 사건<small style="display:block;font-weight:400;opacity:.8">${open ? "그리고 아무도 말하지 않았다" : both ? "준비 중입니다. 곧 열립니다" : `남주 4장 · 여주 4장을 모두 리얼 엔딩으로 깨면 열립니다<br>남주 ${mark(t.m)} · 여주 ${mark(t.f)}`}</small></button>
+      <button class="btn ghost" id="stBack" style="text-align:center">뒤로</button></div>`;
+    ov.querySelector("#stNew").onclick = () => { ov.remove(); S.mode = "story"; S.story = { next: 0 }; screenCreate(); };
+    ov.querySelector("#stBack").onclick = () => { ov.remove(); startNew(); };
+    if (open) ov.querySelector("#stLast").onclick = () => { ov.remove(); playHidden(); };
+  };
   ov.querySelector("#mdSpeed").onclick = () => { ov.remove(); screenCreate(); };
   ov.querySelector("#mdOps").onclick = () => { ov.remove(); S.mode = "opsNew"; screenCreate(); };
 }
@@ -22516,7 +22526,7 @@ function storyResult(res, end, step, n, hero, next) {
 const TRUE_KEY = KEY + "-trueend";
 function trueLoad() { try { return JSON.parse(localStorage.getItem(TRUE_KEY)) || {}; } catch (e) { return {}; } }
 function trueSave(t) { try { localStorage.setItem(TRUE_KEY, JSON.stringify(t)); } catch (e) {} }
-// 마지막 이야기는 아직 쓰는 중이라 버튼은 숨겨 둔다(트루엔딩 기록은 지금부터 남긴다)
+// 마지막 사건: 남주 4장 win + 여주 4장 truth_bond를 모두 보면 열린다. 원고를 다시 쓰는 동안은 잠가 둔다(조건을 채우면 '준비 중')
 const HIDDEN_READY = false;
 const hiddenOpen = () => { const t = trueLoad(); return HIDDEN_READY && !!(t.m && t.f); };
 // 두 이야기의 트루엔딩을 모두 봤을 때 타이틀에서 여는 마지막 이야기(story.html의 h1)
@@ -22641,16 +22651,15 @@ const HOWTO = [
   ["사건 갤러리", [
     "이긴 사건은 갤러리에 분류별로 모입니다. 새 게임을 시작해도 남습니다."]]
 ];
-function screenHowto(back, i = 0) {
-  // 서류철 모양: 항목 탭을 누르면 그 서류철이 앞으로 오고, 본문 크기는 그대로다
-  const [h, ps] = HOWTO[i];
-  const tabs = `<div class="gal-tabs">${HOWTO.map(([t], k) => `<button class="gal-tab ${k === i ? "on" : ""}" data-ht="${k}">${esc(t.split(":")[0])}</button>`).join("")}</div>`;
+function screenHowto(back) {
   show(`<div><div class="eyebrow">벼넥시트 외전 : 의뢰인의 진실</div><h2>게임 방법</h2></div>
-    <div class="folders">${tabs}<div class="folder-body text"><div class="pn-name" style="margin-bottom:8px">${esc(h)}</div>${ps.map(p => `<p class="note" style="margin:0 0 8px">${esc(p)}</p>`).join("")}</div></div>`,
+    <p class="note howto-tip">궁금한 항목을 누르면 설명이 펼쳐집니다.</p>${HOWTO.map(([h, ps]) => `<details class="pn howto"><summary class="pn-name">${esc(h)}</summary>${ps.map(p => `<p class="note">${esc(p)}</p>`).join("")}</details>`).join("")}`,
     `<button class="btn primary" id="howBack">돌아가기</button>`, "office");
-  on("[data-ht]", e => screenHowto(back, +e.currentTarget.dataset.ht));
   on("#howBack", back);
+  // 아래 탭에서 갤러리를 열었다가 돌아오면 다시 게임 방법 화면으로
+  screenBack = () => screenHowto(back);
 }
+var screenBack = null;
 function screenOpening(next, i = 0, doneLabel = "개업하기", cards = OPENING) {
   const o = cards[i], last = i === cards.length - 1, hero = heroOf();
   const name = who().name || hero.name, firm = who().firm || "새벽 법률사무소";
@@ -22801,20 +22810,20 @@ function screenArchive(back, openId, tab) {
   const detail = sel ? `<div class="file gal-open"><div class="gal-head"><div class="portrait">${portrait(sel)}</div>
       <div><div class="vn">${esc(sel.client.name)} · ${esc(sel.category)}</div><div class="vm">${caseNo(sel)} · <b class="pos">${resultLabel(sel, "win")}</b>${g[openId].money ? ` · 수임료 ${won(g[openId].money)}` : ""}</div></div></div>
       <div class="file-body"><div class="judgment"><div class="lbl">주문</div>${esc(sel.outcomes.win)}</div><p class="note">${esc(sel.epilogue)}</p></div></div>` : "";
-  const cur = tab || (sel ? groupOf(sel) : GROUPS[0]);
-  const tabs = `<div class="gal-tabs">${GROUPS.map(gr => {
+  // 처음엔 모두 접어 두고, 사건을 눌러 다시 그릴 때만 그 분야를 펼쳐 둔다
+  let cur = tab || (sel ? groupOf(sel) : null);
+  const folders = GROUPS.map(gr => {
     const list = CASES.filter(c => groupOf(c) === gr), n = list.filter(c => g[c.id]).length;
-    return `<button class="gal-tab ${gr === cur ? "on" : ""}" data-gt="${gr}">${gr.replace(" · ", "·")}<small>${n}/${list.length}</small></button>`;
-  }).join("")}</div>`;
-  const list = CASES.filter(c => groupOf(c) === cur);
-  const secs = `<div class="gal-grid">${list.map(c => g[c.id]
+    const grid = `<div class="gal-grid">${list.map(c => g[c.id]
         ? `<button class="gal-t ${sel === c ? "on" : ""}" data-g="${c.id}">${portrait(c)}<span>${esc(c.category)}</span></button>`
         : `<div class="gal-t lock">?</div>`).join("")}</div>`;
+    return `<details class="pn howto" data-gr="${gr}"${gr === cur ? " open" : ""}><summary class="pn-name"><span>${esc(gr.replace(/ · /g, "·"))} <small class="note" style="font-size:12px;margin-left:6px">${n}/${list.length}</small></span></summary>${grid}</details>`;
+  }).join("");
   show(`<div><div class="eyebrow">모은 사건 ${got} / ${CASES.length}</div><h2>사건 갤러리</h2></div>
-    ${detail}<div class="folders">${tabs}<div class="folder-body">${secs}</div></div>`,
+    ${detail}${folders}`,
     `<button class="btn primary" id="archBack">돌아가기</button>`, S && S.ended && back === screenEnding ? "end-top" : "office");
   on("[data-g]", e => screenArchive(back, e.currentTarget.dataset.g, cur));
-  on("[data-gt]", e => screenArchive(back, null, e.currentTarget.dataset.gt));
+  document.querySelectorAll("details[data-gr]").forEach(d => d.addEventListener("toggle", () => { if (d.open) cur = d.dataset.gr; }));
   on("#archBack", back);
   if (sel) app.scrollTop = 0;
 }
@@ -25641,8 +25650,8 @@ function renderTabs() {
       const ld = app.querySelector(".log-drawer"); if (ld && showLog) ld.scrollTop = ld.scrollHeight;
     }
     if (k === "ev" || k === "log") { app.classList.toggle("show-ev", showEv); app.classList.toggle("show-logd", showLog); }
-    // 운영 모드는 하던 단계(배정·메뉴·결과·정산)로 돌아간다
-    const back = () => isOps() ? opsResume() : monthDone() ? screenDayEnd() : screenDayIntro();
+    // 게임 방법처럼 게임 밖 화면에서 열었으면 그 화면으로, 게임 중이면 하던 단계로 돌아간다(운영 모드는 배정·메뉴·결과·정산)
+    const back = screenBack || (() => !S ? screenCover() : isOps() ? opsResume() : monthDone() ? screenDayEnd() : screenDayIntro());
     if (k === "arc") return screenArchive(back);
     if (k === "ofc") { officeBack = back; return screenOffice(); }
     if (k === "snd") toggleSound();
@@ -25651,6 +25660,8 @@ function renderTabs() {
 }
 function show(html, dockHtml, scene = "office", track) {
   tutScreen = null; tutRefresh();
+  // 화면이 바뀌면 '이 화면으로 돌아오기'는 그 화면이 새로 정한다(게임 방법 화면 등)
+  screenBack = null;
   setScene(scene);
   music(track || (scene === "court" ? "trial" : "normal"));
   renderHud();
