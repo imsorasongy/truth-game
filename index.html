@@ -22399,7 +22399,7 @@ function startNew() {
     ov.innerHTML = `<div class="sp-card"><div class="sp-name">스토리 모드</div>
       <button class="btn primary" id="stNew" style="text-align:center">이야기 시작<small style="display:block;font-weight:400;opacity:.8">남주 4장 · 여주 4장</small></button>
       <button class="btn ${open ? "primary" : "ghost"}" id="stLast" style="text-align:center">${open ? "" : "🔒 "}마지막 사건<small style="display:block;font-weight:400;opacity:.8">${open ? "그리고 아무도 말하지 않았다" : both ? "준비 중입니다. 곧 열립니다" : `남주 4장 · 여주 4장을 모두 리얼 엔딩으로 깨면 열립니다<br>남주 ${mark(t.m)} · 여주 ${mark(t.f)}`}</small></button>
-      <div id="stPw" style="display:none;gap:8px;align-items:center"><input id="stPwIn" type="password" inputmode="numeric" maxlength="8" placeholder="테스트 비밀번호" style="flex:1;min-width:0"><button class="btn primary" id="stPwOk">확인</button></div>
+      <div id="stPw" style="display:none;width:100%;gap:8px;align-items:center"><input id="stPwIn" type="password" inputmode="numeric" maxlength="8" placeholder="테스트 비밀번호" autocomplete="off" style="flex:1 1 auto;width:100%;min-width:0;padding:10px 12px;font-size:16px;border-radius:8px;border:1px solid var(--brass);background:#120c08;color:#f3e7d3"><button class="btn primary" id="stPwOk" style="flex:0 0 auto;width:auto">확인</button></div>
       <div id="stPwMsg" class="sp-row" style="display:none">비밀번호가 맞지 않습니다.</div>
       <button class="btn ghost" id="stBack" style="text-align:center">뒤로</button></div>`;
     ov.querySelector("#stNew").onclick = () => { ov.remove(); S.mode = "story"; S.story = { next: 0 }; screenCreate(); };
