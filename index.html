@@ -649,6 +649,7 @@ html, body { height: 100%; overflow: hidden; }
 .dock { pointer-events: none; }
 .dock .wrap { pointer-events: auto; }
 body.has-dock #app:not(.vn) { padding-bottom: 96px; }
+.title-box .hidden-story { position: absolute; left: 50%; top: 72%; transform: translateX(-50%); width: 56%; z-index: 2; box-shadow: 0 0 18px #c9a24a88; }
 
 /* 아래 탭 */
 #tabs { position: fixed; left: 0; right: 0; bottom: 0; margin: 0 auto; max-width: 480px; z-index: 8; display: grid; grid-template-columns: repeat(5, 1fr); height: calc(62px + env(safe-area-inset-bottom, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); background: #0d0806f5; border-top: 1px solid #c9a24a44; }
@@ -22351,6 +22352,7 @@ function screenCover() {
       <button class="hot" style="top:81.8%" id="new" aria-label="새로 시작"></button>
       <button class="hot" style="top:87.6%" id="cont" aria-label="이어하기"></button>
       <button class="hot" style="top:93.3%" id="howto" aria-label="게임 방법"></button>
+      ${hiddenOpen() ? `<button class="btn primary hidden-story" id="hiddenStory">마지막 이야기</button>` : ""}
       <div id="titlePop"></div>
     </div>
   </section>`;
@@ -22358,6 +22360,7 @@ function screenCover() {
   const pop = html => { document.getElementById("titlePop").innerHTML = html ? `<div class="title-pop">${html}</div>` : ""; };
   on(".snd", toggleSound);
   on("#howto", () => screenHowto(screenCover));
+  on("#hiddenStory", () => playHidden());
   // 저장 칸 고르기
   const slotRow = n => {
     const v = loadSlot(n);
@@ -22489,6 +22492,10 @@ function storyResult(res, end, step, n, hero, next) {
       return storyEnd(next, res === "left" ? "의뢰인이 떠났습니다" : "이 사건을 이기지 못했습니다");
     }
     st.hist[hero + (n + 1)] = end || res;
+    // 히든 스토리: 남주 최종 win, 여주 4장 truth_bond를 본 적이 있으면 저장 칸과 상관없이 기록한다
+    if (n === STORY_STEPS.length - 1 && ((hero === "m" && /^win(~|$)/.test(end || "")) || (hero === "f" && /^truth_bond(~|$)/.test(end || "")))) {
+      const t = trueLoad(); t[hero] = { ...st.hist }; trueSave(t);
+    }
     st.jumped = false;
     const pay = Math.round(step.fee[hero] * (STORY_PAY[res] || 0));
     S.money += pay;
@@ -22505,6 +22512,23 @@ function storyResult(res, end, step, n, hero, next) {
     if (S.rep > before) rows.push(`명성 ${before} → <b>${S.rep}</b>`);
     storyNotice("사건 종결", rows, () => over ? storyEnd(next) : next());
   }
+}
+const TRUE_KEY = KEY + "-trueend";
+function trueLoad() { try { return JSON.parse(localStorage.getItem(TRUE_KEY)) || {}; } catch (e) { return {}; } }
+function trueSave(t) { try { localStorage.setItem(TRUE_KEY, JSON.stringify(t)); } catch (e) {} }
+// 마지막 이야기는 아직 쓰는 중이라 버튼은 숨겨 둔다(트루엔딩 기록은 지금부터 남긴다)
+const HIDDEN_READY = false;
+const hiddenOpen = () => { const t = trueLoad(); return HIDDEN_READY && !!(t.m && t.f); };
+// 두 이야기의 트루엔딩을 모두 봤을 때 타이틀에서 여는 마지막 이야기(story.html의 h1)
+function playHidden(resume) {
+  const t = trueLoad(), hist = { ...(t.m || {}), ...(t.f || {}) };
+  // 기일 사이(adjourn)에는 본 게임 달이 없으니 바로 다음 기일로 이어 연다. 중간에 끊겼으면 타이틀에서 이어서 연다
+  const q = "ch=h1&office=2&hist=" + Object.entries(hist).map(([k, v]) => k + "." + v).join(",") + (resume || t.h1adj ? "&resume=1" : "");
+  storyFrame(q, (res, end) => {
+    if (res === "adjourn") { trueSave({ ...trueLoad(), h1adj: true }); return playHidden(true); }
+    const t2 = trueLoad(); delete t2.h1adj; if (res === "win") t2.h1 = end || res; trueSave(t2);
+    storyNotice(res === "win" ? "마지막 이야기 완결" : "배드 엔딩", [res === "win" ? "한서준과 윤서연의 마지막 이야기가 끝났습니다." : "마지막 재판을 이기지 못했습니다. 이야기는 여기서 끝납니다."], screenCover);
+  });
 }
 function storyEnd(next, bad) {
   const ov = document.createElement("div");
