@@ -22440,7 +22440,7 @@ function storyFrame(query, done) {
   out.style.opacity = 1;
   setTimeout(() => {
     const f = document.createElement("iframe");
-    f.src = "story.html?" + query;
+    f.src = "story.html?" + query + (/slot=/.test(query) ? "" : "&slot=" + SLOT);
     f.title = "스토리";
     f.style.cssText = "position:fixed;inset:0;width:100%;height:100%;border:0;z-index:9999;background:#000";
     f.onload = () => out.remove();
@@ -22486,6 +22486,8 @@ function storyCheck(next) {
   // 1장은 일반 사건 2달 뒤 명성 20이면 열리고, 미달이어도 5개월째에는 열린다
   if (!(n === 0 ? (S.rep >= step.need && S.day >= 3) || S.day >= 5 : S.rep >= step.need)) return false;
   const hero = S.hero || "m";
+  // 조사하다 끊긴 장이면 자동 저장된 자리에서 이어서 연다
+  if (st.playing === n) { storyFrame(`ch=${hero}${n + 1}&office=${S.office || 0}&resume=1&hist=${Object.entries(st.hist || {}).map(([k, v]) => k + "." + v).join(",")}`, (res, end) => storyResult(res, end, step, n, hero, next)); return true; }
   // 명성 50이 되면 4년 뒤로 넘어가면서 사무실도 서초동 법조타운으로 옮겨 놓는다
   const prevOffice = S.office || 0;
   if (step.jump && !st.jumped) S.office = Math.max(S.office || 0, 2);
@@ -22495,12 +22497,14 @@ function storyCheck(next) {
   if (step.jump && !st.jumped) q += `&jump=${step.jump}`;
   if (step.day) S.day = Math.max(S.day, step.day[hero]);
   st.jumped = !!step.jump || st.jumped;
+  st.playing = n; storyClearMid(hero + (n + 1), SLOT);
   save();
   storyFrame(q, (res, end) => storyResult(res, end, step, n, hero, next));
   return true;
 }
 function storyResult(res, end, step, n, hero, next) {
   const st = S.story;
+  delete st.playing;
   {
     if (res === "adjourn") {
       st.adjourn = { n, day: S.day };
@@ -22512,7 +22516,7 @@ function storyResult(res, end, step, n, hero, next) {
     if (res === "lose" || res === "left") {
       if (res === "left") S.rep = Math.max(0, S.rep - 3);
       st.done = true; st.bad = res; save();
-      return storyEnd(next, res === "left" ? "의뢰인이 떠났습니다" : "이 사건을 이기지 못했습니다");
+      return storyEnd(storyBadMsg(res));
     }
     st.hist[hero + (n + 1)] = end || res;
     // 히든 스토리: 남주 최종 win, 여주 4장 truth_bond를 본 적이 있으면 저장 칸과 상관없이 기록한다
@@ -22533,7 +22537,7 @@ function storyResult(res, end, step, n, hero, next) {
     // 남주 4장은 한서준 자신이 피고인인 사건이라 보수가 없다
     const rows = [pay ? `보수 <b>${won(pay)}</b> 입금` : hero === "m" && n === 3 ? "내가 피고인이었던 사건이라 받은 보수는 없습니다." : "받은 보수가 없습니다."];
     if (S.rep > before) rows.push(`명성 ${before} → <b>${S.rep}</b>`);
-    storyNotice("사건 종결", rows, () => over ? storyEnd(next) : next());
+    storyNotice("사건 종결", rows, () => over ? storyEnd() : next());
   }
 }
 const TRUE_KEY = KEY + "-trueend";
@@ -22546,21 +22550,29 @@ const hiddenOpen = () => { const t = trueLoad(); return HIDDEN_READY && !!(t.m &
 function playHidden(resume) {
   const t = trueLoad(), hist = { ...(t.m || {}), ...(t.f || {}) };
   // 기일 사이(adjourn)에는 본 게임 달이 없으니 바로 다음 기일로 이어 연다. 중간에 끊겼으면 타이틀에서 이어서 연다
-  const q = "ch=h1&office=2&hist=" + Object.entries(hist).map(([k, v]) => k + "." + v).join(",") + (resume || t.h1adj ? "&resume=1" : "");
+  // 조사하다 끊겼으면(h1mid) 자동 저장된 자리에서 이어서 연다
+  const cont = resume || t.h1adj || t.h1mid;
+  if (!cont) storyClearMid("h1", "h");
+  trueSave({ ...trueLoad(), h1mid: true });
+  const q = "ch=h1&office=2&slot=h&hist=" + Object.entries(hist).map(([k, v]) => k + "." + v).join(",") + (cont ? "&resume=1" : "");
   storyFrame(q, (res, end) => {
     if (res === "adjourn") { trueSave({ ...trueLoad(), h1adj: true }); return playHidden(true); }
-    const t2 = trueLoad(); delete t2.h1adj; if (res === "win") t2.h1 = end || res; trueSave(t2);
+    const t2 = trueLoad(); delete t2.h1adj; delete t2.h1mid; if (res === "win") t2.h1 = end || res; trueSave(t2);
     storyNotice(res === "win" ? "마지막 이야기 완결" : "배드 엔딩", [res === "win" ? "한서준과 윤서연의 마지막 이야기가 끝났습니다." : "마지막 재판을 이기지 못했습니다. 이야기는 여기서 끝납니다."], screenCover);
   });
 }
-function storyEnd(next, bad) {
+// 스토리 모드는 엔딩을 보면 그 판이 끝난다(일반 사건으로 이어 가지 않는다). 저장 칸을 불러와도 이 화면이 다시 뜬다
+const storyBadMsg = r => r === "left" ? "의뢰인이 떠났습니다" : "이 사건을 이기지 못했습니다";
+// 새로 여는 장은 예전 자동 저장을 지운다(같은 칸에서 새 게임을 시작한 경우 등)
+function storyClearMid(ch, slot) { try { localStorage.removeItem("truth-story-resume-" + slot + "-" + ch); localStorage.removeItem("truth-story-resume-" + ch); } catch (e) {} }
+function storyEnd(bad) {
+  S.ended = true; save();
   const ov = document.createElement("div");
   ov.className = "staff-pop";
   ov.innerHTML = `<div class="sp-card"><div class="sp-name">${bad ? "배드 엔딩" : "스토리 완결"}</div>${bad ? `<div class="sp-row">${bad}.</div>` : ""}<div class="sp-row">${esc(S.name || heroOf().name)} 변호사의 이야기${bad ? "는 여기서" : "가"} 끝났습니다.</div>${bad ? `<div class="sp-row">처음부터 다시 하려면 새 게임을 시작하세요.</div>` : ""}
-    <div class="row2"><button class="btn ghost" id="stTitle">처음 화면으로</button><button class="btn primary" id="stGo">일반 사건 계속</button></div></div>`;
+    <div class="row2"><button class="btn primary" id="stTitle">처음 화면으로</button></div></div>`;
   document.body.appendChild(ov);
   ov.querySelector("#stTitle").onclick = () => { ov.remove(); screenCover(); };
-  ov.querySelector("#stGo").onclick = () => { ov.remove(); next(); };
 }
 
 /* ---------- 주인공·이름·사무소 정하기 ---------- */
@@ -22697,6 +22709,9 @@ function resume() {
   if (isOps()) return opsResume();
   S.office = S.office || 0; S.staff = S.staff || {};
   if (S.gameover) return screenBankrupt();
+  if (isStory() && S.story && S.story.done) { screenCover(); return storyEnd(S.story.bad && storyBadMsg(S.story.bad)); }
+  // 이야기 도중에 끊겼으면 그 장부터 이어서 연다
+  if (isStory() && S.story && S.story.playing != null && storyCheck(screenDayIntro)) return;
   if (!S.today || !S.today.length) planDay();
   // 손님이 없는 달(남주 4장 기일 사이)도 달 시작 화면을 거쳐야 이어 할 기일이 열린다
   if (monthDone() && !(noGuests() && S.paid !== S.day)) screenDayEnd(); else screenDayIntro();
