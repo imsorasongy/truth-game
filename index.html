@@ -427,20 +427,13 @@ html[data-scene^="end"] #backdrop::after { background: linear-gradient(180deg, #
 .ofc-tile { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left; font: inherit; color: inherit; cursor: pointer; }
 .ofc-tile .pn-name { font-size: 17px; }
 .sp-row.need { color: #e8a37a; }
-.term { border-bottom: 1px dotted currentColor; cursor: help; }
-.gl-pop .sp-card { align-items: stretch; text-align: left; }
-.gl-pop .gl-t { font-size: 18px; color: var(--brass); }
-.gl-pop .gl-d { font-size: 15px; line-height: 1.6; color: #efe3cf; }
-.gl-new { font-size: 12px; color: var(--brass); }
-.gl-idx { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 10px; }
-.gl-idx button { min-width: 34px; padding: 4px 8px; border: 1px solid var(--brass); border-radius: 8px; background: transparent; color: inherit; }
-.gl-idx button.off { opacity: .35; }
-.gloss-screen .pn { margin-bottom: 10px; }
-.gl-sec h3 { margin: 0 0 6px; font-size: 18px; color: var(--brass); }
-.gl-row { padding: 8px 0; border-bottom: 1px solid #ffffff1a; }
-.gl-row b { display: block; font-size: 16px; }
-.gl-row span { display: block; font-size: 14px; line-height: 1.55; opacity: .85; }
-.gl-row.lock b { opacity: .45; }
+.term { border-bottom: 1.5px dotted var(--brass); cursor: help; }
+.term.seen { border-bottom-color: #c9a24a66; }
+.gl-pop .sp-card { align-items: stretch; text-align: left; gap: 0; padding: 16px 18px 14px; background: #241a12; border: 1px solid var(--brass); box-shadow: inset 0 0 0 4px #241a12, inset 0 0 0 5px #c9a24a55; }
+.gl-pop .gl-k { font-size: 12px; letter-spacing: .12em; color: #c9a24acc; }
+.gl-pop .gl-t { font-family: var(--f-display); font-size: 26px; line-height: 1.25; color: #f3e4c2; margin: 4px 0 10px; }
+.gl-pop .gl-line { height: 1px; background: linear-gradient(90deg, var(--brass), #c9a24a00); margin-bottom: 10px; }
+.gl-pop .gl-d { font-size: 15.5px; line-height: 1.7; color: #efe3cf; margin-bottom: 14px; }
 .staff-pop { position: fixed; inset: 0; z-index: 26; display: flex; align-items: center; justify-content: center; padding: 20px; background: #000a; animation: fadein .2s; }
 .sp-card { width: min(100%, 320px); background: #1f150f; border: 1px solid var(--brass); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; align-items: center; gap: 8px; box-shadow: 0 14px 36px #000c; }
 .sp-face { width: 120px; height: 120px; border-radius: 50%; overflow: hidden; border: 3px solid var(--brass); background: #1a120d; }
@@ -666,7 +659,7 @@ body.has-dock #app:not(.vn) { padding-bottom: 96px; }
 .title-box .hidden-story { position: absolute; left: 50%; top: 72%; transform: translateX(-50%); width: 56%; z-index: 2; box-shadow: 0 0 18px #c9a24a88; }
 
 /* 아래 탭 */
-#tabs { position: fixed; left: 0; right: 0; bottom: 0; margin: 0 auto; max-width: 480px; z-index: 8; display: grid; grid-template-columns: repeat(6, 1fr); height: calc(62px + env(safe-area-inset-bottom, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); background: #0d0806f5; border-top: 1px solid #c9a24a44; }
+#tabs { position: fixed; left: 0; right: 0; bottom: 0; margin: 0 auto; max-width: 480px; z-index: 8; display: grid; grid-template-columns: repeat(5, 1fr); height: calc(62px + env(safe-area-inset-bottom, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); background: #0d0806f5; border-top: 1px solid #c9a24a44; }
 #tabs .tab { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11px; color: var(--muted); background: none; border: none; }
 #tabs .tab svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 #tabs .tab.on { color: var(--brass); }
@@ -22826,7 +22819,7 @@ function screenDayIntro() {
 
 /* ---------- 사건 파일철: 이긴 사건 모음 ---------- */
 /* ---------- 용어 풀이와 용어 도감 ----------
-   화면 글에 나오는 법률·전문용어에 점선 밑줄을 긋고, 누르면 풀이를 띄운다. 한 번 본 용어는 도감에 모인다(새 게임을 해도 남는다) */
+   화면 글에 나오는 법률·전문용어에 점선 밑줄을 긋고, 누르면 풀이를 띄운다. 한 번 본 용어는 기억해 두고 밑줄을 옅게 한다(새 게임을 해도 남는다) */
 const GLOSSARY = {
 "기각": "법원이 청구나 신청을 따져 본 뒤 이유가 없다고 받아들이지 않는 것이다. 형사 항소를 기각하면 1심 판결이 그대로 유지된다.",
 "각하한다": "법원이 내용을 따져 보기 전에, 소송을 낼 자격이나 기간 같은 형식 요건이 맞지 않아 받아들이지 않는 것이다.",
@@ -23160,27 +23153,33 @@ function termify(root) {
   if (!root) return;
   const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: n => {
     const el = n.parentElement;
-    if (!el || el.closest("button, input, textarea, select, .term, script, style, #tabs, .hud, .gl-pop, .gloss-screen")) return NodeFilter.FILTER_REJECT;
+    if (!el || el.closest("button, input, textarea, select, .term, script, style, #tabs, .hud, .gl-pop")) return NodeFilter.FILTER_REJECT;
     GLOSS_RE.lastIndex = 0;
     return GLOSS_RE.test(n.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
   } });
   const nodes = []; while (w.nextNode()) nodes.push(w.currentNode);
+  // 화면에 이미 밑줄이 있는 용어는 다시 긋지 않는다(같은 용어는 처음 한 번만)
+  const shown = new Set([...document.querySelectorAll(".term")].map(t => t.dataset.term)), seen = glossLoad();
   nodes.forEach(n => {
     const txt = n.nodeValue, frag = document.createDocumentFragment(); let last = 0;
     GLOSS_RE.lastIndex = 0;
     txt.replace(GLOSS_RE, (m, i) => {
+      if (shown.has(m)) return m;
+      shown.add(m);
       if (i > last) frag.appendChild(document.createTextNode(txt.slice(last, i)));
-      const sp = document.createElement("span"); sp.className = "term"; sp.dataset.term = m; sp.textContent = m; frag.appendChild(sp);
+      const sp = document.createElement("span"); sp.className = "term" + (seen.has(m) ? " seen" : ""); sp.dataset.term = m; sp.textContent = m; frag.appendChild(sp);
       last = i + m.length; return m;
     });
+    if (!last) return;
     if (last < txt.length) frag.appendChild(document.createTextNode(txt.slice(last)));
     n.parentNode.replaceChild(frag, n);
   });
 }
 function glossPop(t) {
-  const isNew = glossAdd(t);
+  glossAdd(t);
+  document.querySelectorAll(`.term[data-term="${CSS.escape(t)}"]`).forEach(el => el.classList.add("seen"));
   const ov = document.createElement("div"); ov.className = "staff-pop gl-pop";
-  ov.innerHTML = `<div class="sp-card">${isNew ? '<div class="gl-new">용어 도감에 추가</div>' : ""}<div class="gl-t">${esc(glName(t))}</div><div class="gl-d">${esc(GLOSSARY[t])}</div><button class="btn" id="glOk" style="text-align:center">닫기</button></div>`;
+  ov.innerHTML = `<div class="sp-card"><div class="gl-k">용어 풀이</div><div class="gl-t">${esc(glName(t))}</div><div class="gl-line"></div><div class="gl-d">${esc(GLOSSARY[t])}</div><button class="btn" id="glOk" style="text-align:center">닫기</button></div>`;
   document.body.appendChild(ov);
   const close = e => { e.stopPropagation(); ov.remove(); };
   ov.querySelector("#glOk").addEventListener("click", close);
@@ -23191,23 +23190,7 @@ document.addEventListener("click", e => { const t = e.target.closest && e.target
 // 화면이 바뀔 때마다 새로 그려진 글에 밑줄을 긋는다(대사가 한 글자씩 찍히는 동안은 기다렸다가)
 let glossTimer = null;
 new MutationObserver(() => { clearTimeout(glossTimer); glossTimer = setTimeout(() => termify(document.body), 150); }).observe(document.body, { childList: true, subtree: true, characterData: true });
-// ㄱㄴㄷ 순 도감
-const CHO = ["ㄱ", "ㄲ", "ㄴ", "ㄷ", "ㄸ", "ㄹ", "ㅁ", "ㅂ", "ㅃ", "ㅅ", "ㅆ", "ㅇ", "ㅈ", "ㅉ", "ㅊ", "ㅋ", "ㅌ", "ㅍ", "ㅎ"];
-const CHO_MERGE = { "ㄲ": "ㄱ", "ㄸ": "ㄷ", "ㅃ": "ㅂ", "ㅆ": "ㅅ", "ㅉ": "ㅈ" };
-function choOf(t) { const c = t.charCodeAt(0) - 0xAC00; if (c < 0 || c > 11171) return "A"; const k = CHO[Math.floor(c / 588)]; return CHO_MERGE[k] || k; }
-function screenGlossary(back) {
-  const got = glossLoad(), all = Object.keys(GLOSSARY).sort((a, b) => glName(a).localeCompare(glName(b), "ko"));
-  const heads = ["ㄱ", "ㄴ", "ㄷ", "ㄹ", "ㅁ", "ㅂ", "ㅅ", "ㅇ", "ㅈ", "ㅊ", "ㅋ", "ㅌ", "ㅍ", "ㅎ", "A"];
-  const by = {}; all.forEach(t => (by[choOf(glName(t))] = by[choOf(glName(t))] || []).push(t));
-  const idx = heads.filter(h => by[h]).map(h => `<button data-gj="${h}" class="${by[h].some(t => got.has(t)) ? "" : "off"}">${h === "A" ? "A-Z" : h}</button>`).join("");
-  const secs = heads.filter(h => by[h]).map(h => `<div class="pn gl-sec" id="gls-${h}"><h3>${h === "A" ? "A-Z" : h} <small class="note" style="font-size:12px">${by[h].filter(t => got.has(t)).length}/${by[h].length}</small></h3>${by[h].filter(t => got.has(t)).map(t => `<div class="gl-row"><b>${esc(glName(t))}</b><span>${esc(GLOSSARY[t])}</span></div>`).join("")}${by[h].some(t => !got.has(t)) ? `<div class="gl-row lock"><b>아직 모르는 용어 ${by[h].filter(t => !got.has(t)).length}개</b></div>` : ""}</div>`).join("");
-  show(`<div class="gloss-screen"><div class="eyebrow">모은 용어 ${[...got].filter(t => GLOSSARY[t]).length} / ${all.length}</div><h2>용어 도감</h2>
-    <div class="pn"><p class="note" style="margin:0">사건에 나오는 점선 밑줄 용어를 누르면 풀이를 보고 여기에 모을 수 있습니다.</p>
-    <div class="gl-idx">${idx}</div></div>${secs}</div>`,
-    `<button class="btn primary" id="glBack">돌아가기</button>`, "office");
-  on("[data-gj]", e => { const el = document.getElementById("gls-" + e.currentTarget.dataset.gj); if (el) el.scrollIntoView({ block: "start", behavior: "smooth" }); });
-  on("#glBack", back);
-}
+
 
 // 사건 갤러리: 이긴 사건을 분류별로 모은다(새 게임을 시작해도 남는다)
 const GAL_KEY = "lawyer-game-gallery";
@@ -23289,7 +23272,7 @@ document.addEventListener("click", e => {
   const tip = tutMsg ? { tap: "warn" } : tutScreen(); if (!tip || (!tip.sel && !tip.tap)) return;
   const t = e.target;
   if (t.closest("#tutb") || !t.closest("#app, #dock, #tabs")) return;
-  if (t.closest('input:not([type=radio]):not([type=checkbox]), textarea, select, .snd, [data-tab="ev"], [data-tab="log"], [data-tab="snd"], [data-tab="gls"]')) return;
+  if (t.closest('input:not([type=radio]):not([type=checkbox]), textarea, select, .snd, [data-tab="ev"], [data-tab="log"], [data-tab="snd"]')) return;
   const okSel = [tip.tap ? null : tip.sel, tip.ok].filter(Boolean).join(", ");
   if (okSel && [...document.querySelectorAll(okSel)].some(el => el.contains(t))) return;
   e.stopPropagation(); e.preventDefault();
@@ -26055,7 +26038,6 @@ const TAB_ICON = {
   ev: '<svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5"/></svg>',
   log: '<svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg>',
   arc: '<svg viewBox="0 0 24 24"><path d="M3 7h6l2 2h10v10H3z"/></svg>',
-  gls: '<svg viewBox="0 0 24 24"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/><path d="M9 8h6"/></svg>',
   ofc: '<svg viewBox="0 0 24 24"><path d="M4 21V5l8-3 8 3v16"/><path d="M9 21v-5h6v5M8 9h2M14 9h2M8 13h2M14 13h2"/></svg>',
   snd: '<svg viewBox="0 0 24 24"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>'
 };
@@ -26071,7 +26053,7 @@ function renderHud() {
 }
 function renderTabs() {
   const hasEv = !!app.querySelector(".ev-drawer"), hasTalk = !!app.querySelector(".log-drawer");
-  const items = [["ev", "증거", hasEv], ["log", "대화 기록", hasTalk], ["arc", "갤러리", !C], ["gls", "용어", true], ["ofc", "사무실", !C && !!S], ["snd", soundOn ? "음악 켬" : "음악 끔", true]];
+  const items = [["ev", "증거", hasEv], ["log", "대화 기록", hasTalk], ["arc", "갤러리", !C], ["ofc", "사무실", !C && !!S], ["snd", soundOn ? "음악 켬" : "음악 끔", true]];
   tabsEl.innerHTML = items.map(([k, l, ok]) => `<button class="tab ${ok ? "" : "off"} ${(k === "ev" && showEv) || (k === "log" && showLog) ? "on" : ""}" data-tab="${k}" ${ok ? "" : "disabled"}>${TAB_ICON[k]}<span>${l}</span></button>`).join("");
   tabsEl.querySelectorAll("[data-tab]").forEach(b => b.addEventListener("click", () => {
     const k = b.dataset.tab;
@@ -26085,7 +26067,6 @@ function renderTabs() {
     // 게임 방법처럼 게임 밖 화면에서 열었으면 그 화면으로, 게임 중이면 하던 단계로 돌아간다(운영 모드는 배정·메뉴·결과·정산)
     const back = screenBack || (() => !S ? screenCover() : isOps() ? opsResume() : monthDone() ? screenDayEnd() : screenDayIntro());
     if (k === "arc") return screenArchive(back);
-    if (k === "gls") return screenGlossary(back);
     if (k === "ofc") { officeBack = back; return screenOffice(); }
     if (k === "snd") toggleSound();
     renderTabs();
