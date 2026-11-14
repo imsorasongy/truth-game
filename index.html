@@ -860,7 +860,15 @@ html.pc .hud .rk { max-width: none; margin: 0 0 0 auto; padding: 0; font-size: 1
 /* 튜토리얼 말풍선: 장면을 가리지 않게 오른쪽 패널 아래(대화 기록 자리)에 */
 /* 판형: 위 한 줄 막대, 왼쪽 60% 그림, 오른쪽 40% 패널(모든 글·버튼). 타이틀만 화면 전체 */
 html.pc.pc-panel-on body::after { content: ""; position: fixed; top: 0; right: 0; bottom: 0; width: 40vw; background: #140e0af2; border-left: 2px solid var(--brass); z-index: -1; pointer-events: none; }
-html.pc.pc-panel-on #app:not(.vn) { left: 60vw; right: 0; top: 56px; bottom: 0 !important; max-width: none; margin: 0; padding: 22px 26px 120px; overflow-y: auto; }
+html.pc.pc-panel-on #app:not(.vn) { left: 60vw; right: 0; top: 56px; bottom: 90px !important; max-width: none; margin: 0; padding: 22px 26px 24px; overflow-y: auto; }
+/* 배경 그림은 왼쪽 60%에만: 판사·의뢰인이 그림 영역 가운데 오게 */
+html.pc.pc-panel-on #backdrop { right: 40vw; }
+/* 엔딩 자막·독백: 큰 화면에 맞게 크게 */
+html.pc .er-line { width: min(100%, 980px); grid-template-columns: 124px 1fr; gap: 26px; }
+html.pc .er-line.noava { grid-template-columns: 1fr; }
+html.pc .er-line .ava { width: 124px; height: 124px; }
+html.pc .er-line .who { font-size: 19px; }
+html.pc .er-line p { font-size: 27px; }
 html.pc.pc-panel-on #app.vn { left: 0; right: 40vw; max-width: none; margin: 0; bottom: 0 !important; }
 html.pc.pc-panel-on .dock { left: 60vw; right: 0; max-width: none; margin: 0; bottom: 16px; padding: 0 26px; background: none; z-index: 8; }
 html.pc.pc-panel-on .dock .wrap { padding-block: 0; }
@@ -870,7 +878,11 @@ html.pc #tabs { top: 9px; bottom: auto; left: auto; right: 16px; width: auto; he
 html.pc #tabs .tab { flex-direction: row; gap: 6px; padding: 0 12px; height: 38px; border: 1px solid #c9a24a66; border-radius: 8px; font-size: 14px; color: #d8c6a2; }
 html.pc #tabs .tab svg { width: 18px; height: 18px; }
 html.pc #tabs [data-tab="ev"], html.pc #tabs [data-tab="log"] { display: none; }
-html.pc .hud .rk { margin-right: 480px; }
+html.pc .hud .rk { margin-right: 600px; white-space: nowrap; }
+@media (max-width: 1560px) { html.pc .hud .rk { display: none; } }
+/* 튜토리얼 안내가 뜨면 같은 자리의 주인공 대사창은 잠깐 숨긴다(두 글이 겹치지 않게) */
+html.pc:has(#tutb) #app.vn:not(.court) .pc-hero, html.pc:has(#tutb) #app.vn:not(.court) .vn-bottom .talk > .me-row { visibility: hidden; }
+html.pc:has(#app.vn) .tutb { background: #1d140e; }
 html.pc:has(#app .heroes, #app .op) .hud .pills, html.pc:has(#app .heroes, #app .op) .hud .rk { visibility: hidden; }
 html.pc #tabs .tab { padding: 0 10px; }
 html.pc #tabs .tab span { font-size: 13px; }
@@ -970,7 +982,42 @@ html.pc .log-drawer .bubble { font-size: 15px; }
 /* 법정: 왼쪽에 판사석·양쪽 얼굴·저울, 오른쪽 패널에 재판 기록 */
 html.pc .court .side { max-width: 230px; }
 html.pc .court .bench .ava { width: 120px; height: 120px; }
-html.pc.pc-panel-on #app.court .log-wrap { position: fixed; top: 66px; bottom: 92px; right: 0; left: auto; width: 40vw; padding: 0 22px; z-index: 7; overflow-y: auto; }
+/* 법정 대사: 왼쪽 아래 큰 대사창(말하는 사람 얼굴·이름과 함께). 오른쪽 패널에는 지금까지의 재판 기록 */
+html.pc.pc-panel-on #app.court .log-wrap { position: fixed; left: 24px; width: calc(60vw - 48px); right: auto; top: auto; bottom: 20px; max-height: 46vh; padding: 0; z-index: 7; overflow: visible; }
+html.pc .court .log .log-line:last-child { font-size: 22px; line-height: 1.6; padding: 22px 26px; min-height: 150px; align-items: center; border-radius: 14px; }
+html.pc .court .log .log-line:last-child .who { font-size: 16px; color: var(--brass); margin-bottom: 4px; }
+html.pc .court .log .log-line:last-child.has-ava { grid-template-columns: 96px 1fr auto; gap: 20px; }
+html.pc .court .log .log-line:last-child .ava { width: 96px; height: 96px; }
+html.pc .court .log .log-line:last-child .btn { font-size: 18px; }
+.pc-clog { display: none; }
+html.pc #app.court .pc-clog { display: flex; flex-direction: column; gap: 8px; position: fixed; top: 66px; bottom: 92px; right: 0; width: 40vw; padding: 0 22px; overflow-y: auto; z-index: 6; }
+html.pc #app.court .pc-clog::before { content: "재판 기록"; font-size: 15px; letter-spacing: .1em; color: var(--brass); padding: 4px 0; }
+html.pc #app.court .pc-clog .log-line { display: grid; font-size: 17px; animation: none; }
+html.pc #app.court .pc-clog .log-line .who { font-size: 13px; }
+html.pc #app.court .pc-clog .btn, html.pc #app.court .pc-clog .slam { display: none; }
+/* 양쪽 대리인: 판사 양옆에 크게 고정. 흔들지 않고 테두리만 번쩍 */
+html.pc .court .sides { top: 24%; left: 4%; right: 4%; }
+html.pc .court .side { width: min(24%, 30vh); max-width: none; }
+html.pc .court .side span { font-size: 16px; padding: 4px; }
+html.pc .court.hit-us .side.us, html.pc .court.hit-opp .side.opp { animation: pcHit .6s; }
+@keyframes pcHit { 30% { box-shadow: 0 0 0 5px #ff6a55, 0 6px 18px #000; } }
+html.pc .court .bench .tt { font-size: 20px; } html.pc .court .bench .no, html.pc .court .bench .who { font-size: 14px; }
+/* 컴퓨터 글자 크기: 휴대폰 기준 글자를 한 단계씩 키운다 */
+html.pc #app:not(.vn), html.pc .dock { font-size: 18px; }
+html.pc .btn { font-size: 18px; padding: 15px 18px; }
+html.pc .btn small { font-size: 15px; }
+html.pc .eyebrow { font-size: 14px; }
+html.pc .note { font-size: 16px; }
+html.pc .bubble { font-size: 19px; }
+html.pc .bubble.me { font-size: 18px; }
+html.pc .bubble.sys { font-size: 16px; }
+html.pc .ev .ev-name { font-size: 19px; }
+html.pc .ev .ev-desc, html.pc .ev .ev-detail { font-size: 17px; }
+html.pc .ev .ev-hint { font-size: 13px; }
+html.pc .log-line { font-size: 17px; }
+html.pc .log-line .who { font-size: 13px; }
+html.pc .feebox { font-size: 18px; }
+html.pc .court-head .tt { font-size: 21px; } html.pc .court-head .no { font-size: 15px; }
 html.pc .title-box.pc-title { position: absolute; inset: 0; width: 100%; max-width: none; height: 100%; aspect-ratio: auto; background: center / cover no-repeat url("assets/pc/title.jpg"); }
 .pc-title::after { content: ""; position: absolute; top: 0; right: 0; bottom: 0; width: 46%; background: linear-gradient(90deg, #0000, #0d0806d9 30%, #0d0806f2); pointer-events: none; }
 .pc-title .pc-logo { position: absolute; right: 6%; width: 34%; top: 22%; text-align: center; text-shadow: 0 3px 14px #000; z-index: 1; }
@@ -26003,6 +26050,11 @@ function show(html, dockHtml, scene = "office", track) {
     sides.innerHTML = `<div class="side opp"><img src="assets/${isCrim(C.c) ? "pros" : "opp"}.webp" alt=""><span>${isCrim(C.c) ? "검사" : "상대 대리인"}</span></div>
       <div class="side us"><img src="${heroOf().img}" alt=""><span>${esc(S.name || heroOf().name)} 변호사</span></div>`;
     app.appendChild(sides);
+    // 컴퓨터용: 오른쪽 패널의 재판 기록(지금까지 나온 대사 전부)
+    const clog = document.createElement("div"); clog.className = "pc-clog"; app.appendChild(clog);
+    const syncLog = () => { const L = app.querySelector("#log"); if (!L) return; clog.innerHTML = L.innerHTML; clog.scrollTop = clog.scrollHeight; };
+    new MutationObserver(syncLog).observe(app.querySelector("#log"), { childList: true, subtree: true, characterData: true });
+    syncLog();
     new MutationObserver(() => {
       const last = app.querySelector(".log .log-line:last-child");
       // 상대가 반박하면 우리 쪽이, 우리가 막아 내면 상대 쪽이 흔들린다
