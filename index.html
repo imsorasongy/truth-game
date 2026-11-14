@@ -875,13 +875,28 @@ html.pc.pc-panel-on .dock .wrap { padding-block: 0; }
 html.pc #app:not(.vn) h2 { font-size: 26px; }
 /* 아래 탭은 위 막대 오른쪽 아이콘으로(증거·대화 기록은 오른쪽 패널에 늘 펼쳐져 있어 뺀다) */
 html.pc #tabs { top: 9px; bottom: auto; left: auto; right: 16px; width: auto; height: 38px; max-width: none; margin: 0; display: flex; gap: 8px; padding: 0; background: none; border: none; box-shadow: none; z-index: 10; }
-html.pc #tabs .tab { flex-direction: row; gap: 6px; padding: 0 12px; height: 38px; border: 1px solid #c9a24a66; border-radius: 8px; font-size: 14px; color: #d8c6a2; }
+html.pc #tabs .tab { flex-direction: row; justify-content: center; gap: 6px; padding: 0 8px; width: 108px; flex: none; height: 38px; border: 1px solid #c9a24a66; border-radius: 8px; font-size: 14px; color: #d8c6a2; }
 html.pc #tabs .tab svg { width: 18px; height: 18px; }
 html.pc #tabs [data-tab="ev"], html.pc #tabs [data-tab="log"] { display: none; }
-html.pc .hud .rk { margin-right: 600px; white-space: nowrap; }
-@media (max-width: 1560px) { html.pc .hud .rk { display: none; } }
+html.pc .hud .rk { margin-right: 720px; white-space: nowrap; }
+@media (max-width: 1640px) { html.pc .hud .rk { display: none; } }
 /* 튜토리얼 안내가 뜨면 같은 자리의 주인공 대사창은 잠깐 숨긴다(두 글이 겹치지 않게) */
-html.pc:has(#tutb) #app.vn:not(.court) .pc-hero, html.pc:has(#tutb) #app.vn:not(.court) .vn-bottom .talk > .me-row { visibility: hidden; }
+/* 컴퓨터 대화: 휴대폰식 말풍선 대신 아래 대화창 하나에서 변호사와 의뢰인이 번갈아 말한다(클릭하면 다음 대사) */
+html.pc #app.vn:not(.court) .vn-bottom .talk, html.pc #app.vn:not(.court) .pc-hero { display: none !important; }
+#pcdlg { display: none; }
+html.pc #pcdlg { display: grid; grid-template-columns: 124px 1fr; gap: 26px; align-items: center; position: fixed; left: 24px; width: calc(60vw - 48px); bottom: 20px; height: 196px; padding: 0 34px 0 26px; z-index: 6; background: #140d09f5; border: 1.5px solid var(--brass); border-radius: 16px; box-shadow: 0 10px 30px #000c; cursor: pointer; }
+html.pc #pcdlg[hidden] { display: none; }
+#pcdlg .f { width: 124px; height: 124px; border-radius: 50%; overflow: hidden; border: 2px solid var(--brass); background: #2a1d10; }
+#pcdlg .f img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 15%; display: block; }
+html.pc #pcdlg.noface { grid-template-columns: 1fr; }
+#pcdlg.noface .f { display: none; }
+#pcdlg .n { font-size: 18px; color: var(--brass); margin-bottom: 8px; }
+#pcdlg.me .n { color: #9fc7e8; }
+#pcdlg .t { font-family: var(--f-doc); font-size: 23px; line-height: 1.7; color: #f3e9da; }
+#pcdlg .more { position: absolute; right: 26px; bottom: 16px; font-size: 14px; color: var(--brass); animation: blink 1.2s infinite; }
+@keyframes blink { 50% { opacity: .3; } }
+html.pc.pc-wait #app .vn-bottom .stack, html.pc.pc-wait .pc-ptabs, html.pc.pc-wait #app .dock { pointer-events: none; opacity: .45; }
+html.pc #app.vn:not(.court) .scene { bottom: 236px !important; }
 html.pc:has(#app.vn) .tutb { background: #1d140e; }
 html.pc:has(#app .heroes, #app .op) .hud .pills, html.pc:has(#app .heroes, #app .op) .hud .rk { visibility: hidden; }
 html.pc #tabs .tab { padding: 0 10px; }
@@ -891,7 +906,8 @@ html.pc .tutb { left: 24px; right: auto; width: calc(60vw - 48px); margin: 0; to
 html.pc .tutb .ava { width: 84px; height: 84px; }
 html.pc .tutb p { font-size: 20px; }
 html.pc .tutb .tn { font-size: 15px; }
-html.pc:has(#app.vn) .tutb { top: auto !important; bottom: 20px; height: 156px; }
+/* 튜토리얼 안내: 장면의 선택지·버튼을 가리지 않게 오른쪽 패널 아래에 */
+html.pc:has(#app.vn) .tutb { top: auto !important; bottom: 20px; height: auto; left: calc(60vw + 22px); width: calc(40vw - 44px); }
 /* 오른쪽 패널 탭(질문·증거·기록): 상담 화면에서 셋 중 하나를 패널 가득 */
 .pc-ptabs { display: none; }
 html.pc #app.vn:not(.court) .pc-ptabs { display: flex; position: fixed; top: 66px; right: 22px; width: calc(40vw - 44px); gap: 6px; z-index: 8; }
@@ -951,7 +967,9 @@ html.pc .vn .bubble.me { font-size: 16px; }
 html.pc .vn .talk .bubble:last-child { max-height: 9em; }
 /* 상담 왼쪽: 의뢰인은 가운데 크게, 의뢰인의 말은 얼굴 아래 말풍선, 주인공의 말은 맨 아래 대사창(얼굴과 함께) */
 .pc-hero { display: none; }
-html.pc #app.vn:not(.court) .scene { left: 50% !important; top: 66px !important; width: min(46vh, 480px) !important; height: min(46vh, 480px) !important; }
+html.pc #app.vn:not(.court) .scene { left: 50% !important; top: auto !important; bottom: 330px !important; width: min(36vh, 380px) !important; height: min(36vh, 380px) !important; }
+html.pc #app.vn:not(.court) .pc-hero .hint { color: #b7a68f; font-size: 17px; margin-top: 18px; }
+html.pc #app.vn:not(.court):has(.vn-bottom .talk > .me-row) .pc-hero .hint { display: none; }
 html.pc #app.vn:not(.court) .vn-bottom { left: 6% !important; right: 6% !important; top: auto !important; bottom: 196px !important; overflow: visible !important; }
 html.pc #app.vn:not(.court) .pc-hero { display: flex; align-items: center; gap: 18px; position: absolute; left: 24px; right: 24px; bottom: 20px; height: 156px; padding: 0 22px; z-index: 3; background: #140d09f2; border: 1.5px solid var(--brass); border-radius: 14px; pointer-events: none; }
 html.pc #app.vn:not(.court) .pc-hero img { width: 104px; height: 104px; border-radius: 50%; object-fit: cover; object-position: 50% 15%; border: 2px solid var(--brass); flex: none; }
@@ -962,6 +980,143 @@ html.pc #app.vn:not(.court) .vn-bottom .talk > .me-row .bubble.me { max-width: 1
 /* 오른쪽 패널 1: 질문 목록 */
 html.pc #app.vn:not(.court) .vn-bottom .stack { position: fixed; top: 66px; right: 0; width: 40vw; max-height: 36vh; overflow-y: auto; padding: 0 22px; z-index: 7; gap: 8px; }
 html.pc #app.vn:not(.court) .vn-bottom .stack .btn:not(.primary):not(.ghost) { font-size: 17px; padding: 9px 14px; }
+/* ===== 상담(컴퓨터 새 판형) =====
+   왼쪽 장면: 의뢰인은 왼쪽, 물어볼 것은 장면 오른쪽 위 선택지, 판단 내리기는 그 아래, 대사는 맨 아래 대화창
+   오른쪽 패널: 증거 · 대화 기록 · 사건 정보(자료 검토용) */
+html.pc #app.vn:not(.court) .scene { left: 24% !important; }
+html.pc #app.vn:not(.court) .vn-bottom .stack { position: fixed !important; left: calc(60vw - 24px - min(460px, 30vw)) !important; right: auto !important; width: min(460px, 30vw) !important; top: 84px !important; bottom: auto !important; max-height: min(300px, 28vh) !important; height: auto !important; overflow-y: auto; padding: 0 !important; background: none !important; display: flex !important; flex-direction: column; gap: 10px; z-index: 5; }
+html.pc #app.vn:not(.court) .vn-bottom .stack .section-head { background: #0d0806cc; border-radius: 8px; padding: 6px 12px; }
+html.pc #app.vn:not(.court) .vn-bottom .stack .section-head .eyebrow { font-size: 15px; color: #e6d6b4; }
+html.pc #app.vn:not(.court) .vn-bottom .stack .btn { font-size: 19px !important; padding: 13px 18px !important; background: #140d09eb; border: 1.5px solid var(--brass); border-left-width: 5px; border-radius: 10px; box-shadow: 0 6px 18px #000a; }
+html.pc #app.vn:not(.court) .vn-bottom .stack .btn:hover { background: #2a1d12f2; }
+html.pc #app.vn:not(.court) .vn-bottom .stack .note { background: #0d0806cc; border-radius: 8px; padding: 8px 12px; }
+html.pc.pc-wait #app.vn:not(.court) .vn-bottom .stack, html.pc.pc-wait:has(#app.vn:not(.court)) .dock { visibility: hidden; }
+html.pc[data-pctab] #app.vn:not(.court) .vn-bottom .stack { display: flex !important; }
+html.pc.pc-panel-on:has(#app.vn:not(.court)) .dock { left: calc(60vw - 24px - min(460px, 30vw)); right: auto; width: min(460px, 30vw); bottom: 236px; padding: 0; }
+/* 재판 준비(증거·주장 고르기): 오른쪽 패널 안에서 스크롤 없이. 증거는 두 줄 카드, 머리·주장은 얇게 */
+html.pc #app:not(.vn):has(.arg.pick) { padding-top: 14px; gap: 10px; }
+html.pc #app:has(.arg.pick) .bench.no-ava { padding: 8px 14px; }
+html.pc #app:has(.arg.pick) .bench.no-ava .tt { font-size: 18px; }
+html.pc #app:has(.arg.pick) .bench.no-ava .no, html.pc #app:has(.arg.pick) .bench.no-ava .who { font-size: 13px; }
+html.pc #app:has(.arg.pick) .stack { gap: 6px; }
+html.pc #app:has(.arg.pick) .evlist { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+html.pc #app:has(.arg.pick) .ev.pick { padding: 10px 12px; grid-template-columns: 22px 1fr; gap: 8px; }
+html.pc #app:has(.arg.pick) .ev.pick .ev-name { font-size: 16px; }
+html.pc #app:has(.arg.pick) .ev.pick .ev-desc { font-size: 14px; }
+html.pc #app:has(.arg.pick) .ev.pick .ev-detail { font-size: 13.5px; line-height: 1.45; margin-top: 4px; padding-top: 4px; }
+html.pc #app:has(.arg.pick) .arg { padding: 9px 14px; font-size: 16px; }
+html.pc #app:has(.arg.pick) .eyebrow { font-size: 13px; }
+@media (max-height: 900px) {
+  html.pc #app:not(.vn):has(.arg.pick) { padding-top: 10px; padding-bottom: 8px; gap: 6px; bottom: 76px !important; }
+  html.pc #app:has(.arg.pick) .ev.pick { padding: 6px 10px; }
+  html.pc #app:has(.arg.pick) .ev.pick .ev-name { font-size: 15px; }
+  html.pc #app:has(.arg.pick) .ev.pick .ev-desc { font-size: 13px; line-height: 1.4; }
+  html.pc #app:has(.arg.pick) .ev.pick .ev-detail { font-size: 12.5px; line-height: 1.35; margin-top: 3px; padding-top: 3px; }
+  html.pc #app:has(.arg.pick) .arg { padding: 6px 12px; font-size: 14.5px; }
+  html.pc #app:has(.arg.pick) .bench.no-ava { padding: 5px 12px; }
+  html.pc #app:has(.arg.pick) .bench.no-ava > div { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  html.pc #app:has(.arg.pick) .arg { padding: 4px 12px; line-height: 1.4; }
+  html.pc #app:has(.arg.pick) .evlist { gap: 6px; }
+  html.pc.pc-panel-on:has(#app .arg.pick) .dock { bottom: 10px; }
+  html.pc:has(#app .arg.pick) .dock .btn { padding: 11px; }
+}
+/* 판결 화면: 왼쪽 장면 전체를 판결 카드로(뒤의 법정·대화창은 숨김), 사무실로 돌아가기는 카드 아래 맨 앞에 */
+html.pc #app.court #verdict:not(:empty) { position: fixed; left: 24px; width: calc(60vw - 48px); top: 72px; bottom: 96px; z-index: 9; padding: 26px 30px; gap: 16px; border: 1.5px solid var(--brass); border-radius: 14px; background: #120c08fa; overflow-y: auto; }
+html.pc #app.court:has(#verdict:not(:empty)) .log-wrap, html.pc #app.court:has(#verdict:not(:empty)) .sides, html.pc #app.court:has(#verdict:not(:empty)) .bench, html.pc #app.court:has(#verdict:not(:empty)) > div:nth-child(2) { visibility: hidden; }
+html.pc #app.court #verdict .ledger { font-size: 18px; padding: 12px 16px; }
+html.pc #app.court #verdict .judgment { font-size: 19px; line-height: 1.7; padding: 16px 20px; }
+html.pc #app.court #verdict .judgment .jl { font-size: 14px; }
+html.pc #app.court #verdict .mono { grid-template-columns: 64px 1fr; gap: 14px; padding: 16px 18px; }
+html.pc #app.court #verdict .mono .ava { width: 64px; height: 64px; }
+html.pc #app.court #verdict .mono p { font-size: 18px; line-height: 1.7; }
+html.pc #app.court #verdict .mono .who { font-size: 15px; }
+html.pc #app.court #verdict .vd-top { grid-template-columns: 150px 1fr; }
+html.pc:has(#app.court #verdict:not(:empty)) .dock { z-index: 12; left: 24px; width: calc(60vw - 48px); bottom: 24px; }
+html.pc:has(#app.court #verdict:not(:empty)) .dock .btn { background: var(--brass); color: #2a1d10; font-weight: 700; border-color: var(--brass); font-size: 19px; opacity: 1; }
+/* ===== 직접 플레이 점검 뒤 손본 것 ===== */
+/* 타이틀: 위 빈 막대 숨김, 슬롯 고르기 글자 키움 */
+html.pc:has(#app .title) .hud { display: none; }
+html.pc .pc-title .title-pop { width: 520px; right: calc(6% + 17% - 260px); padding: 18px; top: 46%; bottom: auto; max-height: 51%; overflow-y: auto; }
+html.pc .pc-title .title-pop p { font-size: 19px; }
+html.pc .pc-title .slot { padding: 12px 14px; grid-template-columns: 34px 1fr; }
+html.pc .pc-title .slot b { font-size: 20px; }
+html.pc .pc-title .slot span { font-size: 17px; }
+html.pc .pc-title .slot small { font-size: 14px; }
+html.pc .pc-title .title-pop .btn { font-size: 17px; }
+/* 작은 확인 창(모드 고르기·튜토리얼·직원 등): 컴퓨터에서는 크게 */
+html.pc .sp-card { width: min(100%, 480px); padding: 26px; gap: 12px; }
+html.pc .sp-card, html.pc .sp-card p { font-size: 18px; }
+html.pc .sp-card .sp-name { font-size: 24px; }
+html.pc .sp-row { font-size: 18px; }
+html.pc .sp-card .btn { font-size: 18px; padding: 13px 16px; }
+/* 개업 전(변호사 등록·오프닝): 저장·불러오기·사무실·갤러리 버튼은 숨김(음악·설정만) */
+html.pc:has(#app .heroes, #app .op) #tabs .tab:not([data-tab="snd"]):not([data-tab="set"]) { display: none; }
+/* 오프닝 글: 대화창 폭을 다 쓴다 */
+html.pc .op-full .op-line { max-width: none; }
+/* 법정 글자 */
+html.pc .gauge-labels { font-size: 15px; }
+html.pc .court .bench .tt { font-size: 24px; }
+/* 장부·사무실 관리 */
+html.pc #app .ledger { font-size: 17px; }
+html.pc #app .ofc-banner { aspect-ratio: auto; height: 150px; background-image: none !important; background: #1d140e; }
+html.pc #app .ofc-banner::after { display: none; }
+html.pc #app .ofc-name { font-size: 22px; }
+html.pc #app .ofc-name small { font-size: 15px; }
+html.pc #app .ofc-seat img { max-width: 64px; }
+html.pc #app .ofc-seat span { font-size: 14px; }
+/* 손님 카드 버튼 */
+html.pc #app .visitor .v-act .mini { font-size: 16px; padding: 8px 18px; }
+/* 갤러리: 오른쪽 패널은 분야 목록과 고른 사건의 판결문, 펼친 분야의 사건 카드는 왼쪽 장면 가득 */
+html.pc #app details[open] > .gal-grid { position: fixed; left: 24px; width: calc(60vw - 48px); top: 72px; bottom: 24px; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); align-content: start; gap: 12px; padding: 18px; background: #0d0806e8; border: 1.5px solid var(--brass); border-radius: 14px; z-index: 5; }
+html.pc #app details[open] > .gal-grid .gal-t { aspect-ratio: auto; height: 200px; font-size: 15px; }
+html.pc #app details[open] > .gal-grid .gal-t span { font-size: 14px; }
+html.pc #app details[open] > .gal-grid .gal-t.lock { display: grid; place-items: center; font-size: 34px; color: #c9a24a66; }
+html.pc #app details[open] > summary { background: var(--brass); color: #2a1d10; border-radius: 8px; }
+html.pc #app details.howto:has(> .gal-grid) { -webkit-backdrop-filter: none; backdrop-filter: none; }
+html.pc #app details.howto > summary .note { font-size: 14px !important; }
+/* 증거를 들이밀며 추궁: 고를 증거 목록은 오른쪽 패널 전체에(증거 탭 자리를 덮는다). 스크롤 없이 */
+html.pc #app.vn:not(.court) .vn-bottom .stack:has([data-pf]) { left: 60vw !important; width: 40vw !important; padding: 0 22px 20px !important; top: 66px !important; bottom: 0 !important; max-height: none !important; z-index: 9; background: #140e0a !important; overflow-y: auto; }
+html.pc #app.vn:not(.court) .vn-bottom .stack:has([data-pf])::before { content: "추궁 · 어떤 증거를 내밀까"; font-size: 17px; color: var(--brass); padding: 8px 0 4px; }
+html.pc #app.vn:not(.court) .vn-bottom .stack:has([data-pf]) .evlist { display: flex; flex-direction: column; gap: 10px; }
+html.pc #app.vn:not(.court) .vn-bottom .stack:has([data-pf]) .ev { border-left-width: 1px !important; background: var(--paper) !important; color: var(--ink); padding: 14px 18px !important; }
+html.pc #app.vn:not(.court) .vn-bottom .stack:has([data-pf]) .ev:hover { outline: 2px solid var(--brass); }
+html.pc:has(#app.vn:not(.court) .vn-bottom .stack [data-pf]) .pc-ptabs { visibility: hidden; }
+html.pc #app.vn:not(.court) .vn-bottom:has(.stack [data-pf]) > div:not(.stack):not(.talk) { display: none; }
+/* 운영 모드 사건 배정: 컴퓨터에서는 크게 */
+html.pc #app .k-cap span { font-size: 16px; }
+html.pc #app .k-cap img { width: 36px; height: 36px; }
+html.pc #app .k-list { gap: 10px; }
+html.pc #app .k-card { grid-template-columns: 72px 1fr; gap: 16px; padding: 12px 16px; }
+html.pc #app .k-card .portrait { width: 72px; height: 80px; }
+html.pc #app .k-card .nm { font-size: 19px; white-space: normal; }
+html.pc #app .k-card .nm .ct { display: block; margin: 2px 0 0; font-size: 15px; color: #d8c6a2; }
+html.pc #app .k-pick { gap: 8px; margin-top: 8px; }
+html.pc #app .k-pick i { width: 46px; height: 46px; font-size: 20px; }
+html.pc #app .k-pick i img { width: 100%; height: 100%; }
+/* 판단 화면: "이 의뢰인은…" 제목과 세 선택지는 오른쪽 칸 위, 상담으로 돌아가기는 판단 버튼 자리에 */
+html.pc #app.vn:not(.court) .vn-bottom:has(#choices) > div:not(.stack):not(.talk):not(.refs):first-of-type { position: fixed; left: calc(60vw - 24px - min(460px, 30vw)); width: min(460px, 30vw); top: 70px; z-index: 5; background: #0d0806cc; border-radius: 8px; padding: 6px 14px; }
+html.pc #app.vn:not(.court) .vn-bottom:has(#choices) > div:first-of-type h2 { font-size: 24px; margin: 0; }
+html.pc #app.vn:not(.court) .vn-bottom #choices { top: 150px !important; }
+@media (max-height: 900px) {
+  html.pc #app.vn:not(.court) .vn-bottom:has(#choices) > div:not(.stack):not(.talk):not(.refs):first-of-type { padding: 4px 12px; }
+  html.pc #app.vn:not(.court) .vn-bottom:has(#choices) > div:first-of-type h2 { font-size: 18px; }
+  html.pc #app.vn:not(.court) .vn-bottom #choices { top: 122px !important; gap: 8px; }
+  html.pc #app.vn:not(.court) .vn-bottom #choices .btn { padding: 9px 16px !important; font-size: 17px !important; }
+}
+html.pc #app.vn:not(.court) .vn-bottom #back { position: fixed; left: calc(60vw - 24px - min(460px, 30vw)); width: min(460px, 30vw); bottom: 236px; z-index: 5; font-size: 19px; padding: 13px 18px; background: #140d09eb; box-shadow: 0 6px 18px #000a; }
+/* 수임료·자백 카드 화면: 카드와 수임료 상자는 장면 왼쪽 아래(오른쪽 칸의 의뢰인 자리를 비워 둔다) */
+html.pc #app.vn:not(.court) .vn-bottom:has(> .feebox) { position: fixed !important; left: 24px !important; right: auto !important; width: calc(60vw - 72px - min(460px, 30vw)); top: auto !important; bottom: 236px !important; max-height: calc(100vh - 236px - 84px); overflow-y: auto !important; flex-direction: column; justify-content: flex-start; gap: 12px; z-index: 5; }
+html.pc #app.vn:not(.court) .vn-bottom > .feebox { background: #140d09f0; border: 1.5px solid var(--brass); font-size: 17px; }
+html.pc:has(#app.vn:not(.court)) .dock .btn { font-size: 19px; padding: 13px 18px; box-shadow: 0 6px 18px #000a; }
+html.pc #app.vn:not(.court) .ev-drawer, html.pc #app.vn:not(.court) .log-drawer, html.pc #app.vn:not(.court) .pc-info { top: 118px !important; bottom: 20px !important; }
+html.pc[data-pctab="ev"] #app.vn:not(.court) .pc-info, html.pc[data-pctab="log"] #app.vn:not(.court) .pc-info, html.pc[data-pctab="info"] #app.vn:not(.court) .ev-drawer, html.pc[data-pctab="info"] #app.vn:not(.court) .log-drawer { display: none !important; }
+.pc-info { display: none; }
+html.pc #app.vn:not(.court) .pc-info { display: flex; flex-direction: column; gap: 12px; position: fixed; right: 0; width: 40vw; padding: 0 22px; overflow-y: auto; z-index: 7; }
+.pc-info .ib { background: #1d140e; border: 1px solid #c9a24a44; border-radius: 10px; padding: 14px 16px; }
+.pc-info .ik { font-size: 14px; color: var(--brass); letter-spacing: .08em; margin-bottom: 6px; }
+.pc-info .iv { font-size: 18px; line-height: 1.6; color: #efe3cf; }
+.pc-info .iv.doc { font-family: var(--f-doc); }
+html.pc #app.vn:not(.court) .log-drawer .bubble { font-size: 18px; }
 html.pc #app.vn .section-head .eyebrow { font-size: 14px; color: var(--brass); }
 /* 오른쪽 패널 2: 증거 그림 격자 */
 html.pc .ev-drawer { position: fixed; left: auto; right: 0; width: 40vw; top: calc(66px + 36vh + 14px); bottom: calc(24vh + 92px); height: auto; transform: none !important; visibility: visible !important; border-radius: 0; z-index: 7; margin: 0; padding: 0 22px; background: transparent; overflow-y: auto; }
@@ -991,7 +1146,31 @@ html.pc .court .log .log-line:last-child .ava { width: 96px; height: 96px; }
 html.pc .court .log .log-line:last-child .btn { font-size: 18px; }
 .pc-clog { display: none; }
 html.pc #app.court .pc-clog { display: flex; flex-direction: column; gap: 8px; position: fixed; top: 66px; bottom: 92px; right: 0; width: 40vw; padding: 0 22px; overflow-y: auto; z-index: 6; }
-html.pc #app.court .pc-clog::before { content: "재판 기록"; font-size: 15px; letter-spacing: .1em; color: var(--brass); padding: 4px 0; }
+/* 사무실(이번 달 손님): 손님 목록은 오른쪽 패널에 가로 카드로(얼굴·이름·사건·버튼). 장면은 사무실 그림 그대로 */
+html.pc #app .visitors { gap: 12px; }
+html.pc #app .visitor { grid-template-columns: 96px 1fr auto; gap: 16px; padding: 12px 14px; background: #1d140e; border: 1px solid #c9a24a44; border-radius: 12px; }
+html.pc #app .visitor .portrait { width: 96px; height: 96px; border-radius: 10px; }
+html.pc #app .visitor .portrait img { object-fit: cover; object-position: 50% 22%; }
+html.pc #app .visitor .vn { font-size: 20px; }
+html.pc #app .visitor .vm { font-size: 15px; margin-top: 2px; }
+html.pc #app .visitor .v-act { gap: 6px; }
+html.pc #app .visitor .v-act .mini { font-size: 15px; padding: 7px 16px; }
+html.pc #app .visitor .st { font-size: 15px; }
+html.pc #app .visitor.dim { opacity: .55; }
+/* 법정 오른쪽 패널(자료 검토): 재판 기록 · 제출한 증거 · 사건 정보 */
+.pc-ctabs, .pc-cev, .pc-cinfo { display: none; }
+html.pc #app.court .pc-ctabs { display: flex; position: fixed; top: 66px; right: 22px; width: calc(40vw - 44px); gap: 6px; z-index: 8; }
+.pc-ctabs button { flex: 1; height: 40px; border: 1px solid #c9a24a66; border-radius: 8px; background: #1d140e; color: #d8c6a2; font-size: 16px; }
+.pc-ctabs button.on { background: var(--brass); color: #2a1d10; font-weight: 700; border-color: var(--brass); }
+html.pc #app.court .pc-clog { top: 118px !important; bottom: 20px !important; }
+html.pc #app.court .pc-cev, html.pc #app.court .pc-cinfo { display: flex; flex-direction: column; gap: 10px; position: fixed; top: 118px; bottom: 20px; right: 0; width: 40vw; padding: 0 22px; overflow-y: auto; z-index: 6; }
+html.pc[data-pcct="ev"] #app.court .pc-clog, html.pc[data-pcct="ev"] #app.court .pc-cinfo,
+html.pc[data-pcct="info"] #app.court .pc-clog, html.pc[data-pcct="info"] #app.court .pc-cev,
+html.pc:not([data-pcct="ev"]) #app.court .pc-cev, html.pc:not([data-pcct="info"]) #app.court .pc-cinfo { display: none !important; }
+html.pc #app.court .pc-cev .ev { font-size: 17px; }
+/* 빨리 넘기기: 장면 안, 대화창 바로 위 오른쪽 */
+html.pc.pc-panel-on:has(#app.court) .dock { left: calc(60vw - 24px - 260px); right: auto; width: 260px; bottom: 232px; padding: 0; }
+html.pc:has(#app.court) .dock .btn { font-size: 17px; padding: 11px 16px; background: #140d09e6; }
 html.pc #app.court .pc-clog .log-line { display: grid; font-size: 17px; animation: none; }
 html.pc #app.court .pc-clog .log-line .who { font-size: 13px; }
 html.pc #app.court .pc-clog .btn, html.pc #app.court .pc-clog .slam { display: none; }
@@ -22514,12 +22693,77 @@ function sceneImage(name) {
 }
 // 컴퓨터용 화면: 가로로 넓은 화면이면 html에 pc를 붙이고, 가로 배경(assets/pc/)이 있는 장면은 그 그림을 쓴다
 const PC_MQ = matchMedia("(min-width: 1100px) and (min-aspect-ratio: 4/3)");
-const isPC = () => PC_MQ.matches;
+// 컴퓨터 배치는 아직 공개 전: 이 컴퓨터(localhost)에서만, 또는 주소에 ?pc=1을 붙였을 때만 켠다
+const PC_ON = /^(localhost|127.0.0.1)$/.test(location.hostname) || (() => { try { if (/[?&]pc=1/.test(location.search)) localStorage.setItem("truth-pc", "1"); return localStorage.getItem("truth-pc") === "1"; } catch (e) { return false; } })();
+const isPC = () => PC_ON && PC_MQ.matches;
 const PC_BG = /^assets\/(office-[0-3]-[mf]\.jpg|court-2\.webp|end-(top|close)-[mf]\.jpg|title\.jpg)$/;
 const pcImage = u => { const m = isPC() && PC_BG.exec(u); return m ? "assets/pc/" + m[1] : u; };
 function applyPC() { document.documentElement.classList.toggle("pc", isPC()); pcPanel(); }
 // 오른쪽 패널(증거·대화 기록 서랍)이 화면에 있을 때만 장면을 왼쪽 60%로 줄인다
-function pcPanel() { pcTabs(); const on = isPC() && !document.querySelector("#app .title"); document.documentElement.classList.toggle("pc-panel-on", on); }
+// 컴퓨터 대화창: 화면의 대화 목록을 읽어 한 줄씩 보여 준다. 새로 생긴 대사는 클릭할 때마다 하나씩
+let pcDlgSt = { key: "", len: 0, cur: 0, seen: new Set() };
+function pcDialog() {
+  const app = document.getElementById("app");
+  let box = document.getElementById("pcdlg");
+  const talk = isPC() && app && app.classList.contains("vn") && !app.classList.contains("court") ? app.querySelector(".vn-bottom .talk") : null;
+  if (!talk) { if (box) box.hidden = true; document.documentElement.classList.remove("pc-wait"); return; }
+  const lines = [...talk.children].map(el => el.classList.contains("me-row") ? { me: 1, t: (el.querySelector(".bubble") || {}).innerHTML } : el.classList.contains("bubble") ? { me: 0, sys: el.classList.contains("sys"), t: el.innerHTML } : null).filter(x => x && x.t);
+  if (!lines.length) { if (box) box.hidden = true; return; }
+  const who = ((app.querySelector(".scene .plate .name") || {}).textContent || "");
+  const key = ((C && C.c && C.c.id) || "") + "|" + who;
+  const st = pcDlgSt;
+  // 화면이 바뀌면(다른 의뢰인·자백 화면 등) 아직 안 보여 준 첫 대사부터, 같은 화면에 대사가 늘면 늘어난 첫 대사부터
+  const changed = key !== st.key;
+  if (changed) { st.key = key; st.seen = new Set(); }
+  if (changed || lines.length !== st.len) { const i = lines.findIndex(l => !st.seen.has(l.t)); st.len = lines.length; st.cur = i < 0 ? lines.length - 1 : i; }
+  if (!box) {
+    box = document.createElement("div"); box.id = "pcdlg"; document.body.appendChild(box);
+    box.addEventListener("click", () => { if (pcDlgSt.cur < pcDlgSt.len - 1) { pcDlgSt.cur++; pcDialog(); } });
+  }
+  box.hidden = false;
+  const L = lines[Math.min(st.cur, lines.length - 1)]; st.seen.add(L.t); const cimg = (app.querySelector(".scene .portrait img") || {}).src;
+  const face = L.sys ? "" : L.me ? `assets/story/cut/hero-${heroKey()}.webp` : cimg;
+  const name = L.sys ? "" : L.me ? `${(S && S.name) || heroOf().name} 변호사` : who;
+  const more = st.cur < st.len - 1;
+  box.className = (L.me ? "me" : "") + (face ? "" : " noface");
+  box.innerHTML = `<div class="f">${face ? `<img src="${face}" alt="">` : ""}</div><div><div class="n">${esc(name)}</div><div class="t">${L.t}</div></div>${more ? '<span class="more">클릭해서 계속 ▼</span>' : ""}`;
+  document.documentElement.classList.toggle("pc-wait", more);
+}
+// 상담: 의뢰인 얼굴은 장면 오른쪽 선택지 칸에서, 위의 질문 목록과 아래 판단 내리기 버튼 사이 빈자리에
+function pcFace() {
+  const app = document.getElementById("app"), sc = app && app.querySelector(".scene");
+  if (!sc) return;
+  const on = isPC() && app.classList.contains("vn") && !app.classList.contains("court");
+  if (!on) { ["top", "bottom", "left", "width", "height"].forEach(k => sc.style.removeProperty(k)); return; }
+  // 화면마다 같은 자리: 장면 오른쪽 칸에서 질문 목록 자리(질문 4개 높이) 아래, 판단 내리기 버튼 자리 위. 상담·판단·수임료 모두 같다
+  const W = innerWidth, H = innerHeight, colW = Math.min(460, W * .3), colL = W * .6 - 24 - colW;
+  const qEnd = 84 + Math.min(300, H * .28), btnTop = H - 236 - 56;
+  const room = btnTop - qEnd - 24 - 50, size = Math.max(150, Math.min(400, room)); // 아래 50px은 이름표·사건 칩 자리
+  const set = (k, v) => sc.style.setProperty(k, v, "important");
+  set("top", (qEnd + 12 + Math.max(0, (room - size) / 2)) + "px"); set("bottom", "auto");
+  set("left", (colL + colW / 2) + "px"); set("width", size + "px"); set("height", size + "px");
+}
+addEventListener("resize", () => setTimeout(pcFace, 50));
+// 컴퓨터: 대사가 남아 있으면 장면 어디를 눌러도 다음 대사로(버튼·오른쪽 패널·창은 제외)
+const pcAdvance = () => { if (pcDlgSt.cur < pcDlgSt.len - 1) { pcDlgSt.cur++; pcDialog(); return true; } return false; };
+document.addEventListener("click", e => {
+  if (!isPC() || !document.documentElement.classList.contains("pc-wait")) return;
+  if (e.target.closest("#pcdlg, button, a, input, .pc-pop, .pc-ptabs, .ev-drawer, .log-drawer, .pc-info, #tabs, .tutb")) return;
+  pcAdvance();
+}, true);
+// 스페이스바·엔터: 대사 넘기기(입력칸이나 버튼에 초점이 있으면 원래대로)
+document.addEventListener("keydown", e => {
+  if (e.key !== " " && e.key !== "Enter") return;
+  const t = e.target; if (t.closest && t.closest("input, textarea, select, button, a")) return;
+  if (document.querySelector(".pc-pop")) return;
+  const click = el => { if (el) { e.preventDefault(); el.click(); return true; } return false; };
+  if (isPC() && document.documentElement.classList.contains("pc-wait")) { e.preventDefault(); pcAdvance(); return; }
+  if (click(document.querySelector(".tutb-next"))) return;
+  if (click(document.querySelector(".endroll:not(.out)"))) return;
+  if (document.querySelector("#app.court")) { e.preventDefault(); document.getElementById("app").click(); return; }
+  click(document.querySelector("#opNext"));
+});
+function pcPanel() { pcTabs(); pcDialog(); requestAnimationFrame(pcFace); const on = isPC() && !document.querySelector("#app .title"); document.documentElement.classList.toggle("pc-panel-on", on); }
 new MutationObserver(pcPanel).observe(document.getElementById("app") || document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
 applyPC();
 PC_MQ.addEventListener("change", () => { applyPC(); const sc = document.documentElement.dataset.scene; if (sc) setScene(sc); if (document.querySelector(".title")) screenCover(); });
@@ -22530,6 +22774,18 @@ function pcLoad() {
   const rows = [1, 2, 3, 4, 5].map(n => { const v = loadSlot(n); return `<button class="slotb" data-ld="${n}" ${v ? "" : "disabled"}><b>${n}번 칸</b> ${v ? esc(v.name || "") + " · " + esc(v.firm || "") : "빈 칸"}<small>${v ? monthLabel(v.day) + " · 명성 " + v.rep : ""}</small></button>`; }).join("");
   const ov = pcPop(`<h3>불러오기</h3>${rows}`);
   ov.querySelectorAll("[data-ld]").forEach(b => b.onclick = () => { const n = +b.dataset.ld, v = loadSlot(n); if (!v) return; ov.remove(); C = null; useSlot(n); S = v; resume(); });
+}
+// 저장: 1~5번 칸 중에서 고른다. 다른 게임이 있는 칸이면 덮어쓸지 한 번 묻는다
+function pcSave() {
+  const rows = [1, 2, 3, 4, 5].map(n => { const v = loadSlot(n); return `<button class="slotb" data-sv="${n}"><b>${n}번 칸</b>${n === SLOT ? " · 지금 칸" : ""} ${v ? esc(v.name || "") + " · " + esc(v.firm || "") : "빈 칸"}<small>${v ? monthLabel(v.day) + " · 명성 " + v.rep : ""}</small></button>`; }).join("");
+  const ov = pcPop(`<h3>저장</h3>${rows}`);
+  const doSave = n => { ov.remove(); useSlot(n); save(); pcToast(`${n}번 칸에 저장했습니다.`); renderTabs(); };
+  ov.querySelectorAll("[data-sv]").forEach(b => b.onclick = () => {
+    const n = +b.dataset.sv, v = loadSlot(n);
+    if (n === SLOT || !v) return doSave(n);
+    ov.querySelector(".box").innerHTML = `<h3>${n}번 칸 덮어쓰기</h3><div class="row">${esc(v.name || "")} · ${monthLabel(v.day)} 기록이 지워집니다.</div><button class="btn primary" data-y style="text-align:center">덮어쓰기</button><button class="btn ghost" data-x style="text-align:center">취소</button>`;
+    ov.querySelector("[data-y]").onclick = () => doSave(n);
+  });
 }
 function pcSettings() {
   const big = document.documentElement.classList.contains("bigtext");
@@ -22542,21 +22798,29 @@ function pcSettings() {
   ov.querySelector("[data-home]").onclick = () => { ov.remove(); C = null; screenCover(); };
 }
 try { if (localStorage.getItem(KEY + "-bigtext")) document.documentElement.classList.add("bigtext"); } catch (e) {}
-// 상담 오른쪽 패널 탭: 질문·증거·기록. 튜토리얼이 가리키는 것이 다른 탭에 있으면 그 탭으로 넘긴다
+// 상담 오른쪽 패널 탭: 증거·대화 기록·사건 정보(자료 검토). 튜토리얼이 가리키는 것이 다른 탭에 있으면 그 탭으로 넘긴다
 function pcTabs() {
   const app = document.getElementById("app"); if (!app) return;
   if (!isPC() || !app.classList.contains("vn") || app.classList.contains("court")) return;
   if (!app.querySelector(".pc-ptabs")) {
     const nEv = app.querySelectorAll(".ev-drawer .ev").length;
     const t = document.createElement("div"); t.className = "pc-ptabs";
-    t.innerHTML = [["q", "질문"], ["ev", `증거 ${nEv || ""}`], ["log", "대화 기록"]].filter(([k]) => k === "q" ? app.querySelector(".vn-bottom .stack") : k === "ev" ? app.querySelector(".ev-drawer") : app.querySelector(".log-drawer")).map(([k, l]) => `<button data-pt="${k}">${l}</button>`).join("");
+    t.innerHTML = [["ev", `증거 ${nEv || ""}`], ["log", "대화 기록"], ["info", "사건 정보"]].filter(([k]) => k === "ev" ? app.querySelector(".ev-drawer") : k === "log" ? app.querySelector(".log-drawer") : true).map(([k, l]) => `<button data-pt="${k}">${l}</button>`).join("");
+    // 사건 정보: 의뢰인 인적사항, 사건 종류, 의뢰인이 처음 한 말, 남은 질문
+    const inf = document.createElement("div"); inf.className = "pc-info";
+    const nm = (app.querySelector(".scene .plate .name") || {}).textContent || "", meta = (app.querySelector(".scene .plate .meta") || {}).textContent || "";
+    const chips = [...app.querySelectorAll(".scene .chips .chip")].map(x => x.textContent).join(" · ");
+    const first = app.querySelector(".vn-bottom .talk > .bubble:not(.sys)");
+    const left = (app.querySelector(".vn-bottom .stack .section-head b") || {}).textContent;
+    inf.innerHTML = `<div class="ib"><div class="ik">의뢰인</div><div class="iv"><b>${esc(nm)}</b> · ${esc(meta)}</div></div>${chips ? `<div class="ib"><div class="ik">사건</div><div class="iv">${esc(chips)}</div></div>` : ""}${first ? `<div class="ib"><div class="ik">의뢰인이 처음 한 말</div><div class="iv doc">${first.innerHTML}</div></div>` : ""}${left != null ? `<div class="ib"><div class="ik">남은 질문 기회</div><div class="iv">${esc(left)}번</div></div>` : ""}`;
+    app.appendChild(inf);
     app.appendChild(t);
     t.querySelectorAll("[data-pt]").forEach(b => b.onclick = e => { e.stopPropagation(); pcTab(b.dataset.pt); });
     const cur = document.documentElement.dataset.pctab;
-    pcTab(t.querySelector(`[data-pt="${cur}"]`) ? cur : (t.querySelector("[data-pt]") || {}).dataset?.pt || "q");
+    pcTab(t.querySelector(`[data-pt="${cur}"]`) ? cur : t.querySelector('[data-pt="ev"]') ? "ev" : (t.querySelector("[data-pt]") || {}).dataset?.pt || "info");
   }
   const g = app.querySelector(".tut-glow");
-  if (g) { const want = g.closest(".ev-drawer") ? "ev" : g.closest(".log-drawer") ? "log" : g.closest(".vn-bottom .stack") ? "q" : null; if (want && want !== document.documentElement.dataset.pctab) pcTab(want); }
+  if (g) { const want = g.closest(".ev-drawer") ? "ev" : g.closest(".log-drawer") ? "log" : null; if (want && want !== document.documentElement.dataset.pctab) pcTab(want); }
 }
 function pcTab(k) { document.documentElement.dataset.pctab = k; document.querySelectorAll(".pc-ptabs [data-pt]").forEach(b => b.classList.toggle("on", b.dataset.pt === k)); }
 function setScene(name) {
@@ -22638,9 +22902,9 @@ function startNew() {
   const ov = document.createElement("div");
   ov.className = "staff-pop";
   ov.innerHTML = `<div class="sp-card"><div class="sp-name">모드 고르기</div>
-    <button class="btn primary" id="mdSpeed" style="text-align:center">스피드 모드</button>
-    <button class="btn ghost" id="mdOps" style="text-align:center">운영 모드</button>
-    <button class="btn ghost" id="mdStory" style="text-align:center">스토리 모드</button></div>`;
+    <button class="btn primary" id="mdSpeed" style="text-align:center">스피드 모드<small style="display:block;font-weight:400;opacity:.85;margin-top:3px">매달 찾아오는 의뢰인의 사건을 맡아 사무소를 키웁니다. 목표는 명성 100.</small></button>
+    <button class="btn ghost" id="mdOps" style="text-align:center">운영 모드<small style="display:block;font-weight:400;opacity:.85;margin-top:3px">로펌 대표가 되어 변호사를 뽑고 사건을 나눠 맡깁니다. 3년 안에 최고의 로펌으로.</small></button>
+    <button class="btn ghost" id="mdStory" style="text-align:center">스토리 모드<small style="display:block;font-weight:400;opacity:.85;margin-top:3px">주인공 변호사의 이야기를 따라가며, 이어진 사건들 뒤에 숨은 진실을 밝힙니다.</small></button></div>`;
   document.body.appendChild(ov);
   // 스토리 모드: 남주·여주 이야기와, 둘 다 리얼 엔딩으로 깨야 열리는 마지막 사건을 함께 보여 준다
   ov.querySelector("#mdStory").onclick = () => {
@@ -22693,7 +22957,7 @@ function storyFrame(query, done) {
     f.src = "story.html?" + query + (/slot=/.test(query) ? "" : "&slot=" + SLOT);
     f.title = "스토리";
     f.style.cssText = "position:fixed;inset:0;width:100%;height:100%;border:0;z-index:9999;background:#000";
-    f.onload = () => out.remove();
+    f.onload = () => { out.remove(); try { f.contentWindow.focus(); } catch (e) {} }; // 열리자마자 스페이스바·엔터가 이야기 쪽으로 가게
     const h = e => {
       if (e.source !== f.contentWindow || !e.data) return;
       // 스토리 장면이 바뀔 때마다 곡을 바꾼다(force면 같은 종류라도 새 곡으로)
@@ -23157,7 +23421,7 @@ function screenArchive(back, openId, tab) {
       <div><div class="vn">${esc(sel.client.name)} · ${esc(sel.category)}</div><div class="vm">${caseNo(sel)} · <b class="pos">${resultLabel(sel, "win")}</b>${g[openId].money ? ` · 수임료 ${won(g[openId].money)}` : ""}</div></div></div>
       <div class="file-body"><div class="judgment"><div class="lbl">주문</div>${esc(sel.outcomes.win)}</div><p class="note">${esc(sel.epilogue)}</p></div></div>` : "";
   // 처음엔 모두 접어 두고, 사건을 눌러 다시 그릴 때만 그 분야를 펼쳐 둔다
-  let cur = tab || (sel ? groupOf(sel) : null);
+  let cur = tab || (sel ? groupOf(sel) : null) || (isPC() ? GROUPS[0] : null); // 컴퓨터는 첫 분야를 펼쳐 장면 쪽에 사건 카드를 깐다
   const folders = GROUPS.map(gr => {
     const list = CASES.filter(c => groupOf(c) === gr), n = list.filter(c => g[c.id]).length;
     const grid = `<div class="gal-grid">${list.map(c => g[c.id]
@@ -23316,7 +23580,6 @@ function screenConsult() {
     if (!opened) return { t: "카드를 누르면 자세한 내용이 나온다.", sel: ".evlist .ev", ok: ".evlist" };
     const unseen = c.evidence.filter(e => !(C.seen || {})[e.id] && !C.opened[e.id]);
     if (!C.asked.length && isPC() && unseen.length) return { t: `다른 카드도 모두 눌러 보자. (${c.evidence.length - unseen.length}/${c.evidence.length})`, sel: `.evlist [data-ev="${unseen[0].id}"]`, ok: ".evlist" };
-    if (!C.asked.length && isPC() && document.documentElement.dataset.pctab === "ev") return { t: "증거를 다 봤다. 오른쪽 위 <b>질문</b> 탭을 누르자.", sel: '.pc-ptabs [data-pt="q"]', ok: ".evlist" };
     if (!C.asked.length && drawer && showEv && !isPC()) return { t: "다른 카드도 눌러 볼 수 있다. 다 봤으면 <b>증거</b> 탭을 한 번 더 눌러 닫자.", sel: '#tabs [data-tab="ev"]', ok: ".evlist" };
     if (!C.asked.length) return { t: "이제 질문할 차례다. 말과 증거가 어긋나는 곳을 물어보자.", sel: "[data-q]" };
     return { t: "질문은 세 번까지 할 수 있다. 다 들었으면 <b>판단 내리기</b>를 누르자.", sel: "#judge", ok: "[data-q]" };
@@ -26007,7 +26270,7 @@ function renderTabs() {
     if (k === "arc") return screenArchive(back);
     if (k === "ofc") { officeBack = back; return screenOffice(); }
     if (k === "snd") toggleSound();
-    if (k === "save") { save(); pcToast(`${SLOT}번 칸에 저장했습니다.`); }
+    if (k === "save") return pcSave();
     if (k === "load") return pcLoad();
     if (k === "set") return pcSettings();
     renderTabs();
@@ -26031,7 +26294,7 @@ function show(html, dockHtml, scene = "office", track) {
     while (first.nextSibling) bottom.appendChild(first.nextSibling);
     app.appendChild(bottom);
     // 컴퓨터용: 장면 왼쪽 아래에 주인공을 세운다(폰에서는 숨김)
-    const hf = document.createElement("div"); hf.className = "pc-hero"; hf.dataset.name = (S && S.name) || heroOf().name; hf.innerHTML = `<img src="assets/story/cut/hero-${heroKey()}.webp" alt="">`; app.appendChild(hf);
+    const hf = document.createElement("div"); hf.className = "pc-hero"; hf.dataset.name = (S && S.name) || heroOf().name; hf.innerHTML = `<img src="assets/story/cut/hero-${heroKey()}.webp" alt=""><span class="hint">오른쪽에서 물어볼 것을 고르자.</span>`; app.appendChild(hf);
     // 상담 중 증거 목록은 서랍으로 뺀다
     const evStack = [...bottom.querySelectorAll(".stack")].find(s => s.querySelector(".evlist") && !s.querySelector(".pick") && !s.classList.contains("proof"));
     if (evStack) {
@@ -26063,6 +26326,22 @@ function show(html, dockHtml, scene = "office", track) {
     app.appendChild(sides);
     // 컴퓨터용: 오른쪽 패널의 재판 기록(지금까지 나온 대사 전부)
     const clog = document.createElement("div"); clog.className = "pc-clog"; app.appendChild(clog);
+    // 오른쪽 패널 탭: 재판 기록 · 제출한 증거 · 사건 정보
+    const ctabs = document.createElement("div"); ctabs.className = "pc-ctabs";
+    ctabs.innerHTML = '<button data-ct="log">재판 기록</button><button data-ct="ev">제출한 증거</button><button data-ct="info">사건 정보</button>';
+    app.appendChild(ctabs);
+    const setCt = k => { document.documentElement.dataset.pcct = k; ctabs.querySelectorAll("[data-ct]").forEach(b => b.classList.toggle("on", b.dataset.ct === k)); };
+    ctabs.querySelectorAll("[data-ct]").forEach(b => b.onclick = e => { e.stopPropagation(); setCt(b.dataset.ct); });
+    setCt("log");
+    const allEv = C.c.evidence.concat(C.card && C.c.confessionCard ? [Object.assign({ isK: true }, C.c.confessionCard)] : []);
+    const subEv = allEv.filter(e => C.sub && C.sub.has(e.id));
+    const cev = document.createElement("div"); cev.className = "pc-cev";
+    cev.innerHTML = (subEv.length ? subEv.map((e, i) => `<div class="ev ${e.isK ? "card-k" : ""}"><div class="ev-name">${evIcon(e)}제${i + 1}호증 ${esc(e.name)}</div><div class="ev-desc">${esc(e.desc)}</div>${e.detail ? `<div class="ev-detail">${esc(e.detail)}</div>` : ""}</div>`).join("") : '<div class="note">제출한 증거가 없습니다.</div>');
+    app.appendChild(cev);
+    const argT = ((C.c.arguments || []).find(a => a.id === C.arg) || {}).text;
+    const cinf = document.createElement("div"); cinf.className = "pc-cinfo pc-info";
+    cinf.innerHTML = `<div class="ib"><div class="ik">의뢰인</div><div class="iv"><b>${esc(C.c.client.name || "")}</b>${C.c.client.age ? " · " + esc(C.c.client.age + "세") : ""}${C.c.client.job ? " · " + esc(C.c.client.job) : ""}</div></div>${argT ? `<div class="ib"><div class="ik">우리 주장</div><div class="iv doc">${esc(formal(argT))}</div></div>` : ""}<div class="ib"><div class="ik">제출한 증거</div><div class="iv">${subEv.length}건</div></div>`;
+    app.appendChild(cinf);
     const syncLog = () => { const L = app.querySelector("#log"); if (!L) return; clog.innerHTML = L.innerHTML; clog.scrollTop = clog.scrollHeight; };
     new MutationObserver(syncLog).observe(app.querySelector("#log"), { childList: true, subtree: true, characterData: true });
     syncLog();
@@ -26099,6 +26378,7 @@ function show(html, dockHtml, scene = "office", track) {
 function fitBottom() {
   const sc = app.querySelector(".vn .scene"), bt = app.querySelector(".vn-bottom");
   if (!sc || !bt) return;
+  if (isPC()) { setTimeout(pcFace, 0); setTimeout(pcFace, 120); return; } // 컴퓨터는 pcFace가 자리를 정한다
   setTimeout(() => {
     const appTop = app.getBoundingClientRect().top, H = app.clientHeight;
     const top = (hud.getBoundingClientRect().bottom || 60) - appTop + 6;
