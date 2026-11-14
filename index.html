@@ -22888,8 +22888,9 @@ function screenCover() {
     pickSlot("어느 게임을 불러올까요?", n => {
       const v = loadSlot(n); if (!v) return;
       useSlot(n); S = v; resume();
-    }, lastMid ? `<button class="slot" id="slotLast"><b>✦</b><span>마지막 사건<small>그리고 아무도 말하지 않았다 · 이어서</small></span></button>` : "");
+    }, (lastMid ? `<button class="slot" id="slotLast"><b>✦</b><span>마지막 사건<small>그리고 아무도 말하지 않았다 · 이어서</small></span></button>` : "") + (Object.keys(storyClearLoad()).length ? `<button class="slot" id="slotReplay"><b>↺</b><span>이야기 다시 하기<small>깬 장을 골라 다시 합니다 · ${(() => { const c = storyClearLoad(); return ["m", "f"].map(h => (h === "m" ? "남주 " : "여주 ") + [1, 2, 3, 4].filter(n => c[h + n]).length + "/4").join(" · "); })()}</small></span></button>` : ""));
     if (lastMid) on("#slotLast", () => { pop(""); playHidden(true); });
+    on("#slotReplay", () => { pop(""); storyReplayMenu(screenCover); });
   });
   on("#new", () => pickSlot("어느 슬롯에서 시작할까요?", n => {
     const v = loadSlot(n);
@@ -22917,7 +22918,9 @@ function startNew() {
       <button class="btn ${open ? "primary" : "ghost"}" id="stLast" style="text-align:center">${open ? "" : "🔒 "}마지막 사건<small style="display:block;font-weight:400;opacity:.8">${open ? "그리고 아무도 말하지 않았다" : both ? "준비 중입니다. 곧 열립니다" : `남주 4장 · 여주 4장을 모두 리얼 엔딩으로 깨면 열립니다<br>남주 ${mark(t.m)} · 여주 ${mark(t.f)}`}</small></button>
       <div id="stPw" style="display:none;width:100%;gap:8px;align-items:center"><input id="stPwIn" type="password" inputmode="numeric" maxlength="8" placeholder="테스트 비밀번호" autocomplete="off" style="flex:1 1 auto;width:100%;min-width:0;padding:10px 12px;font-size:16px;border-radius:8px;border:1px solid var(--brass);background:#120c08;color:#f3e7d3"><button class="btn primary" id="stPwOk" style="flex:0 0 auto;width:auto">확인</button></div>
       <div id="stPwMsg" class="sp-row" style="display:none">비밀번호가 맞지 않습니다.</div>
+      <button class="btn ghost" id="stReplay" style="text-align:center">이야기 다시 하기<small style="display:block;font-weight:400;opacity:.8">${(() => { const c = storyClearLoad(); return ["m", "f"].map(h => (h === "m" ? "남주 " : "여주 ") + [1, 2, 3, 4].filter(n => c[h + n]).length + "/4").join(" · "); })()}</small></button>
       <button class="btn ghost" id="stBack" style="text-align:center">뒤로</button></div>`;
+    ov.querySelector("#stReplay").onclick = () => { ov.remove(); storyReplayMenu(() => { startNew(); document.querySelector("#mdStory").click(); }); };
     ov.querySelector("#stNew").onclick = () => { ov.remove(); S.mode = "story"; S.story = { next: 0 }; screenCreate(); };
     ov.querySelector("#stBack").onclick = () => { ov.remove(); startNew(); };
     // 잠겨 있어도 테스트용 비밀번호(4321)를 넣으면 앞 장을 깨지 않고 마지막 사건을 해 볼 수 있다
@@ -22968,7 +22971,7 @@ function storyFrame(query, done) {
       const reply = d => f.contentWindow && f.contentWindow.postMessage({ storyReply: 1, ...d }, "*");
       if (e.data.story === "slots") return reply({ sound: soundOn, list: [1, 2, 3, 4, 5].map(n => { const v = loadSlot(n); return { n, label: v ? `${v.name || ""} · ${monthLabel(v.day)}` : "" }; }) });
       if (e.data.story === "sound") { toggleSound(); return reply({}); }
-      if (e.data.story === "save") { if (S) { useSlot(+e.data.slot); save(); } return; }
+      if (e.data.story === "save") { if (S && !/slot=replay/.test(query)) { useSlot(+e.data.slot); save(); } return; }
       if (e.data.story === "load" || e.data.story === "home") {
         removeEventListener("message", h); f.remove(); C = null;
         if (e.data.story === "home") return screenCover();
@@ -23046,6 +23049,7 @@ function storyResult(res, end, step, n, hero, next) {
       return storyEnd(storyBadMsg(res));
     }
     st.hist[hero + (n + 1)] = end || res;
+    storyClearSave(hero + (n + 1), { end: end || res, hist: { ...st.hist }, office: S.office || 0 });
     // 히든 스토리: 남주 최종 win, 여주 4장 truth_bond를 본 적이 있으면 저장 칸과 상관없이 기록한다
     if (n === STORY_STEPS.length - 1 && ((hero === "m" && /^win(~|$)/.test(end || "")) || (hero === "f" && /^truth_bond(~|$)/.test(end || "")))) {
       const t = trueLoad(); t[hero] = { ...st.hist }; trueSave(t);
@@ -23068,6 +23072,72 @@ function storyResult(res, end, step, n, hero, next) {
   }
 }
 const TRUE_KEY = KEY + "-trueend";
+// 스토리 모드에서 깬 장(저장 칸과 상관없이 남는다). 다시 보기는 그 장의 이야기만 연다
+const CLEAR_KEY = KEY + "-storyclear";
+function storyClearLoad() {
+  let c = {}; try { c = JSON.parse(localStorage.getItem(CLEAR_KEY)) || {}; } catch (e) {}
+  // 이 기록이 생기기 전에 깬 장은 저장 칸에서 찾아 채운다
+  for (const n of [1, 2, 3, 4, 5]) {
+    const v = loadSlot(n), h = v && v.mode === "story" && v.story && v.story.hist;
+    if (h) for (const [k, e] of Object.entries(h)) if (/^[mf][1-4]$/.test(k) && !c[k]) c[k] = { end: e, hist: { ...h }, office: v.office || 0 };
+  }
+  return c;
+}
+function storyClearSave(k, v) { try { const c = storyClearLoad(); c[k] = v; localStorage.setItem(CLEAR_KEY, JSON.stringify(c)); } catch (e) {} }
+// 이야기 다시 하기: 역전재판처럼 장을 골라 다시 한다. 깬 장은 CLEAR, 안 깬 장은 제목을 숨기고 잠근다
+const REPLAY_CH = {
+  m: [["운수 좋은 날", "story-alley"], ["황폐한 집", "m2-tower"], ["사상누각", "m3-site"], ["수구여병", "m4-court"]],
+  f: [["책도둑", "story-dock"], ["바람의 그림자", "f2-storage"], ["눈감은 자들의 도시", "f3-bank"], ["남산의 이름", "f4-special"]]
+};
+const replayEndLabel = (k, end) => {
+  const r = String(end || "").split("~")[0].replace(/^(blind_|false_)/, ""), civil = k === "m2" || k === "m3";
+  if (r === "win") return civil ? "승소" : "무죄";
+  if (r === "partial") return civil ? "일부승소" : k === "m4" ? "선고유예" : "감형";
+  if (r === "quiet") return "무죄";
+  if (r === "truth") return "유죄";
+  return "";
+};
+function storyReplayMenu(back, tab) {
+  const c = storyClearLoad(), h = tab || (Object.keys(c).some(k => k[0] === "m") || !Object.keys(c).length ? "m" : "f");
+  const cnt = x => [1, 2, 3, 4].filter(n => c[x + n]).length;
+  const ov = document.createElement("div");
+  ov.className = "replay-ov";
+  ov.style.cssText = "position:fixed;inset:0;z-index:9000;background:#0f0b08;color:#f1e6d0;overflow:auto;display:flex;justify-content:center";
+  const card = n => {
+    const k = h + n, r = c[k], [title, bg] = REPLAY_CH[h][n - 1];
+    const im = `background:url('assets/story/${bg}.jpg') center/cover;${r ? "" : "filter:grayscale(1) brightness(.35);"}`;
+    return `<div style="position:relative;height:118px;border-radius:12px;overflow:hidden;border:1px solid #6b5338;margin:0 0 12px">
+      <div style="position:absolute;inset:0;${im}"></div>
+      <div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(10,7,4,.92) 0%,rgba(10,7,4,.55) 60%,rgba(10,7,4,.25) 100%)"></div>
+      <div style="position:absolute;left:14px;top:14px;right:14px">
+        <div style="font-size:12px;color:${r ? "#d9b25f" : "#7d6a4d"};letter-spacing:1px">제${n}장</div>
+        <div style="font-size:19px;font-weight:700;margin-top:2px;color:${r ? "#f1e6d0" : "#8d7c63"}">${r ? title : "? ? ?"}</div>
+        <div style="font-size:12px;color:#c9b796;margin-top:4px">${r ? (replayEndLabel(k, r.end) ? "본 결말: " + replayEndLabel(k, r.end) : "깬 장") : "아직 깨지 않은 장"}</div></div>
+      ${r ? `<div style="position:absolute;right:14px;top:12px;border:2px solid #e2b85a;color:#e2b85a;font-weight:800;padding:2px 8px;border-radius:6px;transform:rotate(8deg);font-size:13px;letter-spacing:1px">CLEAR</div>
+        <button data-rp="${k}" style="position:absolute;right:12px;bottom:12px;background:#b8892c;color:#1a120a;font-weight:700;padding:7px 14px;border-radius:8px;font-size:14px;border:0;cursor:pointer">다시 하기</button>`
+        : `<div style="position:absolute;right:12px;bottom:12px;color:#8d7c63;border:1px solid #5a4630;padding:6px 12px;border-radius:8px;font-size:14px">🔒 잠김</div>`}
+    </div>`;
+  };
+  const tabBtn = x => `<button data-tab="${x}" style="flex:1;padding:10px;font-size:15px;border:0;cursor:pointer;${x === h ? "background:#b8892c;color:#1a120a;font-weight:700" : "background:none;color:#b9a78a"}">${x === "m" ? "한서준" : "윤서연"} 이야기 · ${cnt(x)}/4</button>`;
+  ov.innerHTML = `<div style="width:100%;max-width:440px;padding:0 16px 24px;box-sizing:border-box">
+    <div style="padding:26px 4px 10px"><div style="font-size:22px;font-weight:700">이야기 다시 하기</div><div style="color:#b9a78a;font-size:13px;margin-top:4px">깬 장은 처음부터 다시 할 수 있습니다</div></div>
+    <div style="display:flex;margin:8px 0 12px;border:1px solid #5a4630;border-radius:10px;overflow:hidden">${tabBtn("m")}${tabBtn("f")}</div>
+    ${[1, 2, 3, 4].map(card).join("")}
+    <div style="margin:6px 4px;color:#a8967a;font-size:12px;line-height:1.5">다시 하기는 그 장의 이야기만 진행합니다. 일반 사건은 없고, 저장된 게임에는 영향이 없습니다.</div>
+    <button id="rpBack" style="width:100%;margin-top:10px;padding:11px;border:1px solid #5a4630;border-radius:10px;background:none;color:#c9b796;font-size:15px;cursor:pointer">뒤로</button></div>`;
+  document.body.appendChild(ov);
+  ov.querySelector("#rpBack").onclick = () => { ov.remove(); back(); };
+  ov.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => { ov.remove(); storyReplayMenu(back, b.dataset.tab); });
+  ov.querySelectorAll("[data-rp]").forEach(b => b.onclick = () => { ov.remove(); storyReplay(b.dataset.rp, false, () => storyReplayMenu(back, h)); });
+}
+// 다시 하기: 그 장을 깼을 때의 앞 장 결과로 연다. 저장 칸은 replay로 따로 써서 진행 중인 게임과 섞이지 않게 한다
+function storyReplay(k, resume, back) {
+  const r = storyClearLoad()[k]; if (!r) return back();
+  if (!resume) storyClearMid(k, "replay");
+  const hist = Object.entries(r.hist || {}).filter(([k2]) => k2 !== k && !(k2[0] === k[0] && +k2[1] > +k[1]));
+  const q = `ch=${k}&office=${r.office || 0}&slot=replay&hist=${hist.map(([a, b]) => a + "." + b).join(",")}${resume ? "&resume=1" : ""}`;
+  storyFrame(q, res => res === "adjourn" ? storyReplay(k, true, back) : back());
+}
 function trueLoad() { try { return JSON.parse(localStorage.getItem(TRUE_KEY)) || {}; } catch (e) { return {}; } }
 function trueSave(t) { try { localStorage.setItem(TRUE_KEY, JSON.stringify(t)); } catch (e) {} }
 // 마지막 사건: 남주 4장 win + 여주 4장 truth_bond를 모두 보면 열린다. 원고를 다시 쓰는 동안은 잠가 둔다(조건을 채우면 '준비 중')
@@ -23117,7 +23187,7 @@ function screenCreate() {
         <img src="${v.img}" alt=""><span>${v.label}</span></button>`).join("")}</div>
     <div class="feebox">
       <label class="field"><span class="lbl">변호사 이름을 정해 주세요</span><input id="heroName" maxlength="8" placeholder="예) ${esc(HEROES[h].name)}" value="${esc(S.mode === "story" ? HEROES[h].name : S.name || "")}"${S.mode === "story" ? " readonly" : ""}></label>
-      <label class="field"><span class="lbl">${S.mode === "opsNew" ? "법무법인" : "법률사무소"} 이름을 정해 주세요</span><input id="firmName" maxlength="14" placeholder="예) ${S.mode === "opsNew" ? "새벽 법무법인" : "새벽 법률사무소"}" value="${esc(S.firm || "")}"></label>
+      <label class="field"><span class="lbl">${S.mode === "opsNew" ? "법무법인" : "법률사무소"} 이름을 정해 주세요</span><input id="firmName" maxlength="14" placeholder="예) ${S.mode === "opsNew" ? "새벽 법무법인" : "새벽 법률사무소"}" value="${esc(S.mode === "story" ? HEROES[h].name + " 법률사무소" : S.firm || "")}"${S.mode === "story" ? " readonly" : ""}></label>
     </div>`,
     `<button class="btn primary" id="create">이대로 개업하기</button>`, "office", "opening");
   const keep = () => { S.name = document.getElementById("heroName").value.trim(); S.firm = document.getElementById("firmName").value.trim(); };
@@ -24261,7 +24331,7 @@ function screenOffice() {
     <div class="ofc-tiles">${tile("지금 사무실", cur)}${nx ? tile(canMove() ? "다음 단계 · 이전 가능" : "다음 단계", nx, canMove() ? "on" : "") : `<div class="pn ofc-tile"><span class="eyebrow">다음 단계</span><span class="note">가장 좋은 사무실</span></div>`}</div>`,
     `<button class="btn primary" id="backLedger">${officeBack ? "돌아가기" : "장부로 돌아가기"}</button>`);
   on("[data-ofc]", e => officePop(+e.currentTarget.dataset.ofc));
-  on("#firmEdit", firmPop);
+  if (!isStory()) on("#firmEdit", firmPop);
   on("[data-seat]", e => staffPop(e.currentTarget.dataset.seat));
   on("#backLedger", () => { const b = officeBack || screenDayEnd; officeBack = null; b(); });
 }
