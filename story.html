@@ -111,6 +111,9 @@ button:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
 .court .sides { position: absolute; top: 32%; left: 10px; right: 10px; display: flex; justify-content: space-between; pointer-events: none; }
 .court .side { position: relative; width: 36%; aspect-ratio: 1; border-radius: 14px; overflow: hidden; border: 2px solid; box-shadow: 0 6px 18px #000; }
 .court .side img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 18%; display: block; }
+/* 증인 그림(상반신)은 검사·대리인 그림(얼굴 클로즈업)과 얼굴 크기가 같아 보이게 당겨 보여 준다 */
+.court .side img:not([src*="/expr/"]):not([src*="hero-"]), .log-line .ava img:not([src*="/expr/"]):not([src*="hero-"]), .ci-face img:not([src*="/expr/"]):not([src*="hero-"]) { transform: scale(1.45); transform-origin: 50% 24%; }
+.court .side img[src*="/cut/h1-"], .log-line .ava img[src*="/cut/h1-"], .ci-face img[src*="/cut/h1-"] { transform: scale(1.65); transform-origin: 50% 20%; }
 .court .side span { position: absolute; left: 0; right: 0; bottom: 0; text-align: center; font-size: 11.5px; line-height: 1.5; background: #000b; padding: 2px; }
 .court .side.opp { border-color: var(--lose); } .court .side.us { border-color: var(--win); }
 .court.hit-us .side.us, .court.hit-opp .side.opp { animation: shake .45s; }
