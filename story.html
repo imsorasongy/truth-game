@@ -671,7 +671,7 @@ function hire() {
   const accept = () => {
     G.hired = true;
     Object.assign(G.cards, c.cards0);
-    G.cards.sun = c.sunCard || { n: "변호인선임서", d: `${c.client.n} 사건의 변호인으로 선임되었음을 증명하는 서류.`, img: "ev/sun.webp" };
+    G.cards.sun = c.sunCard || { n: "변호인선임서", d: `${c.client.n} 사건의 변호인으로 선임되었음을 증명하는 서류.`, img: "ev/sun-v2.webp" };
     say([[H[c.hero].n, c.hireSay || `사건 맡겠습니다. ${c.sunCard ? "위임장" : "선임서"}부터 쓰시죠.`], ...linesOf(c.hireLine || "고맙습니다, 변호사님. 받은 서류는 여기 다 가져왔습니다.", G.P._office.cp)],
       () => gains(Object.entries(G.cards).map(([k, e]) => evGain(k, e)), () => c.clientAway ? say(linesOf(c.clientAway, null), idle, c.client.img) : topicMenu(G.P._office.cp)), c.client.img);
   };
@@ -5667,7 +5667,7 @@ CH.h1 = { hero: "m", speaker: "f", title: "마지막 이야기 · 그리고 아�
   hireSay: "맡으시죠. 2031년 결재와 이 살인은 별개 사건입니다. 기록 등사 신청서는 제가 쓰겠습니다.",
   refuseLine: "말리려고 했다. 그 고발이 수사됐으면 타워 인허가는 나지 않았을 수도 있다. 윤서연 변호사는 내 얼굴을 보고 먼저 말했다. '돈을 받았는지는 특검이 볼 일이에요. 여기서는 살인만 봐요.'",
   hireLine: [["윤서연", "맡겠습니다. 저는 이 살인 사건만 해요. 그리고 변론 방침은 제가 정합니다. 부장님이 원하지 않는 사실 주장은 하지 않겠지만, 증거 신청은 제가 판단해요."], "…알겠소. 공소장 부본하고, 변호인이 없을 때 내가 공소청에서 등사해 온 기록이오. 선배님 공판조서 사본도 넣었소."],
-  sunCard: { n: "변호인선임서", d: "피고인 고영진이 윤서연 변호사를 살인 사건 변호인으로 선임한 서류. 기록 열람·등사를 신청할 때 낸다.", img: "ev/sun.webp" },
+  sunCard: { n: "변호인선임서", d: "피고인 고영진이 윤서연 변호사를 살인 사건 변호인으로 선임한 서류. 기록 열람·등사를 신청할 때 낸다.", img: "ev/sun-v2.webp" },
   clientAt: "home",
   clientAway: [["고영진", "나는 집에 있겠소. 요즘은 낮에도 안 나가오. 기자들이 아파트 정문에 서 있어서."], ["고영진", "더 물을 게 있으면 집으로 오시오. 오기 전에 전화부터 하고. 집사람이 문을 안 열어 주니까."], [null, "고영진은 주소를 적은 명함을 두고 나갔다. 명함에는 아직 '변호사 고영진'이 찍혀 있었다. 기소 뒤 업무정지 명령을 받은 사람이다."]],
   prologue: [
