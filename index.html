@@ -22888,7 +22888,7 @@ function screenCover() {
     pickSlot("어느 게임을 불러올까요?", n => {
       const v = loadSlot(n); if (!v) return;
       useSlot(n); S = v; resume();
-    }, auto ? `<button class="slot" data-slot="${STORY_AUTO}"><b>자동</b><span>${esc(auto.name || "")} · 스토리 모드 자동 저장<small>${monthLabel(auto.day)} · 명성 ${auto.rep}</small></span></button>` : "");
+    }, auto ? `<button class="slot" data-slot="${STORY_AUTO}"><b>↻</b><span>${esc(auto.name || "")} · 스토리 모드 자동 저장<small>${monthLabel(auto.day)} · 명성 ${auto.rep}</small></span></button>` : "");
   });
   const slotThen = go => pickSlot("어느 슬롯에서 시작할까요?", n => {
     const v = loadSlot(n);
