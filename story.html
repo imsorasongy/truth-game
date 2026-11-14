@@ -198,7 +198,7 @@ const EXPRS = ["confident", "flustered", "neutral", "serious"];
 const cutPic = u => cut(u);
 const cut = u => { const m = /([\w-]+)\.webp$/.exec(u || ""); return m && CUT.has(m[1]) ? `${A}story/cut/${m[1]}.webp` : u; };
 // 후일담·막간에서 말하는 사람의 얼굴
-const NAMED = { "한서준": A + "story/cut/hero-m.webp", "윤서연": A + "story/cut/hero-f.webp", "이수아": A + "story/cut/face-lee.webp", "방재호": A + "cut/n40m2.webp", "오명환": A + "story/cut/face-oh-50.webp", "정한별": A + "story/cut/face-jung-40.webp", "강도윤": A + "story/cut/face-kang.webp", "권태훈": A + "story/cut/insp.webp", "조경숙": A + "story/cut/face-mother.webp", "박진서": A + "story/cut/face-park_neutral.webp" };
+const NAMED = { "한서준": A + "story/cut/hero-m.webp", "윤서연": A + "story/cut/hero-f.webp", "이수아": A + "story/cut/face-lee.webp", "방재호": A + "story/face-bang.webp", "오명환": A + "story/cut/face-oh-50.webp", "정한별": A + "story/cut/face-jung-40.webp", "강도윤": A + "story/cut/face-kang.webp", "권태훈": A + "story/cut/insp.webp", "조경숙": A + "story/cut/face-mother.webp", "박진서": A + "story/cut/face-park_neutral.webp" };
 const P = { judge: ["재판장", A + "judge.webp"], pros: ["검사", A + "pros.webp"] };
 // 장소별 배경(없는 곳은 사무실: 서류를 읽거나 회사에 문의하는 장면)
 const PLACE_BG = { m: { rec: "rec", hosp: "er", diner: "diner", alley: "alley" }, f: { rec: "rec", cctv: "dock", mate: "dock", rest: "rest" } };
@@ -757,7 +757,8 @@ function pickLie() {
       const n = left.find(i => steps[i].card === card || (steps[i].cards || []).includes(card)); // cards: 같은 단계에 통하는 다른 증거
       if (n === undefined) return missed("그게 뭐 어쨌다는 겁니까.", judge);
       left.splice(left.indexOf(n), 1);
-      if (left.length) return say(named(steps[n].show(G, card)), () => ask(false), c.client.img);
+      // enough: 이 증거 하나만으로도 의뢰인이 털어놓는다(남은 증거를 더 내밀 필요 없음)
+      if (left.length && !steps[n].enough) return say(named(steps[n].show(G, card)), () => ask(false), c.client.img);
       G.confessed = true;
       say([...named(steps[n].show(G, card)), ...named(c.press.close || []), ...confessLines(), [null, c.after]], afterJudge, c.client.img);
     }, null, judge);
@@ -879,7 +880,7 @@ function trial() {
   // 증거가 걸린 선택지(o[5])는 버튼으로 보여 주지 않고 '증거를 제시한다'로 고르게 한다. 맞는 증거를 내면 그 선택지가 실행된다
   const optsHtml = opts => {
     const all = opts.map((o, n) => [o, n]).filter(([o]) => !o[5]);
-    const ev = opts.some(o => o[5]) ? '<button class="btn go" data-ev="1">증거를 제시한다</button>' : "";
+    const ev = opts.some(o => o[5]) ? '<button class="btn" data-ev="1">증거를 제시한다</button>' : "";
     const order = all.filter(([o]) => !isPass(o)).map(x => [Math.random(), x]).sort((a, b) => a[0] - b[0]).map(x => x[1]).concat(all.filter(([o]) => isPass(o)));
     return `<div class="opts">${ev}${order.map(([o, n]) => `<button class="btn" data-o="${n}">${optLabel(o[0])}</button>`).join("")}</div>`;
   };
@@ -1592,7 +1593,7 @@ CH.f1 = { hero: "f", tags: G => [G.doneIds.pot && "pot", G.doneIds.sold && "sold
     steps: [
       { card: "hail", show: G => [["h", "택배사에서 받은 배송 앱 기록입니다."], ["h", "그날 13시 10분부터 55분 동안 차가 터미널 휴게실 앞에 서 있었어요. 라면 하나 드신 것치고는 길죠."],
         ["c", "밥 먹고 좀 쉬었다니까요. 그게 무슨 증거입니까."], ["h", "그러고 나서 14시 30분에 분실 처리를 하셨어요. 적재함을 언제 확인했는지는 아무 기록이 없고요."], ["c", "그, 그건 바빠서…"]] },
-      { card: "saw", show: G => [["h", "그날 휴게실에 있던 동료분 말씀입니다. 탁자에 상자를 올려놓고 뜯고 계셨다더군요."], ["c", "…그 친구가 잘못 봤겠지요."],
+      { card: "saw", enough: true, show: G => [["h", "그날 휴게실에 있던 동료분 말씀입니다. 탁자에 상자를 올려놓고 뜯고 계셨다더군요."], ["c", "…그 친구가 잘못 봤겠지요."],
         ...(G.asked.includes(2) ? [["h", "기사님, 하루에 삼백 개를 돌리신다면서 그 상자 하나 품목이 '홍삼 세트'였던 건 또렷이 기억하세요."], ["h", "설 앞에 홍삼 세트. 그래서 눈에 들어오셨던 거 아닌가요?"]] : []),
         ["c", "……"]] }],
     close: [["h", "저한테까지 거짓말하시면 재판에서 지켜 드릴 수가 없어요. 싣고 나서 손도 안 댔다는 말, 지금도 그대로 하시겠어요?"],
