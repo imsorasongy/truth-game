@@ -22352,7 +22352,7 @@ function screenCover() {
       <button class="hot" style="top:81.8%" id="new" aria-label="새로 시작"></button>
       <button class="hot" style="top:87.6%" id="cont" aria-label="이어하기"></button>
       <button class="hot" style="top:93.3%" id="howto" aria-label="게임 방법"></button>
-      ${hiddenOpen() ? `<button class="btn primary hidden-story" id="hiddenStory">마지막 이야기</button>` : ""}
+      ${""}
       <div id="titlePop"></div>
     </div>
   </section>`;
@@ -22360,7 +22360,7 @@ function screenCover() {
   const pop = html => { document.getElementById("titlePop").innerHTML = html ? `<div class="title-pop">${html}</div>` : ""; };
   on(".snd", toggleSound);
   on("#howto", () => screenHowto(screenCover));
-  on("#hiddenStory", () => playHidden());
+  // 마지막 이야기는 타이틀이 아니라 스토리 모드 안에서 연다
   // 저장 칸 고르기
   const slotRow = n => {
     const v = loadSlot(n);

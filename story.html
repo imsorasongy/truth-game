@@ -771,7 +771,11 @@ const SIDE_EXPR = { opponent: "expr/opponent_", citylaw: "story/face-citylaw_", 
 const courtFace = (s, e) => s === "us" ? `${A}expr/hero-${G.c.speaker || G.c.hero}_${e}.webp` : `${A}${SIDE_EXPR[G.c.side && G.c.side[1]] || "expr/prosecutor_"}${e}.webp`;
 const witnessFace = (img, e) => /face-(jung-40|lee|kang|bang)\.webp$/.test(img) ? img.replace(".webp", `_${e}.webp`) : img;
 const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
-const zoneOf = g => g >= WIN ? 2 : g >= PART ? 1 : 0;
+// 장마다 승소·일부 승소 기준을 따로 둘 수 있다(c.winAt·c.partAt). 기일이 많아 점수 폭이 큰 장(마지막 이야기)용
+const winAt = () => (G && G.c && G.c.winAt) || WIN, partAt = () => (G && G.c && G.c.partAt) || PART;
+const zoneOf = g => g >= winAt() ? 2 : g >= partAt() ? 1 : 0;
+// 저울 바늘 위치: 일부 승소 기준이 50%, 승소 기준이 80% 자리에 오도록 늘이고 줄인다
+const gaugePos = g => { const P = partAt(), W = winAt(); const v = g <= P ? g / P * 50 : g <= W ? 50 + (g - P) / (W - P) * 30 : 80 + (g - W) / (W - P) * 30; return Math.max(0, Math.min(100, v)); };
 function cutIn(img, txt, side, then) {
   if (REDUCED) return then();
   const ov = document.createElement("div");
@@ -799,7 +803,7 @@ function trial() {
   view(`${topBar()}
     <div class="bench"><div class="no">${c.no}</div><div class="tt">${(rd && rd.tt) || c.tt || "공판기일"}</div><div class="who">${c.benchWho || "재판장 · 검사"}</div></div>
     <div class="sides"><div class="side opp"><img id="oppF" alt=""><span id="oppN"></span></div><div class="side us"><img id="usF" alt=""><span>${hero.n} 변호사</span></div></div>
-    <div class="gw"><div class="gauge" id="gauge" style="--t1:${PART}%;--t2:${WIN}%"><div class="needle" id="needle"></div></div><div class="gauge-labels"><span>${labels[0]}</span><span>${labels[1]}</span><span>${labels[2]}</span></div></div>
+    <div class="gw"><div class="gauge" id="gauge" style="--t1:50%;--t2:80%"><div class="needle" id="needle"></div></div><div class="gauge-labels"><span>${labels[0]}</span><span>${labels[1]}</span><span>${labels[2]}</span></div></div>
     <div class="log-wrap" id="logw"></div><div id="verdict"></div>`);
   app.classList.add("court");
   const faces = () => {
@@ -808,7 +812,7 @@ function trial() {
     $("oppF").src = cutPic(p ? witnessFace(p[1], fx[1]) : courtFace("opp", fx[1]));
     $("oppN").textContent = p ? p[0] : sideName;
   };
-  const tilt = () => { $("needle").style.left = Math.max(0, Math.min(100, G.g)) + "%"; };
+  const tilt = () => { $("needle").style.left = gaugePos(G.g) + "%"; };
   const adj = d => {
     G.g += d; tilt();
     const z = zoneOf(G.g), g = $("gauge");
@@ -872,21 +876,35 @@ function trial() {
   };
   // 정답이 늘 같은 자리에 있지 않게 섞고, 넘어가는 선택지만 맨 아래에 둔다
   const isPass = o => o[0].startsWith("(") || /넘어간다|그대로 둔다/.test(o[0]);
+  // 증거가 걸린 선택지(o[5])는 버튼으로 보여 주지 않고 '증거를 제시한다'로 고르게 한다. 맞는 증거를 내면 그 선택지가 실행된다
   const optsHtml = opts => {
-    const all = opts.map((o, n) => [o, n]).filter(([o]) => !o[5] || G.cards[o[5]]);
+    const all = opts.map((o, n) => [o, n]).filter(([o]) => !o[5]);
+    const ev = opts.some(o => o[5]) ? '<button class="btn go" data-ev="1">증거를 제시한다</button>' : "";
     const order = all.filter(([o]) => !isPass(o)).map(x => [Math.random(), x]).sort((a, b) => a[0] - b[0]).map(x => x[1]).concat(all.filter(([o]) => isPass(o)));
-    return `<div class="opts">${order.map(([o, n]) => `<button class="btn" data-o="${n}">${optLabel(o[0])}</button>`).join("")}</div>`;
+    return `<div class="opts">${ev}${order.map(([o, n]) => `<button class="btn" data-o="${n}">${optLabel(o[0])}</button>`).join("")}</div>`;
   };
-  const bindOpts = (s, then) => app.querySelectorAll("[data-o]").forEach(b => b.onclick = () => {
-    const o = s.opts[+b.dataset.o];
-    const box = app.querySelector(".opts"); if (box) box.remove();
+  const bindOpts = (s, then, redo) => {
+    const evb = app.querySelector("[data-ev]");
+    if (evb) evb.onclick = () => present(s.q || "증거 제시", card => {
+      const box = app.querySelector(".opts"); if (box) box.remove();
+      const n = s.opts.findIndex(o => o[5] === card);
+      if (n < 0) return lineThen([["judge", "그 자료로는 알 수 없습니다.", MISS]], then);
+      G.flags["ev_" + card] = true;
+      runOpt(s, s.opts[n], then);
+    }, Object.entries(G.cards), redo);
+    app.querySelectorAll("[data-o]").forEach(b => b.onclick = () => {
+      const box = app.querySelector(".opts"); if (box) box.remove();
+      runOpt(s, s.opts[+b.dataset.o], then);
+    });
+  };
+  const runOpt = (s, o, then) => {
     if (o[0].startsWith("(")) return then();
     if (o[2]) o[2].split(",").forEach(f => G.flags[f] = true); // 플래그는 "a,b"처럼 여러 개를 달 수 있다
     const rebut = o[1] > 0 && (s.k === "cross" || /이의/.test(s.q + o[0]));
     const arr = [["us", optSay(o[0]), o[1], rebut ? "us" : undefined]];
     if (o[4]) arr.push([o[3], o[4], 0, o[1] < 0 && o[3] === "pros" ? "opp" : undefined]);
     lineThen(arr, then);
-  });
+  };
   const next = () => {
     if (i >= steps.length) return roundEnd();
     const s = steps[i++];
@@ -899,12 +917,12 @@ function trial() {
       return;
     }
     if (s.k === "choice") {
-      prompt("변호인", s.q, optsHtml(s.opts));
-      return bindOpts(s, next);
+      const draw = () => { G.curStep = s; prompt("변호인", s.q, optsHtml(s.opts)); bindOpts(s, next, draw); };
+      return draw();
     }
     if (s.k === "cross") lineThen([["us", s.q]], () => {
-      show(s.w, s.a, 0, undefined, optsHtml(s.opts));
-      bindOpts(s, next);
+      const draw = () => { G.curStep = s; show(s.w, s.a, 0, undefined, optsHtml(s.opts)); bindOpts(s, next, draw); };
+      draw();
     });
   };
   tilt(); faces();
@@ -916,7 +934,7 @@ function roundEnd() {
   if (!rs || (G.round || 0) >= rs.length - 1) return verdict();
   document.onclick = null;
   const rd = rs[G.round || 0];
-  const mood = G.g >= WIN ? "재판부가 우리 쪽으로 기운 것 같다." : G.g >= PART ? "재판부는 아직 어느 쪽으로도 기울지 않았다." : "재판부의 표정이 좋지 않다.";
+  const mood = G.g >= winAt() ? "재판부가 우리 쪽으로 기운 것 같다." : G.g >= partAt() ? "재판부는 아직 어느 쪽으로도 기울지 않았다." : "재판부의 표정이 좋지 않다.";
   popup({ k: rd.tt || "기일 종료", t: "다음 기일이 지정되었다", body: `${rd.next ? rd.next + "<br>" : ""}${mood}`, btns: [["법정을 나간다", () => betweenRound(rd.between || {}), "go"]] });
 }
 function betweenRound(b) {
@@ -975,7 +993,7 @@ function finish(res, end) {
 }
 function verdict() {
   document.onclick = null;
-  const c = G.c, r = c.resBy ? c.resBy(G) : G.g >= WIN ? "win" : G.g >= PART ? "partial" : "lose", V = c.res[r];
+  const c = G.c, r = c.resBy ? c.resBy(G) : G.g >= winAt() ? "win" : G.g >= partAt() ? "partial" : "lose", V = c.res[r];
   const stamps = c.stamps || { win: "무죄", partial: "감형", lose: "유죄" };
   // 완전히 이겨야(무죄·승소, 여주 4장은 진실·입 다문 결말) 다음으로 간다. 일부승소·감형·패소는 배드 엔딩
   const label = stamps[r], hero = H[c.hero], cleared = r !== "lose" && r !== "partial";
@@ -1484,7 +1502,7 @@ CH.f1 = { hero: "f", tags: G => [G.doneIds.pot && "pot", G.doneIds.sold && "sold
     ["강도윤", "작은 사건부터 맡은 건 잘했다. 작은 사건을 대충 하는 사람은 큰 사건도 망친다. 막히면 전화해라. 밤에도 괜찮다.", A + "story/face-kang.webp"],
     [null, "밥값 계산서는 어느새 교수님 손에 가 있었다."]] }],
   intro: ["벽지가 들뜨고 창틀에 곰팡이 자국이 남은 상가 2층 사무실. 중고 책상과 철제 캐비닛 사이에서, 교수님이 써 주신 수구여병(守口如甁) 액자만 안 어울리게 비싸 보인다.", "오늘은 법률구조 상담 명단에서 소개받은 의뢰인이 오는 날이다.", "지난주에는 상담만 세 건 하고 한 건도 맡지 못했다. 둘은 이웃끼리 주차 문제로 다투는 일이었고, 하나는 헤어진 남자친구한테 준 패딩을 돌려받을 수 있느냐는 문의였다.", "약속 시간에 맞춰 남색 조끼를 입은 마른 남자가 문을 두드렸다. 안경 너머 눈이 피곤해 보였다. 셔츠 단추는 맨 위까지 잠겨 있었다."],
-  greet: [["c", "저, 방재호라고 합니다. 택배 일 하고요. 상담 예약했는데요."], ["h", "네, 안녕하세요. 변호사 윤서연입니다. 앉으세요. 찾기 어려우셨죠."], ["c", "미용실 옆 계단이라고 해서 찾긴 찾았어요. 쉬는 날이라 옷은 좀 챙겨 입고 왔고요. 그런데 저 액자는 뭐라고 쓰여 있는 거예요?"], ["h", "은사님이 써 주셨어요. 입을 병마개처럼 지키라는 뜻이에요."], ["c", "허, 요즘 저한테 제일 필요한 말이네요."], ["h", "커피 드릴까요? 믹스밖에 없는데요."], ["c", "믹스가 제일 낫죠. 설탕 들어간 걸로요. 아침을 못 먹고 나와서요."], ["h", "두 봉 넣어 드릴게요."], ["c", "아이고, 고맙습니다. 저희 휴게실 커피는 물을 하도 많이 부어서 맹물 맛이 나요."], ["h", "편하게 말씀하세요. 어떤 일로 오셨어요?"]],
+  greet: [["c", "저, 방재호라고 합니다. 택배 일 하고요. 상담 예약했는데요."], ["h", "네, 안녕하세요. 변호사 윤서연입니다. 앉으세요. 찾기 어려우셨죠."], ["c", "미용실 옆 계단이라고 해서 찾긴 찾았어요. 그런데 저 액자는 뭐라고 쓰여 있는 거예요?"], ["h", "은사님이 써 주셨어요. 입을 병마개처럼 지키라는 뜻이에요."], ["c", "허, 요즘 저한테 제일 필요한 말이네요."], ["h", "커피 드릴까요? 믹스밖에 없는데요."], ["c", "믹스가 제일 낫죠. 설탕 들어간 걸로요. 아침을 못 먹고 나와서요."], ["h", "두 봉 넣어 드릴게요."], ["c", "아이고, 고맙습니다. 저희 휴게실 커피는 물을 하도 많이 부어서 맹물 맛이 나요."], ["h", "편하게 말씀하세요. 어떤 일로 오셨어요?"]],
   opening: "택배 하나 없어졌다고 절도로 걸렸습니다. 스무 해 가까이 일했는데요. 배송 중에 없어진 걸 저더러 어쩌라는 겁니까. 하루에 삼백 개를 돌리는데 그걸 어떻게 다 끼고 다녀요.",
   qs: [
     ["상자를 만졌는지에 대하여|그 상자, 직접 만지신 적은 있어요?", ["스캔만 찍었죠. 레일에서 내려서 바코드 찍고 적재함에 넣고, 차에 싣고 나서는 손도 안 댔어요.", "그 많은 걸 언제 만져 봐요. 스캔 기록 보시면 다 나와요. 회사에 물어보세요."], []],
@@ -3118,7 +3136,8 @@ CH.m3 = { hero: "m", title: "남주 3장 · 사상누각", no: "2035가합71406 
         S("judge", "채택합니다. 다음 기일은 오명환 증인 신문으로 진행합니다.")],
       between: { bg: "diner", lines: G => [
         "제2회 기일이 끝나고 법원 앞 횡단보도에서 정한별과 나란히 섰다.",
-        ["정한별", "그 판결문 읽으실 때 목소리가 똑같으시더군요. 5년 전이랑요."],
+        // 판결 이유를 법정에서 읽은 경우(ruling 제출)에만
+        ...(G.flags.ev_ruling ? [["정한별", "그 판결문 읽으실 때 목소리가 똑같으시더군요. 5년 전이랑요."]] : []),
         ["한서준", "정한별 씨, 저는……."],
         ["정한별", "됐어요. 말씀 안 하실 거잖아요. 그날 제가 본 게 사실이었다고는요."],
         ...(/^blind/.test(G.hist.m1 || "") ? ["판결 뒤에야 알았다는 말도 할 수 없었다. 신호가 바뀌어 같이 길을 건넜다."]
@@ -3885,7 +3904,7 @@ CH.f3 = { hero: "f", title: "여주 3장 · 눈감은 자들의 도시", no: "20
       ["강도윤", "다 먹었으면 한 그릇 더 시켜라. 이번엔 순대도 넣어 달라고 하고."],
       ["윤서연", "교수님, 저 이제 학생 아니에요."],
       ["강도윤", "내 앞에서는 학생이다. 먹어라."]] },
-    { bg: "f4-court-press", lines: ["며칠 뒤 법원 복도에서 남자 변호사와 부딪혔다. 시추공 24개로 시청을 이긴 사람, 한서준.", ["한서준", "윤서연 변호사님이시죠. 판결문 읽었습니다. 24공 중 15공."], ["윤서연", "그 숫자를 어떻게…"], ["한서준", "시청 재판 내내 붙들고 있던 숫자니까요. 건축 심의에 들어간 시추 결과는 9개뿐이었어요. 빠진 15개가 금융 쪽에서 먼저 지워졌다는 걸 이번에 알았습니다."], ["윤서연", "그 얘기를 저한테 하시는 이유가 뭐예요?"], ["한서준", "…사무실에 수구여병 액자 걸려 있지 않습니까? 기사 사진에서 봤어요. 강도윤 교수님 제자시죠."], ["윤서연", "어떻게 아세요."], ["한서준", "제 사무실에도 있거든요."], ["윤서연", "교수님이 같은 글을 두 군데 써 주셨으면, 그건 중복 기재네요."], ["한서준", "빼야 하는지는 서진에 자문부터 받아 보죠."], "둘 다 웃음이 터졌다. 복도 끝에서 법원 경위가 이쪽을 돌아보았다."] }],
+    { bg: "f4-court-press", lines: ["며칠 뒤 법원 복도에서 남자 변호사와 부딪혔다. 한서준 변호사. 시청 심의 자료에서 시추공 15개의 결과가 빠진 것을 밝혀내 타워 유족들의 국가배상 소송을 이긴 사람이다.", ["한서준", "윤서연 변호사님이시죠. 판결문 읽었습니다. 24공 중 15공."], ["윤서연", "그 숫자를 어떻게…"], ["한서준", "시청 재판 내내 붙들고 있던 숫자니까요. 건축 심의에 들어간 시추 결과는 9개뿐이었어요. 빠진 15개가 금융 쪽에서 먼저 지워졌다는 걸 이번에 알았습니다."], ["윤서연", "그 얘기를 저한테 하시는 이유가 뭐예요?"], ["한서준", "…사무실에 수구여병 액자 걸려 있지 않습니까? 기사 사진에서 봤어요. 강도윤 교수님 제자시죠."], ["윤서연", "어떻게 아세요."], ["한서준", "제 사무실에도 있거든요."], ["윤서연", "교수님이 같은 글을 두 군데 써 주셨으면, 그건 중복 기재네요."], ["한서준", "빼야 하는지는 서진에 자문부터 받아 보죠."], "둘 다 웃음이 터졌다. 복도 끝에서 법원 경위가 이쪽을 돌아보았다."] }],
     blind_win: [{ bg: "office", lines: [
       "판결 사흘 뒤, 송민규 씨가 남은 수임료를 봉투에 넣어 들고 왔다.",
       ["송민규", "남은 수임료입니다. 늦어서 죄송합니다.", A + "story/face-pf.webp"],
@@ -3893,7 +3912,7 @@ CH.f3 = { hero: "f", title: "여주 3장 · 눈감은 자들의 도시", no: "20
       ["송민규", "아내한테는 다 말했습니다. 변호사님한테 거짓말한 것까지요. 아내가 변호사님한테 사과부터 하라고 했습니다.", A + "story/face-pf.webp"],
       ["윤서연", "사과는 들었어요. 애 달리기 대회는 다녀오셨어요?"],
       ["송민규", "네. 꼴찌였습니다. 끝까지는 뛰었어요.", A + "story/face-pf.webp"]] },
-    { bg: "f4-court-press", lines: ["며칠 뒤 법원 복도에서 남자 변호사와 부딪혔다. 시추공 24개로 시청을 이긴 사람, 한서준.", ["한서준", "윤서연 변호사님이시죠. 판결문 읽었습니다. 24공 중 15공."], ["윤서연", "그 숫자를 어떻게…"], ["한서준", "시청 재판 내내 붙들고 있던 숫자니까요. 건축 심의에 들어간 시추 결과는 9개뿐이었어요. 빠진 15개가 금융 쪽에서 먼저 지워졌다는 걸 이번에 알았습니다."], ["윤서연", "그 얘기를 저한테 하시는 이유가 뭐예요?"], ["한서준", "…사무실에 수구여병 액자 걸려 있지 않습니까? 기사 사진에서 봤어요. 강도윤 교수님 제자시죠."], ["윤서연", "어떻게 아세요."], ["한서준", "제 사무실에도 있거든요."], ["윤서연", "교수님이 같은 글을 두 군데 써 주셨으면, 그건 중복 기재네요."], ["한서준", "빼야 하는지는 서진에 자문부터 받아 보죠."], "둘 다 웃음이 터졌다. 복도 끝에서 법원 경위가 이쪽을 돌아보았다."] }],
+    { bg: "f4-court-press", lines: ["며칠 뒤 법원 복도에서 남자 변호사와 부딪혔다. 한서준 변호사. 시청 심의 자료에서 시추공 15개의 결과가 빠진 것을 밝혀내 타워 유족들의 국가배상 소송을 이긴 사람이다.", ["한서준", "윤서연 변호사님이시죠. 판결문 읽었습니다. 24공 중 15공."], ["윤서연", "그 숫자를 어떻게…"], ["한서준", "시청 재판 내내 붙들고 있던 숫자니까요. 건축 심의에 들어간 시추 결과는 9개뿐이었어요. 빠진 15개가 금융 쪽에서 먼저 지워졌다는 걸 이번에 알았습니다."], ["윤서연", "그 얘기를 저한테 하시는 이유가 뭐예요?"], ["한서준", "…사무실에 수구여병 액자 걸려 있지 않습니까? 기사 사진에서 봤어요. 강도윤 교수님 제자시죠."], ["윤서연", "어떻게 아세요."], ["한서준", "제 사무실에도 있거든요."], ["윤서연", "교수님이 같은 글을 두 군데 써 주셨으면, 그건 중복 기재네요."], ["한서준", "빼야 하는지는 서진에 자문부터 받아 보죠."], "둘 다 웃음이 터졌다. 복도 끝에서 법원 경위가 이쪽을 돌아보았다."] }],
     false_win: [{ bg: "office", lines: [
       "변협에 낼 소명서는 사흘이 걸렸다. 무엇을 냈고 무엇을 확인하지 않았는지 날짜순으로 적었다.",
       "소명서를 우체국에서 부치고 돌아오는데 송민규 씨가 전화를 했다.",
@@ -3901,7 +3920,7 @@ CH.f3 = { hero: "f", title: "여주 3장 · 눈감은 자들의 도시", no: "20
       ["윤서연", "송민규 씨가 하실 건 없어요. 낸 건 제가 정한 거예요."],
       ["송민규", "…네. 그럼 애 달리기 대회나 다녀오겠습니다. 이번 토요일이에요.", A + "story/face-pf.webp"],
       ["윤서연", "꼭 가세요. 결과는 알려 주시고요."]] },
-    { bg: "f4-court-press", lines: ["며칠 뒤 법원 복도에서 남자 변호사와 부딪혔다. 시추공 24개로 시청을 이긴 사람, 한서준.", ["한서준", "윤서연 변호사님이시죠. 판결문 읽었습니다. 24공 중 15공."], ["윤서연", "그 숫자를 어떻게…"], ["한서준", "시청 재판 내내 붙들고 있던 숫자니까요. 건축 심의에 들어간 시추 결과는 9개뿐이었어요. 빠진 15개가 금융 쪽에서 먼저 지워졌다는 걸 이번에 알았습니다."], ["윤서연", "그 얘기를 저한테 하시는 이유가 뭐예요?"], ["한서준", "…사무실에 수구여병 액자 걸려 있지 않습니까? 기사 사진에서 봤어요. 강도윤 교수님 제자시죠."], ["윤서연", "어떻게 아세요."], ["한서준", "제 사무실에도 있거든요."], ["윤서연", "교수님이 같은 글을 두 군데 써 주셨으면, 그건 중복 기재네요."], ["한서준", "빼야 하는지는 서진에 자문부터 받아 보죠."], "둘 다 웃음이 터졌다. 복도 끝에서 법원 경위가 이쪽을 돌아보았다."] }],
+    { bg: "f4-court-press", lines: ["며칠 뒤 법원 복도에서 남자 변호사와 부딪혔다. 한서준 변호사. 시청 심의 자료에서 시추공 15개의 결과가 빠진 것을 밝혀내 타워 유족들의 국가배상 소송을 이긴 사람이다.", ["한서준", "윤서연 변호사님이시죠. 판결문 읽었습니다. 24공 중 15공."], ["윤서연", "그 숫자를 어떻게…"], ["한서준", "시청 재판 내내 붙들고 있던 숫자니까요. 건축 심의에 들어간 시추 결과는 9개뿐이었어요. 빠진 15개가 금융 쪽에서 먼저 지워졌다는 걸 이번에 알았습니다."], ["윤서연", "그 얘기를 저한테 하시는 이유가 뭐예요?"], ["한서준", "…사무실에 수구여병 액자 걸려 있지 않습니까? 기사 사진에서 봤어요. 강도윤 교수님 제자시죠."], ["윤서연", "어떻게 아세요."], ["한서준", "제 사무실에도 있거든요."], ["윤서연", "교수님이 같은 글을 두 군데 써 주셨으면, 그건 중복 기재네요."], ["한서준", "빼야 하는지는 서진에 자문부터 받아 보죠."], "둘 다 웃음이 터졌다. 복도 끝에서 법원 경위가 이쪽을 돌아보았다."] }],
     partial: { bg: "f4-court-press", lines: [["한서준", "윤서연 변호사님, 사무실에 수구여병 액자 걸려 있지 않습니까? 강도윤 교수님 제자시죠."], ["윤서연", "어떻게 아세요."], ["한서준", "제 사무실에도 있거든요."], "시추공 24개로 시청을 이겼다는 그 변호사였다."] }
   },
   file: ["서진 자문 회신: 대법원 2011. 2. 30. 판결 인용", "초안: 24공 중 15공 부적합", "S 프로젝트 = 스타포트 부지 대출", "한서준의 이름"]
@@ -5615,7 +5634,7 @@ CH.h1 = { hero: "m", speaker: "f", title: "마지막 이야기 · 그리고 아�
   benchWho: "재판장 · 검사", labels: ["유죄", "상해치사", "무죄"], stamps: { win: "무죄", partial: "상해치사", lose: "유죄" },
   bgConsult: "m4-frame", endBg: "f4-court-press", officeName: "윤서연 법률사무소",
   client: { n: "고영진", m: "61세 · 전 서울중앙공소청 부장검사", img: H1F.go },
-  people: { w: ["노진우 형사", H1F.noj], w2: ["차윤희", H1F.cha], w3: ["국과수 법의관", A + "cut/n40f2.webp"], w4: ["반포 아파트 관리소 직원", H1F.mgr], w5: ["엄수경", H1F.eom], w6: ["고영진의 아내", H1F.wife], t: ["탁영수", H1F.takScar], s: ["심재곤", H1F.sim], c: ["고영진", H1F.go] },
+  people: { w: ["노진우 형사", H1F.noj], w2: ["차윤희", H1F.cha], w3: ["국과수 법의관", A + "cut/n40f2.webp"], w4: ["반포 아파트 관리소 직원", H1F.mgr], w5: ["엄수경", H1F.eom], w6: ["고영진의 아내", H1F.wife], t: ["탁영수", H1F.tak], s: ["심재곤", H1F.sim], c: ["고영진", H1F.go] },
   hireQ: "윤 변호사에게 이 사건을 맡자고 할까?", hireYes: "맡자고 한다", hireNo: "말린다",
   hireSay: "맡으시죠. 2031년 결재와 이 살인은 별개 사건입니다. 기록 등사 신청서는 제가 쓰겠습니다.",
   refuseLine: "말리려고 했다. 그 고발이 수사됐으면 타워 인허가는 나지 않았을 수도 있다. 윤서연 변호사는 내 얼굴을 보고 먼저 말했다. '돈을 받았는지는 특검이 볼 일이에요. 여기서는 살인만 봐요.'",
@@ -7038,7 +7057,9 @@ CH.h1 = { hero: "m", speaker: "f", title: "마지막 이야기 · 그리고 아�
     partial: ["피고인을 징역 7년에 처한다.", "살인의 고의는 증명되지 않았으나, 피고인이 기록 문제로 피해자와 다투다 둔기로 머리를 때려 숨지게 한 사실은 인정된다(상해치사). 피고인의 진술은 여러 차례 바뀌어 믿기 어렵다. 탁영수의 진술은 공범이 책임을 다른 사람에게 떠넘기려는 것으로 보여 믿기 어렵고, 피해자 시계 줄의 혈흔이 탁영수의 것이라는 감정 결과는 탁영수가 피고인과 함께 현장에 있었다는 사정과도 맞는다."],
     lose: ["피고인을 징역 20년에 처한다.", "피해자의 시계가 멈춘 시각에 피해자와 함께 있던 사람은 피고인뿐이다. 흉기는 피고인 차량에서 피고인의 지문과 함께 발견되었다. 피고인은 피해자의 기록을 없앨 동기가 있었고 수사 초기 거짓말을 하였다. 탁영수의 진술은 공범이 책임을 다른 사람에게 떠넘기려는 것으로 보여 믿기 어렵고, 피해자 시계 줄의 혈흔이 탁영수의 것이라는 감정 결과는 탁영수가 피고인과 함께 현장에 있었다는 사정과도 맞는다."] },
   // 마지막 이야기는 다른 장보다 기준을 높인다(최선 경로 약 210점)
-  resBy: G => G.g >= 140 ? "win" : G.g >= 90 ? "partial" : "lose",
+  // 기일이 다섯 번이라 최고점이 270점대다. 다른 장처럼 얻을 수 있는 점수의 55% 안팎을 따야 이기게 170점
+  winAt: 170, partAt: 90,
+  resBy: G => G.g >= 170 ? "win" : G.g >= 90 ? "partial" : "lose",
   endBy: (G, r) => r === "win" && !(G.flags.takk && G.flags.simk) ? "win_half" : null,
   ending: {
     win: [
