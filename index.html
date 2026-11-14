@@ -22734,7 +22734,8 @@ function pcFace() {
   const app = document.getElementById("app"), sc = app && app.querySelector(".scene");
   if (!sc) return;
   const on = isPC() && app.classList.contains("vn") && !app.classList.contains("court");
-  if (!on) { ["top", "bottom", "left", "width", "height"].forEach(k => sc.style.removeProperty(k)); return; }
+  // 휴대폰에서는 손대지 않는다(휴대폰 크기는 fitBottom이 정함). 이 함수가 정해 둔 값만 지운다
+  if (!on) { if (sc.dataset.pcface) { ["top", "bottom", "left", "width", "height"].forEach(k => sc.style.removeProperty(k)); delete sc.dataset.pcface; } return; }
   // 화면마다 같은 자리: 장면 오른쪽 칸에서 질문 목록 자리(질문 4개 높이) 아래, 판단 내리기 버튼 자리 위. 상담·판단·수임료 모두 같다
   const W = innerWidth, H = innerHeight, colW = Math.min(460, W * .3), colL = W * .6 - 24 - colW;
   const qEnd = 84 + Math.min(300, H * .28), btnTop = H - 236 - 56;
@@ -22742,6 +22743,7 @@ function pcFace() {
   const set = (k, v) => sc.style.setProperty(k, v, "important");
   set("top", (qEnd + 12 + Math.max(0, (room - size) / 2)) + "px"); set("bottom", "auto");
   set("left", (colL + colW / 2) + "px"); set("width", size + "px"); set("height", size + "px");
+  sc.dataset.pcface = "1";
 }
 addEventListener("resize", () => setTimeout(pcFace, 50));
 // 컴퓨터: 대사가 남아 있으면 장면 어디를 눌러도 다음 대사로(버튼·오른쪽 패널·창은 제외)
