@@ -22527,7 +22527,7 @@ PC_MQ.addEventListener("change", () => { applyPC(); const sc = document.document
 function pcToast(t) { const d = document.createElement("div"); d.className = "pc-toast"; d.textContent = t; document.body.appendChild(d); setTimeout(() => d.remove(), 1800); }
 function pcPop(html) { const ov = document.createElement("div"); ov.className = "pc-pop"; ov.innerHTML = `<div class="box">${html}<button class="btn ghost" data-x style="text-align:center;margin-top:6px">닫기</button></div>`; document.body.appendChild(ov); ov.addEventListener("click", e => { if (e.target === ov || e.target.closest("[data-x]")) ov.remove(); }); return ov; }
 function pcLoad() {
-  const rows = [1, 2, 3].map(n => { const v = loadSlot(n); return `<button class="slotb" data-ld="${n}" ${v ? "" : "disabled"}><b>${n}번 칸</b> ${v ? esc(v.name || "") + " · " + esc(v.firm || "") : "빈 칸"}<small>${v ? monthLabel(v.day) + " · 명성 " + v.rep : ""}</small></button>`; }).join("");
+  const rows = [1, 2, 3, 4, 5].map(n => { const v = loadSlot(n); return `<button class="slotb" data-ld="${n}" ${v ? "" : "disabled"}><b>${n}번 칸</b> ${v ? esc(v.name || "") + " · " + esc(v.firm || "") : "빈 칸"}<small>${v ? monthLabel(v.day) + " · 명성 " + v.rep : ""}</small></button>`; }).join("");
   const ov = pcPop(`<h3>불러오기</h3>${rows}`);
   ov.querySelectorAll("[data-ld]").forEach(b => b.onclick = () => { const n = +b.dataset.ld, v = loadSlot(n); if (!v) return; ov.remove(); C = null; useSlot(n); S = v; resume(); });
 }
@@ -22612,7 +22612,7 @@ function screenCover() {
     return `<button class="slot ${v ? "" : "empty"}" data-slot="${n}"><b>${n}</b><span>${v ? `${esc(v.name || "")} · ${esc(v.firm || "")}<small>${monthLabel(v.day)} · 명성 ${v.rep}${v.ended ? " · 엔딩 봄" : ""}</small>` : "빈 칸"}</span></button>`;
   };
   const pickSlot = (title, onPick, extra) => {
-    pop(`<p>${title}</p><div class="slots">${[1, 2, 3].map(slotRow).join("")}${extra || ""}</div><button class="btn ghost" id="slotX">닫기</button>`);
+    pop(`<p>${title}</p><div class="slots">${[1, 2, 3, 4, 5].map(slotRow).join("")}${extra || ""}</div><button class="btn ghost" id="slotX">닫기</button>`);
     on("[data-slot]", e => onPick(+e.currentTarget.dataset.slot));
     on("#slotX", () => pop(""));
   };
@@ -22698,6 +22698,17 @@ function storyFrame(query, done) {
       if (e.source !== f.contentWindow || !e.data) return;
       // 스토리 장면이 바뀔 때마다 곡을 바꾼다(force면 같은 종류라도 새 곡으로)
       if (e.data.story === "music" && TRACKS[e.data.mode]) { if (e.data.force) audioMode = null; return music(e.data.mode); }
+      // 스토리 ≡ 메뉴: 저장 칸 목록, 다른 칸에 저장, 불러오기, 음악, 처음 화면
+      const reply = d => f.contentWindow && f.contentWindow.postMessage({ storyReply: 1, ...d }, "*");
+      if (e.data.story === "slots") return reply({ sound: soundOn, list: [1, 2, 3, 4, 5].map(n => { const v = loadSlot(n); return { n, label: v ? `${v.name || ""} · ${monthLabel(v.day)}` : "" }; }) });
+      if (e.data.story === "sound") { toggleSound(); return reply({}); }
+      if (e.data.story === "save") { if (S) { useSlot(+e.data.slot); save(); } return; }
+      if (e.data.story === "load" || e.data.story === "home") {
+        removeEventListener("message", h); f.remove(); C = null;
+        if (e.data.story === "home") return screenCover();
+        const v = loadSlot(+e.data.slot); if (!v) return screenCover();
+        useSlot(+e.data.slot); S = v; return resume();
+      }
       if (e.data.story !== "done") return;
       removeEventListener("message", h);
       const back = storyBlack(1);
