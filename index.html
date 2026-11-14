@@ -22904,9 +22904,9 @@ function startNew(slotThen) {
   const ov = document.createElement("div");
   ov.className = "staff-pop";
   ov.innerHTML = `<div class="sp-card"><div class="sp-name">모드 고르기</div>
-    <button class="btn primary" id="mdSpeed" style="text-align:center">스피드 모드<small style="display:block;font-weight:400;opacity:.85;margin-top:3px">매달 찾아오는 의뢰인의 사건을 맡아 사무소를 키웁니다. 목표는 명성 100.</small></button>
-    <button class="btn primary" id="mdOps" style="text-align:center">운영 모드<small style="display:block;font-weight:400;opacity:.85;margin-top:3px">로펌 대표가 되어 변호사를 뽑고 사건을 나눠 맡깁니다. 3년 안에 최고의 로펌으로.</small></button>
-    <button class="btn primary" id="mdStory" style="text-align:center">스토리 모드<small style="display:block;font-weight:400;opacity:.85;margin-top:3px">주인공 변호사의 이야기를 따라가며, 이어진 사건들 뒤에 숨은 진실을 밝힙니다.</small></button>
+    <button class="btn ghost" id="mdSpeed" style="text-align:center">스피드 모드</button>
+    <button class="btn ghost" id="mdOps" style="text-align:center">운영 모드</button>
+    <button class="btn ghost" id="mdStory" style="text-align:center">스토리 모드</button>
     <button class="btn ghost" id="mdBack" style="text-align:center">닫기</button></div>`;
   document.body.appendChild(ov);
   const pick = go => { ov.remove(); if (slotThen) return slotThen(go); go(); };
@@ -23086,17 +23086,17 @@ function storyPick(back, tab) {
   const card = n => {
     const k = h + n, r = c[k], ok = open(n), cl = done(n), [title, bg] = REPLAY_CH[h][n - 1];
     const im = `background:url('assets/story/${bg}.jpg') center/cover;${ok ? "" : "filter:grayscale(1) brightness(.35);"}`;
-    const sub = cl ? (n === 5 ? "깬 이야기" : replayEndLabel(k, r.end) ? "본 결말: " + replayEndLabel(k, r.end) : "깬 장") : ok ? "아직 깨지 않은 장" : n === 5 ? "남주 4장과 여주 4장을 깨면 열립니다" : "앞 장을 깨면 열립니다";
-    return `<div style="position:relative;height:118px;border-radius:12px;overflow:hidden;border:1px solid #6b5338;margin:0 0 12px">
+    const sub = !ok && n === 5 ? "남주 4장과 여주 4장을 깨면 열립니다" : "";
+    return `<div style="position:relative;height:84px;border-radius:12px;overflow:hidden;border:1px solid #6b5338;margin:0 0 12px">
       <div style="position:absolute;inset:0;${im}"></div>
       <div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(10,7,4,.92) 0%,rgba(10,7,4,.55) 60%,rgba(10,7,4,.25) 100%)"></div>
-      <div style="position:absolute;left:14px;top:14px;right:14px">
+      <div style="position:absolute;left:14px;top:12px;right:120px">
         <div style="font-size:12px;color:${ok ? "#d9b25f" : "#7d6a4d"};letter-spacing:1px">${n === 5 ? "마지막 사건" : "제" + n + "장"}</div>
-        <div style="font-size:19px;font-weight:700;margin-top:2px;color:${ok ? "#f1e6d0" : "#8d7c63"}">${ok ? title : "? ? ?"}</div>
-        <div style="font-size:12px;color:#c9b796;margin-top:4px">${sub}</div></div>
-      ${cl ? `<div style="position:absolute;right:14px;top:12px;border:2px solid #e2b85a;color:#e2b85a;font-weight:800;padding:2px 8px;border-radius:6px;transform:rotate(8deg);font-size:13px;letter-spacing:1px">CLEAR</div>` : ""}
-      ${ok ? `<button data-go="${n}" style="position:absolute;right:12px;bottom:12px;background:#b8892c;color:#1a120a;font-weight:700;padding:7px 14px;border-radius:8px;font-size:14px;border:0;cursor:pointer">${cl ? "다시 하기" : "시작"}</button>`
-        : `<button data-lock="${n}" style="position:absolute;right:12px;bottom:12px;color:#8d7c63;border:1px solid #5a4630;background:none;padding:6px 12px;border-radius:8px;font-size:14px">🔒 잠김</button>`}
+        <div style="font-size:18px;font-weight:700;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:${ok ? "#f1e6d0" : "#8d7c63"}">${ok ? title : "? ? ?"}</div>
+        ${sub ? `<div style="font-size:12px;color:#c9b796;margin-top:3px">${sub}</div>` : ""}</div>
+      ${cl ? `<div style="position:absolute;right:12px;top:8px;border:2px solid #e2b85a;color:#e2b85a;font-weight:800;padding:2px 8px;border-radius:6px;transform:rotate(8deg);font-size:12px;letter-spacing:1px">CLEAR</div>` : ""}
+      ${ok ? `<button data-go="${n}" style="position:absolute;right:12px;bottom:9px;background:#b8892c;color:#1a120a;font-weight:700;padding:5px 11px;border-radius:7px;font-size:13px;border:0;cursor:pointer">${cl ? "다시 하기" : "시작"}</button>`
+        : `<button data-lock="${n}" style="position:absolute;right:12px;bottom:9px;color:#8d7c63;border:1px solid #5a4630;background:none;padding:6px 12px;border-radius:8px;font-size:14px">🔒 잠김</button>`}
     </div>`;
   };
   const tabBtn = x => `<button data-tab="${x}" style="flex:1;padding:10px;font-size:15px;border:0;cursor:pointer;${x === h ? "background:#b8892c;color:#1a120a;font-weight:700" : "background:none;color:#b9a78a"}">${x === "m" ? "한서준" : "윤서연"} 이야기 · ${cnt(x)}/5</button>`;
