@@ -22799,6 +22799,38 @@ function pcSettings() {
   ov.querySelectorAll("[data-big]").forEach(b => b.onclick = () => { const on = b.dataset.big === "1"; document.documentElement.classList.toggle("bigtext", on); try { localStorage.setItem(KEY + "-bigtext", on ? "1" : ""); } catch (e) {} ov.remove(); pcSettings(); });
   ov.querySelector("[data-home]").onclick = () => { ov.remove(); C = null; screenCover(); };
 }
+// ≡ 메뉴(모든 모드): 불러오기·처음 화면. 스토리 모드만 저장이 있다(스피드·운영 모드는 고른 칸에 늘 자동 저장된다)
+function gameMenu() {
+  const ov = document.createElement("div"); ov.className = "staff-pop";
+  const close = () => ov.remove();
+  ov.onclick = e => { if (e.target === ov) close(); };
+  const row = (n, v, extra = "") => `<b>${n}번 칸</b>${extra} ${v ? esc(v.name || "") + " · " + monthLabel(v.day) + " · 명성 " + v.rep : "빈 칸"}`;
+  const box = html => { ov.innerHTML = `<div class="sp-card"><div class="sp-name">메뉴</div>${html}<button class="btn ghost" data-x style="text-align:center">닫기</button></div>`; ov.querySelector("[data-x]").onclick = close; };
+  const main = () => {
+    box(`${isStory() ? '<button class="btn" data-a="save" style="text-align:center">저장</button>' : ""}
+      <button class="btn" data-a="load" style="text-align:center">불러오기</button>
+      <button class="btn" data-a="home" style="text-align:center">처음 화면으로</button>`);
+    ov.querySelectorAll("[data-a]").forEach(b => b.onclick = () => ({ save: saveMenu, load: loadMenu, home: () => { close(); C = null; screenCover(); } })[b.dataset.a]());
+  };
+  const saveMenu = () => {
+    box(`<div class="sp-row">어느 칸에 저장할까요?</div>${[1, 2, 3, 4, 5].map(n => `<button class="btn" data-sv="${n}" style="text-align:left">${row(n, loadSlot(n), n === SLOT ? " · 지금 칸" : "")}</button>`).join("")}`);
+    const doSave = n => { close(); useSlot(n); save(); pcToast(`${n}번 칸에 저장했습니다.`); };
+    ov.querySelectorAll("[data-sv]").forEach(b => b.onclick = () => {
+      const n = +b.dataset.sv, v = loadSlot(n);
+      if (n === SLOT || !v) return doSave(n);
+      box(`<div class="sp-row">${n}번 칸의 기록(${esc(v.name || "")} · ${monthLabel(v.day)})이 지워집니다.</div><button class="btn primary" data-y style="text-align:center">덮어쓰기</button><button class="btn" data-no style="text-align:center">취소</button>`);
+      ov.querySelector("[data-y]").onclick = () => doSave(n);
+      ov.querySelector("[data-no]").onclick = saveMenu;
+    });
+  };
+  const loadMenu = () => {
+    const auto = loadSlot(STORY_AUTO);
+    box(`<div class="sp-row">어느 게임을 불러올까요?</div>${[1, 2, 3, 4, 5].map(n => { const v = loadSlot(n); return `<button class="btn" data-ld="${n}" style="text-align:left" ${v ? "" : "disabled"}>${row(n, v, n === SLOT ? " · 지금 칸" : "")}</button>`; }).join("")}${auto ? `<button class="btn" data-ld="${STORY_AUTO}" style="text-align:left"><b>↻</b> ${esc(auto.name || "")} · 스토리 모드 자동 저장 · ${monthLabel(auto.day)}</button>` : ""}`);
+    ov.querySelectorAll("[data-ld]").forEach(b => b.onclick = () => { const n = +b.dataset.ld, v = loadSlot(n); if (!v) return; close(); C = null; useSlot(n); S = v; resume(); });
+  };
+  document.body.appendChild(ov);
+  main();
+}
 try { if (localStorage.getItem(KEY + "-bigtext")) document.documentElement.classList.add("bigtext"); } catch (e) {}
 // 상담 오른쪽 패널 탭: 증거·대화 기록·사건 정보(자료 검토). 튜토리얼이 가리키는 것이 다른 탭에 있으면 그 탭으로 넘긴다
 function pcTabs() {
@@ -24092,6 +24124,25 @@ function runTrial() {
   const arg = c.arguments.find(a => a.id === C.arg);
   steps.push({ cls: "ours", who: "우리 측 주장", text: formal(arg.text) + ".", d: arg.value });
   if (hired("baek") && isCrim(c)) steps.push({ cls: "ours", who: "백지원 변호사", text: "검찰 증거에 빠진 부분이 있습니다. 피고인에게 유리한 사정도 함께 살펴 주십시오.", d: 1 });
+  const cited = new Set(); let argSaid = false;
+  const evText = e => {
+    const t = String(e.desc || "").trim();
+    if (/^"[^"]+"$/.test(t)) { const last = t.replace(/[^가-힣]/g, "").slice(-1), j = last && (last.charCodeAt(0) - 0xac00) % 28; return `「${e.name}」에는 ${t}${j ? "이" : ""}라고 되어 있습니다.`; }
+    return `「${e.name}」${josaEul(e.name)} 보십시오. ${t.replace(/[.\s]+$/, "").split(/\.\s+/).map(x => /다$/.test(x) ? formal(x) : /["'”]$|(없음|있음|않음|읽음|함|됨)$/.test(x) ? x : x + "입니다").join(". ")}.`.replace(/([.!?]["'”])\.$/, "$1");
+  };
+  const rebutLines = (ids, half) => {
+    const lines = [];
+    if (ids.includes("k")) lines.push(`그 점은 저희가 먼저 밝힌 부분입니다. 「${c.confessionCard.name}」${josaEul(c.confessionCard.name)} 보십시오.`);
+    const evs = ids.filter(id => id !== "k" && id !== C.arg).map(id => c.evidence.find(e => e.id === id)).filter(Boolean);
+    if (half && evs.length) lines.push("적어도 그 일부는 사실과 다릅니다.");
+    const fresh = evs.find(e => !cited.has(e.id));
+    if (fresh) { cited.add(fresh.id); lines.push(evText(fresh)); }
+    const rest = evs.filter(e => e !== fresh);
+    if (rest.length) lines.push(`${fresh ? "" : "앞서 본 "}${rest.map(e => `「${e.name}」`).join(", ")}${fresh ? "도 함께 보십시오." : " 그대로입니다."}`);
+    if (ids.includes(C.arg)) lines.push(argSaid ? "그 점은 앞서 드린 주장으로 이미 답했습니다." : `앞서 말씀드린 대로, ${formal(c.arguments.find(a => a.id === C.arg).text)}.`);
+    if (ids.includes(C.arg)) argSaid = true;
+    return lines;
+  };
   c.opponent.forEach(o => {
     const cs = o.counters || [];
     // 숨긴 사실 폭로는 털어놓은 사실을 내고 맞는 주장까지 골라야 막힌다
@@ -24108,21 +24159,13 @@ function runTrial() {
     steps.push({ ava: isCrim(c) ? "pros" : "opp", cls: "opp", who: isCrim(c) ? "검사" : C.vs ? `상대 대리인 · ${C.vs}` : "상대 대리인", text: say.text, note: say.note, d: hit ? 0 : half ? -Math.ceil(power / 2) : -power, dTxt: hit ? "" : null });
     if (half) {
       const ids = (o.half || []).filter(used).concat(kOnly ? ["k"] : []);
-      const evNames = ids.filter(id => id !== "k" && id !== C.arg).map(id => (c.evidence.find(e => e.id === id) || {}).name).filter(Boolean);
-      const lines = [];
-      if (ids.includes("k")) lines.push(`그 점은 저희가 먼저 밝힌 부분입니다. 「${c.confessionCard.name}」${josaEul(c.confessionCard.name)} 보십시오.`);
-      if (evNames.length) lines.push(`적어도 그 일부는 저희가 제출한 ${evNames.map(n => `「${n}」`).join(", ")}${josaEul(evNames[evNames.length - 1])} 보시면 사실과 다릅니다.`);
-      if (ids.includes(C.arg)) lines.push(`앞서 말씀드린 대로, ${formal(c.arguments.find(a => a.id === C.arg).text)}.`);
+      const lines = rebutLines(ids, true);
       steps.push({ img: heroOf().img, cls: "ours rebut", who: "우리 측 반론", text: `이의 있습니다! ${lines.join(" ")}`, d: 0, dTxt: "일부 막음" });
     }
     // 막았다면 우리 측이 그 자리에서 증거·털어놓은 사실·주장을 내밀며 반론한다
     if (hit) {
       const ids = cs.filter(id => C.sub.has(id) || id === C.arg);
-      const evNames = ids.filter(id => id !== "k" && id !== C.arg).map(id => (c.evidence.find(e => e.id === id) || {}).name).filter(Boolean);
-      const lines = [];
-      if (ids.includes("k")) lines.push(`그 점은 저희가 먼저 밝힌 부분입니다. 「${c.confessionCard.name}」${josaEul(c.confessionCard.name)} 보십시오.`);
-      if (evNames.length) lines.push(`저희가 제출한 ${evNames.map(n => `「${n}」`).join(", ")}${josaEul(evNames[evNames.length - 1])} 보십시오.`);
-      if (ids.includes(C.arg)) lines.push(`앞서 말씀드린 대로, ${formal(c.arguments.find(a => a.id === C.arg).text)}.`);
+      const lines = rebutLines(ids, false);
       steps.push({ img: heroOf().img, cls: "ours rebut", who: "우리 측 반론", text: `이의 있습니다! ${lines.join(" ")}`, d: 0, dTxt: "막아냄" });
     }
   });
@@ -26347,7 +26390,8 @@ function renderHud() {
       <span class="pill"><i>★</i>${S.rep}${office().repCap < 100 ? `<small>/${office().repCap}</small>` : ""}</span>
       <span class="pill r">${ym} · 수임 ${isOps() ? opsTaken() + "/" + opsCapAll() : (S.taken || 0) + "/" + intakeCap()}</span>
     </div>
-    <div class="rk">${S.name ? esc(S.name) + " · " : ""}${esc(rankOf(S.rep))} · 승률 ${trials() ? winRate() + "%" : "—"}</div>`;
+    <div class="rk" style="display:flex;align-items:center;gap:8px"><span style="flex:1;min-width:0">${S.name ? esc(S.name) + " · " : ""}${esc(rankOf(S.rep))} · 승률 ${trials() ? winRate() + "%" : "—"}</span>${isPC() ? "" : '<button class="gmenu-b" type="button" style="flex:0 0 auto;border:1px solid var(--brass);background:#0b0806cc;color:var(--brass);border-radius:8px;font-size:12px;padding:3px 10px">≡ 메뉴</button>'}</div>`;
+  hud.querySelectorAll(".gmenu-b").forEach(b => b.onclick = e => { e.stopPropagation(); gameMenu(); });
 }
 function renderTabs() {
   const hasEv = !!app.querySelector(".ev-drawer"), hasTalk = !!app.querySelector(".log-drawer");
