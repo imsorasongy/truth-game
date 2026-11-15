@@ -23022,8 +23022,8 @@ function storyCheck(next) {
     storyFrame(q, (res, end) => storyResult(res, end, step, n, hero0, next));
     return true;
   }
-  // 1장은 일반 사건 2달 뒤 명성 20이면 열리고, 미달이어도 5개월째에는 열린다
-  if (!(n === 0 ? (S.rep >= step.need && S.day >= 3) || S.day >= 5 : S.rep >= step.need)) return false;
+  // 1장은 일반 사건 2달 뒤(3개월째) 명성과 관계없이 열린다
+  if (!(n === 0 ? S.day >= 3 : S.rep >= step.need)) return false;
   const hero = S.hero || "m";
   // 조사하다 끊긴 장이면 자동 저장된 자리에서 이어서 연다
   if (st.playing === n) { storyFrame(`ch=${hero}${n + 1}&office=${S.office || 0}&resume=1&hist=${Object.entries(st.hist || {}).map(([k, v]) => k + "." + v).join(",")}`, (res, end) => storyResult(res, end, step, n, hero, next)); return true; }
