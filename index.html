@@ -22799,7 +22799,7 @@ function pcSettings() {
   ov.querySelectorAll("[data-big]").forEach(b => b.onclick = () => { const on = b.dataset.big === "1"; document.documentElement.classList.toggle("bigtext", on); try { localStorage.setItem(KEY + "-bigtext", on ? "1" : ""); } catch (e) {} ov.remove(); pcSettings(); });
   ov.querySelector("[data-home]").onclick = () => { ov.remove(); C = null; screenCover(); };
 }
-// ≡ 메뉴(모든 모드): 불러오기·처음 화면. 스토리 모드만 저장이 있다(스피드·운영 모드는 고른 칸에 늘 자동 저장된다)
+// ≡ 메뉴(모든 모드): 불러오기·음악·처음 화면. 스토리 모드만 저장이 있다(스피드·운영 모드는 고른 칸에 늘 자동 저장된다)
 function gameMenu() {
   const ov = document.createElement("div"); ov.className = "staff-pop";
   const close = () => ov.remove();
@@ -22809,8 +22809,9 @@ function gameMenu() {
   const main = () => {
     box(`${isStory() ? '<button class="btn" data-a="save" style="text-align:center">저장</button>' : ""}
       <button class="btn" data-a="load" style="text-align:center">불러오기</button>
+      <button class="btn" data-a="snd" style="text-align:center">음악 ${soundOn ? "끄기" : "켜기"}</button>
       <button class="btn" data-a="home" style="text-align:center">처음 화면으로</button>`);
-    ov.querySelectorAll("[data-a]").forEach(b => b.onclick = () => ({ save: saveMenu, load: loadMenu, home: () => { close(); C = null; screenCover(); } })[b.dataset.a]());
+    ov.querySelectorAll("[data-a]").forEach(b => b.onclick = () => ({ save: saveMenu, load: loadMenu, snd: () => { toggleSound(); renderTabs(); main(); }, home: () => { close(); C = null; screenCover(); } })[b.dataset.a]());
   };
   const saveMenu = () => {
     box(`<div class="sp-row">어느 칸에 저장할까요?</div>${[1, 2, 3, 4, 5].map(n => `<button class="btn" data-sv="${n}" style="text-align:left">${row(n, loadSlot(n), n === SLOT ? " · 지금 칸" : "")}</button>`).join("")}`);
