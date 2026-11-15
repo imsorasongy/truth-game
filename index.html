@@ -22722,7 +22722,7 @@ function pcDialog() {
   }
   box.hidden = false;
   const L = lines[Math.min(st.cur, lines.length - 1)]; st.seen.add(L.t); const cimg = (app.querySelector(".scene .portrait img") || {}).src;
-  const face = L.sys ? "" : L.me ? `assets/story/cut/hero2-${heroKey()}.webp` : cimg;
+  const face = L.sys ? "" : L.me ? `assets/story/cut/hero-${heroKey()}.webp` : cimg;
   const name = L.sys ? "" : L.me ? `${(S && S.name) || heroOf().name} 변호사` : who;
   const more = st.cur < st.len - 1;
   box.className = (L.me ? "me" : "") + (face ? "" : " noface");
@@ -23232,8 +23232,8 @@ function storyEnd(bad) {
 
 /* ---------- 주인공·이름·사무소 정하기 ---------- */
 const HEROES = {
-  m: { img: "assets/hero2-m.webp", label: "남자 변호사", name: "한서준" },
-  f: { img: "assets/hero2-f.webp", label: "여자 변호사", name: "윤서연" }
+  m: { img: "assets/hero-m.webp", label: "남자 변호사", name: "한서준" },
+  f: { img: "assets/hero-f.webp", label: "여자 변호사", name: "윤서연" }
 };
 const who = () => S || load() || {};
 const heroOf = () => HEROES[who().hero || "m"];
@@ -24242,7 +24242,7 @@ function runTrial() {
 let actx = null;
 const zoneOf = sc => sc >= 3 ? 2 : sc >= 1 ? 1 : 0;
 // 재판 표정: 주인공 기본·자신감·당황·심각·안도, 상대 변호사·검사 기본·자신감·당황·심각
-const face = (side, e) => side === "us" ? `assets/expr/hero2-${heroKey()}_${e}.webp` : `assets/expr/${C && isCrim(C.c) ? "prosecutor" : "opponent"}_${e}.webp`;
+const face = (side, e) => side === "us" ? `assets/expr/hero-${heroKey()}_${e}.webp` : `assets/expr/${C && isCrim(C.c) ? "prosecutor" : "opponent"}_${e}.webp`;
 function setFaces(us, opp) {
   const u = document.querySelector(".court .side.us img"), o = document.querySelector(".court .side.opp img");
   if (u && us) u.src = face("us", us);
@@ -26436,7 +26436,7 @@ function show(html, dockHtml, scene = "office", track) {
     while (first.nextSibling) bottom.appendChild(first.nextSibling);
     app.appendChild(bottom);
     // 컴퓨터용: 장면 왼쪽 아래에 주인공을 세운다(폰에서는 숨김)
-    const hf = document.createElement("div"); hf.className = "pc-hero"; hf.dataset.name = (S && S.name) || heroOf().name; hf.innerHTML = `<img src="assets/story/cut/hero2-${heroKey()}.webp" alt=""><span class="hint">오른쪽에서 물어볼 것을 고르자.</span>`; app.appendChild(hf);
+    const hf = document.createElement("div"); hf.className = "pc-hero"; hf.dataset.name = (S && S.name) || heroOf().name; hf.innerHTML = `<img src="assets/story/cut/hero-${heroKey()}.webp" alt=""><span class="hint">오른쪽에서 물어볼 것을 고르자.</span>`; app.appendChild(hf);
     // 상담 중 증거 목록은 서랍으로 뺀다
     const evStack = [...bottom.querySelectorAll(".stack")].find(s => s.querySelector(".evlist") && !s.querySelector(".pick") && !s.classList.contains("proof"));
     if (evStack) {
