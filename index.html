@@ -22558,8 +22558,10 @@ const winRate = () => trials() ? Math.round((S.w + S.p * 0.5) / trials() * 100) 
 // 한 달에 찾아오는 의뢰인 수: 명성 0이면 1~2명, 100이면 10~20명
 const visitorRange = rep => [1 + Math.floor(rep * 9 / 100), 2 + Math.floor(rep * 18 / 100)];
 // 진행은 월 단위. S.day는 1부터 세는 달 번호(1 = 2030년 1월). 스토리 모드 여주는 1 = 2031년 1월
-const baseYear = () => (S && S.mode === "story" && S.hero === "f") ? 2031 : 2030;
-const monthLabel = m => `${baseYear() + Math.floor((m - 1) / 12)}년 ${((m - 1) % 12) + 1}월`;
+// 여주 스토리모드는 2031년, 나머지는 2030년이 1번째 달이다. 저장 칸은 그 기록의 주인공으로 계산한다
+const yearBaseOf = v => (v && v.mode === "story" && v.hero === "f") ? 2031 : 2030;
+const baseYear = () => yearBaseOf(S);
+const monthLabel = (m, v = S) => `${yearBaseOf(v) + Math.floor((m - 1) / 12)}년 ${((m - 1) % 12) + 1}월`;
 const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const isCrim = c => c.kind === "criminal";
 // 형사 사건에서 이긴 판결이 무죄가 아니면(감형·공소기각 등) 그 이름으로 부른다
@@ -22773,19 +22775,19 @@ PC_MQ.addEventListener("change", () => { applyPC(); const sc = document.document
 function pcToast(t) { const d = document.createElement("div"); d.className = "pc-toast"; d.textContent = t; document.body.appendChild(d); setTimeout(() => d.remove(), 1800); }
 function pcPop(html) { const ov = document.createElement("div"); ov.className = "pc-pop"; ov.innerHTML = `<div class="box">${html}<button class="btn ghost" data-x style="text-align:center;margin-top:6px">닫기</button></div>`; document.body.appendChild(ov); ov.addEventListener("click", e => { if (e.target === ov || e.target.closest("[data-x]")) ov.remove(); }); return ov; }
 function pcLoad() {
-  const rows = [1, 2, 3, 4, 5].map(n => { const v = loadSlot(n); return `<button class="slotb" data-ld="${n}" ${v ? "" : "disabled"}><b>${n}번 칸</b> ${v ? esc(v.name || "") + " · " + esc(v.firm || "") : "빈 칸"}<small>${v ? monthLabel(v.day) + " · 명성 " + v.rep : ""}</small></button>`; }).join("");
+  const rows = [1, 2, 3, 4, 5].map(n => { const v = loadSlot(n); return `<button class="slotb" data-ld="${n}" ${v ? "" : "disabled"}><b>${n}번 칸</b> ${v ? esc(v.name || "") + " · " + esc(v.firm || "") : "빈 칸"}<small>${v ? monthLabel(v.day, v) + " · 명성 " + v.rep : ""}</small></button>`; }).join("");
   const ov = pcPop(`<h3>불러오기</h3>${rows}`);
   ov.querySelectorAll("[data-ld]").forEach(b => b.onclick = () => { const n = +b.dataset.ld, v = loadSlot(n); if (!v) return; ov.remove(); C = null; useSlot(n); S = v; resume(); });
 }
 // 저장: 1~5번 칸 중에서 고른다. 다른 게임이 있는 칸이면 덮어쓸지 한 번 묻는다
 function pcSave() {
-  const rows = [1, 2, 3, 4, 5].map(n => { const v = loadSlot(n); return `<button class="slotb" data-sv="${n}"><b>${n}번 칸</b>${n === SLOT ? " · 지금 칸" : ""} ${v ? esc(v.name || "") + " · " + esc(v.firm || "") : "빈 칸"}<small>${v ? monthLabel(v.day) + " · 명성 " + v.rep : ""}</small></button>`; }).join("");
+  const rows = [1, 2, 3, 4, 5].map(n => { const v = loadSlot(n); return `<button class="slotb" data-sv="${n}"><b>${n}번 칸</b>${n === SLOT ? " · 지금 칸" : ""} ${v ? esc(v.name || "") + " · " + esc(v.firm || "") : "빈 칸"}<small>${v ? monthLabel(v.day, v) + " · 명성 " + v.rep : ""}</small></button>`; }).join("");
   const ov = pcPop(`<h3>저장</h3>${rows}`);
   const doSave = n => { ov.remove(); useSlot(n); save(); pcToast(`${n}번 칸에 저장했습니다.`); renderTabs(); };
   ov.querySelectorAll("[data-sv]").forEach(b => b.onclick = () => {
     const n = +b.dataset.sv, v = loadSlot(n);
     if (n === SLOT || !v) return doSave(n);
-    ov.querySelector(".box").innerHTML = `<h3>${n}번 칸 덮어쓰기</h3><div class="row">${esc(v.name || "")} · ${monthLabel(v.day)} 기록이 지워집니다.</div><button class="btn primary" data-y style="text-align:center">덮어쓰기</button><button class="btn ghost" data-x style="text-align:center">취소</button>`;
+    ov.querySelector(".box").innerHTML = `<h3>${n}번 칸 덮어쓰기</h3><div class="row">${esc(v.name || "")} · ${monthLabel(v.day, v)} 기록이 지워집니다.</div><button class="btn primary" data-y style="text-align:center">덮어쓰기</button><button class="btn ghost" data-x style="text-align:center">취소</button>`;
     ov.querySelector("[data-y]").onclick = () => doSave(n);
   });
 }
@@ -22804,7 +22806,7 @@ function gameMenu() {
   const ov = document.createElement("div"); ov.className = "staff-pop";
   const close = () => ov.remove();
   ov.onclick = e => { if (e.target === ov) close(); };
-  const row = (n, v, extra = "") => `<b>${n}번 칸</b>${extra} ${v ? esc(v.name || "") + " · " + monthLabel(v.day) + " · 명성 " + v.rep : "빈 칸"}`;
+  const row = (n, v, extra = "") => `<b>${n}번 칸</b>${extra} ${v ? esc(v.name || "") + " · " + monthLabel(v.day, v) + " · 명성 " + v.rep : "빈 칸"}`;
   const box = html => { ov.innerHTML = `<div class="sp-card"><div class="sp-name">메뉴</div>${html}<button class="btn ghost" data-x style="text-align:center">닫기</button></div>`; ov.querySelector("[data-x]").onclick = close; };
   const main = () => {
     box(`${isStory() ? '<button class="btn" data-a="save" style="text-align:center">저장</button>' : ""}
@@ -22819,14 +22821,14 @@ function gameMenu() {
     ov.querySelectorAll("[data-sv]").forEach(b => b.onclick = () => {
       const n = +b.dataset.sv, v = loadSlot(n);
       if (n === SLOT || !v) return doSave(n);
-      box(`<div class="sp-row">${n}번 칸의 기록(${esc(v.name || "")} · ${monthLabel(v.day)})이 지워집니다.</div><button class="btn primary" data-y style="text-align:center">덮어쓰기</button><button class="btn" data-no style="text-align:center">취소</button>`);
+      box(`<div class="sp-row">${n}번 칸의 기록(${esc(v.name || "")} · ${monthLabel(v.day, v)})이 지워집니다.</div><button class="btn primary" data-y style="text-align:center">덮어쓰기</button><button class="btn" data-no style="text-align:center">취소</button>`);
       ov.querySelector("[data-y]").onclick = () => doSave(n);
       ov.querySelector("[data-no]").onclick = saveMenu;
     });
   };
   const loadMenu = () => {
     const auto = loadSlot(STORY_AUTO);
-    box(`<div class="sp-row">어느 게임을 불러올까요?</div>${[1, 2, 3, 4, 5].map(n => { const v = loadSlot(n); return `<button class="btn" data-ld="${n}" style="text-align:left" ${v ? "" : "disabled"}>${row(n, v, n === SLOT ? " · 지금 칸" : "")}</button>`; }).join("")}${auto ? `<button class="btn" data-ld="${STORY_AUTO}" style="text-align:left"><b>↻</b> ${esc(auto.name || "")} · 스토리 모드 자동 저장 · ${monthLabel(auto.day)}</button>` : ""}`);
+    box(`<div class="sp-row">어느 게임을 불러올까요?</div>${[1, 2, 3, 4, 5].map(n => { const v = loadSlot(n); return `<button class="btn" data-ld="${n}" style="text-align:left" ${v ? "" : "disabled"}>${row(n, v, n === SLOT ? " · 지금 칸" : "")}</button>`; }).join("")}${auto ? `<button class="btn" data-ld="${STORY_AUTO}" style="text-align:left"><b>↻</b> ${esc(auto.name || "")} · 스토리 모드 자동 저장 · ${monthLabel(auto.day, auto)}</button>` : ""}`);
     ov.querySelectorAll("[data-ld]").forEach(b => b.onclick = () => { const n = +b.dataset.ld, v = loadSlot(n); if (!v) return; close(); C = null; useSlot(n); S = v; resume(); });
   };
   document.body.appendChild(ov);
@@ -22908,7 +22910,7 @@ function screenCover() {
   // 저장 칸 고르기
   const slotRow = n => {
     const v = loadSlot(n);
-    return `<button class="slot ${v ? "" : "empty"}" data-slot="${n}"><b>${n}</b><span>${v ? `${esc(v.name || "")} · ${esc(v.firm || "")}<small>${monthLabel(v.day)} · 명성 ${v.rep}${v.ended ? " · 엔딩 봄" : ""}</small>` : "빈 칸"}</span></button>`;
+    return `<button class="slot ${v ? "" : "empty"}" data-slot="${n}"><b>${n}</b><span>${v ? `${esc(v.name || "")} · ${esc(v.firm || "")}<small>${monthLabel(v.day, v)} · 명성 ${v.rep}${v.ended ? " · 엔딩 봄" : ""}</small>` : "빈 칸"}</span></button>`;
   };
   const pickSlot = (title, onPick, extra) => {
     pop(`<p>${title}</p><div class="slots">${[1, 2, 3, 4, 5].map(slotRow).join("")}${extra || ""}</div><button class="btn ghost" id="slotX">닫기</button>`);
@@ -22921,12 +22923,12 @@ function screenCover() {
     pickSlot("어느 게임을 불러올까요?", n => {
       const v = loadSlot(n); if (!v) return;
       useSlot(n); S = v; resume();
-    }, auto ? `<button class="slot" data-slot="${STORY_AUTO}"><b>↻</b><span>${esc(auto.name || "")} · 스토리 모드 자동 저장<small>${monthLabel(auto.day)} · 명성 ${auto.rep}</small></span></button>` : "");
+    }, auto ? `<button class="slot" data-slot="${STORY_AUTO}"><b>↻</b><span>${esc(auto.name || "")} · 스토리 모드 자동 저장<small>${monthLabel(auto.day, auto)} · 명성 ${auto.rep}</small></span></button>` : "");
   });
   const slotThen = go => pickSlot("어느 슬롯에서 시작할까요?", n => {
     const v = loadSlot(n);
     if (!v) { useSlot(n); return go(); }
-    pop(`<p>${n}번 칸의 ${monthLabel(v.day)} 기록이 지워집니다.</p><div class="row2"><button class="btn primary" id="yesNew">지우고 시작</button><button class="btn ghost" id="noNew">취소</button></div>`);
+    pop(`<p>${n}번 칸의 ${monthLabel(v.day, v)} 기록이 지워집니다.</p><div class="row2"><button class="btn primary" id="yesNew">지우고 시작</button><button class="btn ghost" id="noNew">취소</button></div>`);
     on("#yesNew", () => { pop(""); useSlot(n); go(); });
     on("#noNew", () => pop(""));
   });
@@ -22954,9 +22956,9 @@ const isStory = () => !!S && S.mode === "story";
 // need: 열리는 명성, after: 깬 뒤 명성, day: 이야기 시점(게임 내 달), fee: 이겼을 때 받는 돈(만 원)
 const STORY_STEPS = [
   { need: 20, after: 30, fee: { m: 500, f: 100 } },
-  { need: 50, after: 60, jump: 4, day: { m: 59, f: 49 }, fee: { m: 3000, f: 1500 } },
-  { need: 75, after: 85, day: { m: 66, f: 59 }, fee: { m: 5000, f: 4000 } },
-  { need: 100, after: 100, day: { m: 75, f: 63 }, fee: { m: 0, f: 10000 } }
+  { need: 50, after: 60, jump: 4, day: { m: 59, f: 50 }, fee: { m: 3000, f: 1500 } },
+  { need: 75, after: 85, day: { m: 66, f: 52 }, fee: { m: 5000, f: 4000 } },
+  { need: 100, after: 100, day: { m: 75, f: 60 }, fee: { m: 0, f: 10000 } }
 ];
 // 판결 결과별로 받는 비율: 일부승소·감형과 특검 사건의 유죄 결말은 절반
 const STORY_PAY = { win: 1, quiet: 1, partial: 0.5, truth: 0.5 };
@@ -22978,7 +22980,7 @@ function storyFrame(query, done) {
       if (e.data.story === "music" && TRACKS[e.data.mode]) { if (e.data.force) audioMode = null; return music(e.data.mode); }
       // 스토리 ≡ 메뉴: 저장 칸 목록, 다른 칸에 저장, 불러오기, 음악, 처음 화면
       const reply = d => f.contentWindow && f.contentWindow.postMessage({ storyReply: 1, ...d }, "*");
-      if (e.data.story === "slots") return reply({ sound: soundOn, list: [1, 2, 3, 4, 5].map(n => { const v = loadSlot(n); return { n, label: v ? `${v.name || ""} · ${monthLabel(v.day)}` : "" }; }) });
+      if (e.data.story === "slots") return reply({ sound: soundOn, list: [1, 2, 3, 4, 5].map(n => { const v = loadSlot(n); return { n, label: v ? `${v.name || ""} · ${monthLabel(v.day, v)}` : "" }; }) });
       if (e.data.story === "sound") { toggleSound(); return reply({}); }
       if (e.data.story === "save") { if (S && !/slot=replay/.test(query)) { useSlot(+e.data.slot); save(); } return; }
       if (e.data.story === "load" || e.data.story === "home") {
@@ -26225,7 +26227,7 @@ function opsEndingRoll() {
       let t = REDUCED ? S.day : 1;
       const tick = () => {
         if (over) return;
-        y.textContent = 2030 + Math.floor((t - 1) / 12) + "년"; m.textContent = ((t - 1) % 12 + 1) + "월";
+        y.textContent = baseYear() + Math.floor((t - 1) / 12) + "년"; m.textContent = ((t - 1) % 12 + 1) + "월";
         if (t >= S.day) return setTimeout(() => { if (!over) advance(); }, 1100);
         t++; setTimeout(tick, 75);
       };
