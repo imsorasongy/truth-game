@@ -291,7 +291,7 @@ html.pc .cover { position: absolute; inset: 64px 40px 40px; }
 <main id="app"></main>
 <nav id="tabs" hidden></nav>
 <script>
-const A = "assets/", H = { m: { n: "한서준", img: A + "hero-m.webp" }, f: { n: "윤서연", img: A + "hero-f.webp" } };
+const A = "assets/", H = { m: { n: "한서준", img: A + "hero2-m.webp" }, f: { n: "윤서연", img: A + "hero2-f.webp" } };
 const OFF = Math.max(0, Math.min(3, +new URLSearchParams(location.search).get("office") || 0));
 const BG = { court: A + "court-2.webp", m: `${A}office-${OFF}-m.jpg`, f: `${A}office-${OFF}-f.jpg` };
 const OLD_BG = ["rec", "er", "diner", "alley", "dock", "rest"];
@@ -303,13 +303,13 @@ const homeBg = () => G.c.bgConsult ? bgOf(G.c.bgConsult) : BG[G.c.hero];
 const EV_IMG = { bore: "ev-settle.webp", map: "ev-board.webp", sign: "ev-sign.webp", phone: "ev-phone.webp", log: "ev-broadcast.webp" };
 const evPic = k => EV_IMG[k] ? `<img class="evpic" src="${A}story/${EV_IMG[k]}" alt="">` : "";
 // 대화 장면의 인물은 배경을 지운 그림으로
-const CUT = new Set(["face-chair", "face-citylaw", "face-jung-40", "face-kang", "face-lee", "face-mother", "face-oh-50", "face-park_neutral", "face-pf", "face-special", "insp", "hero-m", "hero-f"]);
+const CUT = new Set(["face-chair", "face-citylaw", "face-jung-40", "face-kang", "face-lee", "face-mother", "face-oh-50", "face-park_neutral", "face-pf", "face-special", "insp", "hero2-m", "hero2-f"]);
 const EXPRS = ["confident", "flustered", "neutral", "serious"];
 ["face-citylaw", "face-jung-40", "face-kang", "face-lee", "face-park", "face-special"].forEach(b => EXPRS.forEach(e => CUT.add(`${b}_${e}`)));
 const cutPic = u => cut(u);
 const cut = u => { const m = /([\w-]+)\.webp$/.exec(u || ""); return m && CUT.has(m[1]) ? `${A}story/cut/${m[1]}.webp` : u; };
 // 후일담·막간에서 말하는 사람의 얼굴
-const NAMED = { "한서준": A + "story/cut/hero-m.webp", "윤서연": A + "story/cut/hero-f.webp", "이수아": A + "story/cut/face-lee.webp", "방재호": A + "story/face-bang.webp", "오명환": A + "story/cut/face-oh-50.webp", "정한별": A + "story/cut/face-jung-40.webp", "강도윤": A + "story/cut/face-kang.webp", "권태훈": A + "story/cut/insp.webp", "조경숙": A + "story/cut/face-mother.webp", "박진서": A + "story/cut/face-park_neutral.webp" };
+const NAMED = { "한서준": A + "story/cut/hero2-m.webp", "윤서연": A + "story/cut/hero2-f.webp", "이수아": A + "story/cut/face-lee.webp", "방재호": A + "story/face-bang.webp", "오명환": A + "story/cut/face-oh-50.webp", "정한별": A + "story/cut/face-jung-40.webp", "강도윤": A + "story/cut/face-kang.webp", "권태훈": A + "story/cut/insp.webp", "조경숙": A + "story/cut/face-mother.webp", "박진서": A + "story/cut/face-park_neutral.webp" };
 const P = { judge: ["재판장", A + "judge.webp"], pros: ["검사", A + "pros.webp"] };
 // 장소별 배경(없는 곳은 사무실: 서류를 읽거나 회사에 문의하는 장면)
 const PLACE_BG = { m: { rec: "rec", hosp: "er", diner: "diner", alley: "alley" }, f: { rec: "rec", cctv: "dock", mate: "dock", rest: "rest" } };
@@ -1016,7 +1016,7 @@ function pickLie() {
 /* ---------- 직접 조종 재판 ---------- */
 // 양쪽 얼굴: 주인공·상대(검사/대리인/특검)는 표정 그림, 표정이 있는 증인도 표정 그림
 const SIDE_EXPR = { opponent: "expr/opponent_", citylaw: "story/face-citylaw_", special: "story/face-special_" };
-const courtFace = (s, e) => s === "us" ? `${A}expr/hero-${G.c.speaker || G.c.hero}_${e}.webp` : `${A}${SIDE_EXPR[G.c.side && G.c.side[1]] || "expr/prosecutor_"}${e}.webp`;
+const courtFace = (s, e) => s === "us" ? `${A}expr/hero2-${G.c.speaker || G.c.hero}_${e}.webp` : `${A}${SIDE_EXPR[G.c.side && G.c.side[1]] || "expr/prosecutor_"}${e}.webp`;
 // 표정 그림이 있는 증인: 기본 그림 이름 뒤에 _표정을 붙인 파일을 쓴다(박진서는 기본이 face-park_neutral)
 const witnessFace = (img, e) => /(face-(jung-40|lee|kang|bang|oh-50|mother|choi|yang)|insp|h1-(ko|eom|no|shim|tak))\.webp$/.test(img) ? img.replace(".webp", `_${e}.webp`)
   : /face-park_\w+\.webp$/.test(img) ? img.replace(/face-park_\w+\.webp$/, `face-park_${e}.webp`) : img;
@@ -1309,32 +1309,32 @@ CH.m1 = { hero: "m", title: "남주 1장 · 운수 좋은 날", no: "2030고단1
     [null, "2029년 10월. 개업했다는 소식도 전해 드릴 겸 인사를 드리러 법무법인 목멱에 들렀었다. 대학 시절 내 모의법정 지도교수였던 강도윤 교수님의 사무실이다."],
     [null, "교수님은 검사장까지 지내고 나와서 이 법인을 세우셨다. 그러고도 일주일에 한 번은 학교에 나가 학생들을 가르치신다."],
     ["강도윤", "서준이 왔구나. 앉아라. 커피는 내가 타마. 네가 탄 커피는 모의법정 때 이미 질렸다.", A + "story/face-kang.webp"],
-    ["한서준", "교수님, 그때 일은 이제 잊어 주십시오. 설탕을 소금으로 착각한 건 딱 한 번이었습니다.", A + "story/cut/hero-m.webp"],
+    ["한서준", "교수님, 그때 일은 이제 잊어 주십시오. 설탕을 소금으로 착각한 건 딱 한 번이었습니다.", A + "story/cut/hero2-m.webp"],
     ["강도윤", "한 번이면 충분하지. 그래, 사무실은 어디에 차렸다고? 사람들이 오기는 하는 동네냐?", A + "story/face-kang.webp"],
-    ["한서준", "이 근처 남산 밑 동네 상가 2층입니다. 아래층이 약국이고 옆집이 보습학원이요. 월세가 싸서요.", A + "story/cut/hero-m.webp"],
+    ["한서준", "이 근처 남산 밑 동네 상가 2층입니다. 아래층이 약국이고 옆집이 보습학원이요. 월세가 싸서요.", A + "story/cut/hero2-m.webp"],
     ["강도윤", "잘했다. 처음부터 서초동에 앉아서 전화만 기다리는 놈들보다 낫다. 사람 사는 데서 사람 일을 봐야 변호사가 되는 거다.", A + "story/face-kang.webp"],
-    ["한서준", "사람은 사는데 변호사를 찾는 사람은 아직 없습니다. 개업하고 보름 동안 사무실 전화가 두 통 왔는데, 한 통은 정수기 영업이었습니다. 요즘 사람들은 변호사보다는 AI한테 상담을 하시더라고요.", A + "story/cut/hero-m.webp"],
+    ["한서준", "사람은 사는데 변호사를 찾는 사람은 아직 없습니다. 개업하고 보름 동안 사무실 전화가 두 통 왔는데, 한 통은 정수기 영업이었습니다. 요즘 사람들은 변호사보다는 AI한테 상담을 하시더라고요.", A + "story/cut/hero2-m.webp"],
     ["강도윤", "다른 한 통은?", A + "story/face-kang.webp"],
-    ["한서준", "옆집 보습학원 원장님이요. 학원비를 안 내는 학부모를 고소할 수 있느냐고 하셔서, 고소할 일은 아니고 지급명령을 신청하시라고 알려 드렸습니다.", A + "story/cut/hero-m.webp"],
+    ["한서준", "옆집 보습학원 원장님이요. 학원비를 안 내는 학부모를 고소할 수 있느냐고 하셔서, 고소할 일은 아니고 지급명령을 신청하시라고 알려 드렸습니다.", A + "story/cut/hero2-m.webp"],
     ["강도윤", "그래서 받은 건 있냐?", A + "story/face-kang.webp"],
-    ["한서준", "귤 한 봉지 받았습니다.", A + "story/cut/hero-m.webp"],
+    ["한서준", "귤 한 봉지 받았습니다.", A + "story/cut/hero2-m.webp"],
     ["강도윤", "첫 수임료로 귤이면 나쁘지 않다. 뭐라도 받아. 그리고 절대 서류는 공짜로 써 주지 마라. 한 번 공짜로 해 주면 계속 공짜로 해 달라고 할 거다.", A + "story/face-kang.webp"],
-    ["한서준", "교수님, 3학년 1학기 등록금 말입니다. 과사무실에서는 이미 납부돼 있다고 하더군요.", A + "story/cut/hero-m.webp"],
+    ["한서준", "교수님, 3학년 1학기 등록금 말입니다. 과사무실에서는 이미 납부돼 있다고 하더군요.", A + "story/cut/hero2-m.webp"],
     ["강도윤", "무슨 등록금. 과사무실이 뭘 잘못 알았겠지. 그런 얘기 할 거면 이거나 받아 가라.", A + "story/face-kang.webp"],
     ["강도윤", "자, 개업 선물이다. 내가 직접 썼어. 표구는 인사동까지 가서 맡겼으니까 떨어뜨리지 마라.", A + "story/face-kang.webp"],
     [null, "교수님이 내민 것은 두 팔로 안아야 할 만큼 큰 액자였다. 먹빛이 짙은 네 글자. 수구여병(守口如甁)."],
-    ["한서준", "입을 병마개처럼 지켜라, 맞습니까?", A + "story/cut/hero-m.webp"],
+    ["한서준", "입을 병마개처럼 지켜라, 맞습니까?", A + "story/cut/hero2-m.webp"],
     ["강도윤", "입 지키기를 병 막듯 하라. 주자가 제 마음 다잡으려고 쓴 글에 나오는 말이다. 내가 처음 사무실을 열던 날 내 은사께서 이 넉 자를 써 주셨지. 그 뒤로 제자가 개업할 때마다 나도 똑같이 써 준다.", A + "story/face-kang.webp"],
     ["강도윤", "서준아, 의뢰인이 너를 찾아올 때는 세상에 아무한테도 못 할 말을 들고 온다. 변호사는 그 말을 무덤까지 가져가는 사람이다. 판사도 검사도 그 입은 못 연다. 법이 그렇게 정해 둔 거야.", A + "story/face-kang.webp"],
-    ["한서준", "그 말씀은 수업 때도 몇 번이나 하셨습니다.", A + "story/cut/hero-m.webp"],
+    ["한서준", "그 말씀은 수업 때도 몇 번이나 하셨습니다.", A + "story/cut/hero2-m.webp"],
     ["강도윤", "시험에 안 나올 것 같으니 아무도 안 듣더구나. 걸어 두고 매일 봐라.", A + "story/face-kang.webp"],
-    ["한서준", "감사합니다, 교수님.", A + "story/cut/hero-m.webp"],
+    ["한서준", "감사합니다, 교수님.", A + "story/cut/hero2-m.webp"],
     ["강도윤", "집은 어디 얻었냐.", A + "story/face-kang.webp"],
-    ["한서준", "사무실 뒤편 원룸입니다. 걸어서 3분이요.", A + "story/cut/hero-m.webp"],
+    ["한서준", "사무실 뒤편 원룸입니다. 걸어서 3분이요.", A + "story/cut/hero2-m.webp"],
     ["강도윤", "지각할 핑계는 못 대겠구나. 그건 잘했다.", A + "story/face-kang.webp"],
-    ["한서준", "어차피 저밖에 없어서 지각이고 뭐고 없습니다. 오후 1시에 가도 아무도 뭐라고 하지 않습니다.", A + "story/cut/hero-m.webp"],
+    ["한서준", "어차피 저밖에 없어서 지각이고 뭐고 없습니다. 오후 1시에 가도 아무도 뭐라고 하지 않습니다.", A + "story/cut/hero2-m.webp"],
     ["강도윤", "출근 시간은 너 자신과의 약속이다. 액자에 수구여병 말고 신독(愼獨)이라고 써 줄 걸 그랬구나. 힘든 날에 전화하고. 밥은 내가 산다.", A + "story/face-kang.webp"],
-    ["한서준", "그럼 이번 달 안에 힘든 날을 하나 만들어 보겠습니다.", A + "story/cut/hero-m.webp"],
+    ["한서준", "그럼 이번 달 안에 힘든 날을 하나 만들어 보겠습니다.", A + "story/cut/hero2-m.webp"],
     ["강도윤", "힘든 날은 안 만들어도 알아서 온다. 그날 전화해라. 그리고 계단 내려갈 때 조심해. 그거 깨지면 다시 안 써 준다.", A + "story/face-kang.webp"],
     [null, "액자를 안고 목멱 건물 계단을 내려오는데 어깨가 절로 펴졌다. 세상에 내 편이 한 사람은 있는 것 같았다."]] }],
   intro: ["2030년 5월. 개업한 지 일곱 달째. 동네 상가 2층, 아래층은 약국이고 옆집은 보습학원이다. 오후 네 시면 아이들 뛰어다니는 소리가 벽을 타고 올라온다.", "벽에 걸어 둔 액자가 이 사무실에서 제일 비싼 물건이다. 수구여병. 입을 병마개처럼 지켜라.", "커피는 믹스 한 상자로 석 달째 버티는 중이다. 손님이 오면 두 봉을 넣고, 혼자 마실 때는 한 봉으로 두 잔을 탄다. 이번 달은 아직 손님 몫을 한 봉도 뜯지 못했다.", "오늘도 오후 내내 판례 검색만 했다. 아래층 약국에 두 번 내려가 박카스를 사려고 했는데, 두 번 다 약사님이 그냥 가져가라고 했다.","퇴근 무렵, 진남색 정장에 태극 배지를 단 남자가 계단참에서 한참 두리번거리더니 문을 닫고 들어왔다. 반백 머리를 뒤로 단정하게 넘긴 사람이었다."],
@@ -1757,26 +1757,26 @@ CH.f1 = { hero: "f", tags: G => [G.doneIds.pot && "pot", G.doneIds.sold && "sold
     [null, "2030년 10월에 개업하고 다섯 달째. 점심시간에 사무실 문이 열리더니 강도윤 교수님이 고개를 들이미셨다. 사무실을 한 바퀴 둘러보시고는 밥부터 먹자고 하셨다."],
     [null, "상가 1층 백반집. 은발에 무테안경, 쓰리피스 양복에 변호사 배지까지 단 분이 플라스틱 의자에 앉자, 주인아주머니가 물을 두 번 가져왔다."],
     ["강도윤", "서연아, 벽지가 왜 그렇게 들떠 있느냐.", A + "story/face-kang.webp"],
-    ["윤서연", "월세가 싸서요, 교수님. 지난 장마 때 물이 샜대요.", A + "hero-f.webp"],
+    ["윤서연", "월세가 싸서요, 교수님. 지난 장마 때 물이 샜대요.", A + "hero2-f.webp"],
     ["강도윤", "밥이나 먹어라. 모의법정 결승 때도 굶고 들어가서 변론하다 목소리가 갈라졌지.", A + "story/face-kang.webp"],
-    ["윤서연", "그때 교수님이 목캔디 주셔서 끝까지 했잖아요.", A + "hero-f.webp"],
+    ["윤서연", "그때 교수님이 목캔디 주셔서 끝까지 했잖아요.", A + "hero2-f.webp"],
     ["강도윤", "그거 내가 먹으려고 산 거였다. 한 봉지를 다 먹어 놓고 상은 은상을 받았지.", A + "story/face-kang.webp"],
     [null, "주인아주머니가 시키지도 않은 계란말이를 한 접시 내려놓고 갔다."],
     ["강도윤", "여기 자주 오느냐.", A + "story/face-kang.webp"],
-    ["윤서연", "거의 매일요. 칠천 원에 반찬이 일곱 가지예요. 아주머니가 제 얼굴 보고 밥을 더 퍼 주세요.", A + "hero-f.webp"],
+    ["윤서연", "거의 매일요. 칠천 원에 반찬이 일곱 가지예요. 아주머니가 제 얼굴 보고 밥을 더 퍼 주세요.", A + "hero2-f.webp"],
     [null, "교수님은 대학 시절 내 모의법정 지도교수셨고, 변호사 윤리도 가르치셨다. 공직에서 높은 자리까지 올랐다가 나와 법무법인 목멱을 차리신 뒤에도 강의는 놓지 않으셨다."],
     [null, "3학년 2학기에 나는 등록금을 못 내서 휴학계를 쓰고 있었다. 며칠 뒤 행정실에서 장학금이 나왔다고 했다. 그 돈이 교수님 지갑에서 나왔다는 건 졸업하고 나서 조교 언니에게 들었다."],
-    ["윤서연", "교수님, 저 그때 등록금 아직 못 갚았어요.", A + "hero-f.webp"],
+    ["윤서연", "교수님, 저 그때 등록금 아직 못 갚았어요.", A + "hero2-f.webp"],
     ["강도윤", "무슨 등록금. 장학금은 학교가 준 거다. 그런 거 신경 쓸 시간에 네 뒤에 오는 애 밥이나 한 번 사 줘라.", A + "story/face-kang.webp"],
     ["강도윤", "액자는 걸었더구나.", A + "story/face-kang.webp"],
-    ["윤서연", "제일 잘 보이는 자리예요. 손님들이 표구값부터 물어봐요. 그런데 교수님, 왜 하필 수구여병이에요? 개업 선물이면 보통 정의 같은 걸 써 주시잖아요.", A + "hero-f.webp"],
+    ["윤서연", "제일 잘 보이는 자리예요. 손님들이 표구값부터 물어봐요. 그런데 교수님, 왜 하필 수구여병이에요? 개업 선물이면 보통 정의 같은 걸 써 주시잖아요.", A + "hero2-f.webp"],
     ["강도윤", "입 지키기를 병 막듯 하라. 주자가 제 마음 다잡으려고 쓴 글에 나오는 말이다. 내가 처음 사무실을 열던 날 내 은사께서 그 넉 자를 써 주셨지. 그때는 나도 너처럼 왜 하필 이 말인가 했다.", A + "story/face-kang.webp"],
     ["강도윤", "의뢰인이 너한테 하는 말은 세상 누구한테도 못 하는 말이다. 변호사는 의뢰인의 비밀을 무덤까지 가져가는 사람이다. 식구한테도, 나한테도 말하면 안 된다.", A + "story/face-kang.webp"],
-    ["윤서연", "변호사법 제26조 말씀이시죠? 시험 볼 때 외웠어요.", A + "hero-f.webp"],
+    ["윤서연", "변호사법 제26조 말씀이시죠? 시험 볼 때 외웠어요.", A + "hero2-f.webp"],
     ["강도윤", "외우기야 쉽지. 사건 하나 해 보면 그 말이 왜 무거운지 안다. 요새 일은 좀 있느냐.", A + "story/face-kang.webp"],
-    ["윤서연", "법률구조 상담 명단에 이름을 올렸어요. 절도니 사기니 작은 사건들이요.", A + "hero-f.webp"],
+    ["윤서연", "법률구조 상담 명단에 이름을 올렸어요. 절도니 사기니 작은 사건들이요.", A + "hero2-f.webp"],
     ["강도윤", "사무실에 혼자 있으면 전화는 누가 받느냐.", A + "story/face-kang.webp"],
-    ["윤서연", "제가 받아요. 법정 가는 날은 휴대폰으로 돌려 두고요. 지난달에 재판 중에 진동이 울려서 판사님한테 한 소리 들었어요.", A + "hero-f.webp"],
+    ["윤서연", "제가 받아요. 법정 가는 날은 휴대폰으로 돌려 두고요. 지난달에 재판 중에 진동이 울려서 판사님한테 한 소리 들었어요.", A + "hero2-f.webp"],
     ["강도윤", "법정 들어갈 때는 꺼라. 의뢰인 전화는 나와서 다시 걸면 된다. 판사 눈 밖에 나서 좋을 일 없다.", A + "story/face-kang.webp"],
     ["강도윤", "작은 사건부터 맡은 건 잘했다. 작은 사건을 대충 하는 사람은 큰 사건도 망친다. 막히면 전화해라. 밤에도 괜찮다.", A + "story/face-kang.webp"],
     [null, "밥값 계산서는 어느새 교수님 손에 가 있었다."]] }],
@@ -2430,16 +2430,16 @@ CH.f2 = { hero: "f", title: "여주 2장 · 바람의 그림자", no: "2035고�
       [null, "2035년 2월, 이삿짐을 다 풀기도 전에 들를 데가 있었다. 법무법인 목멱, 대학 은사 강도윤 교수님의 방이다."],
       [null, "창밖으로 남산이 보였다. 교수님은 오늘도 조끼까지 갖춰 입고 계셨다."],
       ["강도윤", "서연이 왔구나. 앉아라. 서초동으로 나왔다면서.", A + "story/face-kang.webp"],
-      ["윤서연", "네, 교수님. 법조타운이라 월세가 무섭긴 한데요.", A + "hero-f.webp"],
+      ["윤서연", "네, 교수님. 법조타운이라 월세가 무섭긴 한데요.", A + "hero2-f.webp"],
       ["강도윤", "월세 걱정이야 다 한다. 타워 상담 천막에 앉아 있었다는 얘기는 들었다. 고생했다.", A + "story/face-kang.webp"],
-      ["윤서연", "고생은 그분들이 하셨죠. 저는 이틀 앉아 있다가 왔어요. 아무것도 못 해 드리고요.", A + "hero-f.webp"],
+      ["윤서연", "고생은 그분들이 하셨죠. 저는 이틀 앉아 있다가 왔어요. 아무것도 못 해 드리고요.", A + "hero2-f.webp"],
       ["강도윤", "이틀이라도 간 사람이 많지 않다.", A + "story/face-kang.webp"],
       ["강도윤", "내가 써 준 액자는 챙겼고?", A + "story/face-kang.webp"],
-      ["윤서연", "제일 먼저 싸서 옮겼어요. 뽁뽁이로 세 겹 둘렀고요.", A + "hero-f.webp"],
+      ["윤서연", "제일 먼저 싸서 옮겼어요. 뽁뽁이로 세 겹 둘렀고요.", A + "hero2-f.webp"],
       ["강도윤", "그래. 잘 보이는 데 걸어라. 그나저나 밥은 먹고 다니냐? 너희 학번은 개업만 하면 밥을 굶더라.", A + "story/face-kang.webp"],
-      ["윤서연", "밥 얘기 하시면 또 사 주실 거잖아요. 교수님이 등록금 대신 내 주신 애들, 저 말고도 많은 거 다 알아요.", A + "hero-f.webp"],
+      ["윤서연", "밥 얘기 하시면 또 사 주실 거잖아요. 교수님이 등록금 대신 내 주신 애들, 저 말고도 많은 거 다 알아요.", A + "hero2-f.webp"],
       ["강도윤", "누가 그런 소리를 하더냐. 쓸데없는 소문이다.", A + "story/face-kang.webp"],
-      ["윤서연", "그럼 이번엔 제가 살게요. 1층에 새로 생긴 커피집 있던데요.", A + "hero-f.webp"],
+      ["윤서연", "그럼 이번엔 제가 살게요. 1층에 새로 생긴 커피집 있던데요.", A + "hero2-f.webp"],
       ["강도윤", "서초동 월세 내려면 커피값부터 아껴라. 거기 한 잔에 육천 원이다.", A + "story/face-kang.webp"],
       ["강도윤", "막히는 사건 있으면 와라. 전화로 말고 얼굴 보고. 밤이든 주말이든 괜찮다.", A + "story/face-kang.webp"],
       [null, "돌아오는 길에 철물점에 들러 액자 걸 못을 샀다."]] }],
@@ -4298,7 +4298,7 @@ CH.f4 = { hero: "f", title: "여주 4장 · 남산의 이름", no: "2036고합47
   hireLine: ["고맙습니다, 변호사님. 필요한 서류는 제 사무장을 통해 받으실 수 있습니다.", "유기택이라고, 오래 저를 봐 온 사람입니다."],
   officeName: "교도소 접견실",
   client: { n: "박진서", m: "수감 중 · 전 도원컨설팅 대표", img: A + "story/face-park_neutral.webp" },
-  people: { w: ["이수아", A + "story/face-lee.webp"], w2: ["방재호", A + "story/face-bang.webp"], w3: ["한서준", A + "hero-m.webp"], w4: ["문상철", A + "story/face-mun.webp"], p: ["박진서", A + "story/face-park_neutral.webp"] },
+  people: { w: ["이수아", A + "story/face-lee.webp"], w2: ["방재호", A + "story/face-bang.webp"], w3: ["한서준", A + "hero2-m.webp"], w4: ["문상철", A + "story/face-mun.webp"], p: ["박진서", A + "story/face-park_neutral.webp"] },
   truth: "liar",
   endBg: "f4-court-press",
   prologue: [
@@ -4313,18 +4313,18 @@ CH.f4 = { hero: "f", title: "여주 4장 · 남산의 이름", no: "2036고합47
     { bg: "m4-kang-office", lines: [
       [null, "그 주 금요일, 교수님이 저녁을 사 주겠다며 법무법인 목멱 사무실로 부르셨다. 교수님은 은발에 무테안경, 언제나 쓰리피스 차림이시다."],
       ["강도윤", "서연아, 앉아라. 밥은 먹고 다니냐. 서초동으로 옮기고 나서 얼굴이 반쪽이다.", A + "story/face-kang.webp"],
-      ["윤서연", "교수님은 제 얼굴만 보면 그 말씀이세요. 저 학교 다닐 때도 그러셨어요.", A + "story/cut/hero-f.webp"],
+      ["윤서연", "교수님은 제 얼굴만 보면 그 말씀이세요. 저 학교 다닐 때도 그러셨어요.", A + "story/cut/hero2-f.webp"],
       ["강도윤", "그때는 정말 반쪽이었지. 3학년 2학기에 휴학한다고 학교에 안 나오던 애가 누구더라.", A + "story/face-kang.webp"],
-      ["윤서연", "그 얘기 또 하시네요. 그때 학비, 제가 갚겠다고 하면 매번 딴소리하시면서.", A + "story/cut/hero-f.webp"],
+      ["윤서연", "그 얘기 또 하시네요. 그때 학비, 제가 갚겠다고 하면 매번 딴소리하시면서.", A + "story/cut/hero2-f.webp"],
       ["강도윤", "갚긴 뭘 갚아. 나는 낸 적 없다. 돈 없는 사람 사건이나 한 번 더 맡아라.", A + "story/face-kang.webp"],
-      ["윤서연", "오늘은 뭐 사 주세요?", A + "story/cut/hero-f.webp"],
+      ["윤서연", "오늘은 뭐 사 주세요?", A + "story/cut/hero2-f.webp"],
       ["강도윤", "아래 생선집이다. 거기 고등어가 이 동네에서는 제일 낫다. 내가 다 먹어 봤다.", A + "story/face-kang.webp"],
-      ["윤서연", "교수님은 맨날 생선이세요.", A + "story/cut/hero-f.webp"],
+      ["윤서연", "교수님은 맨날 생선이세요.", A + "story/cut/hero2-f.webp"],
       ["강도윤", "나이 들면 고기는 질기고 생선은 부드럽다. 너도 언젠가 안다.", A + "story/face-kang.webp"],
-      ["윤서연", "교수님, 저 교도소에서 편지를 하나 받았어요. 박진서 씨한테서요. 자기 사건을 맡아 달래요.", A + "story/cut/hero-f.webp"],
+      ["윤서연", "교수님, 저 교도소에서 편지를 하나 받았어요. 박진서 씨한테서요. 자기 사건을 맡아 달래요.", A + "story/cut/hero2-f.webp"],
       [null, "교수님은 잠깐 말씀이 없으셨다."],
       ["강도윤", "박진서라. 그 사람이 너를 골랐구나.", A + "story/face-kang.webp"],
-      ["윤서연", "장현우 살해로 복역 중인 사람이에요. 큰 로펌은 다 안 맡겠다고 했대요. 제가 맡아도 되는 사건인지 모르겠어요.", A + "story/cut/hero-f.webp"],
+      ["윤서연", "장현우 살해로 복역 중인 사람이에요. 큰 로펌은 다 안 맡겠다고 했대요. 제가 맡아도 되는 사건인지 모르겠어요.", A + "story/cut/hero2-f.webp"],
       ["강도윤", "그건 네가 정할 일이다. 그래도 변호사 없이 재판받는 사람은 없어야지. 다들 손가락질할 때 옆에 앉아 주는 게 우리 일이다.", A + "story/face-kang.webp"],
       ["강도윤", "네가 맡는다면 나는 마음이 놓이겠다.", A + "story/face-kang.webp"],
       [null, "교수님이 그렇게 말씀하시면 나는 거절을 못 한다."]] },
@@ -4332,13 +4332,13 @@ CH.f4 = { hero: "f", title: "여주 4장 · 남산의 이름", no: "2036고합47
       [null, "그날 밤 사무실로 돌아와 메모지를 꺼냈다. 맡겠다고 하기 전에 따져 볼 게 있었다."],
       [null, "이 사건은 장부 얘기를 빼고는 변론이 안 된다. 그 장부 일로 내가 변호한 사람이 벌써 둘이다. 이수아 씨와 방재호 기사님이다."],
       [null, "변협 윤리 상담 창구에 전화를 걸었다. 이름은 빼고 사정만 말했다."],
-      ["윤서연", "예전에 증거인멸 사건으로 변호해서 무죄가 확정된 분이 있어요. 이번에 들어온 사건에서 그분이 특검 쪽 핵심 증인이 될 것 같아요. 제가 피고인 변호를 맡아도 될까요?", A + "story/cut/hero-f.webp"],
+      ["윤서연", "예전에 증거인멸 사건으로 변호해서 무죄가 확정된 분이 있어요. 이번에 들어온 사건에서 그분이 특검 쪽 핵심 증인이 될 것 같아요. 제가 피고인 변호를 맡아도 될까요?", A + "story/cut/hero2-f.webp"],
       ["상담 변호사", "사건이 다르다는 것만으로 괜찮다고 할 수는 없습니다. 두 사건이 실제로 같은 사실을 놓고 다투는지부터 보세요.", A + "cut/n40f3.webp"],
-      ["윤서연", "같은 장부예요. 그 사건은 장부를 없앴느냐였고, 이번 사건은 장부에 뭐가 적혔느냐예요.", A + "story/cut/hero-f.webp"],
+      ["윤서연", "같은 장부예요. 그 사건은 장부를 없앴느냐였고, 이번 사건은 장부에 뭐가 적혔느냐예요.", A + "story/cut/hero2-f.webp"],
       ["상담 변호사", "그럼 관련 있는 사건으로 보셔야 합니다. 다음은 그분한테 불이익이 가는지 보셔야 하고요. 확정된 사건이라 다시 처벌받을 일은 없어도, 예전 변호사가 법정에서 그분 증언의 신빙성을 다투는 건 불이익이지요.", A + "cut/n40f3.webp"],
-      ["윤서연", "그건 피할 수가 없겠네요. 증언을 다투는 게 제 일이 될 테니까요.", A + "story/cut/hero-f.webp"],
+      ["윤서연", "그건 피할 수가 없겠네요. 증언을 다투는 게 제 일이 될 테니까요.", A + "story/cut/hero2-f.webp"],
       ["상담 변호사", "제일 어려운 건 마지막입니다. 그분 상담 때 들은 얘기요. 그걸 안 쓰고도 지금 의뢰인을 제대로 변호할 수 있습니까? 쓸 수밖에 없는 순간이 오면 그때는 사임하셔야 합니다.", A + "cut/n40f3.webp"],
-      ["윤서연", "그분한테 동의를 받으면요?", A + "story/cut/hero-f.webp"],
+      ["윤서연", "그분한테 동의를 받으면요?", A + "story/cut/hero2-f.webp"],
       ["상담 변호사", "동의는 동의서에 적힌 범위까지만 효력이 있습니다. 기록을 복사해서 내는 데 동의했으면 거기까지예요. 상담 때 들은 얘기를 써도 된다는 뜻은 아니고요. 수임해도 되느냐는 동의서가 있든 없든 변호사님이 따로 판단하셔야 합니다.", A + "cut/n40f3.webp"],
       [null, "전화를 끊고 메모지에 세 줄을 적었다. '같은 장부.' '이수아 씨 증언 신빙성 다퉈야 함.' '상담 내용은 안 씀. 써야 할 때가 오면 사임.'"],
       [null, "방재호 기사님도 증인으로 불려 나올 수 있다. 그 아래에 기사님 이름도 적었다."], [null, "메모지 맨 아래에 '교수님은 맡으라고 하심'이라고 적었다가 줄을 그었다. 수임해도 되는지는 변협 상담 변호사 말대로 내가 판단할 일이다."]] }],
@@ -4587,7 +4587,7 @@ CH.f4 = { hero: "f", title: "여주 4장 · 남산의 이름", no: "2036고합47
           { q: "점심은 드셨어요?", a: ["기자실에서 컵라면이요. 선고 있는 날은 그것도 못 먹어요.", "변호사님은 드셨어요? 다음에 한번 사 드릴게요. 취재 말고 그냥요. 그래도 안 받으시겠죠."] },
           { q: "이 사건은 오래 쓰셨어요?", a: ["타워 무너진 날부터요. 그날 현장에 있었어요.", "2년째 같은 사건이에요. 데스크는 이제 독자들이 지겨워한대요. 그래도 재판 날은 열두 줄은 줘요."] }] },
         // 한서준: 3회 뒤 진실 경로에서만
-        { id: "han", n: "한서준", from: 3, gone: "nobook", face: A + "hero-m.webp",
+        { id: "han", n: "한서준", from: 3, gone: "nobook", face: A + "hero2-m.webp",
         intro: [[null, "복도 자판기에서 캔커피 두 개를 뽑아 하나를 건넸다."], "특검이 저를 증인으로 신청했습니다. 들으셨죠."],
         topics: [
           { q: "오 과장 정리비에 대하여|장부에 적힌 '오 과장 정리비 5000', 어떤 돈인지 아세요?", req: ["f:oath", "f:warned"], optional: true, a: ["그 5000, 뭔지 압니다.", "말할지 말지는 법정에서 정하겠습니다.", ["윤서연", "변호사님 전 의뢰인 일이죠?"], "그것도 법정에서 말하겠습니다."], gives: ["fifty", { n: "한서준의 말", d: "'정리비 5000'이 뭔지 안다고 했다. \"말할지 말지는 법정에서 정하겠습니다.\" 복도에서 들은 말.", img: "ev/f4-fifty.webp" }] },
@@ -5055,20 +5055,20 @@ CH.m4 = { hero: "m", speaker: "f", title: "최종 사건 · 수구여병", no: "
   prologue: [
     { bg: "f4-court-press", lines: [
       [null, "2035년 겨울. 국가배상 사건 판결문을 찾으러 법원에 들렀다가 복도에서 어떤 변호사와 어깨를 부딪쳤다. 서류철이 바닥에 흩어졌다."],
-      ["윤서연", "죄송합니다. 제가 앞을 안 보고 걸었네요.", A + "hero-f.webp"],
+      ["윤서연", "죄송합니다. 제가 앞을 안 보고 걸었네요.", A + "hero2-f.webp"],
       [null, "같이 서류를 줍다가 이름을 봤다. 윤서연. 택배 사건, 이수아 사건으로 신문에 몇 번 나온 변호사다. 그 기사 사진 뒤쪽 벽에 낯익은 액자가 걸려 있었던 게 생각났다."],
-      ["한서준", "…사무실에 수구여병 액자 걸려 있지 않습니까? 강도윤 교수님 제자시죠.", A + "hero-m.webp"],
-      ["윤서연", "그걸 어떻게 아세요?", A + "hero-f.webp"],
-      ["한서준", "제 사무실에도 있거든요.", A + "hero-m.webp"],
-      ["윤서연", "교수님 모의법정 하셨어요? 저는 팀 대표를 두 번 했어요. 교수님 앞에서 울기도 했고요.", A + "hero-f.webp"],
-      ["한서준", "저는 결승에서 '이의 있습니다' 하다가 마이크를 쓰러뜨렸습니다. 교수님은 아직도 그 얘기를 하세요.", A + "hero-m.webp"],
-      ["윤서연", "그럼 개업할 때 같은 액자를 받으신 거네요.", A + "hero-f.webp"],
-      ["한서준", "저는 2029년 가을에 받았습니다. 남산 아래 낡은 건물에서 시작했어요.", A + "hero-m.webp"],
-      ["윤서연", "저는 이듬해 10월이요. 상가 2층이었는데 미용실 옆 계단으로 올라가야 했어요. 손님들이 다 미용실 문부터 열었어요.", A + "hero-f.webp"],
-      ["한서준", "지금도 거기 계십니까?", A + "hero-m.webp"],
-      ["윤서연", "지난겨울에 서초동으로 옮겼어요. 액자는 제일 먼저 싸서 옮겼고요. 깨지면 교수님한테 뭐라고 해요.", A + "hero-f.webp"],
-      ["한서준", "저는 작년 11월에 서초동으로 왔습니다. 교수님이 주신 액자는 신문지로 세 겹 싸서 안전하게 들고 왔었죠.", A + "hero-m.webp"],
-      ["윤서연", "저는 네 겹이요.", A + "hero-f.webp"],
+      ["한서준", "…사무실에 수구여병 액자 걸려 있지 않습니까? 강도윤 교수님 제자시죠.", A + "hero2-m.webp"],
+      ["윤서연", "그걸 어떻게 아세요?", A + "hero2-f.webp"],
+      ["한서준", "제 사무실에도 있거든요.", A + "hero2-m.webp"],
+      ["윤서연", "교수님 모의법정 하셨어요? 저는 팀 대표를 두 번 했어요. 교수님 앞에서 울기도 했고요.", A + "hero2-f.webp"],
+      ["한서준", "저는 결승에서 '이의 있습니다' 하다가 마이크를 쓰러뜨렸습니다. 교수님은 아직도 그 얘기를 하세요.", A + "hero2-m.webp"],
+      ["윤서연", "그럼 개업할 때 같은 액자를 받으신 거네요.", A + "hero2-f.webp"],
+      ["한서준", "저는 2029년 가을에 받았습니다. 남산 아래 낡은 건물에서 시작했어요.", A + "hero2-m.webp"],
+      ["윤서연", "저는 이듬해 10월이요. 상가 2층이었는데 미용실 옆 계단으로 올라가야 했어요. 손님들이 다 미용실 문부터 열었어요.", A + "hero2-f.webp"],
+      ["한서준", "지금도 거기 계십니까?", A + "hero2-m.webp"],
+      ["윤서연", "지난겨울에 서초동으로 옮겼어요. 액자는 제일 먼저 싸서 옮겼고요. 깨지면 교수님한테 뭐라고 해요.", A + "hero2-f.webp"],
+      ["한서준", "저는 작년 11월에 서초동으로 왔습니다. 교수님이 주신 액자는 신문지로 세 겹 싸서 안전하게 들고 왔었죠.", A + "hero2-m.webp"],
+      ["윤서연", "저는 네 겹이요.", A + "hero2-f.webp"],
       [null, "윤 변호사는 주운 서류를 세어 보더니 한 장이 모자란다고 했다. 그 한 장은 내 서류철 사이에 끼어 있었다."],
       [null, "그날은 명함만 주고받고 헤어졌다."]] },
     { bg: "f4-court-press", lines: [
@@ -5077,25 +5077,25 @@ CH.m4 = { hero: "m", speaker: "f", title: "최종 사건 · 수구여병", no: "
       [null, "기사에 한 줄이 인용돼 있었다. '오 과장 정리비 5000.'"],
       [null, "특별검사는 그 줄이 실제 있었던 일과 맞는지부터 확인하겠다고 했다. 2030년에 오 과장을 변호한 내게 증인 소환장이 왔다."],
       [null, "증언을 며칠 앞두고 법원에 들렀다가 복도 끝 자판기 앞에서 윤서연 변호사와 마주쳤다. 윤 변호사가 먼저 물었다."],
-      ["윤서연", "그 5000, 어떤 돈인지 아세요?", A + "hero-f.webp"],
-      ["한서준", "그 5000, 뭔지 압니다. 말할지 말지는 법정에서 정하겠습니다.", A + "hero-m.webp"],
+      ["윤서연", "그 5000, 어떤 돈인지 아세요?", A + "hero2-f.webp"],
+      ["한서준", "그 5000, 뭔지 압니다. 말할지 말지는 법정에서 정하겠습니다.", A + "hero2-m.webp"],
       [null, "6년 동안 아무한테도 안 한 말을 박진서의 변호인한테 했다."],
-      ["윤서연", "…제가 들어도 되는 말이었는지 모르겠네요.", A + "hero-f.webp"],
-      ["한서준", "증언하면 저는 고소당할 겁니다.", A + "hero-m.webp"],
-      ["윤서연", "제가 반대신문에서 어디까지 물어야 할까요?", A + "hero-f.webp"],
-      ["한서준", "물으실 건 다 물으세요. 대가를 받았는지, 왜 이제 와서 말하는지. 저라도 그렇게 묻겠습니다.", A + "hero-m.webp"],
-      ["윤서연", "그렇게 말씀하시면 제가 봐 드릴 수가 없잖아요.", A + "hero-f.webp"],
-      ["한서준", "봐 달라고 드린 말은 아닙니다.", A + "hero-m.webp"],
+      ["윤서연", "…제가 들어도 되는 말이었는지 모르겠네요.", A + "hero2-f.webp"],
+      ["한서준", "증언하면 저는 고소당할 겁니다.", A + "hero2-m.webp"],
+      ["윤서연", "제가 반대신문에서 어디까지 물어야 할까요?", A + "hero2-f.webp"],
+      ["한서준", "물으실 건 다 물으세요. 대가를 받았는지, 왜 이제 와서 말하는지. 저라도 그렇게 묻겠습니다.", A + "hero2-m.webp"],
+      ["윤서연", "그렇게 말씀하시면 제가 봐 드릴 수가 없잖아요.", A + "hero2-f.webp"],
+      ["한서준", "봐 달라고 드린 말은 아닙니다.", A + "hero2-m.webp"],
       [null, "윤 변호사가 자판기에 동전을 넣고 버튼을 눌렀다. 캔커피가 두 개 나왔다. 하나를 내게 내밀었다."],
-      ["윤서연", "잘못 눌렀어요. 반대신문이랑은 상관없는 커피예요.", A + "hero-f.webp"],
-      ["한서준", "받겠습니다. 증언 대가는 아닌 걸로요.", A + "hero-m.webp"]] }
+      ["윤서연", "잘못 눌렀어요. 반대신문이랑은 상관없는 커피예요.", A + "hero2-f.webp"],
+      ["한서준", "받겠습니다. 증언 대가는 아닌 걸로요.", A + "hero2-m.webp"]] }
   ],
   decide: { hero: "m", bg: "m4-court",
     lines: [
       [null, "증언 전날 밤, 전화가 울렸다. 교수님이었다."],
       ["강도윤", "서준아, 내일 증인석에 선다며. 밥은 먹었느냐.", A + "story/face-kang.webp"],
-      ["한서준", "네, 교수님.", A + "hero-m.webp"],
-      ["한서준", "교수님, 내일 무슨 말을 할지는 아직 못 정했습니다.", A + "hero-m.webp"],
+      ["한서준", "네, 교수님.", A + "hero2-m.webp"],
+      ["한서준", "교수님, 내일 무슨 말을 할지는 아직 못 정했습니다.", A + "hero2-m.webp"],
       ["강도윤", "그럼 자고 일어나서 정해라. 밤에 정한 건 아침에 다시 보면 대개 틀린다.", A + "story/face-kang.webp"],
       ["강도윤", "내가 무슨 말 하려는지 알지. 네 벽에 걸린 글씨 잊지 마라. 푹 자거라.", A + "story/face-kang.webp"],
       [null, "전화를 끊고 오명환에게 전화했다. 허락을 구하려고 했다. 오명환은 내 말을 끝까지 듣지 않고 '변호사님이 절 살려 주셨잖습니까' 한마디만 하고 끊었다."],
@@ -5122,8 +5122,8 @@ CH.m4 = { hero: "m", speaker: "f", title: "최종 사건 · 수구여병", no: "
   hireSay: "변호를 맡아 주십시오, 윤 변호사님.",
   refuseLine: "내 사건을 남한테 맡기기가 불편하다. 그래도 자기 변호를 직접 하는 변호사는 바보를 의뢰인으로 둔 셈이라고 수업 때 귀에 못이 박이게 들었다.",
   hireLine: ["맡을게요. 선임서는 가져왔어요. 피고인 칸에 도장 찍으세요.", [null, "처음으로 피고인 칸에 내 도장을 찍었다."]],
-  client: { n: "윤서연", m: "한서준의 변호인", img: A + "hero-f.webp" },
-  people: { w: ["오명환", A + "story/face-oh-50.webp"], w2: ["강도윤", A + "story/face-kang.webp"], w3: ["권태훈", A + "story/insp.webp"], w4: ["정한별", A + "story/face-jung-40.webp"], h: ["한서준", A + "hero-m.webp"] },
+  client: { n: "윤서연", m: "한서준의 변호인", img: A + "hero2-f.webp" },
+  people: { w: ["오명환", A + "story/face-oh-50.webp"], w2: ["강도윤", A + "story/face-kang.webp"], w3: ["권태훈", A + "story/insp.webp"], w4: ["정한별", A + "story/face-jung-40.webp"], h: ["한서준", A + "hero2-m.webp"] },
   truth: "skip",
   intro: [
     "증언 일주일 뒤인 3월 19일, 오명환이 나를 고소했다. 죄명 업무상비밀누설. 고소대리인은 법무법인 목멱이었다.",
@@ -6009,7 +6009,7 @@ CH.m4 = { hero: "m", speaker: "f", title: "최종 사건 · 수구여병", no: "
 // 은폐: 9. 9. 10:12 심재곤→서울청 수사부장 / 9. 10. 14:22 다른 형사가 반포 DVR 두 구간 삭제 / 차량 감식 '미상 모발 감정 불요', 블랙박스 외부 영상만 / 9. 11. 14:40 심재곤→국회 방호 3분, 15:02 탁영수 출입 기록 2건 삭제
 // 기일: 1회 11. 11. / 2회 12. 9. / 3회 1. 13. / 4회 2. 10. / 5회 3. 10. 탁영수 3. 3. 체포(감정처분허가장으로 구강세포), 3. 5. 구속, 3. 19. 기소
 // 결말: endBy. win(flags takk·simk) / win_half / partial / lose / left / blind_win
-const H1F = { go: A + "cut/h1-ko.webp", cha: A + "story/face-citylaw.webp", kang: A + "story/face-kang.webp", hf: A + "hero-f.webp", hm: A + "hero-m.webp", sp: A + "story/face-special.webp", eom: A + "cut/h1-eom.webp", tak: A + "cut/h1-tak.webp", takScar: A + "cut/h1-tak-scar.webp", sim: A + "cut/h1-shim.webp", noj: A + "cut/h1-no.webp", mgr: A + "cut/h1-manager.webp", lab: A + "cut/h1-forensic.webp", phar: A + "cut/h1-pharmacist.webp", wife: A + "story/face-gowife.webp", pros: A + "expr/prosecutor_neutral.webp" };
+const H1F = { go: A + "cut/h1-ko.webp", cha: A + "story/face-citylaw.webp", kang: A + "story/face-kang.webp", hf: A + "hero2-f.webp", hm: A + "hero2-m.webp", sp: A + "story/face-special.webp", eom: A + "cut/h1-eom.webp", tak: A + "cut/h1-tak.webp", takScar: A + "cut/h1-tak-scar.webp", sim: A + "cut/h1-shim.webp", noj: A + "cut/h1-no.webp", mgr: A + "cut/h1-manager.webp", lab: A + "cut/h1-forensic.webp", phar: A + "cut/h1-pharmacist.webp", wife: A + "story/face-gowife.webp", pros: A + "expr/prosecutor_neutral.webp" };
 // 사무실에서 서연과 찾은 자료를 두고 나누는 말. 결론이나 갈 곳을 알려 주지 않는다
 const H1TALKS = [
   ["chast", "차 변호사 진술조서에 복도에서 부장님이 한 말이 그대로 적혀 있어요. 우리가 들은 것하고 같아요. 이제 이 조서로 부장님한테 물을 수 있어요."],
