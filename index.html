@@ -24306,7 +24306,7 @@ function verdict(score) {
   const repD = S.rep - repBefore, capped = repRaw > repD;
   S[res === "win" ? "w" : res === "partial" ? "p" : "l"]++;
   if (res === "win" && c.id !== TUT_ID) { S.archive = (S.archive || []).concat({ id: c.id, m: S.day, money: f + b }); galAdd(c.id, { m: S.day, money: f + b }); }
-  const truthTxt = { honest: "진실한 의뢰인", hiding: "불리한 사실을 숨긴 의뢰인", liar: "거짓말을 한 의뢰인" }[c.truth];
+  const truthTxt = { honest: "사실대로 다 말한 의뢰인", hiding: "불리한 사실을 숨긴 의뢰인", liar: "거짓말을 한 의뢰인" }[c.truth];
   const el = document.getElementById("verdict");
   // 판결 도장: 승소·일부승소·패소·무죄·감형·유죄 모두 같은 크기 칸에
   const lab = resultLabel(c, res);
@@ -24325,13 +24325,24 @@ function verdict(score) {
   on("#done", () => finishCase("done", { rep: repD, money: f + b, res }));
 }
 
-// 판결 뒤 주인공의 첫마디 (의뢰인 유형 × 판결 × 간파 여부)
+// 판결 뒤 주인공의 첫마디 (의뢰인 유형 × 판결 × 간파 여부). 숨긴 사실·거짓말 내용을 사건 데이터에서 넣는다
 function monoOpener(c, res) {
   const caught = C.confessed;
+  const who = ((c.client && c.client.name) || "의뢰인") + " 씨";
+  // 숨긴 사실: "…있었다" → "…있었다는 걸"
+  const fact = (() => { const t = String((c.suspicions || [])[c.hiddenIndex] || "").trim(); return !t ? "불리한 사실" : /다$/.test(t) ? t + "는 걸" : t + "라는 걸"; })();
+  // 거짓말: "…다는 말" → "…다고 한 말", "…라는 말" → "…라고 한 말"
+  const lie = (() => { const t = String((c.lies || [])[c.lieIndex] || "").trim(); return !t ? "한 말" : /다는 말$/.test(t) ? t.replace(/다는 말$/, "다고 한 말") : /라는 말$/.test(t) ? t.replace(/라는 말$/, "라고 한 말") : /말$/.test(t) ? t : t + "라고 한 말"; })();
   const L = {
-    honest: { win: "믿길 잘했다. 처음부터 끝까지 사실대로 말한 의뢰인이었다.", partial: "사실대로 말한 사람이었는데, 절반밖에 못 지켜 줬다.", lose: "사실대로 말한 의뢰인이었는데 졌다. 내가 모자랐다." },
-    hiding: { win: caught ? "숨긴 걸 미리 알아낸 덕에 이겼다." : "숨긴 게 있었는데 운 좋게 이겼다.", partial: caught ? "숨긴 걸 알아냈는데도 다 막지는 못했다." : "역시 숨기는 게 있었다. 그게 발목을 잡았다.", lose: caught ? "숨긴 걸 알고도 졌다. 증거를 잘못 골랐다." : "숨긴 게 있었다. 미리 알아냈어야 했는데." },
-    liar: { win: caught ? "거짓인 줄 알고 맡은 사건이다. 그래도 이긴 건 이긴 거다." : "거짓말한 의뢰인이었다. 모르고 이겼으니 찜찜하다.", partial: "거짓말한 의뢰인이었다. 이 정도면 선방이다.", lose: caught ? "거짓말인 걸 알면서 맡았으니, 질 만했다." : "처음부터 거짓말이었다. 그걸 못 알아챈 내 잘못이다." }
+    honest: { win: `${who}가 한 말은 모두 다 사실이었다. 믿고 간 게 맞았다.`, partial: `${who}가 한 말은 다 사실이었는데, 절반밖에 지켜 주지 못했다.`, lose: `${who}가 한 말은 다 사실이었는데 졌다. 그걸 법정에서 증명하지 못한 건 나다.` },
+    hiding: {
+      win: caught ? `${who}는 ${fact} 숨겼다. 상담 때 그걸 알아낸 덕에 미리 대비할 수 있었다.` : `${who}는 ${fact} 끝까지 말하지 않았다. 법정에서 드러나지 않아 이겼을 뿐이다.`,
+      partial: caught ? `${who}가 ${fact} 숨긴 건 알아냈지만, 그 부분까지 다 막지는 못했다.` : `${who}는 ${fact} 숨기고 있었다. 법정에서 그게 드러나 발목을 잡았다.`,
+      lose: caught ? `${who}가 ${fact} 숨긴 건 알았다. 그런데도 졌다. 증거를 잘못 골랐다.` : `${who}는 ${fact} 숨기고 있었다. 상담 때 알아냈어야 했다.` },
+    liar: {
+      win: caught ? `${who}가 ${lie}은 거짓말이었다. 그걸 알고도 맡았고, 판결은 이겼다.` : `${who}가 ${lie}은 거짓말이었다. 그것도 모르고 이겼으니 마음이 편치 않다.`,
+      partial: `${who}가 ${lie}은 거짓말이었다. 이 정도면 선방했다.`,
+      lose: caught ? `${who}가 ${lie}이 거짓말인 걸 알고 맡았다. 질 만했다.` : `${who}가 ${lie}은 처음부터 거짓말이었다. 그걸 알아채지 못한 내 잘못이다.` }
   };
   return L[c.truth][res];
 }
