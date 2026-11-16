@@ -22561,7 +22561,10 @@ const visitorRange = rep => [1 + Math.floor(rep * 9 / 100), 2 + Math.floor(rep *
 // 여주 스토리모드는 2031년, 나머지는 2030년이 1번째 달이다. 저장 칸은 그 기록의 주인공으로 계산한다
 const yearBaseOf = v => (v && v.mode === "story" && v.hero === "f") ? 2031 : 2030;
 const baseYear = () => yearBaseOf(S);
-const monthLabel = (m, v = S) => `${yearBaseOf(v) + Math.floor((m - 1) / 12)}년 ${((m - 1) % 12) + 1}월`;
+// 스토리 모드 남주는 2030년 3월이 1번째 달이다(1장 사건이 5월에 열리도록). 나머지는 1월부터
+const monthBaseOf = v => (v && v.mode === "story" && v.hero === "m") ? 3 : 1;
+const ymOf = (m, v = S) => { const i = (m || 1) - 1 + monthBaseOf(v) - 1; return [yearBaseOf(v) + Math.floor(i / 12), i % 12 + 1]; };
+const monthLabel = (m, v = S) => { const [y, mo] = ymOf(m, v); return `${y}년 ${mo}월`; };
 const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const isCrim = c => c.kind === "criminal";
 // 형사 사건에서 이긴 판결이 무죄가 아니면(감형·공소기각 등) 그 이름으로 부른다
@@ -22956,9 +22959,9 @@ const isStory = () => !!S && S.mode === "story";
 // need: 열리는 명성, after: 깬 뒤 명성, day: 이야기 시점(게임 내 달), fee: 이겼을 때 받는 돈(만 원)
 const STORY_STEPS = [
   { need: 20, after: 30, fee: { m: 500, f: 100 } },
-  { need: 50, after: 60, jump: 4, day: { m: 59, f: 50 }, fee: { m: 3000, f: 1500 } },
-  { need: 75, after: 85, day: { m: 66, f: 52 }, fee: { m: 5000, f: 4000 } },
-  { need: 100, after: 100, day: { m: 75, f: 60 }, fee: { m: 0, f: 10000 } }
+  { need: 50, after: 60, jump: 4, day: { m: 57, f: 50 }, fee: { m: 3000, f: 1500 } },
+  { need: 75, after: 85, day: { m: 64, f: 52 }, fee: { m: 5000, f: 4000 } },
+  { need: 100, after: 100, day: { m: 73, f: 60 }, fee: { m: 0, f: 10000 } }
 ];
 // 판결 결과별로 받는 비율: 일부승소·감형과 특검 사건의 유죄 결말은 절반
 const STORY_PAY = { win: 1, quiet: 1, partial: 0.5, truth: 0.5 };
@@ -24032,7 +24035,7 @@ function caseNo(c) {
     : k === "hold" ? "카단"
     : k === "gahap" ? "가합"
     : (c.tier === 1 ? "가소" : c.tier === 2 ? "가단" : "가합");
-  return `${baseYear() + Math.floor((((S && S.day) || 1) - 1) / 12)}${code}${(1000 + hash(c.id) % 9000)}`;
+  return `${ymOf((S && S.day) || 1)[0]}${code}${(1000 + hash(c.id) % 9000)}`;
 }
 function trialHead(c) {
   return `<div class="bench no-ava"><div><div class="no">${caseNo(c)} ${esc(c.category)}</div><div class="tt">${isCrim(c) ? "공판기일" : "변론기일"}</div><div class="who">재판장 · 상대측 ${isCrim(c) ? "검사" : "소송대리인"}${!isCrim(c) && C && C.vs ? ` <b class="k-vs">「${esc(C.vs)}」</b>` : ""}</div></div></div>`;
@@ -24563,7 +24566,7 @@ function monthFlip(next) {
   if (REDUCED) return next();
   const ov = document.createElement("div");
   ov.className = "flip";
-  ov.innerHTML = `<div class="flip-card"><div class="flip-y">${baseYear() + Math.floor((S.day - 1) / 12)}년</div><div class="flip-m">${((S.day - 1) % 12) + 1}월</div><div class="flip-f">${esc(S.firm || "")}</div></div>`;
+  ov.innerHTML = `<div class="flip-card"><div class="flip-y">${ymOf(S.day)[0]}년</div><div class="flip-m">${ymOf(S.day)[1]}월</div><div class="flip-f">${esc(S.firm || "")}</div></div>`;
   document.body.appendChild(ov);
   setTimeout(next, 450);
   setTimeout(() => { ov.classList.add("out"); setTimeout(() => ov.remove(), 350); }, 1000);
@@ -26227,7 +26230,7 @@ function opsEndingRoll() {
       let t = REDUCED ? S.day : 1;
       const tick = () => {
         if (over) return;
-        y.textContent = baseYear() + Math.floor((t - 1) / 12) + "년"; m.textContent = ((t - 1) % 12 + 1) + "월";
+        y.textContent = ymOf(t)[0] + "년"; m.textContent = ymOf(t)[1] + "월";
         if (t >= S.day) return setTimeout(() => { if (!over) advance(); }, 1100);
         t++; setTimeout(tick, 75);
       };
@@ -26387,7 +26390,7 @@ const TAB_ICON = {
 };
 function renderHud() {
   if (!S) { hud.innerHTML = ""; return; }
-  const ym = `${baseYear() + Math.floor((S.day - 1) / 12)}.${((S.day - 1) % 12) + 1}`;
+  const ym = `${ymOf(S.day)[0]}.${ymOf(S.day)[1]}`;
   hud.innerHTML = `<div class="pills">
       <span class="pill"><i>₩</i>${won(S.money)}</span>
       <span class="pill"><i>★</i>${S.rep}${office().repCap < 100 ? `<small>/${office().repCap}</small>` : ""}</span>
