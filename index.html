@@ -25909,7 +25909,7 @@ const HOWTO = [
   ["운영 모드", [
     "변호사 한 사람이 아니라 로펌 대표가 되는 모드입니다. 동기 둘과 세운 법무법인을 사실상 혼자 떠맡아, 변호사를 뽑고 사건을 나눠 맡기고 돈을 관리합니다.",
     "목표는 3년 안에 이름난 경쟁 법인들을 넘어 한국 최고의 로펌을 만드는 것입니다. 3년 뒤 순자산과 보고서 검토 정확도에 따라 결말이 달라집니다.",
-    "스피드 모드와 다른 점: 명성 100이 아니라 3년이라는 기한이 끝입니다. 사건을 고용 변호사에게 맡길 수 있습니다. 맡긴 사건은 그 변호사가 진행하고 보고서를 올리며, 보고서를 보고 판단이 틀렸으면 바로잡을 수 있습니다. 직접 맡는 사건만 아래 방식으로 진행합니다. 매달 운영비와 광고·직원 비용을 챙겨야 하고, 보수를 안 주는 의뢰인에게는 독촉하거나 지급명령을 신청합니다. 해마다 경쟁 법인과 순위가 매겨집니다.",
+    "스피드 모드와 다른 점: 명성 100이 아니라 3년이라는 기한이 끝입니다. 사건을 고용 변호사에게 맡길 수 있습니다. 맡긴 사건은 그 변호사가 진행하고 보고서를 올리며, 보고서를 보고 판단이 틀렸으면 바로잡을 수 있습니다. 직접 맡는 사건만 아래 방식으로 진행합니다. 대표가 직접 맡을 수 있는 사건은 사무실에 따라 한 달 5·4·3·2건으로 줄고, 나머지는 고용 변호사가 맡습니다. 사무실 이전은 '사무실 관리'에서 하며, 명성 말고도 연차와 고용 변호사 수 조건이 있습니다. 매달 운영비와 광고·직원 비용을 챙겨야 하고, 보수를 안 주는 의뢰인에게는 독촉하거나 지급명령을 신청합니다. 해마다 경쟁 법인과 순위가 매겨집니다.",
     "고정비(월세·생활비·월급·광고비)는 그달에 한 번이라도 쓴 것을 모두 냅니다. 달 중간에 광고를 끄거나 사람을 내보내도 그달 비용은 나가고, 달 중간에 켠 광고는 다음 달 손님부터 효과가 있습니다. 수임료 기준도 바꾸면 다음 달부터 적용됩니다.",
     "정산을 마친 뒤 남은 현금이 다음 달 고정비보다 적은 달이 석 달 이어지면 폐업합니다."]],
   ["스토리 모드", [
@@ -26695,7 +26695,7 @@ function screenTrial() {
   const scout = !isOps() && hired("ha") ? c.opponent.slice().sort((a, b) => b.power - a.power)[0] : null;
   show(`${trialHead(c)}
     ${isOps() ? opsScoutSay(c) : scout ? staffSay("inv", `상대 쪽은 「${esc(scout.name)}」${josaEul(scout.name)} 준비했대요.`) : ""}
-    <div class="stack"><div class="section-head"><span class="eyebrow">제출할 증거 고르기</span>${hired("ma") ? `<span class="eyebrow">${C.inv ? "마동철 뒷조사 끝" : "마동철 뒷조사 1회"}</span>` : hired("yu") ? `<span class="eyebrow">유성진 디지털 감정</span>` : ""}</div>
+    <div class="stack"><div class="section-head"><span class="eyebrow">제출할 증거 고르기</span>${hired("ma") ? `<span class="eyebrow">${C.inv ? "마동철 뒷조사 끝" : "마동철 뒷조사 1회"}</span>` : ""}${hired("yu") ? `<span class="eyebrow">유성진 디지털 감정</span>` : ""}</div>
       <div class="evlist">${evs}</div></div>
     <div class="stack"><div class="eyebrow">주장 하나 고르기</div>${args}</div>`,
     `<button class="btn primary" id="plead" ${C.arg ? "" : "disabled"}>${isOps() ? "준비 끝" : "변론 시작"}</button>`, isOps() ? "office" : "court");
@@ -26736,6 +26736,7 @@ function formal(t) {
   if (/다툼$/.test(t)) return t.replace(/다툼$/, "다툽니다");
   if (/밝힘$/.test(t)) return t.replace(/밝힘$/, "밝힙니다");
   if (!/다$/.test(t)) return t + "입니다";
+  if (/어치다$/.test(t)) return t.slice(0, -1) + "입니다";       // 1,500만 원어치다 → 어치입니다
   if (/는다$/.test(t)) return t.replace(/는다$/, "습니다");
   const s = t.slice(-2, -1), j = JONG(s), head = t.slice(0, -2);
   if (j === 4) return head + setJong(s, 17) + "니다";          // 한다 → 합니다
@@ -27132,7 +27133,7 @@ function screenBankrupt() {
     <div class="eyebrow">${monthLabel(S.day)}</div>
     <h1>폐업</h1>
     <div class="mono"><div class="ava"><img src="${heroOf().img}" alt=""></div><div><div class="who">${esc(name)} 변호사</div>
-      <p>석 달째 정산을 마치고 나면 다음 달 월세와 월급을 낼 돈이 남지 않았다. 더는 법인을 유지할 수 없어 문을 닫기로 했다.</p></div></div>
+      <p>${isOps() ? "석 달째 정산을 마치고 나면 다음 달 월세와 월급을 낼 돈이 남지 않았다. 더는 법인을 유지할 수 없어 문을 닫기로 했다." : "석 달째 적자가 이어졌다. 월세와 월급을 더는 낼 수 없어 사무소 문을 닫기로 했다."}</p></div></div>
     <div class="ledger">
       <span>버틴 기간</span><span class="r">${S.day}개월</span>
       <span>전적</span><span class="r">${S.w}승 ${S.p}일부 ${S.l}패</span>
@@ -27875,7 +27876,7 @@ const opsCostItems = () => {
   (S.assocs || []).forEach(a => { it["a:" + a.id] = [`${a.name} 변호사 월급`, a.pay]; });
   Object.entries(S.crew || {}).forEach(([k, l]) => (l || []).forEach(id => { const p = pickPerson(k, id); if (p) it["c:" + k + ":" + id] = [`${p.name} ${CREW_ROLE[k] || ""} 월급`, crewPay(p)]; }));
   ADS.forEach(ad => { if (S.ads && S.ads[ad.k]) it["ad:" + ad.k] = [ad.name, ad.cost]; });
-  if (S.jg) it.jg = ["전관 변호사", JG_PAY];
+  if (S.jg && !S.jg.fresh) it.jg = ["전관 변호사", JG_PAY];
   return it;
 };
 const opsCost = () => Object.values(opsCostItems()).reduce((a, x) => a + x[1], 0);
@@ -28013,7 +28014,7 @@ function opsResume() {
   (S.lostThink || []).forEach(t => { if (t.firm) t.firm = ren(t.firm); });
   if (S.story) S.story.firm = ren(S.story.firm);
   // 예전 저장: 달 중간에 내보낸 변호사의 보고서가 남아 있으면 그 사건은 돌려보낸 것으로
-  (S.reports || []).forEach(r => { if (!myAssoc(r.who) && r.status !== "done") { r.status = "out"; } });
+  (S.reports || []).forEach(r => { if (!myAssoc(r.who) && (r.status === "pending" || r.status === "ok")) { r.status = "out"; } });
   if (S.mon && !S.mon.settled && !S.mon.costs) opsCostTouch();
   if (S.gameover) return screenBankrupt();
   if (S.opsEnd) return S.opsRolled ? opsFinal() : opsEndingRoll();
@@ -28072,7 +28073,7 @@ function rivalPerCase(r) {
   if (RIVAL_PC[key] == null) { const l = CASES.filter(c => t.includes(c.tier)); RIVAL_PC[key] = l.reduce((a, c) => a + marketFee(c) + marketBonus(c) * 0.6, 0) / Math.max(1, l.length); }
   return RIVAL_PC[key] * feeMult(r.rep) * ({ ad: 1.15, cheap: 0.8, field: 1 }[r.style] || 1);
 }
-const whyOf = (r, c) => r.style === "ad" ? "광고 보고" : r.style === "cheap" ? "싸서" : isCrim(c) ? `${RIVAL_FIELD} 전문이라` : "소개로";
+const whyOf = (r, c) => r.style === "ad" ? "광고 보고" : r.style === "cheap" ? "수임료가 싸서" : isCrim(c) ? `${RIVAL_FIELD} 전문이라` : "소개로";
 // 달 말: 경쟁 법인 쪽 한 달 — 우리가 못 맡은 손님의 행방과 결과, 명성, 순위, 움직임
 function opsRivalMonth() {
   const lost = [];
@@ -28167,7 +28168,7 @@ function opsScoutBlock() {
   }
   return { html: `<div class="sec staff-say"><div class="sf"><img src="${a.face}" alt=""></div><div><div class="who">${esc(a.name)}</div>"대표님, ${firm}에서 연락이 왔습니다. 월급을 ${won(sc.raise)} 올려 주시면 남겠습니다."</div></div>`,
     btns: [["올려 준다", () => { a.pay += sc.raise; a.slights = 0; S.scout = null; }],
-           ["보낸다", () => { S.assocs = S.assocs.filter(x => x.id !== a.id); const r = S.rivals.find(x => x.name === sc.rival); if (r) r.rep = Math.min(100, r.rep + 2); S.scout = null; toast(`${a.name} 변호사가 ${fro(sc.rival)} 옮겼습니다.`); }]] };
+           ["보낸다", () => { S.assocs = S.assocs.filter(x => x.id !== a.id); if (S.mon && S.mon.costs) delete S.mon.costs["a:" + a.id]; const r = S.rivals.find(x => x.name === sc.rival); if (r) r.rep = Math.min(100, r.rep + 2); S.scout = null; toast(`${a.name} 변호사가 ${fro(sc.rival)} 옮겼습니다.`); }]] };
 }
 // 월급 면담: 단계가 오른 다음 달에 묻는다. 거절하면 서운함(slights)이 쌓여 스카우트에 흔들린다
 function opsRaiseBlock() {
@@ -28240,6 +28241,7 @@ function opsNewMonth() {
   if (S.protestLeft > 0) { n = Math.max(3, n - 1); if (--S.protestLeft === 0) S.news.push("사무실 앞 시위가 끝났다"); }
   n += S.evGuest || 0; S.evGuest = 0;
   // 전관: 1년 계약, 달마다 5% 기사가 나면 명성 −5에 계약 끝. 계약 중에는 손님 +2, 3단계 사건이 두 배로 찾아온다
+  if (S.jg) S.jg.fresh = false;
   if (S.jg) { if (Math.random() < 0.05) { opsRepAdd(-5); S.jg = null; S.news.push("전관예우 기사가 났다. 영입한 변호사가 나갔다. 명성 −5"); } else if (--S.jg.left <= 0) { S.jg = null; S.news.push("전관 변호사와 계약이 끝났다"); } }
   if (S.jg) n += 2;
   S.market = market; S.share = { me: n };
@@ -28373,11 +28375,11 @@ const EV = {
       ["무시한다", () => { const d = opsRepAdd(-1); S.protestLeft = 2; return `시위가 두 달 더 이어집니다. 그동안 손님이 달마다 1명 줄어듭니다. 명성 ${opsRepTxt(d)}`; }]] },
   adrule: { t: "광고 문구 지적", body: () => "포털 광고 문구에 '승소 보장'이라는 말이 들어갔다는 지적이 들어왔습니다. 변호사 광고에서 결과를 보장하는 표현은 금지되어 있습니다.",
     btns: () => [["문구를 고친다", () => "문구를 고쳤습니다."],
-      ["그대로 둔다", () => { S.evGuest = (S.evGuest || 0) + 1; if (Math.random() < 0.5) { const d = opsRepAdd(-3); return `변호사회에서 광고 규정 위반으로 경고를 받았습니다. 명성 ${opsRepTxt(d)}`; } return "이번에는 별일 없이 지나갔습니다. 다음 달 손님이 1명 늘어납니다."; }]] },
+      ["그대로 둔다", () => { S.evGuest = (S.evGuest || 0) + 1; if (Math.random() < 0.5) { const d = opsRepAdd(-3); return `변호사회에서 광고 규정 위반으로 경고를 받았습니다. 명성 ${opsRepTxt(d)}. 다음 달 손님은 1명 늘어납니다.`; } return "이번에는 별일 없이 지나갔습니다. 다음 달 손님이 1명 늘어납니다."; }]] },
   meme: { t: "뜻밖의 유명세", body: () => "대표님 법원 앞 인터뷰 영상이 화제입니다. 방송에서 섭외가 왔습니다.",
     btns: () => [["방송에 나간다", () => { S.evGuest = (S.evGuest || 0) + 3; return "다음 달 손님이 늘어납니다."; }], ["그냥 둔다", () => "지나갔습니다."]] },
   jg: { t: "전관 영입 제안", body: () => `고등법원 부장판사 출신 변호사가 1년 계약을 제안했습니다. 월 ${won(JG_PAY)}입니다.`,
-    btns: () => [["영입한다", () => { S.jg = { left: JG_MONTHS }; opsCostTouch(); return "계약 기간 동안 손님이 달마다 2명 늘고, 3단계 사건 손님이 두 배로 찾아옵니다. 전관예우 기사가 나면 명성 −5에 계약이 끝납니다(달마다 5%)."; }], ["거절한다", () => "정중히 거절했습니다."]] },
+    btns: () => [["영입한다", () => { S.jg = { left: JG_MONTHS + 1, fresh: true }; return "다음 달부터 12달 동안 월급을 내고, 손님이 달마다 2명 늘고, 3단계 사건 손님이 두 배로 찾아옵니다. 전관예우 기사가 나면 명성 −5에 계약이 끝납니다(달마다 5%)."; }], ["거절한다", () => "정중히 거절했습니다."]] },
   gift: { t: "고마운 의뢰인", face: true, body: e => `${BY_ID[e.id].client.name} 씨가 고맙다며 ${GIFTS[e.g][1]}.`, say: e => GIFTS[e.g][2],
     btns: () => [["확인", () => { S.evGuest = (S.evGuest || 0) + 1; return ""; }]] },
   visit: { t: "다시 찾아온 의뢰인", face: true, body: e => { const c = BY_ID[e.id]; return `"변호사님, 그때 ${c.category} 사건 정말 감사했습니다. 제 지인이 변호사를 찾길래 여기를 소개했어요."`; },
@@ -28621,7 +28623,7 @@ function opsMakeReport(x, k = 0) {
       const mx = ERR_MIX[a.trait] || ERR_MIX.careful, r0 = Math.random();
       err = r0 < mx.kind ? "kind" : r0 < mx.kind + mx.target ? "target" : "skip";
       const list = c.truth === "hiding" ? c.suspicions : c.lies;
-      const other = (list || []).map((_, i) => i).filter(i => i !== pickI && !(c.truth === "liar" && i === c.touchIndex));
+      const other = (list || []).map((_, i) => i).filter(i => i !== pickI);
       if (err === "target" && !other.length) err = "kind";
       if (err === "target") pickI = other[Math.floor(Math.random() * other.length)];
       else if (err === "kind") { verdict = Math.random() < 0.6 ? "honest" : (c.truth === "hiding" ? "liar" : "hiding"); pickI = verdict === "honest" ? null : Math.floor(Math.random() * 3); }
@@ -28668,9 +28670,9 @@ function opsReportLines(r) {
   else if (a.trait === "sloppy") L.push(`증거는 ${best.n}번 「${best.e.name}」 위주로 봤습니다.`);
   else if (a.trait === "nice") L.push("의뢰인이 많이 억울해하셨습니다.");
   else if (a.trait === "field") L.push(groupOf(c).includes(a.field) ? `${a.field} 사건이라 제가 잘 아는 쟁점입니다.` : "제 분야는 아니지만 쟁점은 확인했습니다.");
-  if (r.verdict === "honest") L.push(`${best.n}번 「${best.e.name}」 내용이 의뢰인 진술과 맞습니다.`, "숨기거나 사실과 다르게 말한 부분은 없어 보입니다.");
-  else if (r.verdict === "hiding") L.push(`의뢰인이 말하지 않은 사실이 있어 보입니다. ${susOf(c.suspicions[r.pickI])}입니다.`, "재판에서는 이 점을 조심하겠습니다.");
-  else L.push(`의뢰인 진술 중 "${saidOf(c.lies[r.pickI]).replace(/\.$/, "")}"는 부분은 사실과 다릅니다.`, "그 부분과 관련된 증거는 빼고 가겠습니다.");
+  if (r.verdict === "honest") L.push(a.trait === "sloppy" ? "그 증거 내용이 의뢰인 진술과 맞습니다." : `${best.n}번 「${best.e.name}」 내용이 의뢰인 진술과 맞습니다.`, "숨기거나 사실과 다르게 말한 부분은 없어 보입니다.");
+  else if (r.verdict === "hiding") L.push(`의뢰인이 말하지 않은 사실이 있어 보입니다. ${susOf(c.suspicions[r.pickI])}입니다.`, ...(opsRecBack(r) ? [] : ["재판에서는 이 점을 조심하겠습니다."]));
+  else L.push(`의뢰인 진술 중 "${saidOf(c.lies[r.pickI]).replace(/\.$/, "")}"는 부분은 사실과 다릅니다.`, ...(opsRecBack(r) ? [] : ["그 부분과 관련된 증거는 빼고 가겠습니다."]));
   return L;
 }
 // 지는 사건을 알아챈 보고서는 돌려보내자고 권한다(대표가 '잘못됐다'로 그 줄을 짚어 그냥 맡을 수 있음)
@@ -28728,7 +28730,7 @@ function opsSecSay(r, c) {
   const p = pickPerson("sec", id); if (!p) return "";
   if (id === "oh") {
     if (!r.face) { const ks = ["honest", "hiding", "liar"]; r.face = Math.random() < 0.75 ? c.truth : ks.filter(x => x !== c.truth)[Math.floor(Math.random() * 2)]; }
-    return staffSayP(p, { honest: "상담할 때 보니 말할 때 눈빛이 흔들리진 않았어요.", hiding: "상담할 때 보니 뭔가 말을 아끼는 느낌이었어요.", liar: "상담할 때 보니 말이 너무 매끄러웠어요. 외운 것 같았어요." }[r.face]);
+    return staffSayP(p, { honest: "상담 때 보니 눈빛이 흔들리진 않았어요.", hiding: "상담 때 보니 뭔가 말을 아끼는 느낌이었어요.", liar: "상담 때 보니 말이 너무 매끄러웠어요. 외운 것 같았어요." }[r.face]);
   }
   if (id === "moon") return staffSayP(p, r.rescued ? "수임료가 비싸다며 일어서시길래 제가 붙잡고 다시 설명드렸어요. 계약하시기로 했어요." : "계약하실 마음은 확실해 보였어요.");
   return staffSayP(p, opsSecHint(c, r));
@@ -28777,7 +28779,7 @@ function opsReport(i) {
   if (isPC()) {
     // 컴퓨터: 보고서는 왼쪽 장면에 큰 서류로, 담당 변호사는 그 옆에 크게. 오른쪽 패널은 이번 달 보고서 목록과 의뢰인
     const rows = S.reports.map((x, j) => ({ x, j })).filter(({ x }) => opsRepValid(x)).map(({ x, j }) => { const cc = BY_ID[x.id]; return `<button class="pc-rrow ${j === i ? "on" : ""} ${x.status !== "pending" ? "done" : ""}" data-rp="${j}"><img src="${opsFace(x.who)}" alt=""><span class="m">${esc(cc.client.name)} · ${esc(cc.category)}<small>${esc(opsName(x.who))} 변호사</small></span><span class="st">${j === i && !done ? "검토 중" : REP_ST[x.status] || ""}</span></button>`; }).join("");
-    show(`<button class="pc-back" id="rpHub">← 본부로</button><div class="eyebrow">이번 달 보고서 ${S.reports.length}건</div><div class="pc-rlist">${rows}</div>
+    show(`<button class="pc-back" id="rpHub">← 본부로</button><div class="eyebrow">이번 달 보고서 ${S.reports.filter(x => opsRepValid(x)).length}건</div><div class="pc-rlist">${rows}</div>
       <div class="eyebrow">의뢰인</div><div class="pc-client"><div class="portrait">${portrait(c)}</div><div><b>${esc(c.client.name)}</b> <span>${c.client.age ? c.client.age + "세 · " : ""}${esc(c.client.job || "")}</span><p>"${esc(c.opening)}"</p></div></div>${hint}`, acts);
     pcStage(`<div class="pcs-doc k-doc">${docInner}</div><div class="pcs-bubble">"${esc(lines[1] || lines[0])}"</div>
       <div class="pcs-assoc"><img src="${a.face}" alt=""><div class="plate"><b>${esc(a.name)}</b><span>${TRAIT[a.trait]}${a.field ? " " + a.field : ""} · ${a.lvl}단계 · 이번 달 ${S.list.filter(x => x.who === a.id).length}건 · ${opsAccTxt(myAssoc(r.who))}</span></div></div>`, "ops-rep");
@@ -28853,7 +28855,7 @@ function opsBasis(r, c) {
   if (r.verdict === "honest") return `증거 ${best.n}번 「${best.e.name}」 내용이 의뢰인 말과 맞습니다.`;
   const Q = (r.qs || []).map(q => c.questions[q]).filter(Boolean)[0];
   if (r.verdict === "hiding") return `${susOf(c.suspicions[r.pickI])}이 걸립니다.${Q ? ` 상담에서 "${Q.q}" 하고 물었을 때 답이 분명하지 않았습니다.` : ""}`;
-  return `의뢰인이 "${saidOf(c.lies[r.pickI]).replace(/\.$/, "")}"고 했는데, 증거와 맞지 않습니다.`;
+  return `의뢰인이 "${saidOf(c.lies[r.pickI]).replace(/\.$/, "")}"라고 했는데, 증거와 맞지 않습니다.`;
 }
 function opsWhy(i) {
   const r = S.reports[i], c = BY_ID[r.id], a = myAssoc(r.who);
@@ -28893,12 +28895,13 @@ function opsWhy(i) {
       }
       save();
     };
+    const same = ok && r.verdict === c.truth && (r.verdict === "honest" || r.pickI === (c.truth === "hiding" ? c.hiddenIndex : c.lieIndex));
     const fixedMsg = () => {
-      d.innerHTML = `<div class="k-pop k-why">${head("대표님 말씀대로 보고서를 고치겠습니다.")}<button class="btn primary" id="wOk">보고서 보기</button></div>`;
+      d.innerHTML = `<div class="k-pop k-why">${head(same ? "보고서 판단과 같습니다. 보고서대로 진행하겠습니다." : "대표님 말씀대로 보고서를 고치겠습니다.")}<button class="btn primary" id="wOk">보고서 보기</button></div>`;
       d.querySelector("#wOk").onclick = () => { close(); opsReport(i); };
     };
     // 고용 변호사가 근거를 들어 반박할 수 있다: 지적이 틀렸으면 50%, 맞았어도 20%(꼼꼼한 변호사는 30%)
-    const push = Math.random() < (ok ? (a.trait === "careful" ? 0.3 : 0.2) : 0.5);
+    const push = !same && Math.random() < (ok ? (a.trait === "careful" ? 0.3 : 0.2) : 0.5);
     if (!push) { apply(); return fixedMsg(); }
     d.innerHTML = `<div class="k-pop k-why">${head(`제 생각은 다릅니다. ${opsBasis(r, c)}`)}<button class="btn" id="wForce">그래도 고쳐라</button><button class="btn" id="wKeep">보고서대로 둔다</button></div>`;
     // 반박을 누르고 고치게 하면 서운함이 하나 더 쌓인다. 보고서대로 두면 이 보고서는 다시 지적할 수 없다
@@ -29083,7 +29086,7 @@ function opsResults() {
     const c = BY_ID[x.id]; if (!c) return "";
     const lab = resultLabel(c, x.res);
     return `<div class="mk-res"><img src="${opsFace(x.who)}" alt=""><div><div class="vn">${esc(c.client.name)} · ${esc(c.category)}</div>
-      <div class="vm">${esc(opsName(x.who))} · 착수금 ${won(x.fee)}${x.bonus ? ` · 성공보수 ${won(x.bonus)} 다음 달` : ""}${x.refund ? ` · 항의로 착수금 ${won(x.refund)} 돌려줌` : ""}${x.slip ? " · 업무 실수" : ""}${x.vs ? ` · <b class="k-vs">vs ${esc(shortFirm(x.vs))}</b>` : ""}</div>${fb(x)}</div>
+      <div class="vm">${esc(opsName(x.who))} · 착수금 ${won(x.fee)}${x.bonus ? ` · 성공보수 ${won(x.bonus)}(다음 달 입금)` : ""}${x.refund ? ` · 항의로 착수금 ${won(x.refund)} 돌려줌` : ""}${x.slip ? " · 업무 실수" : ""}${x.vs ? ` · <b class="k-vs">vs ${esc(shortFirm(x.vs))}</b>` : ""}</div>${fb(x)}</div>
       <div class="tag ${x.res === "win" ? "w" : x.res === "lose" ? "l" : "p"}">${lab}</div></div>`;
   }).join("");
   // 돌려보낸 보고서 사건: 돌려보낸 판단이 맞았는지
