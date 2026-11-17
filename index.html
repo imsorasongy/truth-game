@@ -396,6 +396,7 @@ html[data-scene^="end"] #backdrop::after { background: linear-gradient(180deg, #
 .tutb.shake { animation: tutshake .35s; }
 @keyframes tutshake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
 .field.need input { border-color: var(--lose) !important; box-shadow: 0 0 0 2px #c0503a55; }
+.tut-dim { opacity: .35; filter: grayscale(.5); transition: opacity .2s; }
 .tut-glow { position: relative; animation: tutglow 1.3s ease-in-out infinite; border-radius: 8px; }
 @keyframes tutglow { 0%, 100% { box-shadow: 0 0 0 2px #e8c36a, 0 0 10px 2px #e8c36a66; } 50% { box-shadow: 0 0 0 3px #ffe08a, 0 0 22px 6px #ffd76a99; } }
 .cutin { position: fixed; inset: 0; z-index: 25; display: flex; align-items: center; pointer-events: none; }
@@ -26209,6 +26210,7 @@ function tutSet(fn) { tutScreen = fn; tutMsg = null; tutRefresh(); }
 function tutWarn(bad, text) { if (!bad || !tutOn()) return false; tutMsg = text; tutRefresh(); return true; }
 function tutRefresh() {
   document.querySelectorAll(".tut-glow").forEach(el => el.classList.remove("tut-glow"));
+  document.querySelectorAll(".tut-dim").forEach(el => el.classList.remove("tut-dim"));
   const old = document.getElementById("tutb"); if (old) old.remove();
   if (!tutScreen || !tutOn()) return;
   const tip = tutMsg ? { t: tutMsg, tap: "warn" } : tutScreen(); if (!tip) return;
@@ -26219,6 +26221,16 @@ function tutRefresh() {
   b.style.top = ((hud.getBoundingClientRect().bottom || 0) + 6) + "px";
   if (tip.tap) b.querySelector(".tutb-next").addEventListener("click", e => { e.stopPropagation(); if (tip.tap === "warn") tutMsg = null; else { C.tutK = C.tutK || {}; C.tutK[tip.tap] = true; } tutRefresh(); });
   if (tip.sel) setTimeout(() => document.querySelectorAll(tip.sel).forEach(el => el.classList.add("tut-glow")), 60);
+  // 지금 단계에서 누를 수 없는 버튼은 흐리게 한다(누를 수 있는 곳만 또렷하게). 증거·기록·음악은 언제나 됨
+  if (tip.sel || tip.tap) setTimeout(() => {
+    const okSel = [tip.tap ? null : tip.sel, tip.ok].filter(Boolean).join(", ");
+    const oks = okSel ? [...document.querySelectorAll(okSel)] : [];
+    document.querySelectorAll("#app button, #app .btn, #app [data-ev], #app [data-q], #dock button, #tabs button").forEach(el => {
+      if (el.closest("#tutb, .snd, [data-tab=ev], [data-tab=log], [data-tab=snd]")) return;
+      if (oks.some(o => o.contains(el) || el.contains(o))) return;
+      el.classList.add("tut-dim");
+    });
+  }, 60);
 }
 document.addEventListener("click", () => setTimeout(tutRefresh, 80), true);
 // 튜토리얼에서는 안내한 것만 누를 수 있다(입력칸·증거 보기·음악은 언제나 됨)
@@ -26322,7 +26334,8 @@ function screenConsult() {
       <div class="section-head"><span class="eyebrow">가져온 증거 ${c.evidence.length}건</span></div>
       <div class="evlist">${c.evidence.map(e => evCard(e, { open: C.opened[e.id] })).join("")}</div>
     </div>`,
-    `<button class="btn primary" id="judge">판단 내리기</button>`);
+    // 튜토리얼에서는 질문을 다 한 뒤에야 판단 버튼을 보여 준다
+    c.id === TUT_ID && left > 0 ? "" : `<button class="btn primary" id="judge">판단 내리기</button>`);
   on("[data-q]", e => {
     C.asked.push(+e.currentTarget.dataset.q);
     const y = window.scrollY; screenConsult(); window.scrollTo({ top: y });
@@ -26341,7 +26354,8 @@ function screenConsult() {
     if (!C.asked.length && isPC() && unseen.length) return { t: `다른 카드도 모두 눌러 보자. (${c.evidence.length - unseen.length}/${c.evidence.length})`, sel: `.evlist [data-ev="${unseen[0].id}"]`, ok: ".evlist" };
     if (!C.asked.length && drawer && showEv && !isPC()) return { t: "다른 카드도 눌러 볼 수 있다. 다 봤으면 <b>증거</b> 탭을 한 번 더 눌러 닫자.", sel: '#tabs [data-tab="ev"]', ok: ".evlist" };
     if (!C.asked.length) return { t: "이제 질문할 차례다. 말과 증거가 어긋나는 곳을 물어보자.", sel: "[data-q]" };
-    return { t: "질문은 세 번까지 할 수 있다. 다 들었으면 <b>판단 내리기</b>를 누르자.", sel: "#judge", ok: "[data-q]" };
+    if (left > 0) return { t: `질문은 세 번까지 할 수 있다. 남은 질문도 해 보자. (남은 기회 ${left})`, sel: "[data-q]" };
+    return { t: "이야기는 다 들었다. 이제 <b>판단 내리기</b>를 누르자.", sel: "#judge" };
   });
 }
 
