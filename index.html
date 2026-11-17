@@ -25268,10 +25268,11 @@ function setDock(html) {
 
 /* ---------- 음악 (예전 게임 배경음악) ---------- */
 const TRACKS = {
-  opening: ["bgm/opening-theme.mp3"],
+  opening: ["bgm/title.mp3"],
   normal: ["bgm/bgm1.mp3", "bgm/bgm2.mp3", "bgm/bgm6.mp3"],
   trial: ["bgm/trialtheme.mp3"],
-  ending: ["bgm/ending-theme.mp3"]
+  ending: ["bgm/ending2.mp3"],
+  tense1: ["bgm/tense1.mp3"], tense2: ["bgm/tense2.mp3"], tense3: ["bgm/tense3.mp3"], sad: ["bgm/sad.mp3"]
 };
 let soundOn = true;
 try { soundOn = localStorage.getItem(KEY + "-snd") !== "off"; } catch (e) {}
