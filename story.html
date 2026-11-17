@@ -339,7 +339,10 @@ let G = null;
 const WIN = 80, PART = 50, MISS = -6, MISS2 = -10;
 // 음악: 본 게임 안이면 본 게임에 곡을 바꾸라고 알리고, 주소로 바로 열었으면 여기서 직접 튼다
 // tense1~3·sad는 장면 음악: 대사 목록에 "♪sad" 같은 줄을 넣으면 그 자리에서 바뀌고, 조사 화면으로 돌아오면 일상 음악으로 돌아간다
-const TRACKS = { opening: ["bgm/title.mp3"], normal: ["bgm/bgm1.mp3", "bgm/bgm2.mp3", "bgm/bgm6.mp3"], trial: ["bgm/trialtheme.mp3"], ending: ["bgm/ending2.mp3"], tense1: ["bgm/tense1.mp3"], tense2: ["bgm/tense2.mp3"], tense3: ["bgm/tense3.mp3"], sad: ["bgm/sad.mp3"] };
+const TRACKS = { opening: ["bgm/title.mp3"], normal: ["bgm/bgm1.mp3", "bgm/bgm2.mp3", "bgm/bgm6.mp3"], trial: ["bgm/trialtheme.mp3"], ending: ["bgm/ending2.mp3"], tense1: ["bgm/tense1.mp3"], tense2: ["bgm/tense2.mp3"], tense3: ["bgm/tense3.mp3"], sad: ["bgm/sad.mp3"], n1: ["bgm/bgm1.mp3"], n2: ["bgm/bgm2.mp3"], n3: ["bgm/bgm6.mp3"] };
+// 장마다 테마곡: 조사 장면 내내 이 곡이 흐른다(재판은 재판 곡). "♪normal" 표시와 장면 곡이 끝난 뒤에도 이 곡으로 돌아간다
+const THEME = { m: "n1", m1: "n1", m2: "sad", m3: "sad", m4: "tense1", f: "n3", f1: "n3", f2: "n2", f3: "n1", f4: "tense2", h1: "tense3" };
+const themeOf = () => (typeof G !== "undefined" && G && G.k && THEME[G.k]) || "normal";
 const SCENE_BGM = /^(tense[0-9]|sad)$/;
 let bgmAudio = null, bgmMode = null, bgmNow = null;
 function bgm(mode, force) {
@@ -575,23 +578,23 @@ function start(k) {
     }));
     G.prologue = false;
     // 조사하다 끊긴 곳에서 이어서: 마지막으로 행동 메뉴가 떴던 자리로 돌아간다
-    if (saved.mid) { G.pendingPops = []; G.pendingBetween = null; bgm("normal", true); return fade(() => idle(), { title: c.title.split(" · ")[1], sub: "이어서" }); }
+    if (saved.mid) { G.pendingPops = []; G.pendingBetween = null; bgm(themeOf(), true); return fade(() => idle(), { title: c.title.split(" · ")[1], sub: "이어서" }); }
     G.loc = "_office";
     const pops = (G.pendingPops || []).filter(id => c.places[id]).map(id => placeGain(c.places[id]));
     G.pendingPops = [];
     const ri = G.pendingBetween;
     G.pendingBetween = null;
-    bgm("normal", true);
+    bgm(themeOf(), true);
     return card("한 달 뒤", `${(curRound() && curRound().tt) || "다음 기일"} 준비`, 1300, () => nextMonthTalk(ri, pops));
   }
   const begin = () => fade(() => {
-    bgm("normal", true);
+    bgm(themeOf(), true);
     G.prologue = false;
     setBg(homeBg());
     say(linesOf(c.intro, null), () => say([...c.greet.map(([w, t]) => [w === "h" ? H[c.hero].n : c.client.n, t]), [c.client.n, c.opening]], () => topicMenu(G.P._office.cp), c.client.img));
   }, { title: c.title.split(" · ")[1], sub: c.no });
   const toScenes = () => playScenes((c.prologue || []).map(s => ({ bg: bgOf(s.bg), lines: s.lines })), c.decide ? () => decide(c.decide, begin) : begin);
-  bgm(jump || c.prologue ? "opening" : "normal", true);
+  bgm(jump || c.prologue ? "opening" : themeOf(), true);
   // 시간 도약: 예전 사무실에서 세월이 흘렀다는 독백 → 페이드 → "n년 후"
   const PREV = Math.max(0, Math.min(3, +q.get("prev") || 0));
   const passing = [
@@ -724,7 +727,7 @@ function say(lines, then, who = null) {
     if (i >= lines.length) { document.onclick = null; return then(); }
     // 음악 표시 줄("♪sad", "♪tense2", "♪normal"): 곡만 바꾸고 화면에는 띄우지 않는다
     const mk = typeof lines[i] === "string" ? lines[i] : typeof lines[i][1] === "string" ? lines[i][1] : "";
-    if (mk[0] === "♪") { const m = mk.slice(1); if (TRACKS[m]) bgm(m, true); i++; return show(); }
+    if (mk[0] === "♪") { const m = mk.slice(1) === "normal" ? themeOf() : mk.slice(1); if (TRACKS[m]) bgm(m, true); i++; return show(); }
     const [n, t0, f, cont] = lines[i], face = f || who;
     let t = t0;
     if (n && G && !cont) G.log.push([n, t]);
@@ -841,7 +844,7 @@ function stageView(person) {
 }
 // 장소에 머무는 화면. 아래 메뉴로 이동·대화·조사
 function idle() {
-  if (SCENE_BGM.test(bgmNow || "")) bgm("normal", true);
+  if (bgmNow !== themeOf()) bgm(themeOf(), true);
   const P = G.P[G.loc], one = P.people.length === 1 ? P.people[0] : null;
   setBg(locBg(G.loc));
   try { preloadAround(); } catch (e) {}
@@ -1275,7 +1278,7 @@ function betweenRound(b) {
     nextMonthTalk(G.round - 1, added.map(id => placeGain(c.places[id])));
   };
   fade(() => {
-    bgm("normal", true);
+    bgm(themeOf(), true);
     G.prologue = false;
     setBg(b.bg ? bgOf(b.bg) : homeBg());
     say(lines, next);
@@ -2323,7 +2326,7 @@ CH.m2 = { hero: "m", title: "남주 2장 · 황폐한 집", no: "2034가합58213
       between: { lines: [
         "열흘 뒤 피고의 준비서면이 도착했다. 이백 쪽이 넘는다.",
         "한결에셋이 해성개발로 720억을 보낸 송금확인증. 3월 1일자 감정평가서. 남기철은 구본태와 몇 년째 왕래가 없었다는 사실확인서.",
-        ["한서준", "돈은 정말 보냈네. 제값을 받고 팔았으면 빌딩이 돈으로 바뀌었을 뿐 회사 재산은 줄지 않았다고 나오겠는데."],
+        ["한서준", "돈은 정말 보냈네. 감정가대로 돈까지 냈으니 정상적인 거래였다고 나오겠는데."],
         "그날 저녁, 누가 사무실 문을 두드렸다. 강도윤 교수님이 난 화분을 안고 서 계셨다.",
         ["강도윤", "서준아, 여기 맞구나. 서초동에 왔으면 연락을 해야지. 내가 소문으로 듣게 만드냐."],
         ["한서준", "교수님! 짐도 못 풀어서요. 곧 찾아뵈려고 했습니다."],
@@ -2340,7 +2343,7 @@ CH.m2 = { hero: "m", title: "남주 2장 · 황폐한 집", no: "2034가합58213
         ["한서준", "타워 유족 사건을 하나 맡았습니다. 해성개발이 빼돌린 빌딩이요."],
         ["강도윤", "들었다. 큰 데들이 일괄 합의 받으러 다니는 판에 합의 안 하고 회사 재산을 찾겠다고 나선 어머니가 있다더니, 네가 그 어머니 변호사냐. 어디 보자."],
         "교수님은 준비서면을 받아 넘겨 보았다.",
-        ["한서준", "송금확인증이 진짜입니다. 720억이 실제로 갔어요. 제값 받고 팔았으니 회사 재산은 줄지 않았다고 버틸 겁니다."],
+        ["한서준", "송금확인증이 진짜입니다. 720억이 실제로 갔어요. 감정가대로 돈을 다 냈으니 정상 거래였고, 빼돌리려는 줄은 몰랐다고 버틸 겁니다."],
         ["강도윤", "돈이 갔으면 그다음엔 어디로 갔냐."],
         ["한서준", "네?"],
         ["강도윤", "돈 사건에서는 보낸 쪽 통장만 보고 멈추는 사람이 많다. 해성에서 나간 돈이 회장 식구한테 갔으면 그 사람 계좌를 봐야지."],
@@ -4402,7 +4405,7 @@ CH.f3 = { hero: "f", title: "여주 3장 · 눈감은 자들의 도시", no: "20
         ["강도윤", "이번 의견서는 짧게 잘 썼다며. 차 변호사가 복도에서 그 얘기를 하더구나."],
         G.doneIds.peer_scared ? ["윤서연", "차 변호사님이 이번 사건 전무 쪽에 계세요. 제가 만나려던 사람을 저보다 하루 먼저 만나고 가셨고요."] : ["윤서연", "차 변호사님이 이번 사건 전무 쪽에 계세요."],
         ["강도윤", "목멱에 변호사가 일흔 명이 넘는다. 누가 어느 편에 서든 다 내가 가르친 사람들이지."],
-        "♪tense2", ["윤서연", "참, 서진이 낸 자문 회신에 판례 날짜가 이상해요. 2월 30일 판결이라고 돼 있어서요."],
+        ["윤서연", "참, 서진이 낸 자문 회신에 판례 날짜가 이상해요. 2월 30일 판결이라고 돼 있어서요."],
         "숟가락을 든 교수님의 손이 잠깐 멈췄다.",
         ["강도윤", "남의 글을 베끼면 틀린 것까지 베끼는 법이다. 밥 식는다."],
         G.doneIds.kang_s ? ["강도윤", "서연아, 저번에 한 말 잊지 마라. 맨 아래 사람을 변호할 때는 위를 다 잡으려고 하지 마라. 네 의뢰인 하나 건지면 네 일은 다 한 거다."] : ["강도윤", "서연아, 하나만 말해 두마. 맨 아래 사람을 변호할 때는 위를 다 잡으려고 하지 마라. 네 의뢰인 하나 건지면 네 일은 다 한 거다."],
@@ -5526,7 +5529,7 @@ CH.m4 = { hero: "m", speaker: "f", title: "최종 사건 · 수구여병", no: "
       [null, "윤 변호사는 주운 서류를 세어 보더니 한 장이 모자란다고 했다. 그 한 장은 내 서류철 사이에 끼어 있었다."],
       [null, "그날은 명함만 주고받고 헤어졌다."]] },
     { bg: "f4-court-press", lines: [
-      "♪tense2", [null, "얼마 뒤 타워 로비 특검이 박진서를 기소했다. 신문에서는 윤서연 변호사가 박진서의 변호인이 되었다고 했다."],
+      [null, "얼마 뒤 타워 로비 특검이 박진서를 기소했다. 신문에서는 윤서연 변호사가 박진서의 변호인이 되었다고 했다."],
       [null, "2월, 재판 도중에 장부가 나왔다는 기사가 났다. 박진서가 쓰던 로비 장부라고 했다. 어디서 어떻게 나왔는지는 기사마다 말이 달랐다."],
       [null, "기사에 한 줄이 인용돼 있었다. '오 과장 정리비 5000.'"],
       [null, "특별검사는 그 줄이 실제 있었던 일과 맞는지부터 확인하겠다고 했다. 2030년에 오 과장을 변호한 내게 증인 소환장이 왔다."],
@@ -5720,7 +5723,7 @@ CH.m4 = { hero: "m", speaker: "f", title: "최종 사건 · 수구여병", no: "
           { q: "143명 앞의 증언에 대하여|143명 앞에서도 입을 지켰어야 합니까?", req: ["t:kang1"], a: ["그걸 정하는 건 변호사가 아니다. 변호사가 자기 마음대로 '이 비밀은 말해도 되겠다'고 고르기 시작하면, 어느 의뢰인이 변호사한테 진실을 말하겠느냐.", "네 마음은 안다. 그래도 그날 일은 오 국장 한 사람으로 끝나지 않는다. 앞으로 변호사를 찾아올 사람들이 다 그걸 본다."] },
           { id: "offerq", q: "고소 취소에 대하여|고소를 취소하게 해 주실 수는 없습니까?", req: ["t:kang1"], a: ["업무상비밀누설은 친고죄다. 1심 판결 선고 전에 오 국장이 고소를 취소하면 공소기각으로 끝나지.", "오 국장은 내 말을 듣는다. 네가 앞으로 장부 일에 더 입을 열지 않겠다고 약속만 하면 내가 말해 보마.", "대답은 천천히 해라. 차 식는다.", [null, "오 국장은 고소인이고, 교수님은 고소대리인인 목멱의 대표다."]], gives: ["offer", { n: "강도윤의 제안", d: "\"앞으로 장부 일에 입을 열지 않겠다고 약속하면 오 국장이 고소를 취소하게 하겠다.\" 고소인이 강도윤의 말을 듣는다는 뜻.", img: "ev/m4-offer.webp" }] },
           { q: "강의안의 틀린 판례에 대하여|강의안에 일부러 틀린 판례를 넣으셨지요", round: 3, req: ["lect"], a: ["증인 소환장은 받았다. 법정에서 볼 사람하고 여기서 길게 얘기할 건 없다만.", "그 판례 말이냐. 그랬지. 복사해 간 놈 잡으려고. 너는 안 베꼈지?", "해마다 기말 답안에 그 판례 쓰는 놈이 두셋은 나왔다."] },
-          { id: "k2a", round: 3, q: "'목멱'이라는 이름에 대하여|교수님, 사무실 이름 '목멱'은 무슨 뜻입니까?", req: ["nam"], a: ["♪tense2", "남산의 옛 이름이다. 목멱산. 우리 사무실이 그 아래 있지. 몰랐느냐.", "법학자는 지명도 공부해야 한다고 했는데, 너는 시험에는 늘 강했어도 교양은 약했다.", [null, "장부에 적힌 '남산 아래 사는 그분'이 떠올랐다."]], gives: ["mok", { n: "목멱 = 남산", d: "강도윤 본인의 설명: 목멱은 남산의 옛 이름이고, 목멱 사무실은 그 아래 있다.", img: "ev/m4-mok.webp" }] },
+          { id: "k2a", round: 3, q: "'목멱'이라는 이름에 대하여|교수님, 사무실 이름 '목멱'은 무슨 뜻입니까?", req: ["nam"], a: ["남산의 옛 이름이다. 목멱산. 우리 사무실이 그 아래 있지. 몰랐느냐.", "법학자는 지명도 공부해야 한다고 했는데, 너는 시험에는 늘 강했어도 교양은 약했다.", [null, "장부에 적힌 '남산 아래 사는 그분'이 떠올랐다."]], gives: ["mok", { n: "목멱 = 남산", d: "강도윤 본인의 설명: 목멱은 남산의 옛 이름이고, 목멱 사무실은 그 아래 있다.", img: "ev/m4-mok.webp" }] },
           { q: "저를 왜 가르치셨습니까?", req: ["t:k2a"], a: ["네가 가르칠 만해서 가르쳤다.", "윤서연이도 그렇고. 나는 내가 가르친 애들 중에 쓸 만한 애들을 좋아한다. 그게 나쁜 일이냐."] },
           { q: "휴학계를 돌려받고 싶습니다", req: ["t:k2a"], a: ["…재판 끝나고 와라. 그때까지 내가 갖고 있으마.", "서준아, 증인석에서는 서로 봐주지 말자."] },
           { q: "제 변호인에 대하여|윤서연 변호사가 제 변호인을 맡았습니다", a: ["안다. 선임서 들어온 날 차 변호사가 알려 주더라.", "서연이는 질문을 짧게 한다. 대답할 틈을 안 줘. 너는 길게 묻고. 둘이 같이 하면 반반이겠구나.", "둘 다 내 제자니까 내가 할 말은 하나다. 밥은 같이 먹고 다녀라."] },
@@ -6109,7 +6112,7 @@ CH.m4 = { hero: "m", speaker: "f", title: "최종 사건 · 수구여병", no: "
         ["윤서연", "자기 전에 기록 보지 마세요. 저는 박진서 사건 때 그러다가 한 달 동안 새벽 세 시에 깼어요."],
         ["한서준", "그럼 자기 전에 뭘 봅니까?"],
         ["윤서연", "요리 프로그램이요. 따라 할 생각은 없고 그냥 봐요."],
-        "♪tense2", ["윤서연", "이거 보세요. 서진이라는 법무법인의 자문 회신이에요. 제가 맡았던 PF 사건 공판에 나온 거라 공개 기록에서 복사해 왔어요."],
+        ["윤서연", "이거 보세요. 서진이라는 법무법인의 자문 회신이에요. 제가 맡았던 PF 사건 공판에 나온 거라 공개 기록에서 복사해 왔어요."],
         ["한서준", "…인용 판례가 2011년 2월 30일 선고로 돼 있군요."],
         ["윤서연", "이 날짜는 저도 처음 보는 게 아니에요. 그 사건 때 한 번 보고 넘겼고, 그 뒤에 한 번 더 봤어요. 어디서였는지는 말 못 해요. 변호사님은요?"],
         G => ["한서준", "조경숙 씨 소송 때 청람 의견서에서" + (sawIn("m3", "opin2") ? ", 국가배상 소송 때 정헌 의견서에서" : "") + " 봤습니다." + (G.cards.nop ? " 불기소 기록에 붙은 한강로 의견서에도 있었고요." : "")],

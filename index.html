@@ -25266,7 +25266,8 @@ const TRACKS = {
   normal: ["bgm/bgm1.mp3", "bgm/bgm2.mp3", "bgm/bgm6.mp3"],
   trial: ["bgm/trialtheme.mp3"],
   ending: ["bgm/ending2.mp3"],
-  tense1: ["bgm/tense1.mp3"], tense2: ["bgm/tense2.mp3"], tense3: ["bgm/tense3.mp3"], sad: ["bgm/sad.mp3"]
+  tense1: ["bgm/tense1.mp3"], tense2: ["bgm/tense2.mp3"], tense3: ["bgm/tense3.mp3"], sad: ["bgm/sad.mp3"],
+  n1: ["bgm/bgm1.mp3"], n2: ["bgm/bgm2.mp3"], n3: ["bgm/bgm6.mp3"]
 };
 let soundOn = true;
 try { soundOn = localStorage.getItem(KEY + "-snd") !== "off"; } catch (e) {}
@@ -29345,7 +29346,7 @@ function opsOffice() {
       ${tile("oPrice", "수임료 기준", priceTile(), "보고서 사건에 적용")}
       ${tile("oAssoc", "고용 변호사", `${S.assocs.length} / ${ASSOC_CAP[S.office || 0]}명`)}
       ${tile("oCrew", "직원", `${crewCount()} / ${CREW_CAP[S.office || 0]}명`)}
-      ${tile("oInt", "인테리어", S.interior >= 2 ? "2단계(최고)" : `${S.interior || 0}단계`, `${S.interior < 2 ? `다음 ${won(intCost)} · ` : ""}단계마다 다시 오는 손님 +10%p · 내 상담 수임료 여유 +8%`)}
+      ${tile("oInt", "인테리어", S.interior >= 2 ? "2단계(최고)" : `${S.interior || 0}단계`, S.interior < 2 ? `다음 ${won(intCost)}` : "")}
       ${tile("oMove", "사무실 이전", nx ? esc(nx.name.split(" ")[0]) : "최고", nx && mv ? `명성 ${nx.need} · ${won(mv.cost)}` : "")}
     </div>`, `<button class="btn primary" id="oBack">돌아가기</button>`);
   on("#oBack", () => { const b = officeBack || opsHub; officeBack = null; b(); });
@@ -29356,7 +29357,7 @@ function opsOffice() {
   on("#oInt", () => {
     if (S.interior >= 2) return;
     if (S.money < intCost) return toast("돈이 모자랍니다.");
-    S.money -= intCost; S.interior = (S.interior || 0) + 1; save(); opsOffice();
+    S.money -= intCost; S.interior = (S.interior || 0) + 1; save(); opsOffice(); toast("인테리어를 바꿨습니다. 다시 찾아오는 손님이 늘고, 상담 때 수임료를 조금 더 받을 수 있습니다.");
   });
   on("#oMove", () => { if (nx && mv) opsMovePop(); });
 }
