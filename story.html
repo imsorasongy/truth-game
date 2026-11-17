@@ -789,7 +789,7 @@ function normPlaces(c) {
   return P;
 }
 const heroN = () => H[G.c.hero].n;
-const faceOf = n => n === heroN() ? null : n === G.c.client.n ? G.c.client.img : NAMED[n] || (Object.values(G.P).flatMap(p => p.people).find(x => x.n === n) || {}).face || (Object.values(G.c.people || {}).find(p => Array.isArray(p) && (p[0] === n || String(p[0]).startsWith(n + " "))) || [])[1] || null;
+const faceOf = n => n === heroN() ? null : G.c.client && n === G.c.client.n ? G.c.client.img : NAMED[n] || (Object.values(G.P || {}).flatMap(p => p.people).find(x => x.n === n) || {}).face || (Object.values(G.c.people || {}).find(p => Array.isArray(p) && (p[0] === n || String(p[0]).startsWith(n + " "))) || [])[1] || null;
 // 대사 묶음: 문자열은 말하는 사람(없으면 독백), [이름, 대사]는 그 사람, [null, 글]은 독백
 // 고백 뒤 고르는 선택지(c.confessPick). 없으면 바로 판단을 마친다
 function confessEnd() {
