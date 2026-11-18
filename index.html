@@ -25762,13 +25762,13 @@ function storyPick(back, tab) {
   document.body.appendChild(ov);
   ov.querySelector("#pkBack").onclick = () => { ov.remove(); back(); };
   ov.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => { ov.remove(); storyPick(back, b.dataset.tab); });
-  ov.querySelectorAll("[data-go]").forEach(b => b.onclick = () => { ov.remove(); const n = +b.dataset.go; if (n === 5) return playHidden(); storyStartAt(h, n); });
+  ov.querySelectorAll("[data-go]").forEach(b => b.onclick = () => { ov.remove(); const n = +b.dataset.go; if (n === 5) return hiddenStart(() => storyPick(back, h)); storyStartAt(h, n); });
   // 잠긴 마지막 사건은 테스트용 비밀번호(4321)로 열 수 있다
   ov.querySelectorAll("[data-lock]").forEach(b => b.onclick = () => {
     if (b.dataset.lock !== "5") return;
     const w = ov.querySelector("#pkPw"); w.style.display = "flex"; ov.querySelector("#pkPwIn").focus();
   });
-  const tryPw = () => { if (ov.querySelector("#pkPwIn").value.trim() === "4321") { ov.remove(); playHidden(); } else ov.querySelector("#pkPwIn").value = ""; };
+  const tryPw = () => { if (ov.querySelector("#pkPwIn").value.trim() === "4321") { ov.remove(); hiddenStart(() => storyPick(back, h)); } else ov.querySelector("#pkPwIn").value = ""; };
   ov.querySelector("#pkPwOk").onclick = tryPw;
   ov.querySelector("#pkPwIn").onkeydown = e => { if (e.key === "Enter") tryPw(); };
 }
@@ -25819,6 +25819,27 @@ function trueSave(t) { try { localStorage.setItem(TRUE_KEY, JSON.stringify(t)); 
 // 마지막 사건: 남주 4장 win + 여주 4장 truth_bond를 모두 보면 열린다. 원고를 다시 쓰는 동안은 잠가 둔다(조건을 채우면 '준비 중')
 const HIDDEN_READY = true;
 const hiddenOpen = () => { const c = storyClearLoad(); return HIDDEN_READY && !!(c.m4 && c.f4); };
+// 마지막 사건: 진행 중인 기록(자동 저장)이 있으면 이어서 할지 처음부터 할지 고른다
+function hiddenStart(back) {
+  const t = trueLoad();
+  if (!(t.h1mid || t.h1adj)) return playHidden();
+  const ov = document.createElement("div"); ov.className = "staff-pop";
+  const ask = () => {
+    ov.innerHTML = `<div class="sp-card"><div class="sp-name">마지막 사건</div><div class="sp-row">진행 중인 기록이 있습니다.</div>
+      <div class="row2"><button class="btn primary" data-k="go">이어서 하기</button><button class="btn" data-k="new">처음부터</button></div>
+      <div class="row2"><button class="btn" data-k="back">뒤로</button></div></div>`;
+    ov.querySelector('[data-k="go"]').onclick = () => { ov.remove(); playHidden(); };
+    ov.querySelector('[data-k="new"]').onclick = confirmNew;
+    ov.querySelector('[data-k="back"]').onclick = () => { ov.remove(); back(); };
+  };
+  const confirmNew = () => {
+    ov.innerHTML = `<div class="sp-card"><div class="sp-name">처음부터 할까요?</div><div class="sp-row">진행 중인 기록(자동 저장)이 지워집니다. 저장 칸에 남긴 기록은 그대로 있습니다.</div>
+      <div class="row2"><button class="btn primary" data-k="yes">처음부터</button><button class="btn" data-k="no">취소</button></div></div>`;
+    ov.querySelector('[data-k="yes"]').onclick = () => { const t2 = trueLoad(); delete t2.h1mid; delete t2.h1adj; trueSave(t2); storyClearMid("h1", "h"); ov.remove(); playHidden(); };
+    ov.querySelector('[data-k="no"]').onclick = ask;
+  };
+  ask(); document.body.appendChild(ov);
+}
 // 두 이야기의 트루엔딩을 모두 봤을 때 타이틀에서 여는 마지막 이야기(story.html의 h1)
 function playHidden(resume) {
   const t = trueLoad(), cl = storyClearLoad(), fromClear = h => cl[h + "4"] ? { ...Object.fromEntries(Object.entries(cl[h + "4"].hist || {}).filter(([k]) => k[0] === h)), [h + "4"]: cl[h + "4"].end } : {};

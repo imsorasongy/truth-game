@@ -467,7 +467,7 @@ function openLog() {
   d.firstElementChild.scrollTop = d.firstElementChild.scrollHeight;
 }
 function topBar(right = "") { return `<div class="top"><div class="tt">${G.c.title.split(" · ")[1]}</div>${right}${window.parent !== window ? '<button class="mini smenu-b" type="button">≡ 메뉴</button>' : ""}</div>`; }
-// ≡ 메뉴: 저장·불러오기·음악·처음 화면으로. 저장 칸은 본 게임과 같은 1~5번(마지막 사건은 따로 한 칸)
+// ≡ 메뉴: 저장·불러오기·음악·처음 화면으로. 저장 칸은 본 게임과 같은 1~5번(마지막 사건은 따로 1~3번)
 let SLOTQ = new URLSearchParams(location.search).get("slot") || "";
 const SLOTS = [1, 2, 3, 4, 5];
 let parentReply = null;
@@ -483,11 +483,12 @@ function smenu() {
   const main = () => askParent({ story: "slots" }, r => {
     box(`<div class="pop-btns">
       <button class="btn" data-a="save">저장</button>
-      ${SLOTQ === "h" ? "" : '<button class="btn" data-a="load">불러오기</button>'}
+      <button class="btn" data-a="load">불러오기</button>
       <button class="btn" data-a="snd">음악 ${r.sound ? "끄기" : "켜기"}</button>
       <button class="btn" data-a="home">처음 화면으로</button></div>`);
     o.querySelectorAll("[data-a]").forEach(b => b.onclick = e => { e.stopPropagation(); const a = b.dataset.a;
-      if (a === "save") return SLOTQ === "h" ? (saveNow(SLOTQ), close()) : pick("어느 칸에 저장할까요?", r.list, n => saveTo(n, r));
+      if (SLOTQ === "h") { const hl = hList(); if (a === "save") return pick("어느 칸에 저장할까요?", hl, n => hSaveTo(n, hl)); if (a === "load") return pick("어느 칸을 불러올까요?", hl, n => { if (!hGet(n)) return; close(); hLoad(n); }, true); }
+      if (a === "save") return pick("어느 칸에 저장할까요?", r.list, n => saveTo(n, r));
       if (a === "load") return pick("어느 칸을 불러올까요?", r.list, n => { const it = r.list.find(x => x.n === n); if (!it || !it.label) return; close(); askParent({ story: "load", slot: n }); }, true);
       if (a === "snd") return askParent({ story: "sound" }, () => main());
       if (a === "home") { close(); askParent({ story: "home" }); }
@@ -496,6 +497,17 @@ function smenu() {
   const pick = (title, list, cb, needFull) => {
     box(`<div class="pop-k">${title}</div><div class="pop-btns">${list.map(x => `<button class="btn" data-n="${x.n}" ${needFull && !x.label ? "disabled" : ""}><b>${x.n}번 칸</b>${String(x.n) === String(SLOTQ) ? " · 지금 칸" : ""}<small>${x.label || "빈 칸"}</small></button>`).join("")}</div>`);
     o.querySelectorAll("[data-n]").forEach(b => b.onclick = e => { e.stopPropagation(); cb(+b.dataset.n); });
+  };
+  // 마지막 사건 전용 칸(본 게임 저장 칸과 따로)
+  const hSaveTo = (n, hl) => {
+    const it = hl.find(x => x.n === n);
+    if (it && it.label) {
+      box(`<div class="pop-b">${n}번 칸의 기록(${it.label})이 지워집니다.</div><div class="pop-btns"><button class="btn go" data-y>덮어쓰기</button><button class="btn" data-no>취소</button></div>`);
+      o.querySelector("[data-y]").onclick = e => { e.stopPropagation(); hSave(n); close(); };
+      o.querySelector("[data-no]").onclick = e => { e.stopPropagation(); main(); };
+      return;
+    }
+    hSave(n); close();
   };
   const saveTo = (n, r) => {
     const it = r.list.find(x => x.n === n);
@@ -517,6 +529,26 @@ function saveNow(n) {
   if (String(n) !== String(SLOTQ)) { SLOTQ = String(n); askParent({ story: "save", slot: n }); }
   if (inCourt) { if (old) try { localStorage.setItem(resumeKey(G.k), old); } catch (e) {} toast(old ? "이번 기일 준비하던 때로 저장했습니다." : "저장할 수 있는 지점이 아직 없습니다."); return; }
   G.mid = true; saveResume(); toast(`${n === "h" ? "" : n + "번 칸에 "}저장했습니다.`);
+}
+// 마지막 사건 저장 칸: 자동 저장 기록을 그대로 복사해 둔다. 불러오면 그 기록을 자동 저장 자리에 되돌리고 이어서 연다
+const H_SLOT = n => "truth-story-hslot-" + n;
+function hGet(n) { try { return JSON.parse(localStorage.getItem(H_SLOT(n)) || "null"); } catch (e) { return null; } }
+function hList() { return [1, 2, 3].map(n => { const v = hGet(n); return { n, label: v ? v.label : "" }; }); }
+function hSave(n) {
+  if (!G || G.prologue) return toast("이야기가 시작된 뒤에 저장할 수 있습니다.");
+  const inCourt = app.classList.contains("court");
+  if (!inCourt) { G.mid = true; saveResume(); }
+  const data = localStorage.getItem(resumeKey(G.k));
+  if (!data) return toast("저장할 수 있는 지점이 아직 없습니다.");
+  const d = new Date(), when = `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+  const rd = (G.round || 0) ? `${G.round}회 기일 뒤` : "첫 기일 전";
+  try { localStorage.setItem(H_SLOT(n), JSON.stringify({ label: `${rd} · ${when}`, data })); } catch (e) { return toast("저장하지 못했습니다."); }
+  toast(inCourt ? `${n}번 칸에 이번 기일 준비하던 때로 저장했습니다.` : `${n}번 칸에 저장했습니다.`);
+}
+function hLoad(n) {
+  const v = hGet(n); if (!v) return;
+  try { localStorage.setItem(resumeKey(G.k), v.data); } catch (e) {}
+  const u = new URL(location.href); u.searchParams.set("resume", "1"); location.replace(u.toString());
 }
 document.addEventListener("click", e => { const b = e.target.closest && e.target.closest(".smenu-b"); if (b) { e.stopPropagation(); smenu(); } }, true);
 // 스페이스바·엔터로 대사 넘기기(고르기 창·증거 창이 열려 있거나 버튼에 초점이 있으면 원래대로)
