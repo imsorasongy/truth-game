@@ -301,7 +301,7 @@ const PENDING_BG = {};
 const bgOf = x => { x = PENDING_BG[x] || x; return OLD_BG.includes(x) ? `${A}story/story-${x}.jpg` : `${A}story/${x}.jpg`; };
 const homeBg = () => G.c.bgConsult ? bgOf(G.c.bgConsult) : BG[G.c.hero];
 // 그림이 있는 증거
-const EV_IMG = { bore: "ev-settle.webp", map: "ev-board.webp", sign: "ev-sign.webp", phone: "ev-phone.webp", log: "ev-broadcast.webp" };
+const EV_IMG = { potm: "ev/f1-book.webp", bore: "ev-settle.webp", map: "ev-board.webp", sign: "ev-sign.webp", phone: "ev-phone.webp", log: "ev-broadcast.webp" };
 const evPic = k => EV_IMG[k] ? `<img class="evpic" src="${A}story/${EV_IMG[k]}" alt="">` : "";
 // 대화 장면의 인물은 배경을 지운 그림으로
 const CUT = new Set(["face-chair", "face-citylaw", "face-jung-40", "face-kang", "face-lee", "face-mother", "face-oh-50", "face-park_neutral", "face-pf", "face-special", "insp", "hero-m", "hero-f"]);
