@@ -25948,6 +25948,7 @@ const HOWTO = [
     "사무실마다 명성 상한이 있습니다(30·50·75·100). 더 오르려면 사무실을 옮겨야 합니다.",
     "큰 사무실일수록 큰 사건이 들어오고 더 많이 맡을 수 있습니다. 명성과 이전 비용이 되면 달 말 장부 화면의 '사무실 관리'에서 옮깁니다.",
     "직원은 사무장·비서·고용 변호사·조사원 네 자리입니다. 자리마다 후보 3명 중 한 명을 뽑고, 사람마다 특기가 다릅니다.",
+    "스토리 모드에서는 사무실을 직접 옮기거나 직원을 두지 않습니다. 동네 사무실에서 명성 50이 되면 이야기와 함께 서초동으로 옮기고, 그 뒤로는 서초동에서 끝까지 갑니다.",
     "명성 100이면 엔딩입니다."]],
   ["사건 갤러리", [
     "이긴 사건은 갤러리에 분류별로 모입니다. 새 게임을 시작해도 남습니다."]]
@@ -27003,12 +27004,13 @@ const STAFF = [
 ];
 // 세금(부가세·소득세를 합쳐 매달 수입의 일정 비율)
 const TAX_RATE = 0.2;
-const office = () => OFFICES[S.office || 0];
+// 스토리 모드: 사무실은 직접 옮기지 않는다. 동네 사무실에서 명성 50까지 가고, 2장에서 서초동으로 옮긴 뒤로는 그대로 간다(명성 상한 50 → 100)
+const office = () => { const o = OFFICES[S.office || 0]; return isStory() ? { ...o, repCap: (S.office || 0) >= 2 ? 100 : 50 } : o; };
 const has = k => !!(S.staff && S.staff[k]);
 const staffCount = () => STAFF.filter(s => has(s.key)).length;
 const capacity = () => (S.office || 0) + 1;
 const monthlyCost = () => office().rent + office().live + STAFF.reduce((a, s) => a + (staffOf(s.key) ? staffOf(s.key).pay : 0), 0);
-const nextOffice = () => OFFICES[(S.office || 0) + 1];
+const nextOffice = () => isStory() ? null : OFFICES[(S.office || 0) + 1];
 const canMove = () => { const n = nextOffice(); return !!n && S.rep >= n.need && S.money >= n.cost; };
 
 // 직무마다 후보 3명. 같은 일을 다른 방식으로 한다
@@ -27048,12 +27050,12 @@ function screenOffice() {
   // 직원 얼굴은 그림 맨 아래 줄에. 주인공 얼굴(그림 높이 33~46%)이 그 위에 오도록 보여 줄 부분을 맞춘다
   const banner = `<div class="ofc-banner" style="background-image:url('${sceneImage("office")}')">
       <div class="ofc-name" id="firmEdit" role="button">${esc(S.firm || "")}<small>${esc(cur.name)}</small></div>
-    <div class="ofc-staff">${STAFF.map(s => `<div class="ofc-seat ${has(s.key) ? "on" : ""}" data-seat="${s.key}" role="button"><img src="${staffFace(s.key)}" alt=""><span>${staffOf(s.key) ? esc(staffOf(s.key).name) : s.name}</span></div>`).join("")}</div></div>`;
+    <div class="ofc-staff" ${isStory() ? 'style="display:none"' : ""}>${STAFF.map(s => `<div class="ofc-seat ${has(s.key) ? "on" : ""}" data-seat="${s.key}" role="button"><img src="${staffFace(s.key)}" alt=""><span>${staffOf(s.key) ? esc(staffOf(s.key).name) : s.name}</span></div>`).join("")}</div></div>`;
   // 사무실은 이름만 두 칸. 누르면 자세한 내용
-  const tile = (lbl, o, extra = "") => `<button class="pn ofc-tile ${extra}" data-ofc="${OFFICES.indexOf(o)}"><span class="eyebrow">${lbl}</span><span class="pn-name">${esc(o.name)}</span></button>`;
+  const tile = (lbl, o, extra = "") => `<button class="pn ofc-tile ${extra}" data-ofc="${OFFICES.findIndex(x => x.name === o.name)}"><span class="eyebrow">${lbl}</span><span class="pn-name">${esc(o.name)}</span></button>`;
   show(`<div><div class="eyebrow">자금 ${won(S.money)} · 월 고정비 ${won(monthlyCost())}</div><h2>사무실 관리</h2></div>
     ${banner}
-    <div class="ofc-tiles">${tile("지금 사무실", cur)}${nx ? tile(canMove() ? "다음 단계 · 이전 가능" : "다음 단계", nx, canMove() ? "on" : "") : `<div class="pn ofc-tile"><span class="eyebrow">다음 단계</span><span class="note">가장 좋은 사무실</span></div>`}</div>`,
+    <div class="ofc-tiles">${tile("지금 사무실", cur)}${nx ? tile(canMove() ? "다음 단계 · 이전 가능" : "다음 단계", nx, canMove() ? "on" : "") : `<div class="pn ofc-tile"><span class="eyebrow">다음 단계</span><span class="note">${isStory() ? ((S.office || 0) < 2 ? "명성 50이 되면 서초동으로 옮깁니다" : "더 옮기지 않습니다") : "가장 좋은 사무실"}</span></div>`}</div>`,
     `<button class="btn primary" id="backLedger">${officeBack ? "돌아가기" : "장부로 돌아가기"}</button>`);
   on("[data-ofc]", e => officePop(+e.currentTarget.dataset.ofc));
   if (!isStory()) on("#firmEdit", firmPop);
@@ -27079,14 +27081,14 @@ function firmPop() {
   ov.querySelector("#firmNew").focus();
 }
 function officePop(i) {
-  const o = OFFICES[i], isCur = i === (S.office || 0), isNext = i === (S.office || 0) + 1;
+  const o = isStory() && i === (S.office || 0) ? office() : OFFICES[i], isCur = i === (S.office || 0), isNext = i === (S.office || 0) + 1;
   const ov = document.createElement("div");
   ov.className = "staff-pop";
   const need = isNext && !canMove() ? `<div class="sp-row need">${S.rep < o.need ? `명성 ${o.need} 필요 (지금 ${S.rep})` : `자금 ${won(o.cost)} 필요`}</div>` : "";
   ov.innerHTML = `<div class="sp-card"><div class="sp-name">${esc(o.name)} <small>${isCur ? "지금 사무실" : "다음 단계"}</small></div>
     ${isNext ? `<div class="sp-row">이전 비용 ${won(o.cost)}</div>` : ""}
     <div class="sp-row">월세 ${won(o.rent)} · 생활비 ${won(o.live)}</div>
-    <div class="sp-row">직원 정원 ${i + 1}명 · 한 달 수임 ${o.cap}건</div>
+    <div class="sp-row">${isStory() ? "" : `직원 정원 ${i + 1}명 · `}한 달 수임 ${o.cap}건</div>
     <div class="sp-row">사건 규모 ${tierTxt(o.tiers)} · 명성 상한 ${o.repCap}${o.up ? ` · 수임료 +${Math.round(o.up * 100)}%` : ""}</div>
     ${need}
     <div class="row2">${isNext && canMove() ? `<button class="btn primary" id="opMove">${won(o.cost)} 내고 이전</button>` : ""}<button class="btn ghost" id="opClose">닫기</button></div></div>`;
@@ -27100,6 +27102,8 @@ function officePop(i) {
 
 // 사무실 그림의 직원 얼굴을 누르면: 고용한 직원은 정보 카드, 빈자리는 후보 고르기
 function staffPop(k) {
+  // 스토리 모드에서는 직원을 두지 않는다
+  if (isStory()) return toast("스토리 모드에서는 직원을 두지 않습니다.");
   const who = staffOf(k), role = STAFF.find(s => s.key === k).name;
   if (!who) return screenHire(k);
   const ov = document.createElement("div");
