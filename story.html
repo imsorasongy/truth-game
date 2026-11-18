@@ -467,7 +467,7 @@ function openLog() {
   d.firstElementChild.scrollTop = d.firstElementChild.scrollHeight;
 }
 function topBar(right = "") { return `<div class="top"><div class="tt">${G.c.title.split(" · ")[1]}</div>${right}${window.parent !== window ? '<button class="mini smenu-b" type="button">≡ 메뉴</button>' : ""}</div>`; }
-// ≡ 메뉴: 저장·불러오기·음악·처음 화면으로. 저장 칸은 본 게임과 같은 1~5번(마지막 사건은 따로 1~3번)
+// ≡ 메뉴: 저장·불러오기·음악·처음 화면으로. 저장 칸은 본 게임과 같은 1~5번(마지막 사건도 같다)
 let SLOTQ = new URLSearchParams(location.search).get("slot") || "";
 const SLOTS = [1, 2, 3, 4, 5];
 let parentReply = null;
@@ -487,7 +487,6 @@ function smenu() {
       <button class="btn" data-a="snd">음악 ${r.sound ? "끄기" : "켜기"}</button>
       <button class="btn" data-a="home">처음 화면으로</button></div>`);
     o.querySelectorAll("[data-a]").forEach(b => b.onclick = e => { e.stopPropagation(); const a = b.dataset.a;
-      if (SLOTQ === "h") { const hl = hList(); if (a === "save") return pick("어느 칸에 저장할까요?", hl, n => hSaveTo(n, hl)); if (a === "load") return pick("어느 칸을 불러올까요?", hl, n => { if (!hGet(n)) return; close(); hLoad(n); }, true); }
       if (a === "save") return pick("어느 칸에 저장할까요?", r.list, n => saveTo(n, r));
       if (a === "load") return pick("어느 칸을 불러올까요?", r.list, n => { const it = r.list.find(x => x.n === n); if (!it || !it.label) return; close(); askParent({ story: "load", slot: n }); }, true);
       if (a === "snd") return askParent({ story: "sound" }, () => main());
@@ -497,17 +496,6 @@ function smenu() {
   const pick = (title, list, cb, needFull) => {
     box(`<div class="pop-k">${title}</div><div class="pop-btns">${list.map(x => `<button class="btn" data-n="${x.n}" ${needFull && !x.label ? "disabled" : ""}><b>${x.n}번 칸</b>${String(x.n) === String(SLOTQ) ? " · 지금 칸" : ""}<small>${x.label || "빈 칸"}</small></button>`).join("")}</div>`);
     o.querySelectorAll("[data-n]").forEach(b => b.onclick = e => { e.stopPropagation(); cb(+b.dataset.n); });
-  };
-  // 마지막 사건 전용 칸(본 게임 저장 칸과 따로)
-  const hSaveTo = (n, hl) => {
-    const it = hl.find(x => x.n === n);
-    if (it && it.label) {
-      box(`<div class="pop-b">${n}번 칸의 기록(${it.label})이 지워집니다.</div><div class="pop-btns"><button class="btn go" data-y>덮어쓰기</button><button class="btn" data-no>취소</button></div>`);
-      o.querySelector("[data-y]").onclick = e => { e.stopPropagation(); hSave(n); close(); };
-      o.querySelector("[data-no]").onclick = e => { e.stopPropagation(); main(); };
-      return;
-    }
-    hSave(n); close();
   };
   const saveTo = (n, r) => {
     const it = r.list.find(x => x.n === n);
@@ -528,27 +516,7 @@ function saveNow(n) {
   const old = localStorage.getItem(resumeKey(G.k));
   if (String(n) !== String(SLOTQ)) { SLOTQ = String(n); askParent({ story: "save", slot: n }); }
   if (inCourt) { if (old) try { localStorage.setItem(resumeKey(G.k), old); } catch (e) {} toast(old ? "이번 기일 준비하던 때로 저장했습니다." : "저장할 수 있는 지점이 아직 없습니다."); return; }
-  G.mid = true; saveResume(); toast(`${n === "h" ? "" : n + "번 칸에 "}저장했습니다.`);
-}
-// 마지막 사건 저장 칸: 자동 저장 기록을 그대로 복사해 둔다. 불러오면 그 기록을 자동 저장 자리에 되돌리고 이어서 연다
-const H_SLOT = n => "truth-story-hslot-" + n;
-function hGet(n) { try { return JSON.parse(localStorage.getItem(H_SLOT(n)) || "null"); } catch (e) { return null; } }
-function hList() { return [1, 2, 3].map(n => { const v = hGet(n); return { n, label: v ? v.label : "" }; }); }
-function hSave(n) {
-  if (!G || G.prologue) return toast("이야기가 시작된 뒤에 저장할 수 있습니다.");
-  const inCourt = app.classList.contains("court");
-  if (!inCourt) { G.mid = true; saveResume(); }
-  const data = localStorage.getItem(resumeKey(G.k));
-  if (!data) return toast("저장할 수 있는 지점이 아직 없습니다.");
-  const d = new Date(), when = `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
-  const rd = (G.round || 0) ? `${G.round}회 기일 뒤` : "첫 기일 전";
-  try { localStorage.setItem(H_SLOT(n), JSON.stringify({ label: `${rd} · ${when}`, data })); } catch (e) { return toast("저장하지 못했습니다."); }
-  toast(inCourt ? `${n}번 칸에 이번 기일 준비하던 때로 저장했습니다.` : `${n}번 칸에 저장했습니다.`);
-}
-function hLoad(n) {
-  const v = hGet(n); if (!v) return;
-  try { localStorage.setItem(resumeKey(G.k), v.data); } catch (e) {}
-  const u = new URL(location.href); u.searchParams.set("resume", "1"); location.replace(u.toString());
+  G.mid = true; saveResume(); toast(`${n}번 칸에 저장했습니다.`);
 }
 document.addEventListener("click", e => { const b = e.target.closest && e.target.closest(".smenu-b"); if (b) { e.stopPropagation(); smenu(); } }, true);
 // 스페이스바·엔터로 대사 넘기기(고르기 창·증거 창이 열려 있거나 버튼에 초점이 있으면 원래대로)
@@ -6661,7 +6629,7 @@ CH.h1 = { hero: "m", speaker: "f", title: "마지막 이야기 · 그리고 아�
   clientAway: [["고영진", "나는 집에 있겠소. 요즘은 낮에도 안 나가오. 기자들이 아파트 정문에 서 있어서."], ["고영진", "더 물을 게 있으면 집으로 오시오. 오기 전에 전화부터 하고. 집사람이 문을 안 열어 주니까."], [null, "고영진은 주소를 적은 명함을 두고 나갔다. 명함에는 아직 '변호사 고영진'이 찍혀 있었다. 기소 뒤 업무정지 명령을 받은 사람이다."],
     [null, "고영진이 엘리베이터를 타는 것까지 보고 윤서연 변호사가 사무실 문을 닫았다."],
     ["윤서연", "건강을 여쭸대요. 우리 둘 다 그 복도에 있었는데요.", H1F.hf],
-    ["한서준", "부장님은 저희가 거기 있었던 걸 모르시는 것 같습니다. 그때 저희는 변호인단 뒤에 서 있었습니다.", H1F.hm],
+    ["한서준", "저희가 변호인단 뒤에 있었는데요, 부장님은 저희가 거기 있었던 걸 모르시는 것 같습니다.", H1F.hm],
     ["윤서연", "지금 다시 불러서 따질까요? 우리가 다 들었다고요.", H1F.hf],
     ["한서준", "아직은 두고 보시죠. 저희가 들은 걸 모르시니까, 다음에 무슨 말을 하시는지 보면 됩니다. 어디까지 숨기시는지도 알 수 있습니다.", H1F.hm],
     ["윤서연", "그래요. 그런데 그 말을 법정에 내려면 우리 말로는 안 돼요. 변호사윤리장전 제54조에 따라 변호사는 자기가 증인이 될 사건을 맡지 못해요. 한 실장님은 우리 사무실 직원이라 증인석에 서도 재판부가 믿어 주기 어렵고요.", H1F.hf],

@@ -25171,7 +25171,7 @@ const baseYear = () => yearBaseOf(S);
 // 스토리 모드 남주는 2030년 3월이 1번째 달이다(1장 사건이 5월에 열리도록). 나머지는 1월부터
 const monthBaseOf = v => (v && v.mode === "story" && v.hero === "m") ? 3 : 1;
 const ymOf = (m, v = S) => { const i = (m || 1) - 1 + monthBaseOf(v) - 1; return [yearBaseOf(v) + Math.floor(i / 12), i % 12 + 1]; };
-const monthLabel = (m, v = S) => { const [y, mo] = ymOf(m, v); return `${y}년 ${mo}월`; };
+const monthLabel = (m, v = S) => { if (v && v.h1) return v.h1.done ? "끝난 판" : "진행 중"; const [y, mo] = ymOf(m, v); return `${y}년 ${mo}월`; };
 const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const isCrim = c => c.kind === "criminal";
 // 형사 사건에서 이긴 판결이 무죄가 아니면(감형·공소기각 등) 그 이름으로 부른다
@@ -25534,7 +25534,7 @@ function screenCover() {
     on("[data-slot]", e => onPick(+e.currentTarget.dataset.slot));
     on("#slotX", () => pop(""));
   };
-  // 마지막 사건은 저장 칸 1~3과 따로 저장된다. 하다 만 것이 있으면 불러오기 목록에 함께 보여 준다
+  // 스토리 모드(마지막 사건 포함) 자동 저장이 있으면 불러오기 목록에 함께 보여 준다
   on("#cont", () => {
     const auto = loadSlot(STORY_AUTO);
     pickSlot("어느 게임을 불러올까요?", n => {
@@ -25819,41 +25819,56 @@ function trueSave(t) { try { localStorage.setItem(TRUE_KEY, JSON.stringify(t)); 
 // 마지막 사건: 남주 4장 win + 여주 4장 truth_bond를 모두 보면 열린다. 원고를 다시 쓰는 동안은 잠가 둔다(조건을 채우면 '준비 중')
 const HIDDEN_READY = true;
 const hiddenOpen = () => { const c = storyClearLoad(); return HIDDEN_READY && !!(c.m4 && c.f4); };
-// 마지막 사건: 진행 중인 기록(자동 저장)이 있으면 이어서 할지 처음부터 할지 고른다
+// 마지막 사건도 스토리 모드처럼 자동 저장 칸(9)에서 진행하고, 이야기 ≡ 메뉴의 저장으로 본 게임 저장 칸 1~5번에 옮겨 둔다
+const isH1 = v => !!(v && v.h1);
 function hiddenStart(back) {
-  const t = trueLoad();
-  if (!(t.h1mid || t.h1adj)) return playHidden();
+  const a = loadSlot(STORY_AUTO), t = trueLoad();
+  const going = isH1(a) && !a.h1.done, old = !going && !!(t.h1mid || t.h1adj);
+  if (!going && !old) return playHidden();
   const ov = document.createElement("div"); ov.className = "staff-pop";
   const ask = () => {
     ov.innerHTML = `<div class="sp-card"><div class="sp-name">마지막 사건</div><div class="sp-row">진행 중인 기록이 있습니다.</div>
       <div class="row2"><button class="btn primary" data-k="go">이어서 하기</button><button class="btn" data-k="new">처음부터</button></div>
       <div class="row2"><button class="btn" data-k="back">뒤로</button></div></div>`;
-    ov.querySelector('[data-k="go"]').onclick = () => { ov.remove(); playHidden(); };
+    ov.querySelector('[data-k="go"]').onclick = () => {
+      ov.remove();
+      if (going) { useSlot(STORY_AUTO); S = a; return playHidden(true); }
+      // 예전 방식(전용 자동 저장)으로 하던 기록은 자동 저장 칸으로 옮겨 이어서 연다
+      let d = null; try { d = localStorage.getItem("truth-story-resume-h-h1"); } catch (e) {}
+      newH1(); if (d) try { localStorage.setItem("truth-story-resume-" + STORY_AUTO + "-h1", d); } catch (e) {}
+      dropOldH1(); playHidden(!!d);
+    };
     ov.querySelector('[data-k="new"]').onclick = confirmNew;
     ov.querySelector('[data-k="back"]').onclick = () => { ov.remove(); back(); };
   };
   const confirmNew = () => {
-    ov.innerHTML = `<div class="sp-card"><div class="sp-name">처음부터 할까요?</div><div class="sp-row">진행 중인 기록(자동 저장)이 지워집니다. 저장 칸에 남긴 기록은 그대로 있습니다.</div>
+    ov.innerHTML = `<div class="sp-card"><div class="sp-name">처음부터 할까요?</div><div class="sp-row">진행 중인 기록(자동 저장)이 지워집니다. 저장 칸 1~5번에 남긴 기록은 그대로 있습니다.</div>
       <div class="row2"><button class="btn primary" data-k="yes">처음부터</button><button class="btn" data-k="no">취소</button></div></div>`;
-    ov.querySelector('[data-k="yes"]').onclick = () => { const t2 = trueLoad(); delete t2.h1mid; delete t2.h1adj; trueSave(t2); storyClearMid("h1", "h"); ov.remove(); playHidden(); };
+    ov.querySelector('[data-k="yes"]').onclick = () => { dropOldH1(); ov.remove(); playHidden(); };
     ov.querySelector('[data-k="no"]').onclick = ask;
   };
   ask(); document.body.appendChild(ov);
 }
-// 두 이야기의 트루엔딩을 모두 봤을 때 타이틀에서 여는 마지막 이야기(story.html의 h1)
+function dropOldH1() { const t = trueLoad(); delete t.h1mid; delete t.h1adj; trueSave(t); storyClearMid("h1", "h"); }
+// 마지막 사건 판: 본 게임 저장 칸에 들어가도록 게임 기록 모양으로 만든다
+function newH1() {
+  useSlot(STORY_AUTO);
+  S = fresh(); S.mode = "story"; S.hero = "m"; S.name = "마지막 사건"; S.firm = "한서준 · 윤서연"; S.rep = 100; S.h1 = {};
+  save();
+}
+const hiddenEnd = res => storyNotice(res === "win" ? "마지막 이야기 완결" : "배드 엔딩", [res === "win" ? "한서준과 윤서연의 마지막 이야기가 끝났습니다." : "마지막 재판을 이기지 못했습니다. 이야기는 여기서 끝납니다."], screenCover);
+// 두 이야기의 트루엔딩을 모두 봤을 때 여는 마지막 이야기(story.html의 h1). resume이면 지금 칸(SLOT)의 기록에서 이어서 연다
 function playHidden(resume) {
+  if (!resume || !isH1(S)) { newH1(); storyClearMid("h1", STORY_AUTO); resume = false; }
   const t = trueLoad(), cl = storyClearLoad(), fromClear = h => cl[h + "4"] ? { ...Object.fromEntries(Object.entries(cl[h + "4"].hist || {}).filter(([k]) => k[0] === h)), [h + "4"]: cl[h + "4"].end } : {};
   const hist = { ...(t.m || fromClear("m")), ...(t.f || fromClear("f")) };
-  // 기일 사이(adjourn)에는 본 게임 달이 없으니 바로 다음 기일로 이어 연다. 중간에 끊겼으면 타이틀에서 이어서 연다
-  // 조사하다 끊겼으면(h1mid) 자동 저장된 자리에서 이어서 연다
-  const cont = resume || t.h1adj || t.h1mid;
-  if (!cont) storyClearMid("h1", "h");
-  trueSave({ ...trueLoad(), h1mid: true });
-  const q = "ch=h1&office=2&slot=h&hist=" + Object.entries(hist).map(([k, v]) => k + "." + v).join(",") + (cont ? "&resume=1" : "");
+  const q = "ch=h1&office=2&hist=" + Object.entries(hist).map(([k, v]) => k + "." + v).join(",") + (resume ? "&resume=1" : "");
   storyFrame(q, (res, end) => {
-    if (res === "adjourn") { trueSave({ ...trueLoad(), h1adj: true }); return playHidden(true); }
-    const t2 = trueLoad(); delete t2.h1adj; delete t2.h1mid; if (res === "win") t2.h1 = end || res; trueSave(t2);
-    storyNotice(res === "win" ? "마지막 이야기 완결" : "배드 엔딩", [res === "win" ? "한서준과 윤서연의 마지막 이야기가 끝났습니다." : "마지막 재판을 이기지 못했습니다. 이야기는 여기서 끝납니다."], screenCover);
+    // 기일 사이(adjourn)에는 본 게임 달이 없으니 바로 다음 기일로 이어 연다
+    if (res === "adjourn") return playHidden(true);
+    S.h1.done = res; S.ended = true; save();
+    if (res === "win") trueSave({ ...trueLoad(), h1: end || res });
+    hiddenEnd(res);
   });
 }
 // 스토리 모드는 엔딩을 보면 그 판이 끝난다(일반 사건으로 이어 가지 않는다). 저장 칸을 불러와도 이 화면이 다시 뜬다
@@ -26005,6 +26020,8 @@ function screenOpening(next, i = 0, doneLabel = "개업하기", cards = OPENING)
 
 function resume() {
   if (isOps()) return opsResume();
+  // 마지막 사건 판: 끝난 판이면 결말 안내만, 아니면 이야기를 이어서 연다
+  if (isH1(S)) { if (S.h1.done) { screenCover(); return hiddenEnd(S.h1.done); } return playHidden(true); }
   S.office = S.office || 0; S.staff = S.staff || {};
   if (S.gameover) return screenBankrupt();
   if (isStory() && S.story && S.story.done) { screenCover(); return storyEnd(S.story.bad && storyBadMsg(S.story.bad)); }
