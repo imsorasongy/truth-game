@@ -596,7 +596,8 @@ function start(k) {
     return card("한 달 뒤", `${(curRound() && curRound().tt) || "다음 기일"} 준비`, 1300, () => nextMonthTalk(ri, pops));
   }
   const begin = () => fade(() => {
-    bgm(themeOf(), true);
+    // 프롤로그 끝(꿈에서 깨며 "♪normal")에 이미 테마곡이 나오고 있으면 처음부터 다시 틀지 않는다
+    if (bgmNow !== themeOf()) bgm(themeOf(), true);
     G.prologue = false;
     setBg(homeBg());
     say(linesOf(c.intro, null), () => say([...c.greet.map(([w, t]) => [w === "h" ? H[c.hero].n : c.client.n, t]), [c.client.n, c.opening]], () => topicMenu(G.P._office.cp), c.client.img));
