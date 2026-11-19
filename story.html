@@ -360,12 +360,14 @@ function bgm(mode, force) {
 document.addEventListener("pointerdown", () => { if (bgmAudio && bgmAudio.paused) bgmAudio.play().catch(() => {}); });
 // 장면 전환: 검게 닫았다가(fade) 다음 장면을 깔고 다시 연다. title을 주면 검은 화면에 제목을 띄운다
 const FADE = 420;
-function fade(then, { title = "", sub = "", hold = 1100, stay = false } = {}) {
-  const o = $("fade");
+// slow: 시점이 바뀌는 곳. 천천히 닫고, 검은 화면에 잠깐 머문 뒤 천천히 연다
+function fade(then, { title = "", sub = "", hold = 1100, stay = false, slow = false } = {}) {
+  const o = $("fade"), T = slow ? 1000 : FADE;
   document.onclick = null;
   o.innerHTML = title ? `<div class="ft">${title}</div>${sub ? `<div class="fs">${sub}</div>` : ""}` : "";
+  o.style.transition = slow ? "opacity 1s ease" : "";
   o.classList.add("on");
-  setTimeout(() => { then(); if (!stay) setTimeout(() => o.classList.remove("on"), title ? hold : 120); }, FADE);
+  setTimeout(() => { then(); if (!stay) setTimeout(() => { o.classList.remove("on"); if (slow) setTimeout(() => o.style.transition = "", 1000); }, title ? hold : slow ? 900 : 120); }, T);
 }
 // 검은 화면에 글만 띄웠다가 이어서 다음 전환으로 넘어간다
 function card(title, sub, hold, then) {
@@ -770,7 +772,7 @@ function toTrial() {
     }]) }));
   };
   // 시점이 바뀌는 장(povCourt): 법정 가는 길부터 법정 쪽 인물의 시점으로 넘어간다
-  if (c.povCourt) return fade(() => { setBg(c.povCourt.bg ? bgOf(c.povCourt.bg) : homeBg()); run(); }, { title: c.povCourt.title, sub: c.povCourt.sub || "", hold: 1400 });
+  if (c.povCourt) return fade(() => { setBg(c.povCourt.bg ? bgOf(c.povCourt.bg) : homeBg()); run(); }, { title: c.povCourt.title, sub: c.povCourt.sub || "", hold: 1400, slow: true });
   setBg(homeBg());
   run();
 }
@@ -1287,7 +1289,7 @@ function betweenRound(b) {
     G.prologue = false;
     setBg(b.bg ? bgOf(b.bg) : homeBg());
     say(lines, next);
-  }, c.povInvest ? { title: c.povInvest.title, sub: c.povInvest.sub || "", hold: 1400 } : undefined); // 시점이 바뀌는 장: 기일이 끝나면 조사 쪽 인물 시점으로
+  }, c.povInvest ? { title: c.povInvest.title, sub: c.povInvest.sub || "", hold: 1400, slow: true } : undefined); // 시점이 바뀌는 장: 기일이 끝나면 조사 쪽 인물 시점으로
 }
 // 다음 기일 준비: 의뢰인과 나눈 이야기에서 갈 곳이 생긴다
 function nextMonthTalk(ri, pops) {
@@ -6628,8 +6630,8 @@ CH.h1 = { hero: "m", speaker: "f", title: "마지막 이야기 · 그리고 아�
   hireLine: [["윤서연", "맡겠습니다. 저는 이 살인 사건만 해요. 그리고 변론 방침은 제가 정합니다. 부장님이 원하지 않는 사실 주장은 하지 않겠지만, 증거 신청은 제가 판단해요."], "…알겠소. 공소장 부본하고, 변호인이 없을 때 내가 공소청에서 등사해 온 기록이오. 선배님 공판조서 사본도 넣었소."],
   sunCard: { n: "변호인선임서", d: "피고인 고영진이 윤서연 변호사를 살인 사건 변호인으로 선임한 서류. 기록 열람·등사를 신청할 때 낸다.", img: "ev/sun-v2.webp" },
   clientAt: "home",
-  // 조사는 한서준, 법정 가는 길·법정은 윤서연 시점. 법정 가는 길로 넘어갈 때 검게 닫았다가 연다(기일 뒤 조사로 돌아올 때는 betweenRound가 이미 페이드)
-  povCourt: {},
+  // 조사는 한서준, 법정 가는 길·법정은 윤서연 시점. 넘어갈 때(법정 가는 길, 기일 뒤) 천천히 검게 닫았다가 연다
+  povCourt: {}, povInvest: {},
   clientAway: [["고영진", "나는 집에 있겠소. 요즘은 낮에도 안 나가오. 기자들이 아파트 정문에 서 있어서."], ["고영진", "더 물을 게 있으면 집으로 오시오. 오기 전에 전화부터 하고. 집사람이 문을 안 열어 주니까."], [null, "고영진은 주소를 적은 명함을 두고 나갔다. 명함에는 아직 '변호사 고영진'이 찍혀 있었다. 기소 뒤 업무정지 명령을 받은 사람이다."],
     [null, "고영진이 엘리베이터를 타는 것까지 보고 윤서연 변호사가 사무실 문을 닫았다."],
     ["윤서연", "건강을 여쭸대요. 우리 둘 다 그 복도에 있었는데요.", H1F.hf],
