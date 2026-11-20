@@ -734,7 +734,7 @@ function pcLog() {
 function say(lines, then, who = null) {
   lines = lines.slice();
   if (!lines.length) return then();
-  let i = 0, click = null, pic = null;
+  let i = 0, click = null, pic = null, fb = false;
   const show = () => {
     if (i >= lines.length) { document.onclick = null; return then(); }
     // 음악 표시 줄("♪sad", "♪tense2", "♪normal"): 곡만 바꾸고 화면에는 띄우지 않는다
@@ -742,14 +742,14 @@ function say(lines, then, who = null) {
     // 번쩍임 표시 줄("⚡white", "⚡red"): 화면만 번쩍이고 넘어간다
     if (mk[0] === "⚡") { flash(mk.slice(1) || "white"); i++; return show(); }
     // 회상 표시 줄: "◐제목|부제|배경" → 검은 화면에 제목을 띄우고 꿈 화면(바랜 색)으로, "◑" → 원래 배경으로 돌아옴
-    if (mk[0] === "◐") { const [tt, sb, bk] = mk.slice(1).split("|"); i++; say.prevBg = lastBg; return fade(() => { document.documentElement.classList.add("dream"); setBg(bgOf(bk)); show(); document.onclick = click; }, { title: tt, sub: sb || "", slow: true }); }
+    if (mk[0] === "◐") { const [tt, sb, bk] = mk.slice(1).split("|"); i++; fb = true; say.prevBg = lastBg; return fade(() => { document.documentElement.classList.add("dream"); setBg(bgOf(bk)); show(); document.onclick = click; }, { title: tt, sub: sb || "", slow: true }); }
     // "◎배경": 꿈·회상 화면은 그대로 두고 배경만 바꾼다
     if (mk[0] === "◎") { const bk = mk.slice(1); i++; return fade(() => { setBg(bgOf(bk)); show(); document.onclick = click; }); }
-    if (mk[0] === "◑") { i++; return fade(() => { document.documentElement.classList.remove("dream"); setBg(say.prevBg || lastBg); show(); document.onclick = click; }); }
+    if (mk[0] === "◑") { i++; fb = false; return fade(() => { document.documentElement.classList.remove("dream"); setBg(say.prevBg || lastBg); show(); document.onclick = click; }); }
     // 그림 표시 줄("▣ev/h1-dongha.webp"): 다음 대사부터 얼굴 자리에 그림을 띄운다. "▣"만 쓰면 그림을 내린다
     if (mk[0] === "▣") { pic = mk.slice(1) || null; i++; return show(); }
     if (mk[0] === "♪") { const m = mk.slice(1) === "normal" ? themeOf() : mk.slice(1); if (TRACKS[m]) bgm(m, true); i++; return show(); }
-    const [n, t0, f, cont] = lines[i], face = f || who;
+    const [n, t0, f, cont] = lines[i], face = f || (fb ? null : who); // 회상 안에서는 지금 대화 상대 얼굴을 띄우지 않는다
     let t = t0;
     if (n && G && !cont) G.log.push([n, t]);
     view(`${G && G.prologue ? '<div class="top"></div>' : topBar()}<div class="stage${pic ? " picon" : ""}">${pic ? `<img class="pic" src="${A}story/${pic}" alt="">` : face ? `<img class="who" src="${cut(face)}" alt="">` : ""}</div>
@@ -1914,7 +1914,7 @@ CH.f1 = { hero: "f", tags: G => [G.doneIds.pot && "pot", G.doneIds.sold && "sold
     ["고소인의 처벌 의사에 대하여|고소인이 상자만 찾으면 처벌은 원하지 않는다고 했대요.", ["…그래요?", [null, "방재호의 손가락이 무릎 위에서 잠깐 멈췄다."], "그게 어디 있는지 알면 제가 여기 앉아 있겠어요. 회사에서도 못 찾은 걸요.", "그 상자가 그렇게 급한가. 경찰서에서도 얼굴이 하얗더니."], [], ["t:stmt"]]],
   pre: [2, 4, 5],
   hireLine: ["고맙습니다, 변호사님.", "약식명령 받은 거랑 회사에 낸 경위서, 여기 다 가져왔습니다.", [null, "내게 고맙다고 인사하는 방재호의 얼굴을 보자 그 사람이 떠올랐다."], // 윤서연 아버지 회상(11-20): 이름표는 그 사람. 정체는 여주 4장 회상에서 드러난다
-    [null, "◐||f4-dad-kitchen"], [null, "식탁 위에 빚 독촉장이 쌓여 있었다. 엄마는 방에서 나오지 않았다."], ["윤서연", "당신이 우리 집안을 파괴했어."], ["그 사람", "미안하다, 서연아.", A + "cut/f-father.webp"], ["윤서연", "난 당신을 절대 용서하지 않아. 두고 봐."], [null, "◑"], [null, "그 사람도 늘 저런 얼굴로 미안하다고 했다. 미안하다는 말만 하다가 빚만 남기고 갔다. 짜증 나는 사람이었지."]],
+    [null, "◐||f4-dad-kitchen"], [null, "식탁 위에 빚 독촉장이 쌓여 있었다. 엄마는 방에서 나오지 않았다."], ["윤서연", "당신이 우리 집안을 파괴했어.", A + "hero-f.webp"], ["그 사람", "미안하다, 서연아.", A + "cut/f-father.webp"], ["윤서연", "난 당신을 절대 용서하지 않아. 두고 봐.", A + "hero-f.webp"], [null, "◑"], [null, "그 사람도 늘 저런 얼굴로 미안하다고 했다. 미안하다는 말만 하다가 빚만 남기고 갔다. 짜증 나는 사람이었지."]],
   refuseLine: "…명단에서 넘어온 사건이다. 돌려보낼 곳도 없는 사람이다. 맡기로 했다.",
   cards0: {
     gong: { n: "공소장", d: "배송 중이던 상자 1개를 가져가 절취. 피해품 미발견.", img: "ev/f1-gong.webp" },
