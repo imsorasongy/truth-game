@@ -4,7 +4,12 @@
 <title>의뢰인의 진실 스토리</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;600&family=Nanum+Myeongjo:wght@400;700&display=swap">
+<style>/* 폰트는 게임 안에 직접 넣었다(OFL, assets/fonts). 게임에 쓰는 글자와 한글 2,350자만 남겨 용량을 줄였다 */
+@font-face{font-family:"Black Han Sans";src:url("assets/fonts/BlackHanSans-Regular.woff2") format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"IBM Plex Sans KR";src:url("assets/fonts/IBMPlexSansKR-Regular.woff2") format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"IBM Plex Sans KR";src:url("assets/fonts/IBMPlexSansKR-SemiBold.woff2") format("woff2");font-weight:600 800;font-display:swap}
+@font-face{font-family:"Nanum Myeongjo";src:url("assets/fonts/NanumMyeongjo-Regular.woff2") format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Nanum Myeongjo";src:url("assets/fonts/NanumMyeongjo-Bold.woff2") format("woff2");font-weight:700 800;font-display:swap}</style>
 <style>
 :root { --pcf: 1; }
 /* 레이아웃: 위 띠 + 인물 무대 + 아래 대화창. 본 게임의 호두나무·놋쇠 색을 그대로 씀(단일 다크) */
@@ -4731,7 +4736,8 @@ CH.f3 = { hero: "f", title: "여주 3장 · 눈감은 자들의 도시", no: "20
 // 1회 뒤: 도원 옛 사무실 헛걸음(필라테스 학원) → 반찬가게 전 경리. 특검 수사관이 먼저 다녀가 입을 닫음 → 이수아 공판 기록(burnold)을 보여 줘야 grudge
 // 2회 뒤: 구청 헛걸음(반입 기록 폐기) → 터미널 일지(dump). 특검이 방재호에게 전화 → 휴게실에서 거절 → 요양병원(hosp)에서 설득
 // 3회 뒤: 진실 경로는 특검이 원본 열람을 미룸 → 헌책방 주인 사진(stainc). 그 밖은 nobook 플래그 → 기자에게 특검보 발언(leak) → 헌책방 확인(헛걸음)
-CH.f4 = { hero: "f", title: "여주 4장 · 남산의 이름", no: "2036고합47 특정범죄가중처벌법위반(알선수재) 등",
+CH.f4 = { winAt: 105, // 11-23 난이도 조정: 승소선 80 → 105(정답률 80%에서 승소율 92% → 66%)
+  hero: "f", title: "여주 4장 · 남산의 이름", no: "2036고합47 특정범죄가중처벌법위반(알선수재) 등",
   benchWho: "재판장 · 특별검사", side: ["특별검사", "special"], labels: ["유죄", "일부 유죄", "무죄"],
   stamps: { truth: "유죄", quiet: "무죄", lose: "유죄" },
   resBy: G => G.flags.betray ? "lose" : G.flags.oath && G.flags.warned ? "truth" : "quiet",
@@ -5640,7 +5646,8 @@ const M4_LEAD = again => F(G => !G.flags.leadObj && (G.flags.leadObj = true), [
     ["이미 아는 사실을 확인할 뿐|증인이 이미 아는 사실을 확인하는 질문일 뿐입니다.", -1, "leadLost", "judge", "답을 정해 놓고 묻는 질문은 유도신문입니다. 이의를 인정합니다. 변호인, 질문을 바꾸십시오."],
     ["변호인 측 증인이라 상관없다|변호인이 신청한 증인입니다. 어떻게 묻든 변호인 측 신문입니다.", -2, "leadLost", "judge", "자기 쪽 증인에게 하는 주신문이라서 유도신문이 제한되는 것입니다. 이의를 인정합니다. 질문을 바꾸십시오."]]),
   F(G => G.flags.leadLost, [S("us", again)])]);
-CH.m4 = { hero: "m", speaker: "f", title: "최종 사건 · 수구여병", no: "2036고단3318 업무상비밀누설",
+CH.m4 = { winAt: 110, // 11-23 난이도 조정: 승소선 80 → 110(정답률 80%에서 승소율 98% → 50%)
+  hero: "m", speaker: "f", title: "최종 사건 · 수구여병", no: "2036고단3318 업무상비밀누설",
   prologue: [
     { bg: "f4-court-press", lines: [
       [null, "2035년 겨울. 국가배상 사건 판결문을 찾으러 법원에 들렀다가 복도에서 어떤 변호사와 어깨를 부딪쳤다. 서류철이 바닥에 흩어졌다."],
@@ -8418,8 +8425,8 @@ CH.h1 = { hero: "m", speaker: "f", title: "마지막 이야기 · 그리고 아�
     get lose() { return ["피고인을 징역 20년에 처한다.", (G.flags.rq1 ? "녹음상 피해자의 마지막 목소리는 21시 56분이고 피고인이 방을 나온 것은 21시 58분이므로, 녹음만으로 피고인이 방을 나올 때 피해자가 살아 있었다고 단정할 수 없다. " : "") + (G.flags.crownf || G.flags.rq1 ? "피고인은 21시 15분부터 21시 58분까지 피해자와 단둘이 601호에 있었고, 그 시간은 사망 추정 시각 안이다. 탁영수가 그날 밤 현장에 있었다는 사정만으로는 피고인이 피해자를 살해하였다는 데 합리적 의심이 생기지 않는다." : "피해자의 시계가 멈춘 시각에 피해자와 함께 있던 사람은 피고인뿐이다.") + " 흉기는 피고인 차량에서 피고인의 지문과 함께 발견되었다. 피고인은 피해자의 기록을 없앨 동기가 있었고 수사 초기 거짓말을 하였다. 탁영수는 이 법정에서 증언을 거부하였고, 피해자 시계 줄의 혈흔이 탁영수의 것이라는 감정 결과는 탁영수가 피고인과 함께 현장에 있었다는 사정과도 맞는다."]; } },
   // 마지막 이야기는 다른 장보다 기준을 높인다(최선 경로 약 210점)
   // 기일이 다섯 번이라 최고점이 270점대다. 다른 장처럼 얻을 수 있는 점수의 55% 안팎을 따야 이기게 170점
-  winAt: 170, partAt: 90,
-  resBy: G => G.g >= 170 ? "win" : G.g >= 90 ? "partial" : "lose",
+  winAt: 200, partAt: 90, // 11-23 난이도 조정: 승소선 170 → 200(정답률 80%에서 승소율 91% → 55%)
+  resBy: G => G.g >= 200 ? "win" : G.g >= 90 ? "partial" : "lose",
   endBy: (G, r) => r === "win" && !(G.flags.takk && G.flags.simk) ? "win_half" : null,
   ending: {
     win: [

@@ -22,9 +22,12 @@ img { max-width: 100%; }
 
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;600&family=Nanum+Myeongjo:wght@400;700&display=swap">
+<style>/* 폰트는 게임 안에 직접 넣었다(OFL, assets/fonts). 게임에 쓰는 글자와 한글 2,350자만 남겨 용량을 줄였다 */
+@font-face{font-family:"Black Han Sans";src:url("assets/fonts/BlackHanSans-Regular.woff2") format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"IBM Plex Sans KR";src:url("assets/fonts/IBMPlexSansKR-Regular.woff2") format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"IBM Plex Sans KR";src:url("assets/fonts/IBMPlexSansKR-SemiBold.woff2") format("woff2");font-weight:600 800;font-display:swap}
+@font-face{font-family:"Nanum Myeongjo";src:url("assets/fonts/NanumMyeongjo-Regular.woff2") format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Nanum Myeongjo";src:url("assets/fonts/NanumMyeongjo-Bold.woff2") format("woff2");font-weight:700 800;font-display:swap}</style>
 <style>
 /* 한 단 세로 배치: 위 장부띠(HUD) + 아래 장면. 호두나무 사무실 + 놋쇠 + 서류 종이 */
 :root {
