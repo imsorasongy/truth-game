@@ -16,7 +16,7 @@
 *::-webkit-scrollbar { display: none; width: 0; height: 0; }
 html, body { height: 100%; }
 /* 장면 전환 */
-#fade { position: fixed; inset: 0; z-index: 60; background: #000; opacity: 0; pointer-events: none; transition: opacity .42s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 24px; text-align: center; }
+#fade { position: fixed; inset: 0; z-index: 60; background: #000; opacity: 0; pointer-events: none; transition: opacity .9s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 24px; text-align: center; }
 #fade.on { opacity: 1; pointer-events: auto; }
 #fade .ft { font-family: var(--f-d); color: var(--brass); font-size: calc(30px * var(--pcf)); line-height: 1.3; }
 #fade .fs { font-family: var(--f-s); color: #d6c6aa; font-size: calc(15px * var(--pcf)); }
@@ -369,15 +369,16 @@ function bgm(mode, force) {
 }
 document.addEventListener("pointerdown", () => { if (bgmAudio && bgmAudio.paused) bgmAudio.play().catch(() => {}); });
 // 장면 전환: 검게 닫았다가(fade) 다음 장면을 깔고 다시 연다. title을 주면 검은 화면에 제목을 띄운다
-const FADE = 420;
+// 화면 전환: 천천히 어두워졌다가(0.9초) 잠깐 검은 화면을 두고(0.5초) 천천히 밝아진다(작가 지시 11-23)
+const FADE = 900;
 // slow: 시점이 바뀌는 곳. 천천히 닫고, 검은 화면에 잠깐 머문 뒤 천천히 연다
 function fade(then, { title = "", sub = "", hold = 1100, stay = false, slow = false } = {}) {
-  const o = $("fade"), T = slow ? 1000 : FADE;
+  const o = $("fade"), T = slow ? 1400 : FADE;
   document.onclick = null;
   o.innerHTML = title ? `<div class="ft">${title}</div>${sub ? `<div class="fs">${sub}</div>` : ""}` : "";
-  o.style.transition = slow ? "opacity 1s ease" : "";
+  o.style.transition = slow ? "opacity 1.4s ease" : "";
   o.classList.add("on");
-  setTimeout(() => { then(); if (!stay) setTimeout(() => { o.classList.remove("on"); if (slow) setTimeout(() => o.style.transition = "", 1000); }, title ? hold : slow ? 1600 : 120); }, T);
+  setTimeout(() => { then(); if (!stay) setTimeout(() => { o.classList.remove("on"); if (slow) setTimeout(() => o.style.transition = "", 1400); }, title ? hold : slow ? 1600 : 500); }, T);
 }
 // 검은 화면에 글만 띄웠다가 이어서 다음 전환으로 넘어간다
 function card(title, sub, hold, then) {
@@ -647,7 +648,7 @@ function openingOnly(h) {
 // 여주 오프닝 터미널 장면: 배경은 기존 상하차장, 이수아는 얼굴 없는 실루엣으로 대화창에 나온다(이름·받는 사람·내용물은 숨김)
 const F_TERMINAL = [{ bg: A + "story/story-dock.jpg", lines: [
   [null, "1월 중순 아침. 택배 터미널 접수 창구 앞에 설 선물 상자가 줄지어 쌓여 있었다."],
-  [null, "줄 끝에 선 여자가 납작한 상자 하나를 두 손으로 안고 있었다. 모자를 눌러쓰고, 목도리로 얼굴 아래쪽을 가렸다. 줄이 줄어드는 동안 두 번 뒤를 돌아보았다."],
+  [null, "모자를 눌러쓰고 목도리로 얼굴 아래쪽을 가린 여자가 줄 끝에 서서 납작한 상자 하나를 두 손으로 안고 있었다. 여자는 줄이 줄어드는 동안 계속 뒤를 돌아보았다."],
   ["직원", "다음 분이요. 송장 쓰시고요. 품목도 적어 주세요."],
   ["여자", "…품목이요?", A + "story/f1-silhouette.webp"],
   ["직원", "안에 뭐 들었는지 쓰시면 돼요."],
