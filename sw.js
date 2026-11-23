@@ -2,7 +2,7 @@
 // 앱(화면 파일)은 배포할 때마다 새 판으로 바꾸고, 그림(assets/)은 버전과 상관없는 따로 된 저장소에 둔다.
 // 그래서 배포해도 이미 받은 그림은 다시 받지 않는다. 그림은 저장해 둔 것을 바로 보여 주고, 뒤에서 바뀌었는지만 확인한다.
 // 같은 이름의 그림을 다시 그려 바꿨을 때도 다음 실행부터 새 그림이 보인다(뒤에서 확인한 결과).
-const CACHE = "truth-v1796360000000";
+const CACHE = "truth-v1796370000000";
 const IMG = "truth-img-3";
 // 음악(bgm/)도 그림처럼 버전과 상관없는 저장소에 둔다. 처음 들을 때는 인터넷으로 바로 틀고, 뒤에서 곡 전체를 받아 저장한다.
 // 저장된 뒤에는 저장한 곡에서 필요한 부분(Range)을 잘라 준다. 그래서 데이터가 끊겨도 음악이 멈추지 않는다
@@ -18,7 +18,9 @@ self.addEventListener("install", e => {
     await self.skipWaiting();
   })());
 });
-self.addEventListener("activate", e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE && k !== IMG && k !== MUS).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
+// 같은 이름으로 다시 그린 그림: 새 판이 설치되면 저장해 둔 옛 그림을 지워서 바로 새 그림을 받게 한다
+const REDRAWN = ["./assets/end-top-f.jpg","./assets/end-top-m.jpg","./assets/expr/hero-f_confident.webp","./assets/expr/hero-f_flustered.webp","./assets/expr/hero-f_neutral.webp","./assets/expr/hero-f_relieved.webp","./assets/expr/hero-f_serious.webp","./assets/expr/hero-m_confident.webp","./assets/expr/hero-m_flustered.webp","./assets/expr/hero-m_neutral.webp","./assets/expr/hero-m_relieved.webp","./assets/expr/hero-m_serious.webp","./assets/hero-f.webp","./assets/hero-m.webp","./assets/op/o1-f.webp","./assets/op/o1-m.webp","./assets/op/o2-f.webp","./assets/op/o2-m.webp","./assets/ops-end/grade-a-f.jpg","./assets/ops-end/grade-a-m.jpg","./assets/ops-end/grade-b-f.jpg","./assets/ops-end/grade-b-m.jpg","./assets/ops-end/grade-c-f.jpg","./assets/ops-end/grade-c-m.jpg","./assets/ops-end/grade-d-f.jpg","./assets/ops-end/grade-d-m.jpg","./assets/ops-end/grade-s-f.jpg","./assets/ops-end/grade-s-m.jpg","./assets/pc/end-top-f.jpg","./assets/pc/end-top-m.jpg","./assets/story/cut/hero-f.webp","./assets/story/cut/hero-m.webp"];
+self.addEventListener("activate", e => { e.waitUntil(caches.open(IMG).then(c => Promise.all(REDRAWN.map(u => c.delete(u, { ignoreSearch: true })))).then(() => caches.keys()).then(ks => Promise.all(ks.filter(k => k !== CACHE && k !== IMG && k !== MUS).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener("fetch", e => {
   if (e.request.method !== "GET") return;
   const url = new URL(e.request.url);
@@ -54,7 +56,8 @@ self.addEventListener("fetch", e => {
   if (url.origin === location.origin && isAsset(e.request.url)) {
     e.respondWith(caches.open(IMG).then(async c => {
       const hit = await c.match(e.request, { ignoreSearch: true });
-      const net = fetch(e.request).then(res => { if (res.ok) c.put(e.request, res.clone()); return res; });
+      // 뒤에서 받을 때는 브라우저가 잠시 저장해 둔 옛 파일을 쓰지 않고 서버에 바뀌었는지 확인한다
+      const net = fetch(e.request, { cache: "no-cache" }).then(res => { if (res.ok) c.put(e.request, res.clone()); return res; });
       if (hit) { e.waitUntil(net.catch(() => {})); return hit; }
       return net;
     }));
