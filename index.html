@@ -25960,8 +25960,8 @@ function screenCreate() {
     const miss = !S.name ? "heroName" : !S.firm ? "firmName" : null;
     if (miss) { const el = document.getElementById(miss); el.closest(".field").classList.add("need"); el.focus(); return; }
     S.hero = S.hero || "m";
-    if (S.mode === "opsNew") { if (!/(사무소|법인|로펌)$/.test(S.firm)) S.firm += " 법무법인"; return opsStart(); }
-    if (!/(사무소|법인|로펌)$/.test(S.firm)) S.firm += " 법률사무소";
+    if (S.mode === "opsNew") { if (!/(사무소|법인|로펌)/.test(S.firm)) S.firm += " 법무법인"; return opsStart(); }
+    if (!/(사무소|법인|로펌)/.test(S.firm)) S.firm += " 법률사무소";
     // 튜토리얼을 이미 해 봤으면 건너뛸지 묻는다
     const begin = withTut => { planDay(); if (withTut) S.today.unshift({ id: TUT_ID, status: "wait" }); save(); if (S.mode === "story") return storyFrame("open=" + S.hero, () => screenDayIntro()); screenOpening(screenDayIntro); };
     if (!tutDoneBefore()) return begin(true);
@@ -27237,7 +27237,7 @@ function firmPop() {
   ov.querySelector("#fnCancel").onclick = close;
   ov.querySelector("#fnOk").onclick = () => {
     let f = ov.querySelector("#firmNew").value.trim();
-    if (f) { if (!/(사무소|법인|로펌)$/.test(f)) f += " 법률사무소"; S.firm = f; save(); }
+    if (f) { if (!/(사무소|법인|로펌)/.test(f)) f += " 법률사무소"; S.firm = f; save(); }
     close(); screenOffice();
   };
   ov.querySelector("#firmNew").focus();
