@@ -134,6 +134,11 @@ p { margin: 0; }
 
 /* 대화 */
 .talk { display: flex; flex-direction: column; gap: 10px; }
+.talk-pager { display: flex; align-items: center; justify-content: space-between; font-size: 12.5px; color: #c9a24acc; margin: -2px 2px 0; }
+.tp-btn { background: none; border: 0; color: var(--brass); font-size: 13.5px; padding: 4px 6px; cursor: pointer; font-family: inherit; }
+.tp-btn:disabled { opacity: .3; cursor: default; }
+#cont.nosave { opacity: .4; filter: grayscale(1); }
+.chip.tale, .scene .chip.tale, .vn .scene .chips .chip.tale { background: var(--brass); color: #1a120d; font-weight: 600; cursor: pointer; border-color: var(--brass); }
 .bubble { background: var(--paper); color: var(--ink); padding: 11px 14px; border-radius: 4px 14px 14px 14px; max-width: 92%; font-size: calc(15px * var(--pcf)); animation: pop .25s ease-out; }
 .bubble.me { align-self: flex-end; background: transparent; color: var(--brass); border: 1px solid var(--brass-dim); border-radius: 14px 4px 14px 14px; font-size: calc(14px * var(--pcf)); }
 .bubble.sys { align-self: center; background: transparent; color: var(--muted); border: none; font-size: calc(13px * var(--pcf)); text-align: center; padding: 2px; }
@@ -153,6 +158,24 @@ p { margin: 0; }
 .tag-danger { font-family: var(--f-body); font-size: calc(11px * var(--pcf)); color: #fff; background: var(--lose); padding: 1px 6px; border-radius: 3px; margin-left: 6px; vertical-align: 2px; }
 .pick { display: grid; grid-template-columns: 26px 1fr; gap: 10px; align-items: start; cursor: pointer; }
 .pick input { width: 20px; height: 20px; margin: 2px 0 0; accent-color: var(--ink); }
+.ev-tags { margin-top: 2px; } .ev-tags .tag-danger, .ev-tags .tag-inv { margin-left: 0; margin-right: 4px; }
+.ev-info { display: none; }
+.plead-st { text-align: center; font-size: 13px; color: #e8d8b0; margin: 0 16px 6px; } .plead-st b { color: var(--brass); } .plead-st b.no { color: #e08a7a; }
+.ev-pop .k-pop { max-width: 340px; } .ev-pop-name { font-weight: 700; font-size: 17px; margin-bottom: 4px; } .ev-pop-desc { font-size: 15px; opacity: .85; } .ev-pop-detail { font-size: 15px; line-height: 1.6; margin-top: 8px; padding-top: 8px; border-top: 1px dashed #b7ac9566; }
+html:not(.pc) #app:has(.arg.pick) .bench.no-ava { padding: 7px 12px; }
+html:not(.pc) #app:has(.arg.pick) .bench.no-ava .tt { font-size: 16px; display: inline; margin-left: 6px; }
+html:not(.pc) #app:has(.arg.pick) .bench.no-ava .no { display: inline; font-size: 13px; }
+html:not(.pc) #app:has(.arg.pick) .bench.no-ava .who { display: none; }
+html:not(.pc) #app:has(.arg.pick) .evlist { display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: 1fr; gap: 5px; }
+html:not(.pc) #app:has(.arg.pick) .ev.pick { grid-template-columns: 18px 1fr; gap: 6px; padding: 8px 22px 8px 9px; height: 100%; box-sizing: border-box; }
+html:not(.pc) #app:has(.arg.pick) .ev.pick input { width: 16px; height: 16px; }
+html:not(.pc) #app:has(.arg.pick) .ev.pick .ev-name { font-size: 14px; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+html:not(.pc) #app:has(.arg.pick) .ev.pick .ev-name .ev-ico { display: none; }
+html:not(.pc) #app:has(.arg.pick) .ev.pick .ev-desc { font-size: 12.5px; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+html:not(.pc) #app:has(.arg.pick) .ev.pick .ev-detail { display: none; }
+html:not(.pc) #app:has(.arg.pick) .ev.pick .ev-info { display: block; position: absolute; right: 4px; bottom: 3px; background: none; border: 0; padding: 2px 4px; font-size: 15px; color: #8f7536; cursor: pointer; }
+html:not(.pc) #app:has(.arg.pick) .arg.pick { padding: 8px 12px; font-size: 14px; line-height: 1.4; }
+html:not(.pc) #app:has(.arg.pick) .stack { gap: 6px; }
 .ev.off { opacity: .55; }
 
 /* 법정 */
@@ -273,6 +296,8 @@ html[data-scene="court"] #backdrop::after { background: linear-gradient(180deg, 
 .op-dots i.on { background: var(--brass); }
 .op-full { position: relative; overflow: hidden; justify-content: flex-end; min-height: calc(100vh - 210px); padding: 0; background: #140d09; }
 .op-full .op-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; }
+.op-sign { position: absolute; left: 0; top: 0; width: 600px; height: 120px; transform-origin: 0 0; display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 1; }
+.op-sign span { font-family: "Nanum Myeongjo", serif; font-weight: 700; white-space: nowrap; letter-spacing: .04em; color: #e9c57c; text-shadow: 0 0 6px #ffb44a55, 0 2px 2px #000c; }
 .op-full .op-dots { position: absolute; top: 12px; left: 0; right: 0; z-index: 1; justify-content: center; }
 .op-full .op-txt { position: relative; z-index: 1; margin: 12px; padding: 14px 16px; border-radius: 8px; background: #140d09d9; border: 1px solid #c9a24a55; display: flex; flex-direction: column; gap: 10px; }
 .op-art { min-height: 120px; display: flex; align-items: center; padding-block: 6px; }
@@ -846,6 +871,13 @@ body.has-dock #app:not(.vn) { padding-bottom: 96px; }
 /* 의뢰인 대사(명조) 한 단계 작게 */
 .vn .bubble:not(.me):not(.sys) { font-size: calc(18px * var(--pcf)); }
 .hud .pill small { color: var(--muted); font-size: calc(11px * var(--pcf)); margin-left: 1px; }
+/* 휴대폰 상단 상태줄 글자 14px */
+html:not(.pc) .hud .pill { font-size: 14px; }
+html:not(.pc) .hud .pill small { font-size: 12.5px; }
+html:not(.pc) .hud .pill i { font-size: 12px; width: 20px; height: 20px; }
+html:not(.pc) .hud .rk { font-size: 14px; }
+html:not(.pc) .hud .rk > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+html:not(.pc) .hud .gmenu-b { font-size: 14px !important; }
 
 /* 대화 기록 서랍: 증거 서랍과 같은 자리·크기 */
 .log-drawer { position: absolute; left: 0; right: 0; bottom: 0; height: 70%; z-index: 6; background: #1a120df7; border-radius: 18px 18px 0 0; padding: 10px 14px 16px; overflow-y: auto; transform: translateY(105%); visibility: hidden; box-shadow: 0 -10px 30px #000a; border-top: 1px solid #c9a24a55; }
@@ -25542,7 +25574,11 @@ function screenCover() {
     on("#slotX", () => pop(""));
   };
   // 스토리 모드(마지막 사건 포함) 자동 저장이 있으면 불러오기 목록에 함께 보여 준다
+  // 저장된 게임이 하나도 없으면 이어하기를 흐리게 하고, 누르면 안내만 한다
+  const anySave = [1, 2, 3, 4, 5].some(n => loadSlot(n)) || !!loadSlot(STORY_AUTO);
+  document.querySelectorAll("#cont").forEach(b => b.classList.toggle("nosave", !anySave));
   on("#cont", () => {
+    if (!anySave) return toast("저장된 게임이 없습니다.");
     const auto = loadSlot(STORY_AUTO);
     pickSlot("어느 게임을 불러올까요?", n => {
       const v = loadSlot(n); if (!v) return;
@@ -25909,7 +25945,7 @@ function screenCreate() {
         <img src="${v.img}" alt=""><span>${v.label}</span></button>`).join("")}</div>
     <div class="feebox">
       <label class="field"><span class="lbl">변호사 이름을 정해 주세요</span><input id="heroName" maxlength="8" placeholder="예) ${esc(HEROES[h].name)}" value="${esc(S.mode === "story" ? HEROES[h].name : S.name || "")}"${S.mode === "story" ? " readonly" : ""}></label>
-      <label class="field"><span class="lbl">${S.mode === "opsNew" ? "법무법인" : "법률사무소"} 이름을 정해 주세요</span><input id="firmName" maxlength="14" placeholder="예) ${S.mode === "opsNew" ? "새벽 법무법인" : "새벽 법률사무소"}" value="${esc(S.mode === "story" ? HEROES[h].name + " 법률사무소" : S.firm || "")}"${S.mode === "story" ? " readonly" : ""}></label>
+      <label class="field"><span class="lbl">${S.mode === "opsNew" ? "법무법인" : "법률사무소"} 이름을 정해 주세요</span><input id="firmName" maxlength="12" placeholder="예) ${S.mode === "opsNew" ? "새벽 법무법인" : "새벽 법률사무소"}" value="${esc(S.mode === "story" ? HEROES[h].name + " 법률사무소" : S.firm || "")}"${S.mode === "story" ? " readonly" : ""}></label>
     </div>`,
     `<button class="btn primary" id="create">이대로 개업하기</button>`, "office", "opening");
   const keep = () => { S.name = document.getElementById("heroName").value.trim(); S.firm = document.getElementById("firmName").value.trim(); };
@@ -25938,7 +25974,7 @@ function screenCreate() {
 /* ---------- 오프닝 (주인공 독백) ---------- */
 // 오프닝 세 장: 그림 한 장 + 한 줄. 그림(assets/op/)이 아직 없으면 그림 자리만 빠진다. 주인공이 보이는 그림은 -m / -f 두 장
 const OPENING = [
-  { scene: "office", step: "개업 첫날", img: "assets/op/s1.webp", body: f => `드디어 개업이다. ${f}. 간판은 작아도 내 이름을 건 첫 사무실이다.` },
+  { scene: "office", step: "개업 첫날", img: "assets/op/s1-blank.webp", sign: [[275, 312], [578, 210], [580, 282], [275, 372]], body: f => `드디어 개업이다. ${f}. 간판은 작아도 내 이름을 건 첫 사무실이다.` },
   { scene: "office", step: "의뢰인", img: "assets/op/s2.webp", body: () => "변호사는 의뢰인을 믿어야 한다고들 생각한다. 그렇지 않다. 의뢰인은 늘 자기 편한 만큼만 말한다. 이유없는 믿음은, 신뢰가 아니라 방임이다." },
   { scene: "office", step: "증거", img: "assets/op/s3.webp", body: () => "승소의 열쇠는 의뢰인의 말이 아니라 증거 속에 있다. 오늘도 나는 승소의 열쇠를 찾아 증거를 뒤진다. 대한민국 최고의 변호사가 되는 그 날까지." }
 ];
@@ -26023,8 +26059,37 @@ function screenOpening(next, i = 0, doneLabel = "개업하기", cards = OPENING)
     </section>`,
     `<div class="row2"><button class="btn primary" id="opNext">${last ? doneLabel : "다음"}</button><button class="btn ghost" id="opSkip">${last ? "처음 장으로" : "건너뛰기"}</button></div>`,
     o.scene, "opening");
+  if (img && o.sign) signOn(firm, o.sign);
   on("#opNext", () => last ? next() : screenOpening(next, i + 1, doneLabel, cards));
   on("#opSkip", () => last ? screenOpening(next, 0, doneLabel, cards) : next());
+}
+
+// 개업 첫날 그림의 빈 간판에 사무소 이름을 얹는다. q: 원본 그림 좌표로 간판 안쪽 네 꼭짓점(왼위·오위·오아래·왼아래)
+function signOn(firm, q) {
+  const sec = app.querySelector(".op-full"), im = sec && sec.querySelector(".op-bg"); if (!im) return;
+  const el = document.createElement("div"); el.className = "op-sign"; el.innerHTML = `<span>${esc(firm)}</span>`; sec.appendChild(el);
+  const W = 600, H = 120; // 글자판 크기(이 판을 간판 모양으로 비튼다)
+  const adj = m => [m[4]*m[8]-m[5]*m[7], m[2]*m[7]-m[1]*m[8], m[1]*m[5]-m[2]*m[4], m[5]*m[6]-m[3]*m[8], m[0]*m[8]-m[2]*m[6], m[2]*m[3]-m[0]*m[5], m[3]*m[7]-m[4]*m[6], m[1]*m[6]-m[0]*m[7], m[0]*m[4]-m[1]*m[3]];
+  const mm = (a, b) => { const c = []; for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) { let t = 0; for (let k = 0; k < 3; k++) t += a[3 * i + k] * b[3 * k + j]; c[3 * i + j] = t; } return c; };
+  const mv = (m, v) => [0, 1, 2].map(i => m[3 * i] * v[0] + m[3 * i + 1] * v[1] + m[3 * i + 2] * v[2]);
+  const basis = p => { const m = [p[0][0], p[1][0], p[2][0], p[0][1], p[1][1], p[2][1], 1, 1, 1]; const v = mv(adj(m), [p[3][0], p[3][1], 1]); return mm(m, [v[0], 0, 0, 0, v[1], 0, 0, 0, v[2]]); };
+  const place = () => {
+    if (!el.isConnected || !im.naturalWidth) return;
+    // 그림이 화면에 실제로 놓인 크기·위치(object-fit·object-position 반영)
+    const r = im.getBoundingClientRect(), sr = sec.getBoundingClientRect(), cs = getComputedStyle(im);
+    const nw = im.naturalWidth, nh = im.naturalHeight, fit = cs.objectFit;
+    const k = fit === "contain" ? Math.min(r.width / nw, r.height / nh) : fit === "cover" ? Math.max(r.width / nw, r.height / nh) : r.width / nw;
+    const pos = (cs.objectPosition || "50% 50%").split(" ").map(v => parseFloat(v) / 100);
+    const ox = r.left - sr.left + (r.width - nw * k) * (isNaN(pos[0]) ? .5 : pos[0]), oy = r.top - sr.top + (r.height - nh * k) * (isNaN(pos[1]) ? .5 : pos[1]);
+    const dst = q.map(([x, y]) => [ox + x * k * nw / 720, oy + y * k * nh / 1260]);
+    const t = mm(basis(dst), adj(basis([[0, 0], [W, 0], [W, H], [0, H]]))), n = t.map(x => x / t[8]);
+    el.style.transform = `matrix3d(${n[0]},${n[3]},0,${n[6]},${n[1]},${n[4]},0,${n[7]},0,0,1,0,${n[2]},${n[5]},0,${n[8]})`;
+  };
+  // 이름이 길면 판 폭에 맞게 글자를 줄인다
+  const sp = el.firstChild; let fs = 76; sp.style.fontSize = fs + "px";
+  while (sp.scrollWidth > W - 40 && fs > 30) { fs -= 2; sp.style.fontSize = fs + "px"; }
+  if (im.complete) place(); else im.addEventListener("load", place);
+  addEventListener("resize", place);
 }
 
 function resume() {
@@ -26365,11 +26430,16 @@ const caseRefs = () => `<div class="talk refs-talk">${consultTalk(C.c)}</div>
       <div class="evlist">${C.c.evidence.map(e => evCard(e, { open: C.opened[e.id] })).join("")}</div></div>`;
 function screenConsult() {
   const c = C.c, left = (hired("jin") ? 4 : 3) - C.asked.length;
-  const talk = consultTalk(c);
+  // 휴대폰: 화면에는 한 장(처음 사연 또는 문답 하나)만 보이고, 이전·다음으로 넘겨 지난 대화를 본다
+  const paged = !isPC();
+  const pages = [[`<div class="bubble">${esc(c.opening)}</div>`]].concat(C.asked.map(i => [`<div class="me-row"><div class="bubble me">${esc(c.questions[i].q)}</div><div class="ava me-ava"><img src="${heroOf().img}" alt=""></div></div>`, `<div class="bubble">${esc(c.questions[i].a)}</div>`]));
+  if (C.page == null || C.page >= pages.length) C.page = pages.length - 1;
+  const talk = paged ? pages[C.page].join("") : consultTalk(c);
+  const pager = paged && pages.length > 1 ? `<div class="talk-pager"><button class="tp-btn" data-tp="-1" ${C.page ? "" : "disabled"}>‹ 이전</button><span>${C.page ? `질문 ${C.page} / ${pages.length - 1}` : "처음 사연"}</span><button class="tp-btn" data-tp="1" ${C.page < pages.length - 1 ? "" : "disabled"}>다음 ›</button></div>` : "";
   const qs = c.questions.map((q, i) => C.asked.includes(i) ? "" :
     `<button class="btn" data-q="${i}" ${left <= 0 ? "disabled" : ""}>${esc(q.q)}</button>`).join("");
   show(`${clientCard(c)}
-    <div class="talk" id="talk">${talk}</div>
+    <div class="talk" id="talk">${talk}</div>${pager}
     <div class="stack">
       <div class="section-head"><span class="eyebrow">질문하기</span><span class="eyebrow">남은 기회 <b>${left}</b>${hired("jin") ? " · 진하늘 변호사" : ""}</span></div>
       ${left > 0 ? qs : `<p class="note">상담 시간이 다 됐습니다.</p>`}
@@ -26380,8 +26450,18 @@ function screenConsult() {
     </div>`,
     // 튜토리얼에서는 질문을 다 한 뒤에야 판단 버튼을 보여 준다
     c.id === TUT_ID && left > 0 ? "" : `<button class="btn primary" id="judge">판단 내리기</button>`);
+  // 넘겨 보기: 버튼, 화면 밀기, '사연 다시 보기'
+  const flip = d => { const n = C.page + d; if (n < 0 || n >= pages.length) return; C.page = n; const y = window.scrollY; screenConsult(); window.scrollTo({ top: y }); };
+  if (paged) {
+    document.querySelectorAll("[data-tp]").forEach(b => b.onclick = () => flip(+b.dataset.tp));
+    const tEl = document.getElementById("talk"); let sx = null;
+    tEl.addEventListener("touchstart", e => { sx = e.touches[0].clientX; }, { passive: true });
+    tEl.addEventListener("touchend", e => { if (sx == null) return; const dx = e.changedTouches[0].clientX - sx; sx = null; if (Math.abs(dx) > 40) flip(dx > 0 ? -1 : 1); });
+    const chips = app.querySelector(".chips");
+    if (chips && pages.length > 1) { const t = document.createElement("span"); t.className = "chip tale"; t.textContent = "사연 다시 보기"; t.onclick = () => flip(-C.page); chips.appendChild(t); }
+  }
   on("[data-q]", e => {
-    C.asked.push(+e.currentTarget.dataset.q);
+    C.asked.push(+e.currentTarget.dataset.q); C.page = null;
     const y = window.scrollY; screenConsult(); window.scrollTo({ top: y });
     const talkEl = document.getElementById("talk"); if (!app.classList.contains("vn")) talkEl.lastElementChild.scrollIntoView({ block: "center", behavior: REDUCED ? "auto" : "smooth" });
   });
@@ -26398,6 +26478,7 @@ function screenConsult() {
     if (!C.asked.length && isPC() && unseen.length) return { t: `다른 카드도 모두 눌러 보자. (${c.evidence.length - unseen.length}/${c.evidence.length})`, sel: `.evlist [data-ev="${unseen[0].id}"]`, ok: ".evlist" };
     if (!C.asked.length && drawer && showEv && !isPC()) return { t: "다른 카드도 눌러 볼 수 있다. 다 봤으면 <b>증거</b> 탭을 한 번 더 눌러 닫자.", sel: '#tabs [data-tab="ev"]', ok: ".evlist" };
     if (!C.asked.length) return { t: "이제 질문할 차례다. 말과 증거가 어긋나는 곳을 물어보자.", sel: "[data-q]" };
+    if (C.asked.length === 1 && !isPC() && !tutK("c1")) return { t: "지난 대화는 아래 <b>‹ 이전 · 다음 ›</b>을 누르거나 옆으로 밀어서 다시 볼 수 있다. 처음 사연은 <b>사연 다시 보기</b>를 누르면 된다.", tap: "c1", sel: ".talk-pager" };
     if (left > 0) return { t: `질문은 세 번까지 할 수 있다. 남은 질문도 해 보자. (남은 기회 ${left})`, sel: "[data-q]" };
     return { t: "이야기는 다 들었다. 이제 <b>판단 내리기</b>를 누르자.", sel: "#judge" };
   });
@@ -26673,7 +26754,8 @@ function propose() {
     const say = generous ? "돈은 얼마든지 드릴게요. 이기게만 해 주세요." : val < ceil * 0.75 ? "그 정도면 감사하죠. 잘 부탁드립니다." : "네, 그렇게 하겠습니다.";
     show(`${clientCard(c)}<div class="talk">${me}<div class="bubble">${esc(say)}</div><div class="bubble sys">수임 계약을 맺었습니다.</div></div>`,
       `<button class="btn primary" id="toTrial">재판 준비하기</button>`);
-    S.taken = (S.taken || 0) + 1; save();
+    // 수임 건수는 사건을 마칠 때(finishCase) 함께 저장한다. 여기서 저장하면 재판 중 앱을 닫았다 열 때 같은 의뢰인이 다시 와서 건수가 두 번 세어진다
+    S.taken = (S.taken || 0) + 1;
     on("#toTrial", screenTrial);
     tutSet(() => ({ t: "계약했다. 이제 <b>재판 준비하기</b>를 누르자.", sel: "#toTrial" }));
   } else if (!C.haggled && (overStake ? C.offerF + C.offerB <= effStake(c) : val <= ceil * 1.3)) {
@@ -26737,8 +26819,8 @@ function screenTrial() {
       : hired("ma") && !C.inv && !e.isK ? `<span class="tag-inv ask" data-inv="${esc(e.id)}">뒷조사</span>` : "";
     return `<label class="ev pick ${e.isK ? "card-k" : ""} ${danger ? "danger" : ""} ${on_ ? "" : "off"}">
       <input type="checkbox" id="sub-${esc(e.id)}" data-sub="${esc(e.id)}" ${on_ ? "checked" : ""}>
-      <span><div class="ev-name">${evIcon(e)}제${i + 1}호증 ${esc(e.name)}${danger ? `<span class="tag-danger">위험</span>` : ""}${inv}</div>
-      <div class="ev-desc">${esc(e.desc)}</div>${e.detail ? `<div class="ev-detail">${esc(e.detail)}</div>` : ""}</span></label>`;
+      <span><div class="ev-name">${evIcon(e)}${esc(e.name)}</div>${danger || inv ? `<div class="ev-tags">${danger ? `<span class="tag-danger">위험</span>` : ""}${inv}</div>` : ""}
+      <div class="ev-desc">${esc(e.desc)}</div>${e.detail ? `<div class="ev-detail">${esc(e.detail)}</div>` : ""}</span><button type="button" class="ev-info" data-info="${esc(e.id)}" aria-label="자세히">ⓘ</button></label>`;
   }).join("");
   const args = C.argOrder.map(i => c.arguments[i]).map(a => `<label class="arg pick"><input type="radio" name="arg" id="arg-${esc(a.id)}" data-arg="${esc(a.id)}" ${C.arg === a.id ? "checked" : ""}><span>${esc(formal(a.text))}</span></label>`).join("");
   const scout = !isOps() && hired("ha") ? c.opponent.slice().sort((a, b) => b.power - a.power)[0] : null;
@@ -26747,21 +26829,33 @@ function screenTrial() {
     <div class="stack"><div class="section-head"><span class="eyebrow">제출할 증거 고르기</span>${hired("ma") ? `<span class="eyebrow">${C.inv ? "마동철 뒷조사 끝" : "마동철 뒷조사 1회"}</span>` : ""}${hired("yu") ? `<span class="eyebrow">유성진 디지털 감정</span>` : ""}</div>
       <div class="evlist">${evs}</div></div>
     <div class="stack"><div class="eyebrow">주장 하나 고르기</div>${args}</div>`,
-    `<button class="btn primary" id="plead" ${C.arg ? "" : "disabled"}>${isOps() ? "준비 끝" : "변론 시작"}</button>`, isOps() ? "office" : "court");
+    `<div class="plead-st" id="pleadSt"></div><button class="btn primary" id="plead" ${C.arg ? "" : "disabled"}>${isOps() ? "준비 끝" : "변론 시작"}</button>`, isOps() ? "office" : "court");
+  // 버튼 위 현황: 낼 증거 수와 주장을 골랐는지
+  const pleadSt = () => { const el = document.getElementById("pleadSt"); if (el) el.innerHTML = `제출 증거 <b>${cards.filter(e => C.sub.has(e.id)).length}장</b> · 주장 ${C.arg ? "<b>고름</b>" : "<b class=\"no\">아직 안 고름</b>"}`; };
+  pleadSt();
+  // ⓘ: 증거의 자세한 내용을 작은 창으로
+  document.querySelectorAll("[data-info]").forEach(el => el.addEventListener("click", ev => {
+    ev.preventDefault(); ev.stopPropagation();
+    const e = cards.find(x => x.id === ev.currentTarget.dataset.info); if (!e) return;
+    const d = document.createElement("div"); d.className = "k-dim ev-pop";
+    d.innerHTML = `<div class="k-pop" style="text-align:left"><div class="ev-pop-name">${esc(e.name)}</div><div class="ev-pop-desc">${esc(e.desc)}</div>${e.detail ? `<div class="ev-pop-detail">${esc(e.detail)}</div>` : ""}<button class="btn primary" style="text-align:center">닫기</button></div>`;
+    d.onclick = x => { if (x.target === d || x.target.tagName === "BUTTON") d.remove(); };
+    document.body.appendChild(d);
+  }));
   document.querySelectorAll("[data-sub]").forEach(el => el.addEventListener("change", e => {
     const id = e.target.dataset.sub; e.target.checked ? C.sub.add(id) : C.sub.delete(id);
-    e.target.closest(".ev").classList.toggle("off", !e.target.checked);
+    e.target.closest(".ev").classList.toggle("off", !e.target.checked); pleadSt();
   }));
   document.querySelectorAll("[data-arg]").forEach(el => el.addEventListener("change", e => {
-    C.arg = e.target.dataset.arg; document.getElementById("plead").disabled = false;
+    C.arg = e.target.dataset.arg; document.getElementById("plead").disabled = false; pleadSt();
   }));
   document.querySelectorAll("[data-inv]").forEach(el => el.addEventListener("click", e => {
     e.preventDefault(); e.stopPropagation();
     C.inv = e.currentTarget.dataset.inv; const y = window.scrollY; screenTrial(); window.scrollTo({ top: y });
   }));
   on("#plead", () => { if (tutWarn(C.sub.has("e4"), "가게 장부가 아직 들어가 있다. 빼고 가자.") || tutWarn(C.card && C.arg !== "a3", "200만 원 받은 걸 털어놓았는데 이렇게 말하면 바로 걸린다. 받은 돈을 뺀 주장으로 가자.")) return; if (isOps()) return opsSavePrep(); runTrial(); });
-  tutSet(() => !tutK("t1") ? { t: "체크된 증거만 재판에 나간다. 불리한 증거는 눌러서 빼면 된다.", tap: "t1" }
-    : C.sub.has("e4") ? { t: "가게 장부의 '투자'라는 메모는 상대 말을 거든다. <b>가게 장부</b>를 눌러 빼자.", sel: 'label.ev:has([data-sub="e4"])' }
+  tutSet(() => !tutK("t1") ? { t: isPC() ? "체크된 증거만 재판에 나간다. 불리한 증거는 눌러서 빼면 된다." : "체크된 증거만 재판에 나간다. 불리한 증거는 눌러서 빼면 된다. 카드의 <b>ⓘ</b>를 누르면 자세한 내용이 나온다.", tap: "t1" }
+    : C.sub.has("e4") ? { t: isPC() ? "가게 장부에 '투자'라는 메모가 있다. 이 메모는 상대방 주장에 부합하므로 우리에게 불리한 증거다. <b>가게 장부</b>를 눌러 빼자." : "가게 장부의 <b>ⓘ</b>를 눌러 보면 '투자'라는 메모가 있다. 이 메모는 상대방 주장에 부합하므로 우리에게 불리한 증거다. <b>가게 장부</b>를 눌러 빼자.", sel: 'label.ev:has([data-sub="e4"])' }
     : !C.arg || (C.card && C.arg !== "a3") ? { t: C.card ? "200만 원은 이미 받았다. 그 돈을 뺀 주장을 고르자." : "주장을 하나 고르자.", sel: C.card ? 'label.arg:has([data-arg="a3"])' : ".arg" }
     : { t: "준비는 끝났다. <b>변론 시작</b>을 누르자.", sel: "#plead" });
 }
@@ -27118,7 +27212,7 @@ function firmPop() {
   const ov = document.createElement("div");
   ov.className = "staff-pop";
   ov.innerHTML = `<div class="sp-card"><div class="sp-name">사무소 이름</div>
-    <label class="field" style="width:100%"><input id="firmNew" maxlength="14" value="${esc(S.firm || "")}"></label>
+    <label class="field" style="width:100%"><input id="firmNew" maxlength="12" value="${esc(S.firm || "")}"></label>
     <div class="row2"><button class="btn ghost" id="fnCancel">취소</button><button class="btn primary" id="fnOk">바꾸기</button></div></div>`;
   document.body.appendChild(ov);
   const close = () => ov.remove();
@@ -29639,7 +29733,7 @@ function show(html, dockHtml, scene = "office", track) {
     const allEv = C.c.evidence.concat(C.card && C.c.confessionCard ? [Object.assign({ isK: true }, C.c.confessionCard)] : []);
     const subEv = allEv.filter(e => C.sub && C.sub.has(e.id));
     const cev = document.createElement("div"); cev.className = "pc-cev";
-    cev.innerHTML = (subEv.length ? subEv.map((e, i) => `<div class="ev ${e.isK ? "card-k" : ""}"><div class="ev-name">${evIcon(e)}제${i + 1}호증 ${esc(e.name)}</div><div class="ev-desc">${esc(e.desc)}</div>${e.detail ? `<div class="ev-detail">${esc(e.detail)}</div>` : ""}</div>`).join("") : '<div class="note">제출한 증거가 없습니다.</div>');
+    cev.innerHTML = (subEv.length ? subEv.map((e, i) => `<div class="ev ${e.isK ? "card-k" : ""}"><div class="ev-name">${evIcon(e)}${esc(e.name)}</div><div class="ev-desc">${esc(e.desc)}</div>${e.detail ? `<div class="ev-detail">${esc(e.detail)}</div>` : ""}</div>`).join("") : '<div class="note">제출한 증거가 없습니다.</div>');
     app.appendChild(cev);
     const argT = ((C.c.arguments || []).find(a => a.id === C.arg) || {}).text;
     const cinf = document.createElement("div"); cinf.className = "pc-cinfo pc-info";
