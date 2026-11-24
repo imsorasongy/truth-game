@@ -135,6 +135,7 @@ p { margin: 0; }
 /* 대화 */
 .talk { display: flex; flex-direction: column; gap: 10px; }
 #talk .bubble { overscroll-behavior: contain; }
+html, body { overscroll-behavior-y: none; }
 .talk-pager { display: flex; align-items: center; justify-content: space-between; font-size: 12.5px; color: #c9a24acc; margin: -2px 2px 0; }
 .tp-btn { background: none; border: 0; color: var(--brass); font-size: 13.5px; padding: 4px 6px; cursor: pointer; font-family: inherit; }
 .tp-btn:disabled { opacity: .3; cursor: default; }
@@ -26431,7 +26432,22 @@ const consultTalk = c => [`<div class="bubble">${esc(c.opening)}</div>`]
 const caseRefs = () => `<div class="talk refs-talk">${consultTalk(C.c)}</div>
     <div class="stack"><div class="section-head"><span class="eyebrow">가져온 증거 ${C.c.evidence.length}건</span></div>
       <div class="evlist">${C.c.evidence.map(e => evCard(e, { open: C.opened[e.id] })).join("")}</div></div>`;
+// 상담 화면 넘기기: 화면을 아래로 끌면 이전 문답, 위로 밀면 다음 문답(상담 화면에서만, 증거·기록 서랍과 안내창 위는 제외)
+// 답이 길어 말풍선 안에 글이 남아 있으면 먼저 글을 읽게 하고, 끝에 닿은 뒤 민 것만 넘긴다. 휴대폰이 당겨서 새로 고침 등으로 터치를 가져가도(touchcancel) 넘긴다
+let consultSwipe = null, cs0 = null;
+const csOn = e => consultSwipe && app.querySelector(".talk-pager") && !e.target.closest(".ev-drawer, .log-drawer, #tutb, .k-dim, input, textarea");
+const csBox = () => { const b = [...app.querySelectorAll("#talk .bubble")].pop(); return b; };
+const csEnd = (y, x) => { const st = cs0; cs0 = null; if (!st) return; const dy = y - st.y, dx = x - st.x;
+  if (Math.abs(dy) < 40 || Math.abs(dy) < Math.abs(dx) * 1.3) return;
+  if (dy > 0 && st.top && consultSwipe.prev()) consultSwipe.flip(-1); else if (dy < 0 && st.bot && consultSwipe.next()) consultSwipe.flip(1); };
+document.addEventListener("touchstart", e => { if (!csOn(e) || e.touches.length > 1) { cs0 = null; return; } const b = csBox(), inB = b && b.contains(e.target);
+  cs0 = { x: e.touches[0].clientX, y: e.touches[0].clientY, lx: e.touches[0].clientX, ly: e.touches[0].clientY, top: !inB || b.scrollTop <= 1, bot: !inB || b.scrollTop + b.clientHeight >= b.scrollHeight - 1 }; }, { passive: true });
+document.addEventListener("touchmove", e => { if (!cs0) return; const t = e.touches[0]; cs0.lx = t.clientX; cs0.ly = t.clientY; const dy = t.clientY - cs0.y, dx = t.clientX - cs0.x;
+  if (Math.abs(dy) > 6 && Math.abs(dy) >= Math.abs(dx) && ((dy > 0 && cs0.top && consultSwipe.prev()) || (dy < 0 && cs0.bot && consultSwipe.next())) && e.cancelable) e.preventDefault(); }, { passive: false });
+document.addEventListener("touchend", e => { if (cs0) csEnd(e.changedTouches[0].clientY, e.changedTouches[0].clientX); });
+document.addEventListener("touchcancel", () => { if (cs0) csEnd(cs0.ly, cs0.lx); });
 function screenConsult() {
+  consultSwipe = null;
   const c = C.c, left = (hired("jin") ? 4 : 3) - C.asked.length;
   // 휴대폰: 화면에는 한 장(처음 사연 또는 문답 하나)만 보이고, 이전·다음으로 넘겨 지난 대화를 본다
   const paged = !isPC();
@@ -26457,16 +26473,7 @@ function screenConsult() {
   const flip = d => { const n = C.page + d; if (n < 0 || n >= pages.length) return; C.page = n; const y = window.scrollY; screenConsult(); window.scrollTo({ top: y }); };
   if (paged) {
     document.querySelectorAll("[data-tp]").forEach(b => b.onclick = () => flip(+b.dataset.tp));
-    // 대화 칸을 아래로 끌면 이전 문답, 위로 밀면 다음 문답. 답이 길어 말풍선 안에서 글이 더 내려가면 먼저 글을 다 읽게 하고, 끝에 닿은 뒤 민 것만 넘긴다
-    const tEl = document.getElementById("talk"); let t0 = null;
-    const box = () => [...tEl.querySelectorAll(".bubble")].pop();
-    tEl.addEventListener("touchstart", e => { const b = box(); t0 = { x: e.touches[0].clientX, y: e.touches[0].clientY, top: !b || b.scrollTop <= 1, bot: !b || b.scrollTop + b.clientHeight >= b.scrollHeight - 1 }; }, { passive: true });
-    tEl.addEventListener("touchmove", e => { if (!t0) return; const dy = e.touches[0].clientY - t0.y, dx = e.touches[0].clientX - t0.x;
-      // 넘길 방향이면 화면 전체가 같이 밀리지 않게 막는다
-      if (Math.abs(dy) > Math.abs(dx) && ((dy > 0 && t0.top && C.page > 0) || (dy < 0 && t0.bot && C.page < pages.length - 1))) e.preventDefault(); }, { passive: false });
-    tEl.addEventListener("touchend", e => { if (!t0) return; const dy = e.changedTouches[0].clientY - t0.y, dx = e.changedTouches[0].clientX - t0.x, st = t0; t0 = null;
-      if (Math.abs(dy) < 45 || Math.abs(dy) < Math.abs(dx) * 1.5) return;
-      if (dy > 0 && st.top) flip(-1); else if (dy < 0 && st.bot) flip(1); });
+    consultSwipe = { flip, prev: () => C.page > 0, next: () => C.page < pages.length - 1 };
     const chips = app.querySelector(".chips");
     if (chips && pages.length > 1) { const t = document.createElement("span"); t.className = "chip tale"; t.textContent = "사연 다시 보기"; t.onclick = () => flip(-C.page); chips.appendChild(t); }
   }
@@ -26488,7 +26495,7 @@ function screenConsult() {
     if (!C.asked.length && isPC() && unseen.length) return { t: `다른 카드도 모두 눌러 보자. (${c.evidence.length - unseen.length}/${c.evidence.length})`, sel: `.evlist [data-ev="${unseen[0].id}"]`, ok: ".evlist" };
     if (!C.asked.length && drawer && showEv && !isPC()) return { t: "다른 카드도 눌러 볼 수 있다. 다 봤으면 <b>증거</b> 탭을 한 번 더 눌러 닫자.", sel: '#tabs [data-tab="ev"]', ok: ".evlist" };
     if (!C.asked.length) return { t: "이제 질문할 차례다. 말과 증거가 어긋나는 곳을 물어보자.", sel: "[data-q]" };
-    if (C.asked.length === 1 && !isPC() && !tutK("c1")) return { t: "지난 대화는 아래 <b>‹ 이전 · 다음 ›</b>을 누르거나, 대화 칸을 아래로 끌어서 다시 볼 수 있다. 처음 사연은 <b>사연 다시 보기</b>를 누르면 된다.", tap: "c1", sel: ".talk-pager" };
+    if (C.asked.length === 1 && !isPC() && !tutK("c1")) return { t: "지난 대화는 아래 <b>‹ 이전 · 다음 ›</b>을 누르거나, 화면을 아래로 끌어서 다시 볼 수 있다. 처음 사연은 <b>사연 다시 보기</b>를 누르면 된다.", tap: "c1", sel: ".talk-pager" };
     if (left > 0) return { t: `질문은 세 번까지 할 수 있다. 남은 질문도 해 보자. (남은 기회 ${left})`, sel: "[data-q]" };
     return { t: "이야기는 다 들었다. 이제 <b>판단 내리기</b>를 누르자.", sel: "#judge" };
   });
