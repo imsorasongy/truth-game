@@ -202,7 +202,7 @@ p { margin: 0; }
 /* ---- 장면 배경·예전 게임 그림 자원 ---- */
 #backdrop { position: fixed; inset: 0; z-index: -1; background: var(--wood) center / cover no-repeat; }
 #backdrop::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, #140d09cc 0%, #140d09a6 30%, #140d09ee 70%, #140d09fa 100%); }
-html[data-scene="office"] #backdrop { background-image: url("assets/bg-office.webp"); }
+html[data-scene="office"] #backdrop { background-image: url("assets/office-0-m.jpg"); }
 html[data-scene="court"] #backdrop { background-image: url("assets/court-2.webp"); }
 html[data-scene="court"] #backdrop::after { background: linear-gradient(180deg, #140d0955 0%, #140d0922 35%, #140d0988 65%, #140d09e6 100%); }
 .hud { background: #1b120dd9; -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border-bottom: 1px solid #c9a24a40; }
@@ -25307,7 +25307,7 @@ function sceneImage(name) {
   if (name === "end-top") return `assets/end-top-${heroKey()}.jpg`;
   if (name === "end-close") return `assets/end-close-${heroKey()}.jpg`;
   if (name.startsWith("end-ops-")) return `assets/ops-end/grade-${name.slice(8)}-${heroKey()}.jpg`;
-  if (!S) return "assets/bg-office.webp";
+  if (!S) return `assets/office-0-${heroKey()}.jpg`;
   const o = S.office || 0;
   // 사무실 4단계 모두 고른 주인공(남·여)이 나오는 그림
   return `assets/office-${o}-${heroKey()}.jpg`;
