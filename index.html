@@ -26884,11 +26884,14 @@ function runTrial() {
     setTimeout(() => { el.className = "slam"; }, 700);
   };
   // 연출: 대사 타자, 반론 때 우리 변호사 컷인·흰 섬광, 큰 반박 때 상대 컷인·붉은 섬광·흔들림, 구간이 바뀌면 게이지가 빛남
-  let busy = false, typing = null, zone = zoneOf(0);
+  let busy = false, typing = null, zone = zoneOf(0), pend = null;
+  // 메뉴(불러오기·처음 화면)로 재판을 떠나 C가 바뀌면 이 재판의 타이머와 화면 누르기를 멈춘다
+  const myC = C, gone = () => { if (C === myC) return false; clearTimeout(timer); finishType(); app.removeEventListener("click", tapNext); return true; };
   const finishType = () => { if (typing) { typing.el.textContent = typing.full; clearInterval(typing.t); typing = null; } };
   const step = () => {
+    if (gone()) return;
     finishType();
-    if (i >= steps.length) { app.removeEventListener("click", tapNext); return judgeCloseUp(fast, () => verdict(score)); }
+    if (i >= steps.length) { app.removeEventListener("click", tapNext); return judgeCloseUp(fast, () => { if (C === myC) verdict(score); }); }
     const s = steps[i++];
     const rebut = s.cls.includes("rebut"), oppHit = s.cls === "opp", big = oppHit && s.d <= -4;
     const partial = rebut && s.dTxt === "일부 막음";
@@ -26921,13 +26924,14 @@ function runTrial() {
       busy = true;
       cutIn(face(rebut ? "us" : "opp", partial ? "serious" : "confident"), rebut ? "이의 있음!" : "반박!", rebut ? "us" : "opp", 1500);
       if (rebut) flash("white");
-      timer = setTimeout(run, 1500);
+      pend = run;
+      timer = setTimeout(() => { pend = null; if (!gone()) run(); }, 1500);
     } else run();
   };
   const tapNext = e => { if (fast || busy || e.target.closest("button")) return; clearTimeout(timer); step(); };
   app.addEventListener("click", tapNext);
   tutSet(() => ({ t: "상대가 반박하면 우리가 낸 증거나 주장으로 막는다. 화면을 누르면 빨리 넘어간다." }));
-  on("#skip", () => { fast = true; busy = false; clearTimeout(timer); document.querySelectorAll(".cutin, .flash").forEach(x => x.remove()); app.removeEventListener("click", tapNext); step(); });
+  on("#skip", () => { fast = true; busy = false; clearTimeout(timer); document.querySelectorAll(".cutin, .flash").forEach(x => x.remove()); app.removeEventListener("click", tapNext); if (pend) { const p = pend; pend = null; p(); } else step(); });
   timer = setTimeout(step, fast ? 0 : 500);
 }
 
