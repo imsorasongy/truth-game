@@ -352,7 +352,7 @@ let G = null;
 const WIN = 80, PART = 50, MISS = -6, MISS2 = -10;
 // 음악: 본 게임 안이면 본 게임에 곡을 바꾸라고 알리고, 주소로 바로 열었으면 여기서 직접 튼다
 // tense1~3·sad는 장면 음악: 대사 목록에 "♪sad" 같은 줄을 넣으면 그 자리에서 바뀌고, 조사 화면으로 돌아오면 일상 음악으로 돌아간다
-const TRACKS = { opening: ["bgm/op-sombra.mp3"], main: ["bgm/main-theme.mp3"], normal: ["bgm/bgm1.mp3", "bgm/bgm2.mp3", "bgm/bgm6.mp3"], trial: ["bgm/trialtheme.mp3"], ending: ["bgm/ending-song.mp3"], tense1: ["bgm/tense1.mp3"], tense2: ["bgm/tense2.mp3"], tense3: ["bgm/tense3.mp3"], sad: ["bgm/theme-m2.mp3"], n1: ["bgm/bgm1.mp3"], n2: ["bgm/bgm2.mp3"], n3: ["bgm/bgm6.mp3"], tf2: ["bgm/theme-f2.mp3"], m1: ["bgm/theme-m1.mp3"], m2: ["bgm/theme-m2.mp3"], m3: ["bgm/theme-m3.mp3"], f1: ["bgm/theme-f1.mp3"], f2: ["bgm/theme-f2v2.mp3"], f3: ["bgm/theme-f3.mp3"], f4: ["bgm/theme-f4.mp3"], m4: ["bgm/theme-m4.mp3"], off: [] };
+const TRACKS = { opening: ["bgm/op-sombra.mp3"], main: ["bgm/main-theme.mp3"], normal: ["bgm/bgm1.mp3", "bgm/bgm2.mp3", "bgm/bgm6.mp3"], trial: ["bgm/trialtheme.mp3"], ending: ["bgm/ending-song.mp3"], ending1: ["bgm/ending-chapter.mp3"], tense1: ["bgm/tense1.mp3"], tense2: ["bgm/tense2.mp3"], tense3: ["bgm/tense3.mp3"], sad: ["bgm/theme-m2.mp3"], n1: ["bgm/bgm1.mp3"], n2: ["bgm/bgm2.mp3"], n3: ["bgm/bgm6.mp3"], tf2: ["bgm/theme-f2.mp3"], m1: ["bgm/theme-m1.mp3"], m2: ["bgm/theme-m2.mp3"], m3: ["bgm/theme-m3.mp3"], f1: ["bgm/theme-f1.mp3"], f2: ["bgm/theme-f2v2.mp3"], f3: ["bgm/theme-f3.mp3"], f4: ["bgm/theme-f4.mp3"], m4: ["bgm/theme-m4.mp3"], off: [] };
 // 장마다 테마곡: 조사 장면 내내 이 곡이 흐른다(재판은 재판 곡). "♪normal" 표시와 장면 곡이 끝난 뒤에도 이 곡으로 돌아간다
 const THEME = { m: "m1", m1: "m1", m2: "m2", m3: "m3", m4: "m4", f: "f1", f1: "f1", f2: "f2", f3: "f3", f4: "f4", h1: "main" };
 const themeOf = () => (typeof G !== "undefined" && G && G.k && THEME[G.k]) || "normal";
@@ -1429,7 +1429,7 @@ function verdict() {
     // 후일담은 판결 화면이 아니라 대화 장면으로
     $("ok").onclick = () => {
       const key = endKey(r);
-      bgm(cleared ? "ending" : "sad", true); // 이긴 후일담은 모든 장에서 엔딩 곡, 진 결말은 슬픔
+      bgm(cleared ? (/^(m|f)[123]$/.test(G.k) || G.k === "m" || G.k === "f" ? "ending1" : "ending") : "sad", true); // 11-25: 남주·여주 1~3장 이긴 후일담은 「이제 함께 웃어도 돼요」, 4장·마지막 이야기·게임 엔딩은 「침묵의 방향」 // 이긴 후일담은 모든 장에서 엔딩 곡, 진 결말은 슬픔
       const scenes = [{ bg: c.endBg ? bgOf(c.endBg) : homeBg(), lines: (c.ending[key] || c.ending[r] || []).flatMap(fx).map(nameLine) }];
       const out = cleared && c.outro && (c.outro[key] || c.outro[r]);
       // outro는 장면 하나({bg, lines}) 또는 여러 장면 배열. bg "office"는 주인공 사무실, 배경이 바뀌면 페이드

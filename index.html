@@ -25304,6 +25304,7 @@ const TRACKS = {
   normal: ["bgm/bgm1.mp3", "bgm/bgm2.mp3", "bgm/bgm6.mp3"],
   trial: ["bgm/trialtheme.mp3"],
   ending: ["bgm/ending-song.mp3"], // 11-25 Suno 엔딩곡 「침묵의 방향」(가사 있음)
+  ending1: ["bgm/ending-chapter.mp3"], // 11-25 Suno 「이제 함께 웃어도 돼요」: 남주·여주 1~3장 이긴 후일담
   tense1: ["bgm/tense1.mp3"], tense2: ["bgm/tense2.mp3"], tense3: ["bgm/tense3.mp3"], sad: ["bgm/theme-m2.mp3"], // 11-24 슬픈 장면은 남주 2장 테마 「Empty Chair」로(예전 sad.mp3는 안 씀)
   n1: ["bgm/bgm1.mp3"], n2: ["bgm/bgm2.mp3"], n3: ["bgm/bgm6.mp3"], tf2: ["bgm/theme-f2.mp3"],
   m1: ["bgm/theme-m1.mp3"], m2: ["bgm/theme-m2.mp3"], m3: ["bgm/theme-m3.mp3"], // 11-24 Suno 남주 1·2·3장 테마 「Uneasy Waltz」「Empty Chair」「Slowly Determined」
@@ -25533,7 +25534,7 @@ function setScene(name) {
 function show(html, dockHtml, scene = "office", track) {
   tutScreen = null; tutRefresh();
   setScene(scene);
-  music(track || (scene === "court" ? "trial" : "normal"));
+  music(track || (scene === "court" ? "trial" : storyTheme() || "normal"));
   app.classList.remove("enter"); void app.offsetWidth; app.classList.add("enter");
   renderHud();
   app.innerHTML = html;
@@ -25622,6 +25623,13 @@ function startNew(slotThen) {
 
 /* ---------- 스토리 모드: 일반 사건을 하다가 명성 조건이 되면 story.html의 해당 장이 열린다 ---------- */
 const isStory = () => !!S && S.mode === "story";
+// 스토리 모드에서 일반 사건을 할 때도 법정 밖 화면은 지금 진행 중인 장(기일 사이면 그 장, 아니면 마지막으로 마친 장)의 테마곡을 튼다(11-25 작가)
+const storyTheme = () => {
+  if (!isStory() || !S.story) return null;
+  const st = S.story, h = S.hero || "m", n = st.adjourn ? st.adjourn.n + 1 : (st.next || 0);
+  if (st.done) return "main";
+  return n >= 1 && TRACKS[h + n] ? h + n : null;
+};
 // need: 열리는 명성, after: 깬 뒤 명성, day: 이야기 시점(게임 내 달), fee: 이겼을 때 받는 돈(만 원)
 const STORY_STEPS = [
   { need: 20, after: 30, fee: { m: 500, f: 100 } },
@@ -29700,7 +29708,7 @@ function show(html, dockHtml, scene = "office", track) {
   // 화면이 바뀌면 '이 화면으로 돌아오기'는 그 화면이 새로 정한다(게임 방법 화면 등)
   screenBack = null;
   setScene(scene);
-  music(track || (scene === "court" ? "trial" : "normal"));
+  music(track || (scene === "court" ? "trial" : storyTheme() || "normal"));
   renderHud();
   app.className = "";
   app.innerHTML = html;
