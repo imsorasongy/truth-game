@@ -29726,7 +29726,7 @@ function hintUse(k) {
   if (k === "det") hintResult("탐정의 뒷조사", c.truth === "liar" ? "의뢰인의 말 가운데 거짓말이 있다." : c.truth === "hiding" ? "의뢰인이 무언가를 숨기고 있다." : "의뢰인이 숨기거나 꾸며 낸 것은 보이지 않는다.");
   if (k === "mag") {
     const bad = c.evidence.filter(e => e.value < 0).sort((x, y) => x.value - y.value)[0];
-    if (bad) { C.hintDanger = bad.id; hintResult("돋보기", `'${esc(bad.name)}'에 위험 표시를 했다. 이 증거가 우리에게 불리할 수 있다.`); }
+    if (bad) { C.hintDanger = bad.id; { const nm = bad.name, lc = nm.charCodeAt(nm.length - 1), jc = lc >= 0xAC00 && lc <= 0xD7A3 ? (lc - 0xAC00) % 28 : 0; hintResult("돋보기", `${esc(nm)}${jc > 0 ? "은" : "는"} 우리에게 위험한 증거로 보인다.`); } }
     else hintResult("돋보기", "의뢰인이 가져온 증거 가운데 위험한 증거는 보이지 않는다.");
   }
   if (k === "law") {
