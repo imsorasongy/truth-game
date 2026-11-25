@@ -25303,7 +25303,7 @@ const TRACKS = {
   main: ["bgm/main-theme.mp3"], // 11-24 Suno 메인 테마 「검증의 악장」
   normal: ["bgm/bgm1.mp3", "bgm/bgm2.mp3", "bgm/bgm6.mp3"],
   trial: ["bgm/trialtheme.mp3"],
-  ending: ["bgm/ending2.mp3"],
+  ending: ["bgm/ending-song.mp3"], // 11-25 Suno 엔딩곡 「침묵의 방향」(가사 있음)
   tense1: ["bgm/tense1.mp3"], tense2: ["bgm/tense2.mp3"], tense3: ["bgm/tense3.mp3"], sad: ["bgm/theme-m2.mp3"], // 11-24 슬픈 장면은 남주 2장 테마 「Empty Chair」로(예전 sad.mp3는 안 씀)
   n1: ["bgm/bgm1.mp3"], n2: ["bgm/bgm2.mp3"], n3: ["bgm/bgm6.mp3"], tf2: ["bgm/theme-f2.mp3"],
   m1: ["bgm/theme-m1.mp3"], m2: ["bgm/theme-m2.mp3"], m3: ["bgm/theme-m3.mp3"], // 11-24 Suno 남주 1·2·3장 테마 「Uneasy Waltz」「Empty Chair」「Slowly Determined」
@@ -27311,7 +27311,7 @@ function screenBankrupt() {
       <span>전적</span><span class="r">${S.w}승 ${S.p}일부 ${S.l}패</span>
       <span>최고 사무실</span><span class="r">${esc(office().name)}</span>
     </div>
-  </section>`, `<button class="btn primary" id="again">처음부터 다시</button>`, "end-close", "ending");
+  </section>`, `<button class="btn primary" id="again">처음부터 다시</button>`, "end-close", "sad"); // 폐업은 진 화면이라 슬픈 장면 곡(Empty Chair)
   on("#again", () => { try { localStorage.removeItem(slotKey(SLOT)); } catch (e) {} S = null; screenCover(); });
 }
 
