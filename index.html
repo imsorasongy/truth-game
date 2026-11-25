@@ -25219,6 +25219,18 @@ const yearBaseOf = v => (v && v.mode === "story" && v.hero === "f") ? 2031 : 203
 const baseYear = () => yearBaseOf(S);
 // 스토리 모드 남주는 2030년 3월이 1번째 달이다(1장 사건이 5월에 열리도록). 나머지는 1월부터
 const monthBaseOf = v => (v && v.mode === "story" && v.hero === "m") ? 3 : 1;
+// 판결문(주문)의 연도는 사건을 쓸 때 기준으로 박혀 있다. 사건 글은 작년 같은 상대 표현이라, 지금 게임 연도에 맞춰 판결문 연도를 옮긴다.
+// 기준 해 = 판결문에 나온 가장 늦은 해 + 1(그 일이 작년에 있었다고 본다). 예외: 기한이 올해인 사건, 사건 글에 연도를 직접 쓴 사건(0 = 옮기지 않음)
+const OC_YEAR_BASE = { y13: 2029, t02: 0, w09: 0 };
+function ocText(c, res) {
+  const t = (c.outcomes && c.outcomes[res]) || "";
+  if (!S || !S.day || !/20\d\d(?=\. )/.test(t)) return t;
+  let b = c.id in OC_YEAR_BASE ? OC_YEAR_BASE[c.id] : null;
+  if (b === 0) return t;
+  if (b == null) b = Math.max(...Object.values(c.outcomes).join(" ").match(/20\d\d(?=\. )/g).map(Number)) + 1;
+  const d = ymOf(S.day)[0] - b;
+  return d ? t.replace(/20\d\d(?=\. )/g, y => String(+y + d)) : t;
+}
 const ymOf = (m, v = S) => { const i = (m || 1) - 1 + monthBaseOf(v) - 1; return [yearBaseOf(v) + Math.floor(i / 12), i % 12 + 1]; };
 const monthLabel = (m, v = S) => { if (v && v.h1) return v.h1.done ? "끝난 판" : "진행 중"; const [y, mo] = ymOf(m, v); return `${y}년 ${mo}월`; };
 const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
@@ -26970,6 +26982,7 @@ function runTrial() {
     if (ids.includes(C.arg)) argSaid = true;
     return lines;
   };
+  C.oppMiss = []; // 막지 못한 상대 주장 이름(판결 뒤 첫마디에 쓴다)
   c.opponent.forEach(o => {
     const cs = o.counters || [];
     // 숨긴 사실 폭로는 털어놓은 사실을 내고 맞는 주장까지 골라야 막힌다
@@ -26982,6 +26995,7 @@ function runTrial() {
     // 숨긴 사실 폭로: 털어놓은 사실을 이미 냈으면 맞는 주장을 못 골랐어도 절반은 막는다
     const kOnly = false; // 보류: 털어놓은 사실만 내고 주장이 틀린 경우 처리(변호사님 결정 대기)
     const half = !hit && (kOnly || (o.half || []).some(used));
+    if (!hit) C.oppMiss.push(o.name);
     const say = oppSay(o);
     steps.push({ ava: isCrim(c) ? "pros" : "opp", cls: "opp", who: isCrim(c) ? "검사" : C.vs ? `상대 대리인 · ${C.vs}` : "상대 대리인", text: say.text, note: say.note, d: hit ? 0 : half ? -Math.ceil(power / 2) : -power, dTxt: hit ? "" : null });
     if (half) {
@@ -27144,7 +27158,7 @@ function verdict(score) {
       <span>성공보수</span><span class="r">${won(b)}</span>
       <span class="sum">명성</span><span class="r sum ${repD > 0 ? "pos" : repD < 0 ? "neg" : "zero"}">${repD > 0 ? "+" : repD < 0 ? "−" : "±"}${Math.abs(repD)}${capped ? ` (상한 ${office().repCap})` : ""}</span>
     </div></div>
-    <div class="judgment"><div class="lbl">${/^재판부의 조정권고/.test(c.outcomes[res]) ? "결정사항" : "주문"}</div>${esc(c.outcomes[res])}</div>
+    <div class="judgment"><div class="lbl">${/^재판부의 조정권고/.test(c.outcomes[res]) ? "결정사항" : "주문"}</div>${esc(ocText(c, res))}</div>
     <div class="mono"><div class="ava"><img src="${heroOf().img}" alt=""></div><div><div class="who">${esc(S.name || heroOf().name)} 변호사 · <span>${truthTxt}</span></div><p>${esc(monoOpener(c, res))} ${esc(c.epilogue)}</p></div></div>`;
   renderHud();
   el.scrollIntoView({ block: "start", behavior: REDUCED ? "auto" : "smooth" });
@@ -27164,7 +27178,7 @@ function monoOpener(c, res) {
     honest: { win: `${who}가 한 말은 모두 다 사실이었다. 믿고 간 게 맞았다.`, partial: `${who}가 한 말은 다 사실이었는데, 절반밖에 지켜 주지 못했다.`, lose: `${who}가 한 말은 다 사실이었는데 졌다. 그걸 법정에서 증명하지 못한 건 나다.` },
     hiding: {
       win: caught ? `${who}는 ${fact} 숨겼다. 상담 때 그걸 알아낸 덕에 미리 대비할 수 있었다.` : `${who}는 ${fact} 끝까지 말하지 않았다. 법정에서 드러나지 않아 이겼을 뿐이다.`,
-      partial: caught ? `${who}가 ${fact} 숨긴 건 알아냈지만, 그 부분까지 다 막지는 못했다.` : `${who}는 ${fact} 숨기고 있었다. 법정에서 그게 드러나 발목을 잡았다.`,
+      partial: caught ? `${who}가 ${fact} 숨긴 건 알아냈지만, ${(C.oppMiss || []).length ? `상대의 '${C.oppMiss[0]}'까지` : "그 부분까지 다"} 막지는 못했다.` : `${who}는 ${fact} 숨기고 있었다. 법정에서 그게 드러나 발목을 잡았다.`,
       lose: caught ? `${who}가 ${fact} 숨긴 건 알았다. 그런데도 졌다. 증거를 잘못 골랐다.` : `${who}는 ${fact} 숨기고 있었다. 상담 때 알아냈어야 했다.` },
     liar: {
       win: caught ? `${who}가 ${lie}은 거짓말이었다. 그걸 알고도 맡았고, 판결은 이겼다.` : `${who}가 ${lie}은 거짓말이었다. 그것도 모르고 이겼으니 마음이 편치 않다.`,
@@ -29255,7 +29269,7 @@ function opsVerdict(score) {
   el.innerHTML = `<div class="vd-top"><div class="vd-stamp"><div class="stamp ${r.res} ${lab.length > 2 ? "long" : ""}">${lab}</div></div>
     <div class="ledger vd-ledger"><span>착수금</span><span class="r">${won(r.fee)}</span><span>성공보수</span><span class="r">${r.bonus ? won(r.bonus) + " (다음 달)" : "0원"}</span>
     <span class="sum">명성</span><span class="r sum ${r.rep > 0 ? "pos" : r.rep < 0 ? "neg" : "zero"}">${opsRepTxt(r.rep, r.want)}</span></div></div>
-    <div class="judgment"><div class="lbl">주문</div>${esc(c.outcomes[r.res])}</div>
+    <div class="judgment"><div class="lbl">주문</div>${esc(ocText(c, r.res))}</div>
     ${r.vs ? `<div class="pn">상대 대리인 「${esc(shortFirm(r.vs))}」 · ${r.res === "win" ? `우리 명성 ${opsRepTxt(r.vsRep || 0, 1)}, 상대 명성 −1` : r.res === "lose" ? `상대 명성 +1, 우리 명성 ${opsRepTxt(r.vsRep || 0)}` : "무승부"}</div>` : ""}
     ${r.refund ? `<div class="pn warn">의뢰인이 결과에 항의해 착수금 ${won(r.refund)}을 돌려줬습니다</div>` : ""}
     ${job.slip ? `<div class="pn warn">사무장 보조를 못 받아 업무 실수가 있었습니다 (−2)</div>` : ""}`;
@@ -29730,9 +29744,10 @@ function hintUse(k) {
     else hintResult("돋보기", "의뢰인이 가져온 증거 가운데 위험한 증거는 없어 보인다.");
   }
   if (k === "law") {
-    const top = Math.max(...c.arguments.map(x => x.value)), best = c.arguments.filter(x => x.value === top);
-    C.hintArgs = [best[0].id]; // 똑같이 강한 주장이 여럿이어도 표시는 하나만
-    hintResult("법학책", `검토해 보니 '${esc(best[0].text.replace(/[.!]\s*$/, ""))}'는 주장이 좋아 보인다.`);
+    // 겉보기 점수가 아니라, 위험한 증거를 빼고 냈을 때 상대방 공격까지 계산해 실제로 가장 좋은 주장 하나(운영 모드 최선 플레이와 같은 계산)
+    const best = c.arguments.find(a => a.id === bestPlay(c, true).arg) || c.arguments[0];
+    C.hintArgs = [best.id];
+    hintResult("법학책", `검토해 보니 '${esc(best.text.replace(/[.!]\s*$/, ""))}'는 주장이 좋아 보인다.`);
   }
   if (sc === "consult") screenConsult(); else if (sc === "prep") screenTrial();
   renderTabs();
