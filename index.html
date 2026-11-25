@@ -603,6 +603,18 @@ details.howto .note { margin-top: 6px; }
 .k-cost .ledger { margin-top:6px; }
 .k-cap small { font-size: calc(11px * var(--pcf)); }
 .k-dim { position:fixed; inset:0; background:#000b; z-index:40; display:flex; align-items:center; justify-content:center; }
+.k-pop.hint-pop { width: min(460px, 94vw); } .hint-sub { font-size: 13px; color: var(--muted); margin-top: -6px; }
+.hint-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.hint-card { display: flex; flex-direction: column; align-items: center; gap: 4px; background: #2f2118; border: 1px solid var(--brass); border-radius: 10px; padding: 6px 6px 8px; color: inherit; font: inherit; cursor: pointer; }
+.hint-art { position: relative; width: 100%; aspect-ratio: 2 / 3; border-radius: 6px; background: #1b130d; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.hint-art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.hint-desc { text-align: left; font-size: 12.5px; line-height: 1.5; opacity: .85; display: flex; flex-direction: column; gap: 4px; } .hint-desc b { color: var(--brass); margin-right: 4px; }
+.hint-card svg { width: 40%; height: auto; fill: none; stroke: var(--brass); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.hint-name { position: absolute; left: 0; right: 0; bottom: 7%; text-align: center; font-family: var(--f-body); font-weight: 700; font-size: 15px; color: #e9c57c; text-shadow: 0 1px 3px #000; }
+.hint-card .hint-st { font-size: 11.5px; color: var(--brass); text-align: center; line-height: 1.3; }
+.hint-card.off, .hint-card.used { opacity: .45; cursor: default; } .hint-card.used .hint-st, .hint-card.off .hint-st { color: var(--muted); }
+.hint-res { margin: 0; font-size: 15px; line-height: 1.6; }
+.tag-law { font-size: 11px; color: #1b130d; background: var(--brass); padding: 1px 6px; border-radius: 3px; margin-left: 6px; vertical-align: 2px; }
 .k-pop { width:300px; background:#241912; border:1px solid var(--brass); border-radius:16px; padding:22px 18px 16px; text-align:center; display:flex; flex-direction:column; gap:12px; }
 .k-ev-face { display:flex; justify-content:center; }
 .k-pop h3 { margin:0; font-family:var(--f-display); font-weight:400; font-size: calc(21px * var(--pcf)); color:var(--brass); }
@@ -26365,7 +26377,7 @@ document.addEventListener("click", e => {
   const tip = tutMsg ? { tap: "warn" } : tutScreen(); if (!tip || (!tip.sel && !tip.tap)) return;
   const t = e.target;
   if (t.closest("#tutb") || !t.closest("#app, #dock, #tabs")) return;
-  if (t.closest('input:not([type=radio]):not([type=checkbox]), textarea, select, .snd, [data-tab="ev"], [data-tab="log"], [data-tab="snd"]')) return;
+  if (t.closest('input:not([type=radio]):not([type=checkbox]), textarea, select, .snd, [data-tab="ev"], [data-tab="log"], [data-tab="snd"], [data-tab="hint"], .hint-dim, .hint-res, #hintOk')) return;
   const okSel = [tip.tap ? null : tip.sel, tip.ok].filter(Boolean).join(", ");
   if (okSel && [...document.querySelectorAll(okSel)].some(el => el.contains(t))) return;
   e.stopPropagation(); e.preventDefault();
@@ -26430,7 +26442,7 @@ function evKind(name) {
 const evIcon = e => `<svg class="ev-ico" viewBox="0 0 24 24" aria-hidden="true">${ICONS[e.isK ? "person" : evKind(e.name)]}</svg>`;
 function evCard(e, opts = {}) {
   const open = opts.open;
-  const danger = C.flagged && e.value < 0;
+  const danger = (C.flagged || C.hintDanger === e.id) && e.value < 0;
   return `<button class="ev ${danger ? "danger" : ""}" data-ev="${esc(e.id)}" aria-expanded="${open ? "true" : "false"}">
     <span class="ev-hint">${open ? "접기" : "살펴보기"}</span>
     <div class="ev-name">${evIcon(e)}${esc(e.name)}${danger ? `<span class="tag-danger">위험</span>` : ""}</div>
@@ -26843,7 +26855,7 @@ function screenTrial() {
   // 처음엔 전부 제출로 두고, 불리한 것을 직접 빼게 한다
   if (!C.trialInit) { cards.forEach(e => C.sub.add(e.id)); C.trialInit = true; }
   const evs = cards.map((e, i) => {
-    const on_ = C.sub.has(e.id), danger = C.flagged && e.value < 0;
+    const on_ = C.sub.has(e.id), danger = (C.flagged || C.hintDanger === e.id) && e.value < 0;
     const digital = hired("yu") && !e.isK && ["chat", "video", "photo", "voice"].includes(evKind(e.name));
     const inv = C.inv === e.id || digital ? (e.value < 0 ? `<span class="tag-inv bad">조사: 위험</span>` : e.value > 0 ? `<span class="tag-inv good">조사: 유리</span>` : `<span class="tag-inv">조사: 쓸모 없음</span>`)
       : hired("ma") && !C.inv && !e.isK ? `<span class="tag-inv ask" data-inv="${esc(e.id)}">뒷조사</span>` : "";
@@ -26852,7 +26864,7 @@ function screenTrial() {
       <span><div class="ev-name">${evIcon(e)}${esc(e.name)}</div>${danger || inv ? `<div class="ev-tags">${danger ? `<span class="tag-danger">위험</span>` : ""}${inv}</div>` : ""}
       <div class="ev-desc">${esc(e.desc)}</div>${e.detail ? `<div class="ev-detail">${esc(e.detail)}</div>` : ""}</span><button type="button" class="ev-info" data-info="${esc(e.id)}" aria-label="자세히">ⓘ</button></label>`;
   }).join("");
-  const args = C.argOrder.map(i => c.arguments[i]).map(a => `<label class="arg pick"><input type="radio" name="arg" id="arg-${esc(a.id)}" data-arg="${esc(a.id)}" ${C.arg === a.id ? "checked" : ""}><span>${esc(formal(a.text))}</span></label>`).join("");
+  const args = C.argOrder.map(i => c.arguments[i]).map(a => `<label class="arg pick"><input type="radio" name="arg" id="arg-${esc(a.id)}" data-arg="${esc(a.id)}" ${C.arg === a.id ? "checked" : ""}><span>${esc(formal(a.text))}${(C.hintArgs || []).includes(a.id) ? '<span class="tag-law">법학책</span>' : ""}</span></label>`).join("");
   const scout = !isOps() && hired("ha") ? c.opponent.slice().sort((a, b) => b.power - a.power)[0] : null;
   show(`${trialHead(c)}
     ${isOps() ? opsScoutSay(c) : scout ? staffSay("inv", `상대 쪽은 「${esc(scout.name)}」${josaEul(scout.name)} 준비했대요.`) : ""}
@@ -29665,8 +29677,66 @@ const TAB_ICON = {
   snd: '<svg viewBox="0 0 24 24"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>',
   save: '<svg viewBox="0 0 24 24"><path d="M5 3h11l3 3v15H5z"/><path d="M8 3v6h8V3M8 21v-7h8v7"/></svg>',
   load: '<svg viewBox="0 0 24 24"><path d="M4 7h6l2 2h8v10H4z"/><path d="M12 12v5M9.5 14.5 12 17l2.5-2.5"/></svg>',
-  set: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></svg>'
+  set: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></svg>',
+  hint: '<svg viewBox="0 0 24 24"><rect x="4" y="4" width="11" height="15" rx="2"/><path d="M9 8h7a2 2 0 0 1 2 2v10l-3-2-3 2V10"/></svg>'
 };
+// ---------- 힌트 카드(11-25 작가): 일반 사건에서만. 하루(실제 날짜)에 탐정·돋보기·법학책 한 장씩 ----------
+// 유료 이용자는 무제한으로 쓰게 할 자리(결제가 붙으면 true를 돌려주게 바꾼다)
+const hintUnlimited = () => false;
+const HINT_KEY = KEY + "-hint";
+const HINT_CARDS = [
+  { k: "det", n: "탐정", d: "뒷조사로 의뢰인이 숨기는 것이나 거짓말이 있는지 알아봅니다.", where: "상담",
+    icon: '<circle cx="10" cy="10" r="5"/><path d="M14 14l6 6M7 6l-1-3h8l-1 3"/>' },
+  { k: "mag", n: "돋보기", d: "의뢰인이 가져온 증거 가운데 위험한 증거가 있으면 한 장에 표시합니다.", where: "상담 · 재판 준비",
+    icon: '<circle cx="10" cy="10" r="6"/><path d="M14.5 14.5 21 21"/>' },
+  { k: "law", n: "법학책", d: "고를 수 있는 주장 가운데 가장 강한 주장을 알려 줍니다.", where: "재판 준비",
+    icon: '<path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/>' }
+];
+const hintToday = () => { const d = new Date(); return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate(); };
+const hintState = () => { let s = null; try { s = JSON.parse(localStorage.getItem(HINT_KEY) || "null"); } catch (e) {} if (!s || s.d !== hintToday()) s = { d: hintToday(), used: {} }; return s; };
+const hintSave = s => { try { localStorage.setItem(HINT_KEY, JSON.stringify(s)); } catch (e) {} };
+const hintLeft = () => hintUnlimited() ? "∞" : HINT_CARDS.filter(c => !hintState().used[c.k]).length;
+// 지금 화면: 상담이면 "consult", 재판 준비면 "prep", 그 밖은 null
+const hintScreen = () => !C || !C.c ? null : app.querySelector("#talk") ? "consult" : app.querySelector(".arg.pick") ? "prep" : null;
+const hintCan = k => { const sc = hintScreen(); return k === "det" ? sc === "consult" : k === "mag" ? !!sc : k === "law" ? sc === "prep" : false; };
+function hintMenu() {
+  const st = hintState(), d = document.createElement("div");
+  d.className = "k-dim hint-dim";
+  const left = hintLeft();
+  d.innerHTML = `<div class="k-pop hint-pop"><h3>힌트 카드</h3><div class="hint-sub">${hintUnlimited() ? "무제한으로 쓸 수 있습니다." : `오늘 남은 카드 ${left}장 · 날마다 한 장씩 다시 채워집니다`}</div>
+    <div class="hint-cards">${HINT_CARDS.map(c => { const used = !hintUnlimited() && st.used[c.k], can = hintCan(c.k);
+      return `<button type="button" class="hint-card ${used ? "used" : can ? "" : "off"}" data-hk="${c.k}" ${used || !can ? "disabled" : ""}>
+        <span class="hint-art"><svg viewBox="0 0 24 24" aria-hidden="true">${c.icon}</svg><img src="assets/hint/${c.k}.webp" alt="" onerror="this.remove()"><b class="hint-name">${c.n}</b></span><span class="hint-st">${used ? "오늘 사용함" : can ? "눌러서 쓰기" : c.where}</span></button>`; }).join("")}</div>
+    <div class="hint-desc">${HINT_CARDS.map(c => `<div><b>${c.n}</b> ${c.d}</div>`).join("")}</div>
+    <button type="button" class="btn ghost" id="hintX">닫기</button></div>`;
+  document.body.appendChild(d);
+  d.onclick = e => { if (e.target === d) d.remove(); };
+  d.querySelector("#hintX").onclick = () => d.remove();
+  d.querySelectorAll("[data-hk]").forEach(b => b.onclick = () => { d.remove(); hintUse(b.dataset.hk); });
+}
+function hintResult(title, body) {
+  const d = document.createElement("div"); d.className = "k-dim";
+  d.innerHTML = `<div class="k-pop"><h3>${title}</h3><p class="hint-res">${body}</p><button type="button" class="btn primary" id="hintOk">확인</button></div>`;
+  document.body.appendChild(d); d.querySelector("#hintOk").onclick = () => d.remove();
+}
+function hintUse(k) {
+  if (!hintCan(k)) return;
+  const st = hintState(), c = C.c, sc = hintScreen();
+  if (!hintUnlimited()) { st.used[k] = true; hintSave(st); }
+  if (k === "det") hintResult("탐정의 뒷조사", c.truth === "liar" ? "의뢰인의 말 가운데 거짓말이 있다." : c.truth === "hiding" ? "의뢰인이 무언가를 숨기고 있다." : "의뢰인이 숨기거나 꾸며 낸 것은 보이지 않는다.");
+  if (k === "mag") {
+    const bad = c.evidence.filter(e => e.value < 0).sort((x, y) => x.value - y.value)[0];
+    if (bad) { C.hintDanger = bad.id; hintResult("돋보기", `'${esc(bad.name)}'에 위험 표시를 했다. 이 증거가 우리에게 불리할 수 있다.`); }
+    else hintResult("돋보기", "의뢰인이 가져온 증거 가운데 위험한 증거는 보이지 않는다.");
+  }
+  if (k === "law") {
+    const top = Math.max(...c.arguments.map(x => x.value)), best = c.arguments.filter(x => x.value === top);
+    C.hintArgs = best.map(x => x.id);
+    hintResult("법학책", best.length > 1 ? "가장 강한 주장에 표시를 했다. 똑같이 강한 주장이 둘 이상 있다." : "가장 강한 주장에 표시를 했다.");
+  }
+  if (sc === "consult") screenConsult(); else if (sc === "prep") screenTrial();
+  renderTabs();
+}
 function renderHud() {
   if (!S) { hud.innerHTML = ""; return; }
   const ym = `${ymOf(S.day)[0]}.${ymOf(S.day)[1]}`;
@@ -29680,7 +29750,7 @@ function renderHud() {
 }
 function renderTabs() {
   const hasEv = !!app.querySelector(".ev-drawer"), hasTalk = !!app.querySelector(".log-drawer");
-  const items = [["ev", "증거", hasEv], ["log", "대화 기록", hasTalk], ["arc", "갤러리", !C], ["ofc", "사무실", !C && !!S], ["snd", soundOn ? "음악 켬" : "음악 끔", true]].concat(isPC() ? [["save", "저장", !!S], ["load", "불러오기", true], ["set", "설정", true]] : []);
+  const items = [["ev", "증거", hasEv], ["log", "대화 기록", hasTalk], ["arc", "갤러리", !C], ["ofc", "사무실", !C && !!S], ["hint", "힌트 " + hintLeft(), true]].concat(isPC() ? [["save", "저장", !!S], ["load", "불러오기", true], ["set", "설정", true]] : []);
   tabsEl.innerHTML = items.map(([k, l, ok]) => `<button title="${l}" class="tab ${ok ? "" : "off"} ${(k === "ev" && showEv) || (k === "log" && showLog) ? "on" : ""}" data-tab="${k}" ${ok ? "" : "disabled"}>${TAB_ICON[k]}<span>${l}</span></button>`).join("");
   tabsEl.querySelectorAll("[data-tab]").forEach(b => b.addEventListener("click", () => {
     const k = b.dataset.tab;
@@ -29696,6 +29766,7 @@ function renderTabs() {
     if (k === "arc") return screenArchive(back);
     if (k === "ofc") { officeBack = back; return screenOffice(); }
     if (k === "snd") toggleSound();
+    if (k === "hint") return hintMenu();
     if (k === "save") return pcSave();
     if (k === "load") return pcLoad();
     if (k === "set") return pcSettings();
