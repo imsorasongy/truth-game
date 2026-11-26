@@ -25138,7 +25138,7 @@ BY_ID[TUT_ID] = {
   hiddenIndex: 0,
   confession: "…작년 6월에 200은 받았어요. 그거 말하면 괜히 다 받은 걸로 칠까 봐요.",
   deny: { say: "받은 돈이요? 없다니까요. 한 푼도 안 갚았어요.", proof: ["e2"], fail: "그게 무슨 상관이에요. 받은 거 없어요." },
-  confessionCard: { id: "k", name: "일부 변제 인정", desc: "받은 200만 원을 빼고 300만 원만 청구", value: 1 },
+  confessionCard: { id: "k", name: "일부 변제 인정", desc: "받은 200만 원을 빼고 300만 원만 청구", say: "원고는 피고에게서 200만 원을 돌려받은 사실을 인정합니다.", value: 1 },
   lies: ["차용증을 받아 놨다", "작년 3월 말까지 갚기로 했다", "동창이 전화를 안 받는다"],
   lieIndex: null, touchIndex: null,
   arguments: [
@@ -26982,7 +26982,7 @@ function runTrial() {
   const kSaid = e => e.id === "k" && !/(캡처|공지|기록|내역|확인서|사진|영상|문자|서류|영수증|계약서|녹음|장부|메모|통장|진단서|각서|차용증|문서|사본|파일|결정서|자료|대조표|CCTV|감정서|원본|이력|판결|명세|견적|녹취)/.test(e.name) && !/(서|표|기록|자료|내역|사진|영상|파일|메일|대화|진술)\.?\s*$/.test(e.desc);
   const kText = d => d.split(/\.\s+/).map(x => formal(x)).join(". ") + ".";
   pool.filter(e => C.sub.has(e.id)).forEach(e => steps.push(kSaid(e)
-    ? { cls: "ours", who: "우리 측 주장", text: kText(e.desc), d: e.value }
+    ? { cls: "ours", who: "우리 측 인정", text: e.say || kText(e.desc), d: e.value }
     : { cls: "ours", who: "우리 측 증거", evName: e.name, text: `「${e.name}」${josaEul(e.name)} 제출합니다.`, d: c.truth === "liar" && e.value < 0 ? e.value * 3 : e.value }));
   // 상대 대리인의 말: 증거면 "「…」을 제출합니다." 뒤에 따옴표 안의 말만 하고, 증거 설명은 아래 작은 글씨로
   const oppSay = o => {
@@ -27080,7 +27080,7 @@ function runTrial() {
     const partial = rebut && s.dTxt === "일부 막음";
     const ex = rebut ? (partial ? ["serious", "serious"] : ["confident", "flustered"])
       : oppHit ? [s.d < 0 ? (big ? "flustered" : "serious") : "serious", "confident"]
-      : s.cls === "ours" ? [s.who === "우리 측 주장" ? "confident" : "neutral", "neutral"] : null;
+      : s.cls === "ours" ? [/^우리 측 (주장|인정)$/.test(s.who) ? "confident" : "neutral", "neutral"] : null;
     if (rebut) s.img = face("us", ex[0]);
     // 컴퓨터 화면: 우리 측이 증거·주장을 낼 때도 아래 대사창에 우리 변호사 얼굴을 붙인다
     else if (isPC() && s.cls === "ours" && !s.img && !s.ava) s.img = face("us", ex ? ex[0] : "neutral");
@@ -29818,6 +29818,11 @@ function hintUse(k) {
   if (sc === "consult") screenConsult(); else if (sc === "prep") screenTrial();
   renderTabs();
 }
+// 운영 모드 위쪽 줄: 법인 이름 · 지난달 매출 순위(첫 정산 뒤부터) · 남은 기간
+function opsHudLine() {
+  const rk = S.rank && S.rank[S.firm], left = OPS_MONTHS - S.day + 1;
+  return esc(S.firm || "") + (rk ? ` · 매출 ${rk}위` : "") + ` · 남은 기간 ${left}개월`;
+}
 function renderHud() {
   if (!S) { hud.innerHTML = ""; return; }
   const ym = `${ymOf(S.day)[0]}.${ymOf(S.day)[1]}`;
@@ -29826,7 +29831,7 @@ function renderHud() {
       <span class="pill"><i>★</i>${S.rep}${office().repCap < 100 ? `<small>/${office().repCap}</small>` : ""}</span>
       <span class="pill r">${ym} · 수임 ${isOps() ? opsTaken() + "/" + opsCapAll() : (S.taken || 0) + "/" + intakeCap()}</span>
     </div>
-    <div class="rk" style="display:flex;align-items:center;gap:8px"><span style="flex:1;min-width:0">${S.name ? esc(S.name) + " · " : ""}${esc(rankOf(S.rep))} · 승률 ${trials() ? winRate() + "%" : "—"}</span>${isPC() ? "" : '<button class="gmenu-b" type="button" style="flex:0 0 auto;border:1px solid var(--brass);background:#0b0806cc;color:var(--brass);border-radius:8px;font-size:calc(12px * var(--pcf));padding:3px 10px">≡ 메뉴</button>'}</div>`;
+    <div class="rk" style="display:flex;align-items:center;gap:8px"><span style="flex:1;min-width:0">${isOps() ? opsHudLine() : `${S.name ? esc(S.name) + " · " : ""}${esc(rankOf(S.rep))} · 승률 ${trials() ? winRate() + "%" : "—"}`}</span>${isPC() ? "" : '<button class="gmenu-b" type="button" style="flex:0 0 auto;border:1px solid var(--brass);background:#0b0806cc;color:var(--brass);border-radius:8px;font-size:calc(12px * var(--pcf));padding:3px 10px">≡ 메뉴</button>'}</div>`;
   hud.querySelectorAll(".gmenu-b").forEach(b => b.onclick = e => { e.stopPropagation(); gameMenu(); });
 }
 function renderTabs() {
