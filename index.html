@@ -423,6 +423,7 @@ html[data-scene^="end"] #backdrop::after { background: linear-gradient(180deg, #
 .tut .who { font-size: calc(12px * var(--pcf)); color: var(--brass); margin-bottom: 3px; }
 .tut p { margin: 0; font-size: calc(14.5px * var(--pcf)); line-height: 1.65; color: #f1e6cf; }
 .tut p b { color: var(--brass); }
+.tutb.opsg { z-index: 45; }
 .tutb.shake { animation: tutshake .35s; }
 @keyframes tutshake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
 .field.need input { border-color: var(--lose) !important; box-shadow: 0 0 0 2px #c0503a55; }
@@ -25559,6 +25560,7 @@ function setScene(name) {
 
 function show(html, dockHtml, scene = "office", track) {
   tutScreen = null; tutRefresh();
+  const og = document.getElementById("opsg"); if (og) og.remove();
   setScene(scene);
   music(track || (scene === "court" ? "trial" : storyTheme() || "normal"));
   app.classList.remove("enter"); void app.offsetWidth; app.classList.add("enter");
@@ -28527,6 +28529,19 @@ function opsNewMonth() {
 // 달 시작: 직원이 있으면 직원이, 없으면 대표가 혼자 말한다
 const KNUM = ["", "한", "두", "세", "네", "다섯", "여섯", "일곱", "여덟", "아홉", "열", "열한", "열두", "열세", "열네", "열다섯", "열여섯", "열일곱", "열여덟", "열아홉", "스무"];
 const kCount = n => KNUM[n] ? KNUM[n] + " 명" : `${n}명`;
+// 운영 모드 첫 안내: 화면마다 처음 한 번만 대표의 혼잣말로 띄운다(S.guide에 본 것을 적는다)
+function opsGuide(key, text) {
+  // 한 번 띄우면 본 것으로 적는다(다음을 안 누르고 넘어가도 다시 뜨지 않게)
+  // 이미 한 달 넘게 한 저장 게임에는 첫 달 안내(배정·사무실·진행)를 띄우지 않는다
+  if (key !== "rep" && (S.hist || []).length) return;
+  S.guide = S.guide || {}; if (S.guide[key]) return; S.guide[key] = true; save();
+  const old = document.getElementById("opsg"); if (old) old.remove();
+  const b = document.createElement("div"); b.id = "opsg"; b.className = "tutb opsg";
+  b.innerHTML = `<div class="ava"><img src="${heroOf().img}" alt=""></div><div><div class="tn">${esc(S.name || heroOf().name)}</div><p>${esc(text)}</p></div><button class="tutb-next">다음</button>`;
+  document.body.appendChild(b);
+  if (!isPC()) b.style.top = ((hud.getBoundingClientRect().bottom || 0) + 6) + "px";
+  b.querySelector(".tutb-next").onclick = e => { e.stopPropagation(); b.remove(); };
+}
 function opsIntro() {
   const n = S.list.length, k = ["mgr", "sec", "inv"].find(r => crewOf(r).length);
   const who = k ? pickPerson(k, crewOf(k)[0]) : null;
@@ -28705,6 +28720,7 @@ function opsAssign() {
   show(`<div class="k-head"><h2>${monthLabel(S.day)} 의뢰인 ${S.list.length}명</h2><div class="k-cap">${capHtml()}</div></div>
     <div class="k-list">${S.list.map(card).join("")}</div>`,
     `<div class="row2"><button class="btn" id="asAuto">자동 배정</button><button class="btn primary" id="asDone">이대로 맡기기</button></div>`);
+  opsGuide("assign", "사건마다 얼굴 칸을 누르면 그 사람에게 맡기고, ✕를 누르면 돌려보낸다." + (S.assocs.length ? "" : ` 지금은 변호사가 나 혼자라 이번 달에는 ${opsMeCap()}건까지만 맡을 수 있다.` + (S.list.length > opsMeCap() ? " 맡을 사람이 없는 사건은 돌려보낼 수밖에 없다." : "")));
   // 자동 배정: 아직 안 정한 사건만. 분야 맞는 사건은 그 변호사에게, 큰 사건 두 건은 대표, 나머지는 고용 변호사 → 남으면 대표
   on("#asAuto", () => {
     const done = autoAssign();
@@ -28752,7 +28768,8 @@ function opsHub() {
   S.phase = "hub";
   const myWait = S.today.filter(t => t.status === "wait" || t.status === "deal").length;
   const rep = S.reports.filter(r => r.status === "pending").length;
-  if (isPC()) return opsHubPC(myWait, rep);
+  const hubG = () => opsGuide("hub", "내가 맡은 사건은 '내 의뢰인 상담'에서 직접 진행한다. 사건을 더 받으려면 '사무실 관리'에서 변호사를 뽑아야 하고, 손님을 늘리려면 광고를 켜야 한다.");
+  if (isPC()) { opsHubPC(myWait, rep); return hubG(); }
   show(`<div class="ofc-banner" style="background-image:url('${sceneImage("office")}')"><div class="ofc-name">${esc(S.firm)}<small>${monthLabel(S.day)} · ${opsYear()}년차</small></div>${opsSeats()}</div>
     <div class="k-menu">
       <button class="k-mb" id="mMine">${OPS_IC.talk}내 의뢰인<br>상담${myWait ? `<span class="bd">${myWait}</span>` : ""}</button>
@@ -28764,6 +28781,7 @@ function opsHub() {
   on("#mRep", opsReports);
   on("#mOfc", () => { officeBack = opsHub; opsOffice(); });
   on("#mGo", opsGoAsk);
+  hubG();
 }
 
 // 컴퓨터 본부: 왼쪽 장면에 변호사·직원 판, 오른쪽 패널에 이번 달 할 일과 판도
@@ -28960,7 +28978,8 @@ function opsReports() {
   S.reports = S.reports || [];
   // 컴퓨터: 목록 화면 없이 검토 전 보고서를 바로 연다(목록은 보고서 화면 오른쪽에 있다)
   const valid = S.reports.map((r, i) => ({ r, i })).filter(({ r }) => opsRepValid(r));
-  if (isPC() && valid.length) { const k = valid.find(({ r }) => r.status === "pending"); return opsReport(k ? k.i : valid[0].i); }
+  const repG = () => valid.length && opsGuide("rep", "고용 변호사가 맡은 사건은 보고서로 올라온다. 의뢰인이 진실을 말했는지에 대한 변호사의 판단이 틀렸으면 여기서 바로잡는다. 검토가 얼마나 정확했는지는 3년 뒤 결과에도 반영된다.");
+  if (isPC() && valid.length) { const k = valid.find(({ r }) => r.status === "pending"); opsReport(k ? k.i : valid[0].i); return repG(); }
   // 검토 전 사건을 위로, 끝낸 사건은 뒤로
   const rows = valid.sort((a, b) => (a.r.status !== "pending") - (b.r.status !== "pending") || a.i - b.i).map(({ r, i }) => {
     const c = BY_ID[r.id];
@@ -28971,6 +28990,7 @@ function opsReports() {
     `<button class="btn primary" id="rBack">돌아가기</button>`);
   on("[data-rp]", e => opsReport(+e.currentTarget.dataset.rp));
   on("#rBack", opsHub);
+  repG();
 }
 // 비서 귀띔: 보고서를 맡은 비서의 특기대로(한지수 형편 · 오다은 표정 · 문태윤 계약 의사)
 function opsSecSay(r, c) {
@@ -29176,6 +29196,7 @@ function opsGoAsk() {
   document.body.appendChild(d);
   const close = () => d.remove();
   d.querySelector("#gNo").onclick = close;
+  opsGuide("go", "진행을 누르면 이번 달이 끝나고 월세·월급·광고비가 나간다. 남은 현금이 다음 달 고정비보다 적은 달이 석 달 이어지면 폐업한다.");
   d.querySelector("#gWatch").onclick = () => { close(); opsRun(true); };
   d.querySelector("#gSkip").onclick = () => { close(); opsRun(false); };
 }
