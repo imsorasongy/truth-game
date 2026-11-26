@@ -25572,6 +25572,8 @@ function on(sel, fn) { document.querySelectorAll(sel).forEach(el => el.addEventL
 /* ---------- 표지 ---------- */
 function screenCover() {
   const saved = load();
+  // 튜토리얼 도중 처음 화면으로 오면 안내창을 지운다
+  tutScreen = null; tutMsg = null; tutRefresh();
   hud.innerHTML = "";
   setScene("office");
   music("opening");
@@ -26376,7 +26378,7 @@ function tutRefresh() {
   document.body.appendChild(b);
   b.style.top = ((hud.getBoundingClientRect().bottom || 0) + 6) + "px";
   if (tip.tap) b.querySelector(".tutb-next").addEventListener("click", e => { e.stopPropagation(); if (tip.tap === "warn") tutMsg = null; else { C.tutK = C.tutK || {}; C.tutK[tip.tap] = true; } tutRefresh(); });
-  if (tip.sel) setTimeout(() => document.querySelectorAll(tip.sel).forEach(el => el.classList.add("tut-glow")), 60);
+  if (tip.sel) setTimeout(() => { document.querySelectorAll(tip.sel).forEach(el => el.classList.add("tut-glow")); tutPlace(true); }, 60);
   // 지금 단계에서 누를 수 없는 버튼은 흐리게 한다(누를 수 있는 곳만 또렷하게). 증거·기록·음악은 언제나 됨
   if (tip.sel || tip.tap) setTimeout(() => {
     const okSel = [tip.tap ? null : tip.sel, tip.ok].filter(Boolean).join(", ");
@@ -26388,6 +26390,24 @@ function tutRefresh() {
     });
   }, 60);
 }
+// 휴대폰: 안내창이 눌러야 할 곳을 가리면 화면 아래로 옮기고, 아래에서도 가리면 그곳이 안내창 바로 밑에 오게 스크롤한다
+function tutPlace(scroll) {
+  const b = document.getElementById("tutb"); if (!b || isPC()) return;
+  const gs = [...document.querySelectorAll(".tut-glow")].map(el => el.getBoundingClientRect()).filter(r => r.height > 0);
+  b.style.bottom = ""; b.style.top = ((hud.getBoundingClientRect().bottom || 0) + 6) + "px";
+  if (!gs.length) return;
+  const gTop = Math.min(...gs.map(r => r.top)), gBot = Math.max(...gs.map(r => r.bottom));
+  const hit = r => gTop < r.bottom && gBot > r.top;
+  if (!hit(b.getBoundingClientRect())) return;
+  const lows = [...document.querySelectorAll("#dock, #tabs")].map(el => el.getBoundingClientRect()).filter(r => r.height > 0 && r.top > innerHeight / 2);
+  const floor = lows.length ? Math.min(...lows.map(r => r.top)) : innerHeight;
+  b.style.top = "auto"; b.style.bottom = (innerHeight - floor + 6) + "px";
+  if (!hit(b.getBoundingClientRect())) return;
+  b.style.bottom = ""; b.style.top = ((hud.getBoundingClientRect().bottom || 0) + 6) + "px";
+  if (scroll) window.scrollBy({ top: gTop - b.getBoundingClientRect().bottom - 12 });
+}
+let tutPlaceT = 0;
+addEventListener("scroll", () => { clearTimeout(tutPlaceT); tutPlaceT = setTimeout(() => tutPlace(false), 80); }, true);
 document.addEventListener("click", () => setTimeout(tutRefresh, 80), true);
 // 튜토리얼에서는 안내한 것만 누를 수 있다(입력칸·증거 보기·음악은 언제나 됨)
 document.addEventListener("click", e => {
