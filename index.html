@@ -436,6 +436,7 @@ html[data-scene^="end"] #backdrop::after { background: linear-gradient(180deg, #
 .ci-face { width: 128px; height: 128px; flex: none; border-radius: 10px; overflow: hidden; border: 3px solid #fff; box-shadow: 0 6px 20px #000a; }
 .ci-face img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 15%; display: block; }
 .ci-txt { font-family: var(--f-display); font-size: clamp(34px, 11vw, 54px); color: #fff; text-shadow: 0 3px 0 #000, 0 0 18px #000; transform: rotate(-4deg); white-space: nowrap; }
+.ci-txt.long { font-size: clamp(20px, 6.4vw, 38px); white-space: normal; max-width: 64vw; line-height: 1.2; word-break: keep-all; }
 @keyframes ciL { 0% { transform: translateX(-100%) skewY(-4deg); } 18%, 80% { transform: translateX(0) skewY(-4deg); } 100% { transform: translateX(100%) skewY(-4deg); opacity: 0; } }
 @keyframes ciR { 0% { transform: translateX(100%) skewY(4deg); } 18%, 80% { transform: translateX(0) skewY(4deg); } 100% { transform: translateX(-100%) skewY(4deg); opacity: 0; } }
 .flash { position: fixed; inset: 0; z-index: 24; pointer-events: none; animation: flash .42s ease-out forwards; }
@@ -26960,7 +26961,7 @@ function runTrial() {
   const kText = d => d.split(/\.\s+/).map(x => formal(x)).join(". ") + ".";
   pool.filter(e => C.sub.has(e.id)).forEach(e => steps.push(kSaid(e)
     ? { cls: "ours", who: "우리 측 주장", text: kText(e.desc), d: e.value }
-    : { cls: "ours", who: "우리 측 증거", text: `「${e.name}」${josaEul(e.name)} 제출합니다.`, d: c.truth === "liar" && e.value < 0 ? e.value * 3 : e.value }));
+    : { cls: "ours", who: "우리 측 증거", evName: e.name, text: `「${e.name}」${josaEul(e.name)} 제출합니다.`, d: c.truth === "liar" && e.value < 0 ? e.value * 3 : e.value }));
   // 상대 대리인의 말: 증거면 "「…」을 제출합니다." 뒤에 따옴표 안의 말만 하고, 증거 설명은 아래 작은 글씨로
   const oppSay = o => {
     const isArg = o.arg || /(주장|항변)$/.test(o.name), sub = isArg ? "" : `「${o.name}」${josaEul(o.name)} 제출합니다.`;
@@ -27007,17 +27008,17 @@ function runTrial() {
     const half = !hit && (kOnly || (o.half || []).some(used));
     if (!hit) C.oppMiss.push(o.name);
     const say = oppSay(o);
-    steps.push({ ava: isCrim(c) ? "pros" : "opp", cls: "opp", who: isCrim(c) ? "검사" : C.vs ? `상대 대리인 · ${C.vs}` : "상대 대리인", text: say.text, note: say.note, d: hit ? 0 : half ? -Math.ceil(power / 2) : -power, dTxt: hit ? "" : null });
+    steps.push({ ava: isCrim(c) ? "pros" : "opp", cls: "opp", who: isCrim(c) ? "검사" : C.vs ? `상대 대리인 · ${C.vs}` : "상대 대리인", text: say.text, note: say.note, oppArg: !!(o.arg || /(주장|항변)$/.test(o.name)), d: hit ? 0 : half ? -Math.ceil(power / 2) : -power, dTxt: hit ? "" : null });
     if (half) {
       const ids = (o.half || []).filter(used).concat(kOnly ? ["k"] : []);
       const lines = rebutLines(ids, true);
-      steps.push({ img: heroOf().img, cls: "ours rebut", who: "우리 측 반론", text: `이의 있습니다! ${lines.join(" ")}`, d: 0, dTxt: "일부 막음" });
+      steps.push({ img: heroOf().img, cls: "ours rebut", who: "우리 측 반론", text: lines.join(" "), d: 0, dTxt: "일부 막음" });
     }
     // 막았다면 우리 측이 그 자리에서 증거·털어놓은 사실·주장을 내밀며 반론한다
     if (hit) {
       const ids = cs.filter(id => C.sub.has(id) || id === C.arg);
       const lines = rebutLines(ids, false);
-      steps.push({ img: heroOf().img, cls: "ours rebut", who: "우리 측 반론", text: `이의 있습니다! ${lines.join(" ")}`, d: 0, dTxt: "막아냄" });
+      steps.push({ img: heroOf().img, cls: "ours rebut", who: "우리 측 반론", text: lines.join(" "), d: 0, dTxt: "막아냄" });
     }
   });
   const r = Math.random();
@@ -27074,16 +27075,20 @@ function runTrial() {
       const z = zoneOf(score);
       if (!fast && z !== zone) { const g = document.querySelector(".gauge"); g.classList.remove("zw", "zl"); void g.offsetWidth; g.classList.add(z > zone ? "zw" : "zl"); }
       zone = z;
-      if (oppHit) { if (fast) slam("반박!", "bad"); else if (s.d < 0) { flash("red"); sfx("thud"); if (big) shakeAll(); } }
+      if (oppHit) { if (fast) { if (s.d <= -2) slam(s.oppArg ? "재판장님!" : "보십시오!", "bad"); } else if (s.d < 0) { flash("red"); sfx("thud"); if (big) shakeAll(); } }
       if (!fast) logEl.lastElementChild.scrollIntoView({ block: "nearest", behavior: "smooth" });
       // 글 길이만큼 읽을 시간(1초에 25자 꼴, 우리 측 반론은 최소 1.8초). 화면을 누르면 바로 다음으로
       const wait = Math.min(4000, Math.max(rebut ? 1800 : 900, 300 + s.text.length * 40));
       timer = setTimeout(step, fast ? 0 : wait);
     };
-    if (!fast && (rebut || oppHit)) {
+    // 컷인: 우리 반론은 "반박!", 상대는 우리가 막지 못해 2점 이상 깎일 때만 우리처럼 증거면 "보십시오!", 주장이면 "재판장님!", 우리 결정적 증거(2점 이상)는 "보십시오!", 결정적 주장은 "재판장님!"
+    const decisive = s.cls === "ours" && s.d >= 2;
+    const cutTxt = rebut ? "반박!" : oppHit ? (s.d <= -2 ? (s.oppArg ? "재판장님!" : "보십시오!") : "") : decisive ? (s.evName ? "보십시오!" : "재판장님!") : "";
+    if (!fast && cutTxt) {
       busy = true;
-      cutIn(face(rebut ? "us" : "opp", partial ? "serious" : "confident"), rebut ? "이의 있음!" : "반박!", rebut ? "us" : "opp", 1500);
-      if (rebut) flash("white");
+      const ours = rebut || decisive;
+      cutIn(face(ours ? "us" : "opp", partial ? "serious" : "confident"), cutTxt, ours ? "us" : "opp", 1500);
+      if (ours) flash("white");
       pend = run;
       timer = setTimeout(() => { pend = null; if (!gone()) run(); }, 1500);
     } else run();
@@ -27108,7 +27113,8 @@ function cutIn(img, txt, side, ms = 1200) {
   const ov = document.createElement("div");
   ov.className = "cutin " + side;
   ov.style.setProperty("--ci", ms + "ms");
-  ov.innerHTML = `<div class="ci-band"><div class="ci-face"><img src="${img}" alt=""></div><div class="ci-txt">${txt}</div></div>`;
+  // 증거 이름처럼 긴 글자는 작게 줄이고 줄을 바꾼다
+  ov.innerHTML = `<div class="ci-band"><div class="ci-face"><img src="${img}" alt=""></div><div class="ci-txt${[...txt].length > 7 ? " long" : ""}">${esc(txt)}</div></div>`;
   document.body.appendChild(ov);
   setTimeout(() => ov.remove(), ms + 20);
 }
