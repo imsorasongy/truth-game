@@ -877,7 +877,7 @@ body.has-dock #app:not(.vn) { padding-bottom: 96px; }
 *::-webkit-scrollbar { display: none; width: 0; height: 0; }
 
 /* 막대 숨김이 안 먹는 폰 대비: 넘기는 칸을 화면 오른쪽 밖으로 조금 넓혀 막대가 잘려 나가게 */
-#app.vn { overflow: hidden; }
+#app.vn { overflow: hidden; overflow: clip; } /* clip: 오른쪽 밖으로 넓힌 칸 때문에 화면이 가로로 밀리지 않게(스크롤 자체를 막음) */
 .vn-bottom { right: -24px !important; padding-right: 34px !important; }
 .vn.show-log .vn-bottom { padding-right: 34px !important; }
 .ev-drawer { right: -24px; padding-right: 38px; }
@@ -2878,7 +2878,7 @@ window.CASES.push(
     { id: "a3", text: "피고는 견적서도 없이 일방적으로 보증금에서 공제했다", value: 2 }
   ],
   opponent: [
-    { id: "o1", name: "견적서 제출", desc: "\"실제 견적이 이 금액으로 나왔습니다.\"", power: 1, counters: ["e3"] },
+    { id: "o1", name: "수리 견적서", desc: "\"실제 견적이 이 금액으로 나왔습니다.\"", power: 1, counters: ["e3"] },
     { id: "o2", name: "고양이 사진", desc: "\"원고가 고양이 두 마리를 키운 사진입니다. 원고는 특약 위반을 숨기고 있습니다.\"", power: 5, counters: ["k", "a2"] }
   ],
   outcomes: {
@@ -3015,7 +3015,7 @@ window.CASES.push(
   fee: 700, bonus: 1000,
   opening: "회사 18년 다녔는데 하루아침에 나가랍니다. 노조 일 좀 도왔다고 찍힌 겁니다. 딴 이유 없어요.",
   questions: [
-    { q: "해고 통보는 어떻게 받으셨어요?", a: "부장이 불러서 말로요. 내일부터 나오지 말라고. 종이 한 장 없었습니다." },
+    { q: "해고 통보는 어떻게 받으셨어요?", a: "부장이 불러서 말로 하고, 그날 저녁에 카톡이 한 줄 왔어요. 내일부터 출근하지 말라고요. 해고 사유가 적힌 종이는 한 장도 없었습니다." },
     { q: "징계위원회는 열렸어요?", a: "그런 거 없었어요. 아, 한 번 부르긴 했는데 가 보니 짜고 치는 거라 그냥 나왔습니다." },
     { q: "회사 사람과 다툰 일은요?", a: "회식 때 후배하고 말다툼 좀 한 거요. 손은 안 댔습니다. 걔 병원 간 일도 없고요. 남자들끼리 흔한 일이죠." },
     { q: "노조 활동은 어떤 거였어요?", a: "임금협상 때 서명 받아 준 거요. 그게 답니다." }
@@ -3028,7 +3028,7 @@ window.CASES.push(
   ],
   suspicions: ["회식 자리에서 후배를 때렸다", "회사 돈을 유용했다", "이미 다른 회사에 취직했다"],
   hiddenIndex: null,
-  lies: ["해고를 말로만 통보받았다는 말", "임금협상 때 노조 서명을 받아 줬다는 말", "후배와 말다툼만 했을 뿐 손은 대지 않았다는 말"],
+  lies: ["해고 사유가 적힌 서면은 한 장도 받지 못했다는 말", "임금협상 때 노조 서명을 받아 줬다는 말", "후배와 말다툼만 했을 뿐 손은 대지 않았다는 말"],
   lieIndex: 2, touchIndex: 0,
   confession: "…술김에 한 대 친 건 맞습니다. 근데 18년을 말 한마디로 자르는 게 맞습니까.",
   confessionCard: null,
@@ -3862,17 +3862,17 @@ window.CASES.push(
   client: { name: "남궁소연", age: 38, job: "프리랜서 디자이너", face: "rep" },
   fee: 300, bonus: 250,
   stake: 2500,
-  opening: "캐피탈사에서 제 이름으로 된 2,500만 원 대출을 갚으라고 독촉장이 와요. 저는 그런 대출 받은 적 없어요. 헤어진 남자친구가 제 폰으로 한 것 같아요.",
+  opening: "캐피탈사에서 제 이름으로 된 2,500만 원 대출을 갚으라고 독촉장이 와요. 저는 그런 대출 받은 적 없어요. 헤어진 남자친구가 옛집에 두고 온 제 예전 휴대폰으로 한 것 같아요.",
   questions: [
     { q: "대출이 실행된 날 어디 계셨어요?", a: "부산 출장 중이었어요. 호텔 영수증이랑 클라이언트 미팅 기록 다 있어요." },
-    { q: "전 남자친구가 휴대폰 비밀번호를 알았나요?", a: "…같이 살 때는 알았죠. 헤어지고도 안 바꾼 건 제 실수예요." },
+    { q: "전 남자친구가 휴대폰 비밀번호를 알았나요?", a: "…같이 살던 집에 제 예전 휴대폰을 두고 나왔어요. 거기에 인증서랑 은행 앱, 신분증 사진이 그대로 있었고, 그 폰 비밀번호를 그 사람이 알았죠. 헤어지고도 정리 안 한 건 제 실수예요." },
     { q: "대출금은 어디로 들어갔어요?", a: "제 계좌로 들어왔다가 그날 바로 빠져나갔더라고요. 받는 사람이 그 사람이에요." },
     { q: "경찰에는 신고하셨어요?", a: "사기랑 사문서위조로 고소했어요. 그 사람 조사도 받았대요." }
   ],
   evidence: [
     { id: "e1", name: "고소장 접수증·사건 진행 조회", desc: "전 남자친구 상대 고소, 피의자 조사 완료", detail: "피의자가 '급해서 그랬다'고 진술했다는 담당 수사관 메모가 있다.", value: 2 },
     { id: "e2", name: "캐피탈사 회신·출장 증빙", desc: "대출 신청 IP와 원고의 당일 위치", detail: "신청 IP는 서울 원고 옛집 근처. 같은 시각 부산 호텔에 원고의 체크인 기록이 있다.", value: 1 },
-    { id: "e3", name: "전 남자친구 카톡·계좌 내역", desc: "\"급해서 니 폰으로 했어 내가 갚을게\"", detail: "입금 7분 뒤 같은 금액이 그 사람 계좌로 이체된 내역이 붙어 있다.", value: 1 },
+    { id: "e3", name: "전 남자친구 카톡·계좌 내역", desc: "\"급해서 니 예전 폰으로 했어 내가 갚을게\"", detail: "입금 7분 뒤 같은 금액이 그 사람 계좌로 이체된 내역이 붙어 있다.", value: 1 },
     { id: "e4", name: "휴대폰 사진첩 캡처", desc: "원고 신분증 사진", detail: "촬영 날짜와 촬영자는 나와 있지 않다.", value: 0 }
   ],
   suspicions: ["대출을 알고 함께 썼다", "남자친구에게 대출을 허락했었다", "대출금 일부를 나눠 가졌다"],
@@ -5254,7 +5254,7 @@ window.CASES.push(
     { q: "항공사는 뭐라고 해요?", a: "규정상 운임 일부만 보상한대요. 그걸로 끝내라는 거죠." }
   ],
   evidence: [
-    { id: "e1", name: "지연 안내 문자", desc: "출발 3시간 10분 지연, 사유: 기체 정비", detail: "항공사 문자에 '정비로 인한 지연'이라고 적혀 있다.", value: 2 },
+    { id: "e1", name: "지연 안내 문자", desc: "출발 3시간 10분 지연, 사유: 기체 정비", detail: "항공사 문자에 '정비로 인한 지연'이라고 적혀 있다. 문자를 보낸 시각은 원래 출발 시각 20분 전이다.", value: 2 },
     { id: "e2", name: "미팅 확정 메일", desc: "오사카 바이어와 오후 2시 미팅 확정", detail: "출국 열흘 전 메일이다. 그 뒤로 이어진 메일은 출력돼 있지 않다.", value: -2 },
     { id: "e3", name: "회사 경위서", desc: "\"지연으로 계약이 무산되었음\" 팀장 확인", detail: "작성일이 출국 두 달 뒤, 소송 준비를 시작한 다음이다.", value: -3 },
     { id: "e4", name: "탑승권·택시 영수증", desc: "지연 편 탑승권과 간사이공항 택시 영수증", detail: "늦게 도착해 전철 대신 택시를 탄 요금(1만 8천 엔)이 찍혀 있다.", value: 1 }
@@ -5264,7 +5264,7 @@ window.CASES.push(
   lies: ["미팅 전날 바이어와 확인 메일만 주고받고 별일 없었다는 말", "비행기가 3시간 넘게 늦었다는 말", "항공사가 운임 일부만 보상하겠다고 했다는 말"],
   lieIndex: 0,
   touchIndex: 0,
-  confession: "…전날 밤에 바이어가 미팅 취소 메일을 보냈어요. 비행기는 그냥 탔고요. 실적 깨진 걸 누구 탓으로라도 돌리고 싶었어요.",
+  confession: "…전날 밤 열한 시에 바이어가 미팅 취소 메일을 보냈어요. 저는 그걸 다음 날 아침 공항에서 봤고요. 출장비 결재도 다 났고, 오사카에 가서 얼굴 보고 사정하면 마음을 돌릴 수도 있겠다 싶어서 그냥 탔어요. 결국 못 만났고, 실적 깨진 걸 누구 탓으로라도 돌리고 싶었어요.",
   confessionCard: null,
   arguments: [
     { id: "a1", text: "정비로 인한 지연은 피고 책임이므로 규정상 지연 보상금과 실제 든 추가 비용을 배상해야 한다", value: 1 },
@@ -6061,10 +6061,11 @@ window.CASES.push(
     { q: "피아노는 언제 사셨어요?", a: "8년 전에 600만 원 주고 샀어요. 조율도 1년에 두 번씩 했어요." },
     { q: "떨어뜨리는 걸 보셨어요?", a: "아뇨, 저는 새집에 먼저 가 있었어요. 엄마가 봤어요. 계단에서 쾅 소리가 났대요." },
     { q: "이사 전 피아노 상태는요?", a: "멀쩡했죠. 이사 전날 딸이 치는 영상도 있어요." },
-    { q: "업체에 뭐 써 준 건 있어요?", a: "짐 다 내리고 직원이 사인하라고 해서 했어요. 정신이 없어서 뭔지 잘 안 봤어요." }
+    { q: "업체에 뭐 써 준 건 있어요?", a: "짐 다 내리고 직원이 사인하라고 해서 했어요. 정신이 없어서 뭔지 잘 안 봤어요." },
+    { q: "계약할 때 약관 설명은 들었어요?", a: "견적 받고 계약서에 사인만 했어요. 고가품은 따로 신고하라는 말은 못 들었어요." }
   ],
   evidence: [
-    { id: "e1", name: "조율사 점검표", desc: "1년 전 정기 조율, '상태 양호'", detail: "울림판·다리 항목 모두 '이상 없음'이다.", value: 1 },
+    { id: "e1", name: "조율사 점검표", desc: "넉 달 전 정기 조율, '상태 양호'", detail: "울림판·다리 항목 모두 '이상 없음'이다.", value: 1 },
     { id: "e2", name: "이사 전날 연주 영상", desc: "피아노 정면, 다리 네 개 모두 붙어 있음", detail: "영상 끝에 피아노 옆면까지 비친다.", value: 1 },
     { id: "e3", name: "어머니 진술서", desc: "\"계단에서 인부가 놓쳐 쾅 하고 떨어졌다\"", detail: "직원 이름표 '김ㅇㅇ 팀장'까지 적었다.", value: 1 },
     { id: "e4", name: "이삿짐 인수 확인서", desc: "업체 양식, 의뢰인 서명", detail: "'파손·이상 없음 확인'란에 체크와 서명이 있다.", value: -2 }
@@ -6415,7 +6416,7 @@ window.CASES.push(
   arguments: [
     { id: "a1", text: "분양 후 15일 안에 생긴 질병이므로 피고는 치료비를 배상해야 한다", value: 2 },
     { id: "a2", text: "피고가 설사를 스트레스 탓이라고 설명했으므로 원고가 병을 알고 분양받았다고 볼 수 없다", value: 1 },
-    { id: "a3", text: "아픈 강아지를 판 것은 동물보호법 위반이어서 계약은 무효다", value: 2 }
+    { id: "a3", text: "아픈 강아지를 판 것은 동물보호법 위반이어서 계약은 무효다", value: 0 }
   ],
   opponent: [
     { id: "o1", name: "집 감염 주장", desc: "\"분양 뒤에 집에서 감염된 것입니다.\"", power: 1, counters: ["e2", "a1"] },
@@ -7648,7 +7649,7 @@ window.CASES.push(
   arguments: [
     { id: "a1", text: "아파트는 혼인 중 부부가 함께 모은 재산이니 절반씩 나눠야 한다", value: 2 },
     { id: "a2", text: "이혼 무렵 청구인이 가져간 적금까지 분할 대상에 넣어 정산해야 한다", value: 1 },
-    { id: "a3", text: "생활비 대부분을 청구인이 댔으니 기여도를 60%로 인정해야 한다", value: 2 }
+    { id: "a3", text: "생활비 대부분을 청구인이 댔으니 기여도를 60%로 인정해야 한다", value: 0 }
   ],
   opponent: [
     { id: "o1", name: "특유재산 주장", desc: "\"계약금은 상대방 부모님이 대 준 돈입니다. 아파트는 상대방의 특유재산입니다.\"", power: 2, counters: ["e3"] },
@@ -10218,7 +10219,7 @@ window.CASES.push(
   arguments: [
     { id: "a1", text: "피고는 허락 없이 10년을 썼으니 10년 치 사용료 6,000만 원을 내야 한다", value: 2 },
     { id: "a2", text: "비워 달라고 통지한 2년 전부터의 사용료는 내야 한다", value: 1 },
-    { id: "a3", text: "피고는 남의 땅에 창고를 지은 불법행위자이니 위자료까지 물어야 한다", value: 2 }
+    { id: "a3", text: "피고는 남의 땅에 창고를 지은 불법행위자이니 위자료까지 물어야 한다", value: 0 }
   ],
   opponent: [
     { id: "o1", name: "사용 허락 사진·증언", desc: "\"원고가 창고 지을 때 와서 그냥 쓰라고 했습니다. 마을 사람들도 압니다.\"", power: 5, counters: ["a2"] },
@@ -11251,7 +11252,7 @@ window.CASES.push(
   ],
   opponent: [
     { id: "o1", name: "신고자 진술", desc: "\"신고자는 장난으로 경주를 하는 줄 알았다고 진술했습니다.\"", power: 2, counters: ["e1", "a2"] },
-    { id: "o2", name: "구간 단속 기록", desc: "\"10km 구간에서 차로를 9번 바꿨습니다.\"", power: 3, counters: ["a2"] }
+    { id: "o2", name: "신고자 블랙박스 영상", desc: "\"피고인은 10km 구간에서 차로를 9번 바꿨습니다.\"", power: 3, counters: ["a2"] }
   ],
   outcomes: {
     win: "피고인은 무죄.",
@@ -11839,7 +11840,7 @@ window.CASES.push(
     { q: "담배 피우세요?", a: "아뇨, 저 비흡연자예요. 한 번도 안 피웠어요." },
     { q: "탄 자국은 언제 처음 보셨어요?", a: "들어올 때부터요. 계약하던 날 봤어요. 아, 이삿날이었나. 아무튼 처음부터요." },
     { q: "나갈 때 집주인이 집을 둘러봤어요?", a: "아니요, 퇴실 점검 같은 거 없었어요. 열쇠만 받아 갔어요." },
-    { q: "도배는 언제 한 거래요?", a: "제가 들어오기 4년 전에 했대요. 그 뒤로 안 바꿨고요." }
+    { q: "도배랑 장판은 언제 한 거래요?", a: "둘 다 제가 들어오기 4년 전에 했대요. 그 뒤로 안 바꿨고요." }
   ],
   evidence: [
     { id: "e1", name: "임대차계약서", desc: "보증금 1,000만 원, 원상복구 특약 없음", detail: "도배·장판에 관한 특약은 따로 없다.", value: 2 },
@@ -11849,7 +11850,7 @@ window.CASES.push(
   ],
   suspicions: ["집 안에서 담배를 피웠다", "월세를 몇 달 밀렸다", "친구를 몰래 같이 살게 했다"],
   hiddenIndex: null,
-  lies: ["입주 때부터 탄 자국이 있었다는 말", "퇴실 점검이 없었다는 말", "도배를 입주 4년 전에 했다는 말"],
+  lies: ["입주 때부터 탄 자국이 있었다는 말", "퇴실 점검이 없었다는 말", "도배와 장판을 입주 4년 전에 했다는 말"],
   lieIndex: 0,
   touchIndex: 0,
   confession: "…사실 방에서 피웠어요. 창문 열고요. 탄 자국도 제가 낸 거예요. 사진은 나가기 전에 찍었어요.",
@@ -13887,7 +13888,7 @@ window.CASES.push(
   hiddenIndex: null,
   confession: "…솔직히 공사 끝난 건 4년 전이에요. 바빠서 손 놓고 있다가 요새 일이 없으니 생각난 거죠. 2년이라고 해야 받을 수 있을 것 같아서요.",
   deny: { say: "2년이라니까요. 내가 공사한 날짜를 모르겠어요?", proof: ["e1", "e2"], fail: "그거 갖고 왜 그래요. 2년 좀 넘은 거 맞아요." },
-  confessionCard: { id: "k", name: "공사 완료일 인정", desc: "공사는 4년 전 10월에 끝났고, 그 뒤 원장이 갚겠다고 한 적은 없다.", value: 1 },
+  confessionCard: { id: "k", name: "공사 완료일 인정", desc: "공사는 4년 전 10월에 끝났고, 개업 무렵 원장이 '조금만 기다려 달라'고 한 뒤로는 3년 넘게 연락이 없었다.", value: 1 },
   doomedNote: "공사대금은 3년이다. 4년 묵힌 잔금은 못 받는다.",
   lies: ["공사가 끝난 지 2년쯤 됐다는 말", "계약금과 중도금으로 4,000만 원을 받았다는 말", "천장 누수가 윗집 배관 탓이라는 말"],
   lieIndex: 0,
@@ -13898,7 +13899,7 @@ window.CASES.push(
     { id: "a3", text: "피고가 기다려 달라며 빚을 인정했으므로 시효는 중단되었습니다.", value: 1 }
   ],
   opponent: [
-    { id: "o1", name: "소멸시효 항변", desc: "\"공사는 4년 전 10월에 끝났습니다. 공사대금 채권은 3년이 지나 이미 소멸했습니다.\"", power: 5, counters: ["k", "a3"] },
+    { id: "o1", name: "소멸시효 항변", desc: "\"공사는 4년 전 10월에 끝났습니다. 공사대금 채권은 3년이 지나 이미 소멸했습니다.\"", power: 5, counters: ["k"] },
     { id: "o2", name: "하자 주장", desc: "\"천장 누수로 영업을 못 한 날이 많습니다.\"", power: 2, counters: ["a2"] }
   ],
   outcomes: {
@@ -16465,7 +16466,7 @@ window.CASES.push(
   arguments: [
     { id: "a1", text: "피고 현장소장이 직접 장비를 빌렸으므로 임대차계약의 당사자는 피고다", value: 2 },
     { id: "a2", text: "계약 당사자가 하청업체이더라도 피고는 직불 합의서로 임대료를 직접 지급하기로 약정했다", value: 1 },
-    { id: "a3", text: "피고 현장에서 피고 공사에 장비를 썼으므로 피고가 이익을 얻었다", value: 2 }
+    { id: "a3", text: "피고 현장에서 피고 공사에 장비를 썼으므로 피고가 이익을 얻었다", value: 0 }
   ],
   opponent: [
     { id: "o1", name: "하청 계약서·하청 대표 진술", desc: "\"장비는 하청 대표가 빌렸고, 현장소장은 반입 뒤에야 원고와 처음 통화했습니다.\"", power: 5, counters: ["k", "a2"] },
@@ -16792,7 +16793,7 @@ window.CASES.push(
   opening: "1심에서 졌어요. 지역 축제 출연료 1,500을 못 받았는데, 태풍 때문이라 어쩔 수 없대요. 근데 그날 축제는 체육관으로 옮겨서 다 했어요. 우리 팀만 빠졌다고요.",
   questions: [
     { q: "계약서에 날씨 얘기가 있어요?", a: "있어요. 기상 악화면 실내로 옮겨서 한다고요. 취소하면 출연료는 다 준다고 돼 있고요." },
-    { q: "그날 다른 팀은요?", a: "다섯 팀 다 체육관에서 했어요. 축제 SNS에 사진도 올라와 있어요." },
+    { q: "그날 다른 팀은요?", a: "우리 빼고 다른 다섯 팀은 다 체육관에서 했어요. 축제 SNS에 사진도 올라와 있어요." },
     { q: "공연 전날 주최 측이랑 연락했어요?", a: "했죠. 태풍 얘기 좀 하고… 걱정돼서 이런저런 말은 했는데, 그게 뭐 별거 아니에요." },
     { q: "당일엔 어디 계셨어요?", a: "체육관 앞에서 장비 싣고 세 시간 기다렸어요. 담당자가 대기하라고 해서요." }
   ],
@@ -16807,7 +16808,7 @@ window.CASES.push(
   confession: "…전날 밤에 '태풍이면 우리도 안 가는 게 낫겠다'고 보냈어요. 바로 담당자가 실내로 하니 기다리라고 해서 갔고요. 그 문자 보이면 우리가 포기한 걸로 볼까 봐 지웠어요.",
   deny: { say: "별말 안 했어요. 날씨 걱정 정도요.", proof: ["e4"], fail: "그건 아무 내용도 아니에요. 우린 공연하러 갔어요." },
   confessionCard: { id: "k", name: "전날 밤 문자 전체", desc: "\"안 가는 게 낫겠다\"는 문자 바로 뒤에 담당자가 \"실내로 진행하니 꼭 와 달라\"고 답했고, 밴드는 그 말대로 대기했다.", value: 1 },
-  lies: ["다섯 팀이 모두 체육관에서 공연했다는 말", "체육관 앞에서 세 시간 기다렸다는 말", "계약서에 실내 대체 조항이 있다는 말"],
+  lies: ["다른 다섯 팀은 모두 체육관에서 공연했다는 말", "체육관 앞에서 세 시간 기다렸다는 말", "계약서에 실내 대체 조항이 있다는 말"],
   lieIndex: null,
   touchIndex: null,
   arguments: [
@@ -19098,8 +19099,8 @@ window.CASES.push(
     { id: "o2", name: "안전검사 통과", desc: "\"놀이터는 작년 정기 안전검사를 통과했습니다.\"", power: 2, counters: ["a1", "a2"] }
   ],
   outcomes: {
-    win: "피고는 원고에게 9,000,000원 및 이에 대하여 2026. 5. 25.부터 다 갚는 날까지 연 12%의 비율로 계산한 돈을 지급하라.",
-    partial: "피고는 원고에게 4,500,000원을 지급하라. 원고의 나머지 청구를 기각한다.",
+    win: "피고는 원고에게 9,000,000원 및 이에 대하여 2026. 5. 25.부터 이 판결 선고일까지는 연 5%, 그 다음 날부터 다 갚는 날까지는 연 12%의 각 비율로 계산한 돈을 지급하라.",
+    partial: "피고는 원고에게 4,500,000원 및 이에 대하여 2026. 5. 25.부터 이 판결 선고일까지는 연 5%, 그 다음 날부터 다 갚는 날까지는 연 12%의 각 비율로 계산한 돈을 지급하라. 원고의 나머지 청구를 기각한다.",
     lose: "원고의 청구를 기각한다."
   },
   epilogue: "그 매트는 소장이 들어간 다음 주에 새로 깔렸다고 한다. 아이는 요즘도 그 미끄럼틀만 탄다더라."
@@ -21173,7 +21174,7 @@ window.CASES.push(
   questions: [
     { q: "수표는 언제 돌려받으셨어요?", a: "기소되고 두 달 뒤요. 거래처 사장한테 2천 다 갚고 원본 받아 왔어요." },
     { q: "부도 날 줄 알고 발행하셨어요?", a: "아니죠. 원청에서 그 주에 기성금 5천이 들어오기로 돼 있었어요. 그게 석 달 밀렸어요." },
-    { q: "거래처 사장님은 뭐래요?", a: "처벌 원하지 않는다고 써 줬어요. 30년 거래한 사이예요." },
+    { q: "거래처 사장님은 뭐래요?", a: "처벌 원하지 않는다고 써 줬어요. 대리점 열 때부터 20년 거래한 사이예요." },
     { q: "다른 부도 수표는 없어요?", a: "그거 한 장이에요. 당좌 튼 지 20년 만에 처음이에요." }
   ],
   evidence: [
@@ -21191,7 +21192,7 @@ window.CASES.push(
   touchIndex: null,
   arguments: [
     { id: "a1", text: "발행 당시에는 기성금이 들어올 예정이어서 부도를 예상할 수 없었습니다", value: 1 },
-    { id: "a2", text: "피고인은 30년 거래처와 원만히 정리했으니 선처해 주시기 바랍니다", value: 0 },
+    { id: "a2", text: "피고인은 20년 거래처와 원만히 정리했으니 선처해 주시기 바랍니다", value: 0 },
     { id: "a3", text: "피고인은 제1심 판결 선고 전에 수표를 회수했으므로 공소를 기각해야 합니다", value: 2 }
   ],
   opponent: [
@@ -22086,7 +22087,7 @@ window.CASES.push(
   lieIndex: null,
   touchIndex: null,
   arguments: [
-    { id: "a1", text: "피고는 원고가 쌓은 시장을 가로챘습니다", value: 2 },
+    { id: "a1", text: "피고는 원고가 쌓은 시장을 가로챘습니다", value: 0 },
     { id: "a2", text: "출원 전에 박람회에서 판 것은 맞지만, 12개월 안에 출원하며 신규성 상실 예외를 주장했으므로 등록은 유효합니다", value: 1 },
     { id: "a3", text: "피고 제품은 원고 등록디자인과 모양이 같으므로 디자인권 침해입니다", value: 2 }
   ],
@@ -22455,7 +22456,7 @@ window.CASES.push(
   ],
   evidence: [
     { id: "e1", name: "고용계약서", desc: "병원과 의뢰인이 맺은 계약서", detail: "'원장 월 급여 1,500만 원 고정'이라고 적혀 있고, 사용자 서명란에 투자자 이름이 있다.", value: -3 },
-    { id: "e2", name: "병원 운영 계좌 자료", desc: "병원 법인 통장 사본", detail: "인터넷뱅킹 이체 승인 휴대폰이 모두 투자자 번호로 등록돼 있다.", value: -3 },
+    { id: "e2", name: "병원 운영 계좌 자료", desc: "병원 명의 통장 사본", detail: "인터넷뱅킹 이체 승인 휴대폰이 모두 투자자 번호로 등록돼 있다.", value: -3 },
     { id: "e3", name: "환수 결정 통지서", desc: "요양급여비용 8억 5천만 원 전액 환수", detail: "'명의를 빌려준 의사의 가담 정도·얻은 이익은 따로 따지지 않음'이라고 적혀 있다.", value: 2 },
     { id: "e4", name: "진료 실적표", desc: "의뢰인 진료 환자 수", detail: "의뢰인이 하루 평균 60명을 직접 진료했다. 과잉 진료나 허위 청구 지적은 없다.", value: 1 }
   ],
@@ -22581,7 +22582,7 @@ window.MIRROR = {"a02":{"mirror":1},
 "m21":{"mirror":0,"card":{"id":"k","name":"직접 고용 인정","desc":"직접 뽑아 현금으로 월급 줬지만 등록증은 실제로 확인했다","value":1}},
 "m24":{"mirror":2,"card":{"id":"k","name":"통지서 수령 인정","desc":"통지서 받은 건 인정하고 12일 전 발송이라 송달 기간 위반을 다툰다","value":1}},
 "n01":{"mirror":2},
-"n03":{"mirror":0,"card":{"id":"k","name":"실내 흡연 인정","desc":"방에서 피운 건 인정하고 6년 지난 도배 감가만 다툼","value":1}},
+"n03":{"mirror":0,"card":{"id":"k","name":"실내 흡연 인정","desc":"방에서 피운 건 인정하고 6년 지난 도배·장판 감가만 다툼","value":1}},
 "n05":{"mirror":1},
 "n07":{"mirror":1,"card":{"id":"k","name":"간병 출입 인정","desc":"동거가 아닌 넉 달 간병임을 밝히고 보탠 2천만 원만 청구","value":1}},
 "n10":{"mirror":2,"card":{"id":"k","name":"외출 중 부상 인정","desc":"멍은 외출 때 생긴 것으로 인정하고 억제대 사용만 다툼","value":1}},
@@ -25997,7 +25998,11 @@ function screenCreate() {
     const miss = !S.name ? "heroName" : !S.firm ? "firmName" : null;
     if (miss) { const el = document.getElementById(miss); el.closest(".field").classList.add("need"); el.focus(); return; }
     S.hero = S.hero || "m";
-    if (S.mode === "opsNew") { if (!/(사무소|법인|로펌)/.test(S.firm)) S.firm += " 법무법인"; return opsStart(); }
+    if (S.mode === "opsNew") {
+      // 경쟁 법인과 같은 이름은 판도·소식에서 구별이 안 되므로 막는다
+      if (RIVALS0.some(r => shortFirm(r.name) === shortFirm(S.firm))) { const el = document.getElementById("firmName"); el.closest(".field").classList.add("need"); el.focus(); return toast("경쟁 법인과 같은 이름은 쓸 수 없습니다."); }
+      if (!/(사무소|법인|로펌)/.test(S.firm)) S.firm += " 법무법인"; return opsStart();
+    }
     if (!/(사무소|법인|로펌)/.test(S.firm)) S.firm += " 법률사무소";
     // 튜토리얼을 이미 해 봤으면 건너뛸지 묻는다
     const begin = withTut => { planDay(); if (withTut) S.today.unshift({ id: TUT_ID, status: "wait" }); save(); if (S.mode === "story") return storyFrame("open=" + S.hero, () => screenDayIntro()); screenOpening(screenDayIntro); };
@@ -26463,7 +26468,10 @@ function evCard(e, opts = {}) {
   </button>`;
 }
 
-const consultTalk = c => [`<div class="bubble">${esc(c.opening)}</div>`]
+// 운영 모드: 생각해 보고 오겠다던 손님이 다시 왔을 때 사연 앞에 하는 말
+const BACK_LINES = ["지난번에 생각해 보고 오겠다고 했던 사람이에요. 다른 데도 몇 군데 가 봤는데, 그래도 여기가 제일 나을 것 같아서 다시 왔어요.", "또 왔어요. 수임료 때문에 고민했는데, 집에 가서 생각해 보니 그래도 제대로 맡기는 게 맞겠더라고요.", "기억하세요? 저번에 상담만 받고 간 사람이에요. 다른 사무실은 얘기를 끝까지 안 들어 주더라고요."];
+const openBubble = c => (C && C.back ? `<div class="bubble">${esc(BACK_LINES[hash(c.id) % BACK_LINES.length])}</div>` : "") + `<div class="bubble">${esc(c.opening)}</div>`;
+const consultTalk = c => [openBubble(c)]
   .concat(C.asked.map(i => `<div class="me-row"><div class="bubble me">${esc(c.questions[i].q)}</div><div class="ava me-ava"><img src="${heroOf().img}" alt=""></div></div><div class="bubble">${esc(c.questions[i].a)}</div>`)).join("");
 // 판단·추궁 화면에 붙이는 자료: 대화 기록(기록 탭에서만 보임)과 증거(증거 탭 서랍)
 const caseRefs = () => `<div class="talk refs-talk">${consultTalk(C.c)}</div>
@@ -26488,7 +26496,7 @@ function screenConsult() {
   const c = C.c, left = (hired("jin") ? 4 : 3) - C.asked.length;
   // 휴대폰: 화면에는 한 장(처음 사연 또는 문답 하나)만 보이고, 이전·다음으로 넘겨 지난 대화를 본다
   const paged = !isPC();
-  const pages = [[`<div class="bubble">${esc(c.opening)}</div>`]].concat(C.asked.map(i => [`<div class="me-row"><div class="bubble me">${esc(c.questions[i].q)}</div><div class="ava me-ava"><img src="${heroOf().img}" alt=""></div></div>`, `<div class="bubble">${esc(c.questions[i].a)}</div>`]));
+  const pages = [[openBubble(c)]].concat(C.asked.map(i => [`<div class="me-row"><div class="bubble me">${esc(c.questions[i].q)}</div><div class="ava me-ava"><img src="${heroOf().img}" alt=""></div></div>`, `<div class="bubble">${esc(c.questions[i].a)}</div>`]));
   if (C.page == null || C.page >= pages.length) C.page = pages.length - 1;
   const talk = paged ? pages[C.page].join("") : consultTalk(c);
   const pager = paged && pages.length > 1 ? `<div class="talk-pager"><button class="tp-btn" data-tp="-1" ${C.page ? "" : "disabled"}>‹ 이전</button><span>${C.page ? `질문 ${C.page} / ${pages.length - 1}` : "처음 사연"}</span><button class="tp-btn" data-tp="1" ${C.page < pages.length - 1 ? "" : "disabled"}>다음 ›</button></div>` : "";
@@ -26854,7 +26862,8 @@ function caseNo(c) {
     : k === "fnon" ? (big ? "느합" : "느단")
     : k === "hold" ? "카단"
     : k === "gahap" ? "가합"
-    : (c.tier === 1 ? "가소" : c.tier === 2 ? "가단" : "가합");
+    // 민사 1심: 청구액(만원)으로 소액(3천만 원 이하)·단독(5억 원 이하)·합의를 가른다. 청구액이 없으면 사건 규모로
+    : c.stake ? (c.stake <= 3000 ? "가소" : c.stake <= 50000 ? "가단" : "가합") : (c.tier === 1 ? "가소" : c.tier === 2 ? "가단" : "가합");
   return `${ymOf((S && S.day) || 1)[0]}${code}${(1000 + hash(c.id) % 9000)}`;
 }
 function trialHead(c) {
@@ -26987,7 +26996,8 @@ function runTrial() {
     const cs = o.counters || [];
     // 숨긴 사실 폭로는 털어놓은 사실을 내고 맞는 주장까지 골라야 막힌다
     // kFull: 털어놓은 사실 카드 내용만으로 반박이 깨지는 경우는 카드만 내도 막힌다
-    const hit = c.truth === "hiding" && cs.includes("k") ? C.sub.has("k") && (o.kFull || cs.includes(C.arg)) : cs.some(id => C.sub.has(id) || id === C.arg);
+    // 거짓말 사건도 숨김 사건처럼, 털어놓은 사실 카드는 맞는 주장과 함께 낼 때만 막는다(털어놓게 하고도 거짓말 주장을 고르면 막지 못함)
+    const hit = (c.truth === "hiding" || c.truth === "liar") && cs.includes("k") ? C.sub.has("k") && (o.kFull || cs.includes(C.arg)) : cs.some(id => C.sub.has(id) || id === C.arg);
     // 거짓 의뢰인 사건의 결정타는 막지 못하면 그대로 패소
     const power = c.truth === "liar" && o.power >= 5 ? 12 : o.power;
     // 일부 막음(o.half): 반박을 절반만 깎아 낸다
@@ -27276,6 +27286,7 @@ function firmPop() {
   ov.querySelector("#fnCancel").onclick = close;
   ov.querySelector("#fnOk").onclick = () => {
     let f = ov.querySelector("#firmNew").value.trim();
+    if (f && isOps() && RIVALS0.some(r => shortFirm(r.name) === shortFirm(f))) return toast("경쟁 법인과 같은 이름은 쓸 수 없습니다.");
     if (f) { if (!/(사무소|법인|로펌)/.test(f)) f += " 법률사무소"; S.firm = f; save(); }
     close(); screenOffice();
   };
@@ -28316,6 +28327,7 @@ function opsRivalMonth() {
   // 순위(매출)와 움직임: 우리가 1위로 올라서면 한 법인이 성격대로 반응
   const firms = [{ n: S.firm, v: S.mon.fee + S.mon.bonus }].concat(S.rivals.map(r => ({ n: r.name, v: r.rev }))).sort((a, b) => b.v - a.v);
   S.rankPrev = S.rank || {}; S.rank = {}; firms.forEach((f, i) => { S.rank[f.n] = i + 1; });
+  S.myRev = S.mon.fee + S.mon.bonus; // 판도 표: 경쟁 법인처럼 지난 정산 때의 매출로 보인다
   S.move = null;
   if (S.rank[S.firm] === 1 && (S.rankPrev[S.firm] !== 1 || Math.random() < 0.25)) {
     const r = S.rivals[Math.floor(Math.random() * S.rivals.length)];
@@ -28399,7 +28411,7 @@ function opsVsApply(name, res) {
 // 판도표: 법인 · 명성 · 매출 · 순위
 function opsStandings() {
   S.rank = S.rank || {};
-  const rows = [{ n: S.firm, rep: S.rep, v: S.mon.fee + S.mon.bonus, me: true }].concat(S.rivals.map(r => ({ n: r.name, rep: Math.round(r.rep), v: r.rev || 0 })))
+  const rows = [{ n: S.firm, rep: S.rep, v: S.myRev != null ? S.myRev : S.mon.fee + S.mon.bonus, me: true }].concat(S.rivals.map(r => ({ n: r.name, rep: Math.round(r.rep), v: r.rev || 0 })))
     .sort((a, b) => (S.rank[a.n] || 9) - (S.rank[b.n] || 9));
   const mv = n => { const p = (S.rankPrev || {})[n], c = S.rank[n]; return !p || p === c ? `<span class="k-rk">–</span>` : p > c ? `<span class="k-rk up">▲${p - c}</span>` : `<span class="k-rk dn">▼${c - p}</span>`; };
   return `<div class="pn"><div class="k-sec">판도</div><div class="k-std"><span class="h">법인</span><span class="h">명성</span><span class="h r">매출</span><span class="h r">순위</span>
@@ -28450,6 +28462,9 @@ function opsNewMonth() {
   if (S.jg) S.jg.fresh = false;
   if (S.jg) { if (Math.random() < 0.05) { opsRepAdd(-5); S.jg = null; S.news.push("전관예우 기사가 났다. 영입한 변호사가 나갔다. 명성 −5"); } else if (--S.jg.left <= 0) { S.jg = null; S.news.push("전관 변호사와 계약이 끝났다"); } }
   if (S.jg) n += 2;
+  // 진실한 의뢰인을 거짓말쟁이로 몰아 떠나게 했으면 나쁜 소문만큼 손님이 준다(스피드 모드와 같게)
+  if (S.rumor) { const cut = Math.min(S.rumor, Math.max(0, n - 3)); n -= cut; if (cut) S.news.push(`나쁜 소문이 돌아 이번 달 손님이 ${cut}명 줄었다`); }
+  S.rumor = 0;
   S.market = market; S.share = { me: n };
   S.rivals.forEach(r => { S.share[r.name] = Math.round(market * r.pull / total); });
   // 사건 고르기: 안 해 본 것부터, 사무실 규모, 포털 광고면 거짓·지는 사건이 조금 더
@@ -28462,7 +28477,9 @@ function opsNewMonth() {
     shuffle(done).slice(0, n * 2).forEach(c => { const k = (S.vk[c.id] || 0) + 1; S.vk[c.id] = k; pool.push(ensureCase(c.id + "~" + k)); });
   }
   const w = c => (S.ads.portal && (c.truth === "liar" || c.doomed) ? 1.6 : 1) * (S.ads.tv && c.tier === 3 ? 1.5 : 1) * (S.jg && c.tier === 3 ? 2 : 1) * (S.ads.bus && c.tier === 1 ? 1.3 : 1) * ((S.office || 0) >= 3 && c.tier === 3 ? 1.3 : 1) * (c.ops ? 1.4 : 1);
-  const picks = (S.back || []).slice(0, n);
+  // 다시 오기로 한 손님은 그달 손님 수와 상관없이 모두 온다(모자라면 손님 수를 늘린다)
+  const picks = (S.back || []).slice();
+  if (picks.length > n) { n = picks.length; S.share.me = n; }
   S.back = [];
   while (picks.length < n && pool.length) {
     const tot = pool.reduce((a, c) => a + w(c), 0); let r = Math.random() * tot, i = 0;
@@ -28533,9 +28550,11 @@ function opsDebtPops(done) {
   const hint = inv ? staffSayP(pickPerson("inv", crewOf("inv")[0]), payStyle(c) === "poor" ? "재산이 거의 없어요. 지급명령이 확정돼도 강제집행으로 받을 게 없을 것 같아요." : "재산은 있어요. 지급명령을 신청하면 강제집행으로 받아 낼 수 있겠습니다.") : "";
   // 지급명령 신청과 강제집행 비용. 조현태 사무장이 있으면 절반
   const suitCost = crewOf("mgr").includes("jo") ? 25 : 50;
+  // 3년 결산 직전에는 지급명령 결과가 나올 달이 없으므로 신청할 수 없다
+  const last = S.day >= OPS_MONTHS, suitBtn = id => last ? "" : `<button class="mini gold" ${id}>지급명령 신청 ${won(suitCost)}</button>`;
   const d = opsPop(`<div class="k-pop"><div class="k-ev-face"><div class="portrait">${portrait(c)}</div></div><h3>${esc(x.name)} 씨 · ${won(x.amt)}</h3><div>"${esc(DEBT_EXCUSE[hash(x.id + S.day) % DEBT_EXCUSE.length])}"</div>${hint}
-    <div class="k-act"><button class="mini" data-a="dun">독촉</button><button class="mini gold" data-a="suit">지급명령 신청 ${won(suitCost)}</button><button class="mini" data-a="drop">포기</button></div>
-    <div class="sub">지급명령 신청 비용은 신청과 강제집행 비용을 합친 금액입니다.</div></div>`);
+    <div class="k-act"><button class="mini" data-a="dun">독촉</button>${suitBtn('data-a="suit"')}<button class="mini" data-a="drop">포기</button></div>
+    <div class="sub">${last ? "결산 직전이라 지급명령은 신청할 수 없습니다." : "지급명령 신청 비용은 신청과 강제집행 비용을 합친 금액입니다."}</div></div>`);
   const next = () => { x.popDay = S.day; save(); renderHud(); d.remove(); opsDebtPops(done); };
   const suit = () => { if (S.money < suitCost) return toast("돈이 모자랍니다."); S.money -= suitCost; x.state = "suit"; x.due = S.day + 1; next(); };
   const drop = () => { x.state = "lost"; next(); };
@@ -28553,8 +28572,8 @@ function opsDebtPops(done) {
     }
     // 독촉이 안 먹히면 그 자리에서 지급명령으로 넘어갈 수 있다
     d.innerHTML = `<div class="k-pop"><h3>${esc(x.name)} 씨 · ${won(x.amt)}</h3><div>독촉했지만 연락이 없습니다.</div>${hint}
-      <div class="k-act"><button class="mini gold" id="dbSuit">지급명령 신청 ${won(suitCost)}</button><button class="mini" id="dbLater">다음 달에</button><button class="mini" id="dbDrop">포기</button></div></div>`;
-    d.querySelector("#dbSuit").onclick = suit;
+      <div class="k-act">${suitBtn('id="dbSuit"')}<button class="mini" id="dbLater">다음 달에</button><button class="mini" id="dbDrop">포기</button></div></div>`;
+    if (!last) d.querySelector("#dbSuit").onclick = suit;
     d.querySelector("#dbLater").onclick = next;
     d.querySelector("#dbDrop").onclick = drop;
   });
@@ -28587,9 +28606,9 @@ const EV = {
   jg: { t: "전관 영입 제안", body: () => `고등법원 부장판사 출신 변호사가 1년 계약을 제안했습니다. 월 ${won(JG_PAY)}입니다.`,
     btns: () => [["영입한다", () => { S.jg = { left: JG_MONTHS + 1, fresh: true }; return "다음 달부터 12달 동안 월급을 내고, 손님이 달마다 2명 늘고, 3단계 사건 손님이 두 배로 찾아옵니다. 전관예우 기사가 나면 명성 −5에 계약이 끝납니다(달마다 5%)."; }], ["거절한다", () => "정중히 거절했습니다."]] },
   gift: { t: "고마운 의뢰인", face: true, body: e => `${BY_ID[e.id].client.name} 씨가 고맙다며 ${GIFTS[e.g][1]}.`, say: e => GIFTS[e.g][2],
-    btns: () => [["확인", () => { S.evGuest = (S.evGuest || 0) + 1; return ""; }]] },
+    btns: () => [["확인", () => { S.evGuest = (S.evGuest || 0) + 1; return "소개를 받아 다음 달 손님이 1명 늘어납니다."; }]] },
   visit: { t: "다시 찾아온 의뢰인", face: true, body: e => { const c = BY_ID[e.id]; return `"변호사님, 그때 ${c.category} 사건 정말 감사했습니다. 제 지인이 변호사를 찾길래 여기를 소개했어요."`; },
-    btns: () => [["확인", () => { S.evGood = (S.evGood || 0) + 1; S.evGuest = (S.evGuest || 0) + 1; return ""; }]] }
+    btns: () => [["확인", () => { S.evGood = (S.evGood || 0) + 1; S.evGuest = (S.evGuest || 0) + 1; return "소개를 받아 다음 달 손님이 1명 늘어납니다."; }]] }
 };
 function opsPickEvent(last) {
   S.ev = null;
@@ -28635,7 +28654,6 @@ function opsAssign() {
   // 얼굴 옆에 성격·분야를 적어 배정하면서 알 수 있게
   const tagOf = p => { if (p === "me") return "대표"; const a = myAssoc(p); return a ? `${TRAIT[a.trait]}${a.field ? " " + a.field : ""}` : ""; };
   const capHtml = () => people.map(p => `<span><img src="${opsFace(p)}" alt=""><b>${usedOf(p)}</b>/${capOf(p)} <small class="note">${esc(tagOf(p))}</small></span>`).join("");
-  const head = capHtml();
   const card = (x, i) => {
     const c = BY_ID[x.id];
     const picks = people.map(p => `<i class="${x.who === p ? "on" : ""}" data-as="${i}" data-p="${p}"><img src="${opsFace(p)}" alt=""></i>`).join("")
@@ -28658,7 +28676,7 @@ function opsAssign() {
   }
   // 그달 배정 화면을 처음 열면 자동 배정을 먼저 해 둔다(바꾸고 싶으면 칸을 눌러 고친다)
   if (S.autoDay !== S.day) { S.autoDay = S.day; if (!S.list.some(x => x.who)) autoAssign(); save(); }
-  show(`<div class="k-head"><h2>${monthLabel(S.day)} 의뢰인 ${S.list.length}명</h2><div class="k-cap">${head}</div></div>
+  show(`<div class="k-head"><h2>${monthLabel(S.day)} 의뢰인 ${S.list.length}명</h2><div class="k-cap">${capHtml()}</div></div>
     <div class="k-list">${S.list.map(card).join("")}</div>`,
     `<div class="row2"><button class="btn" id="asAuto">자동 배정</button><button class="btn primary" id="asDone">이대로 맡기기</button></div>`);
   // 자동 배정: 아직 안 정한 사건만. 분야 맞는 사건은 그 변호사에게, 큰 사건 두 건은 대표, 나머지는 고용 변호사 → 남으면 대표
@@ -28685,7 +28703,7 @@ function opsAssign() {
     S.confirmOut = false;
     S.list.forEach(x => { if (!x.who || x.who === "out" || (x.who !== "me" && !myAssoc(x.who))) { x.who = "out"; x.status = "out"; S.mon.out++; } });
     // 지갑 사정은 배정 때 정해 둔다(상담 도중 앱을 닫았다 다시 열어도 같은 값)
-    S.today = S.list.filter(x => x.who === "me").map(x => ({ id: x.id, status: "wait", pay: x.pay, wallet: 0.8 + Math.random() * 0.6 }));
+    S.today = S.list.filter(x => x.who === "me").map(x => ({ id: x.id, status: "wait", pay: x.pay, back: !!x.back, wallet: 0.8 + Math.random() * 0.6 }));
     S.reports = S.list.filter(x => x.who !== "me" && x.who !== "out").map((x, k) => opsMakeReport(x, k));
     // 수임료가 비싸다며 계약하지 않은 의뢰인은 생각해 보고 온다(다음 달 다시 올 수 있음)
     S.reports.filter(r => r.status === "left").forEach(r => { S.thinkers = (S.thinkers || []).concat({ id: r.id, pay: r.pay }); });
@@ -28773,7 +28791,7 @@ function opsMine() {
   }).join("");
   show(`<h2>내 의뢰인 ${S.today.length}명</h2><div class="visitors">${rows || `<div class="note">이번 달 직접 맡은 의뢰인이 없습니다.</div>`}</div>`,
     `<button class="btn primary" id="mBack">돌아가기</button>`);
-  on("[data-meet]", e => { S.idx = +e.currentTarget.dataset.meet; const t = S.today[S.idx]; startCase(t.id); if (t.wallet != null && C) C.wallet = t.wallet; if (C) C.wallet += (S.interior || 0) * 0.08; });
+  on("[data-meet]", e => { S.idx = +e.currentTarget.dataset.meet; const t = S.today[S.idx]; startCase(t.id); if (t.wallet != null && C) C.wallet = t.wallet; if (C) C.wallet += (S.interior || 0) * 0.08; if (C && t.back) { C.back = true; screenConsult(); } });
   on("#mBack", opsHub);
 }
 // 재판 준비 화면에서 [준비 끝] → 저장하고 목록으로
@@ -29142,7 +29160,7 @@ function trialScore(c, sub, argId, knows) {
   const arg = c.arguments.find(a => a.id === argId); s += arg ? arg.value : 0;
   c.opponent.forEach(o => {
     const cs = o.counters || [], used = id => sub.has(id) || id === argId;
-    const hit = c.truth === "hiding" && cs.includes("k") ? sub.has("k") && (o.kFull || cs.includes(argId)) : cs.some(used);
+    const hit = (c.truth === "hiding" || c.truth === "liar") && cs.includes("k") ? sub.has("k") && (o.kFull || cs.includes(argId)) : cs.some(used);
     const power = c.truth === "liar" && o.power >= 5 ? 12 : o.power;
     if (!hit) s -= (o.half || []).some(used) ? Math.ceil(power / 2) : power;
   });
@@ -29371,7 +29389,8 @@ function opsAfterYear() {
 }
 // 3년 결산: 순자산과 등급. 등급 점수 = 순자산 × (0.85 + 0.3 × 보고서 검토 정확도)
 function opsNet() {
-  const recv = (S.recv || []).filter(x => x.state === "wait" || x.state === "suit").reduce((a, x) => a + x.amt, 0);
+  // 받을 돈: 떼먹는 의뢰인의 대기 보수와 재산 없는 의뢰인의 지급명령 건은 받을 수 없으니 뺀다
+  const recv = (S.recv || []).filter(x => (x.state === "wait" && x.pay !== "bad") || (x.state === "suit" && !(BY_ID[x.id] && payStyle(BY_ID[x.id]) === "poor"))).reduce((a, x) => a + x.amt, 0);
   // 이전에 실제로 쓴 돈(예전 저장은 그때 이전 비용으로 계산)
   const moved = S.movedPaid > 0 ? S.movedPaid : OFFICES.slice(1, (S.office || 0) + 1).reduce((a, o) => a + o.cost, 0);
   const net = S.money + Math.round(recv / 2) + Math.round(moved / 2);
@@ -29527,7 +29546,7 @@ function opsFinal() {
     const d = opsPop(`<div class="k-pop"><div class="pn k-big"><div class="l">순자산</div><div class="v">${won(net)}</div></div>
       <div class="ledger"><span>현금</span><span class="r">${won(S.money)}</span><span>받을 돈의 절반</span><span class="r">${won(Math.round(recv / 2))}</span><span>사무실 이전에 쓴 돈의 절반(시설 가치)</span><span class="r">${won(Math.round(moved / 2))}</span>
       <span>보고서 검토 정확도</span><span class="r">${rv.n ? `${rv.ok}/${rv.n} (${Math.round(rate * 100)}%)` : "기록 없음"}</span>
-      <span>등급 점수 <span class="note">(순자산 ×${mult.toFixed(2)})</span></span><span class="r">${won(score)}</span>
+      <span>등급 점수 <span class="note">(${score > 0 ? "순자산 ×" + mult.toFixed(2) : "순자산 그대로"})</span></span><span class="r">${won(score)}</span>
       <span class="sum">재판</span><span class="r sum">${S.w || 0}승 ${S.p || 0}일부 ${S.l || 0}패</span></div>
       <button class="btn primary" id="finClose" style="text-align:center">닫기</button></div>`);
     d.querySelector("#finClose").onclick = () => d.remove();
