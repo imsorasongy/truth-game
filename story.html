@@ -1227,7 +1227,9 @@ function trial() {
     let j = 0;
     const go = () => {
       if (j >= arr.length) return fn();
-      const [w, t, d = 0, cut, cont] = arr[j++];
+      let [w, t, d = 0, cut, cont] = arr[j++];
+      // usEv: 우리가 맞는 증거를 낸 줄(컷인 문구만 다르다)
+      const evCut = cut === "usEv"; if (evCut) cut = "us";
       const run = () => {
         if ((w === "pros" || (c.people && c.people[w])) && w !== left) { fx[1] = "neutral"; left = w; }
         if (cut === "us") { fx = ["confident", "flustered"]; hit("hit-opp"); }
@@ -1243,7 +1245,7 @@ function trial() {
       if (!cut) return run();
       document.onclick = null; finishType();
       if (cut === "us") flash("white");
-      cutIn(courtFace(cut, "confident"), cut === "us" ? "이의 있음!" : "반박!", cut, run);
+      cutIn(courtFace(cut, "confident"), evCut ? "보십시오!" : "반박!", cut, run);
     };
     go();
   };
@@ -1261,7 +1263,7 @@ function trial() {
       return lineThen(bs.map((l, n) => [l[0], l[1], n ? 0 : -20, n ? undefined : "opp"]), after); }
     const okL = card === s.card ? s.ok : s.alt && s.alt[card]; // alt: 같은 점수로 인정되는 다른 증거와 그 대사
     // 맞는 증거를 내면 ev_<증거 id>를 남긴다. 뒤 대사가 그 증거를 전제하면 F(G => G.flags.ev_…)로 감싼다
-    if (okL) { G.flags["ev_" + s.card] = true; G.flags["evc_" + card] = true; if (s.flag) G.flags[s.flag] = true; return lineThen(okL.flatMap(t => typeof t === "function" ? [t(G)].filter(v => v != null) : [t]).map((t, n) => Array.isArray(t) ? [t[0], t[1], 0] : t.startsWith("(") ? ["w", t] : ["us", t, n ? 0 : s.gain, n ? undefined : "us"]), after); } // [말하는 사람, 대사]도 받는다
+    if (okL) { G.flags["ev_" + s.card] = true; G.flags["evc_" + card] = true; if (s.flag) G.flags[s.flag] = true; return lineThen(okL.flatMap(t => typeof t === "function" ? [t(G)].filter(v => v != null) : [t]).map((t, n) => Array.isArray(t) ? [t[0], t[1], 0] : t.startsWith("(") ? ["w", t] : ["us", t, n ? 0 : s.gain, n ? undefined : "usEv"]), after); } // [말하는 사람, 대사]도 받는다
     wrongCard(s, retry || after, after);
   };
   // 정답이 늘 같은 자리에 있지 않게 섞고, 넘어가는 선택지만 맨 아래에 둔다
