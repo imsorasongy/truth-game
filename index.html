@@ -25800,8 +25800,8 @@ function storyClearLoad() {
 function storyClearSave(k, v) { try { const c = storyClearLoad(); c[k] = v; localStorage.setItem(CLEAR_KEY, JSON.stringify(c)); } catch (e) {} }
 // 이야기 다시 하기: 역전재판처럼 장을 골라 다시 한다. 깬 장은 CLEAR, 안 깬 장은 제목을 숨기고 잠근다
 const REPLAY_CH = {
-  m: [["운수 좋은 날", "story-alley"], ["황폐한 집", "m2-tower"], ["사상누각", "m3-site"], ["수구여병", "m4-court"], ["그리고 아무도 말하지 않았다", "m4-kang-office"]],
-  f: [["책도둑", "story-dock"], ["바람의 그림자", "f2-storage"], ["눈감은 자들의 도시", "f3-bank"], ["남산의 이름", "f4-special"], ["그리고 아무도 말하지 않았다", "m4-kang-office"]]
+  m: [["운수 좋은 날", "ch-m1"], ["황폐한 집", "m2-tower"], ["사상누각", "ch-m3"], ["수구여병", "ch-m4"], ["그리고 아무도 말하지 않았다", "ch-h1"]],
+  f: [["책도둑", "ch-f1"], ["바람의 그림자", "ch-f2"], ["눈감은 자들의 도시", "ch-f3"], ["남산의 이름", "ch-f4"], ["그리고 아무도 말하지 않았다", "ch-h1"]]
 };
 const replayEndLabel = (k, end) => {
   const r = String(end || "").split("~")[0].replace(/^(blind_|false_)/, ""), civil = k === "m2" || k === "m3";
