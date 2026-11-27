@@ -539,11 +539,11 @@ function smenu() {
 // 저장: 법정·오프닝 중에는 마지막 자동 저장(행동 메뉴에 있던 때)을 그대로 쓴다
 function saveNow(n) {
   if (!G || G.prologue) return toast("이야기가 시작된 뒤에 저장할 수 있습니다.");
+  if (SLOTQ === "replay") return toast("다시 하기에서는 저장 칸에 남길 수 없습니다. 진행은 자동으로 저장됩니다.");
   const inCourt = app.classList.contains("court");
-  const old = localStorage.getItem(resumeKey(G.k));
-  if (String(n) !== String(SLOTQ)) { SLOTQ = String(n); askParent({ story: "save", slot: n }); }
-  if (inCourt) { if (old) try { localStorage.setItem(resumeKey(G.k), old); } catch (e) {} toast(old ? "이번 기일 준비하던 때로 저장했습니다." : "저장할 수 있는 지점이 아직 없습니다."); return; }
-  G.mid = true; saveResume(); toast(`${n}번 칸에 저장했습니다.`);
+  // 자동 저장은 지금 칸(자동 저장 칸)에만 쌓인다. 저장을 누르면 본 게임이 그 기록을 n번 칸으로 옮겨 적는다
+  if (inCourt) { if (!localStorage.getItem(resumeKey(G.k))) return toast("저장할 수 있는 지점이 아직 없습니다."); askParent({ story: "save", slot: n }); return toast("이번 기일 준비하던 때로 저장했습니다."); }
+  G.mid = true; saveResume(); askParent({ story: "save", slot: n }); toast(`${n}번 칸에 저장했습니다.`);
 }
 document.addEventListener("click", e => { const b = e.target.closest && e.target.closest(".smenu-b"); if (b) { e.stopPropagation(); smenu(); } }, true);
 // 스페이스바·엔터로 대사 넘기기(고르기 창·증거 창이 열려 있거나 버튼에 초점이 있으면 원래대로)

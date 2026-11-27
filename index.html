@@ -25470,13 +25470,13 @@ function pcPop(html) { const ov = document.createElement("div"); ov.className = 
 function pcLoad() {
   const rows = [1, 2, 3, 4, 5].map(n => { const v = loadSlot(n); return `<button class="slotb" data-ld="${n}" ${v ? "" : "disabled"}><b>${n}번 칸</b> ${v ? esc(v.name || "") + " · " + esc(v.firm || "") : "빈 칸"}<small>${v ? monthLabel(v.day, v) + " · 명성 " + v.rep : ""}</small></button>`; }).join("");
   const ov = pcPop(`<h3>불러오기</h3>${rows}`);
-  ov.querySelectorAll("[data-ld]").forEach(b => b.onclick = () => { const n = +b.dataset.ld, v = loadSlot(n); if (!v) return; ov.remove(); C = null; useSlot(n); S = v; resume(); });
+  ov.querySelectorAll("[data-ld]").forEach(b => b.onclick = () => { const n = +b.dataset.ld, v = loadSlot(n); if (!v) return; ov.remove(); C = null; loadGame(n); resume(); });
 }
 // 저장: 1~5번 칸 중에서 고른다. 다른 게임이 있는 칸이면 덮어쓸지 한 번 묻는다
 function pcSave() {
   const rows = [1, 2, 3, 4, 5].map(n => { const v = loadSlot(n); return `<button class="slotb" data-sv="${n}"><b>${n}번 칸</b>${n === SLOT ? " · 지금 칸" : ""} ${v ? esc(v.name || "") + " · " + esc(v.firm || "") : "빈 칸"}<small>${v ? monthLabel(v.day, v) + " · 명성 " + v.rep : ""}</small></button>`; }).join("");
   const ov = pcPop(`<h3>저장</h3>${rows}`);
-  const doSave = n => { ov.remove(); useSlot(n); save(); pcToast(`${n}번 칸에 저장했습니다.`); renderTabs(); };
+  const doSave = n => { ov.remove(); if (isStory()) storySaveTo(n); else { useSlot(n); save(); } pcToast(`${n}번 칸에 저장했습니다.`); renderTabs(); };
   ov.querySelectorAll("[data-sv]").forEach(b => b.onclick = () => {
     const n = +b.dataset.sv, v = loadSlot(n);
     if (n === SLOT || !v) return doSave(n);
@@ -25510,10 +25510,10 @@ function gameMenu() {
   };
   const saveMenu = () => {
     box(`<div class="sp-row">어느 칸에 저장할까요?</div>${[1, 2, 3, 4, 5].map(n => `<button class="btn" data-sv="${n}" style="text-align:left">${row(n, loadSlot(n), n === SLOT ? " · 지금 칸" : "")}</button>`).join("")}`);
-    const doSave = n => { close(); useSlot(n); save(); pcToast(`${n}번 칸에 저장했습니다.`); };
+    const doSave = n => { close(); storySaveTo(n); pcToast(`${n}번 칸에 저장했습니다.`); };
     ov.querySelectorAll("[data-sv]").forEach(b => b.onclick = () => {
       const n = +b.dataset.sv, v = loadSlot(n);
-      if (n === SLOT || !v) return doSave(n);
+      if (!v) return doSave(n);
       box(`<div class="sp-row">${n}번 칸의 기록(${esc(v.name || "")} · ${monthLabel(v.day, v)})이 지워집니다.</div><button class="btn primary" data-y style="text-align:center">덮어쓰기</button><button class="btn" data-no style="text-align:center">취소</button>`);
       ov.querySelector("[data-y]").onclick = () => doSave(n);
       ov.querySelector("[data-no]").onclick = saveMenu;
@@ -25522,7 +25522,7 @@ function gameMenu() {
   const loadMenu = () => {
     const auto = loadSlot(STORY_AUTO);
     box(`<div class="sp-row">어느 게임을 불러올까요?</div>${[1, 2, 3, 4, 5].map(n => { const v = loadSlot(n); return `<button class="btn" data-ld="${n}" style="text-align:left" ${v ? "" : "disabled"}>${row(n, v, n === SLOT ? " · 지금 칸" : "")}</button>`; }).join("")}${auto ? `<button class="btn" data-ld="${STORY_AUTO}" style="text-align:left"><b>↻</b> ${esc(auto.name || "")} · 스토리 모드 자동 저장 · ${monthLabel(auto.day, auto)}</button>` : ""}`);
-    ov.querySelectorAll("[data-ld]").forEach(b => b.onclick = () => { const n = +b.dataset.ld, v = loadSlot(n); if (!v) return; close(); C = null; useSlot(n); S = v; resume(); });
+    ov.querySelectorAll("[data-ld]").forEach(b => b.onclick = () => { const n = +b.dataset.ld, v = loadSlot(n); if (!v) return; close(); C = null; loadGame(n); resume(); });
   };
   document.body.appendChild(ov);
   main();
@@ -25622,7 +25622,7 @@ function screenCover() {
     const auto = loadSlot(STORY_AUTO);
     pickSlot("어느 게임을 불러올까요?", n => {
       const v = loadSlot(n); if (!v) return;
-      useSlot(n); S = v; resume();
+      loadGame(n); resume();
     }, auto ? `<button class="slot" data-slot="${STORY_AUTO}"><b>↻</b><span>${esc(auto.name || "")} · 스토리 모드 자동 저장<small>${monthLabel(auto.day, auto)} · 명성 ${auto.rep}</small></span></button>` : "");
   });
   const slotThen = go => pickSlot("어느 슬롯에서 시작할까요?", n => {
@@ -25691,12 +25691,12 @@ function storyFrame(query, done) {
       const reply = d => f.contentWindow && f.contentWindow.postMessage({ storyReply: 1, ...d }, "*");
       if (e.data.story === "slots") return reply({ sound: soundOn, list: [1, 2, 3, 4, 5].map(n => { const v = loadSlot(n); return { n, label: v ? `${v.name || ""} · ${monthLabel(v.day, v)}` : "" }; }) });
       if (e.data.story === "sound") { toggleSound(); return reply({}); }
-      if (e.data.story === "save") { if (S && !/slot=replay/.test(query)) { useSlot(+e.data.slot); save(); } return; }
+      if (e.data.story === "save") { if (S && !/slot=replay/.test(query)) storySaveTo(+e.data.slot); return; }
       if (e.data.story === "load" || e.data.story === "home") {
         removeEventListener("message", h); f.remove(); C = null;
         if (e.data.story === "home") return screenCover();
-        const v = loadSlot(+e.data.slot); if (!v) return screenCover();
-        useSlot(+e.data.slot); S = v; return resume();
+        if (!loadGame(+e.data.slot)) return screenCover();
+        return resume();
       }
       if (e.data.story !== "done") return;
       removeEventListener("message", h);
@@ -25966,6 +25966,32 @@ function playHidden(resume) {
 // 스토리 모드는 엔딩을 보면 그 판이 끝난다(일반 사건으로 이어 가지 않는다). 저장 칸을 불러와도 이 화면이 다시 뜬다
 const storyBadMsg = r => r === "left" ? "의뢰인이 떠났습니다" : "이 사건을 이기지 못했습니다";
 // 새로 여는 장은 예전 자동 저장을 지운다(같은 칸에서 새 게임을 시작한 경우 등)
+// 스토리 모드의 자동 저장은 자동 저장 칸(9)에만 쌓인다. 1~5번 칸은 플레이어가 저장을 눌렀을 때만 바뀐다
+const STORY_RES = "truth-story-resume-";
+// 이야기 안의 진행 기록(장마다 하나)을 칸에서 칸으로 통째로 옮겨 적는다
+function storyResCopy(from, to) {
+  try {
+    const ks = Object.keys(localStorage), a = STORY_RES + from + "-", b = STORY_RES + to + "-";
+    ks.filter(k => k.startsWith(b)).forEach(k => localStorage.removeItem(k));
+    ks.filter(k => k.startsWith(a)).forEach(k => localStorage.setItem(b + k.slice(a.length), localStorage.getItem(k)));
+  } catch (e) {}
+}
+// 저장: 지금 상태를 n번 칸에 적어 둔다. 지금 칸(자동 저장 칸)은 바꾸지 않는다
+function storySaveTo(n) {
+  save();
+  if (n === SLOT) return;
+  try { localStorage.setItem(slotKey(n), JSON.stringify(S)); } catch (e) {}
+  storyResCopy(SLOT, n);
+}
+// 불러오기: 스토리 모드 기록은 자동 저장 칸으로 옮겨 놓고 거기서 이어 간다. 불러온 칸은 그대로 남는다
+function loadGame(n) {
+  const v = loadSlot(n); if (!v) return null;
+  if (v.mode === "story" && n !== STORY_AUTO) {
+    try { localStorage.setItem(slotKey(STORY_AUTO), JSON.stringify(v)); } catch (e) {}
+    storyResCopy(n, STORY_AUTO); useSlot(STORY_AUTO);
+  } else useSlot(n);
+  S = v; return v;
+}
 function storyClearMid(ch, slot) { try { localStorage.removeItem("truth-story-resume-" + slot + "-" + ch); localStorage.removeItem("truth-story-resume-" + ch); } catch (e) {} }
 function storyEnd(bad) {
   S.ended = true; save();
