@@ -4624,8 +4624,8 @@ window.CASES.push(
   evidence: [
     { id: "e1", name: "근로계약서", desc: "월급 230만 원, 5년째 갱신", detail: "'상시 근로자'로 적혀 있다. 이번 계약기간은 내년 3월 31일까지다.", value: 2 },
     { id: "e2", name: "급여명세서", desc: "최근 3개월분", detail: "기본급과 수당이 항목별로 적혀 있다.", value: 1 },
-    { id: "e3", name: "근무일지", desc: "의뢰인이 쓴 경비 근무일지", detail: "10월 28일 칸에 의뢰인 글씨로 '11/20 종료 통보받음, 소장'이라고 적혀 있다.", value: -3 },
-    { id: "e4", name: "동료 진술서", desc: "\"박 씨는 갑자기 잘렸다.\"", detail: "같은 진술서에 '10월 말 경비실에서 송별회를 했다'는 줄이 있다.", value: -2 }
+    { id: "e3", name: "근무일지", desc: "의뢰인이 쓴 경비 근무일지", detail: "10월 28일 칸에 의뢰인 글씨로 '11/20 종료 통보받음, 소장'이라고 적혀 있다.", value: -3, withK: { arg: "a3", value: 1 } },
+    { id: "e4", name: "동료 진술서", desc: "\"박 씨는 갑자기 잘렸다.\"", detail: "같은 진술서에 '10월 말 경비실에서 송별회를 했다'는 줄이 있다.", value: -2, withK: { arg: "a3", value: 0 } }
   ],
   suspicions: ["미리 서면으로 통보를 받았다", "근무 중 졸다가 경고를 받았다", "다른 단지로 옮겨 갈 자리가 있었다"],
   hiddenIndex: null,
@@ -27011,6 +27011,13 @@ function formal(t) {
   if ("하크치니이되쁘프르".includes(s)) return head + setJong(s, 17) + "니다"; // 아니다 → 아닙니다
   return t.slice(0, -1) + "입니다";                             // 무효다 → 무효입니다
 }
+// 증거 한 장의 재판 점수. 거짓 의뢰인의 불리한 증거는 세 배로 깎인다.
+// withK: { arg, value } 가 있는 증거는, 털어놓은 사실 카드를 내고 그 주장(arg)을 골랐을 때 value로 계산한다
+//  (의뢰인이 인정한 사실을 보여 주는 증거는 그 사실을 전제로 한 주장에서는 불리하지 않고 오히려 뒷받침한다)
+function evVal(c, e, sub, argId) {
+  if (e.withK && sub.has("k") && (!e.withK.arg || e.withK.arg === argId)) return e.withK.value;
+  return c.truth === "liar" && e.value < 0 ? e.value * 3 : e.value;
+}
 function runTrial() {
   const c = C.c;
   const steps = [];
@@ -27021,7 +27028,7 @@ function runTrial() {
   const kText = d => d.split(/\.\s+/).map(x => formal(x)).join(". ") + ".";
   pool.filter(e => C.sub.has(e.id)).forEach(e => steps.push(kSaid(e)
     ? { cls: "ours", who: "우리 측 인정", text: e.say || kText(e.desc), d: e.value }
-    : { cls: "ours", who: "우리 측 증거", evName: e.name, text: `「${e.name}」${josaEul(e.name)} 제출합니다.`, d: c.truth === "liar" && e.value < 0 ? e.value * 3 : e.value }));
+    : { cls: "ours", who: "우리 측 증거", evName: e.name, text: `「${e.name}」${josaEul(e.name)} 제출합니다.`, d: evVal(c, e, C.sub, C.arg) }));
   // 상대 대리인의 말: 증거면 "「…」을 제출합니다." 뒤에 따옴표 안의 말만 하고, 증거 설명은 아래 작은 글씨로
   const oppSay = o => {
     const isArg = o.arg || /(주장|항변)$/.test(o.name), sub = isArg ? "" : `「${o.name}」${josaEul(o.name)} 제출합니다.`;
@@ -29390,7 +29397,7 @@ function opsGoAsk() {
 // 게임과 같은 점수 계산(재판 화면 없이)
 function trialScore(c, sub, argId, knows) {
   let s = 0;
-  c.evidence.concat(c.confessionCard ? [c.confessionCard] : []).forEach(e => { if (sub.has(e.id)) s += c.truth === "liar" && e.value < 0 ? e.value * 3 : e.value; });
+  c.evidence.concat(c.confessionCard ? [c.confessionCard] : []).forEach(e => { if (sub.has(e.id)) s += evVal(c, e, sub, argId); });
   const arg = c.arguments.find(a => a.id === argId); s += arg ? arg.value : 0;
   c.opponent.forEach(o => {
     const cs = o.counters || [], used = id => sub.has(id) || id === argId;
@@ -29504,7 +29511,7 @@ function opsTrialWhy(c, sub, argId, res) {
     (h ? hit : miss).push(o);
   });
   const top = l => l.slice().sort((x, y) => y.power - x.power)[0];
-  const neg = c.evidence.filter(e => sub.has(e.id) && e.value < 0).sort((x, y) => x.value - y.value)[0];
+  const neg = c.evidence.filter(e => sub.has(e.id) && evVal(c, e, sub, argId) < 0).sort((x, y) => x.value - y.value)[0];
   const out = [];
   if (res === "win") { if (hit.length) out.push(`상대의 「${top(hit).name}」${josaEul(top(hit).name)} 막아 냈습니다.`); }
   else {
