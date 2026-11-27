@@ -435,7 +435,7 @@ const PC_MQ = matchMedia("(min-width: 1100px) and (min-aspect-ratio: 4/3)");
 // 컴퓨터 배치는 아직 공개 전: 이 컴퓨터(localhost)에서만, 또는 주소에 ?pc=1을 붙였을 때만 켠다
 const PC_ON = /^(localhost|127.0.0.1)$/.test(location.hostname) || (() => { try { if (/[?&]pc=1/.test(location.search)) localStorage.setItem("truth-pc", "1"); return localStorage.getItem("truth-pc") === "1"; } catch (e) { return false; } })();
 const isPC = () => PC_ON && PC_MQ.matches;
-const PC_BG = /assets\/(office-[0-3]-[mf]\.jpg|court-2\.webp|judge-close\.webp|end-(top|close)-[mf]\.jpg)$/;
+const PC_BG = /assets\/(office-[0-3]-[mf]\.jpg|court-2\.webp|judge-close\.webp|end-(top|close)-[mf]\.jpg|story\/h1-door\.jpg)$/;
 let lastBg = "";
 function setBg(u) {
   lastBg = u;
@@ -8726,7 +8726,7 @@ CH.h1 = { hero: "m", speaker: "f", title: "마지막 이야기 · 그리고 아�
         ["윤서연", "그리고 한 변호사님 사무실 이름 정했어요? 같이 할 거면 간판을 바꿔야 해요."],
         ["한서준", "윤서연 법률사무소면 됩니다. 간판값도 아끼고요."],
         ["윤서연", "…그래요. 간판은 그대로 둘게요."]] },
-      { bg: "office", lines: [
+      { bg: "h1-door", lines: [
         "8월 1일 밤. 불을 끄려던 참에 의뢰인 한 사람이 서류 봉투를 두 손으로 들고 사무실 문을 두드렸다.",
         "한 변호사가 먼저 일어나 탕비실로 갔다. 지난봄에 새로 산 주전자에 물을 올렸다.",
         ["한서준", "차부터 드시고, 처음부터 천천히 말씀해 주십시오. 중간에 끊지 않겠습니다."],
