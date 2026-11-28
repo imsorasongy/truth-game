@@ -25528,7 +25528,7 @@ function gameMenu() {
   const loadMenu = () => {
     const auto = loadSlot(STORY_AUTO);
     box(`<div class="sp-row">어느 게임을 불러올까요?</div>${[1, 2, 3, 4, 5].map(n => { const v = loadSlot(n); return `<button class="btn" data-ld="${n}" style="text-align:left" ${v ? "" : "disabled"}>${row(n, v, n === SLOT ? " · 지금 칸" : "")}</button>`; }).join("")}${auto ? `<button class="btn" data-ld="${STORY_AUTO}" style="text-align:left"><b>↻</b> ${esc(auto.name || "")} · 스토리 모드 자동 저장 · ${monthLabel(auto.day, auto)}</button>` : ""}`);
-    ov.querySelectorAll("[data-ld]").forEach(b => b.onclick = () => { const n = +b.dataset.ld, v = loadSlot(n); if (!v) return; close(); C = null; loadGame(n); resume(); });
+    ov.querySelectorAll("[data-ld]").forEach(b => b.onclick = () => { const n = +b.dataset.ld, v = loadSlot(n); if (!v) return; confirmStoryLoad(n, () => { close(); C = null; loadGame(n); resume(); }); });
   };
   document.body.appendChild(ov);
   main();
@@ -25628,7 +25628,7 @@ function screenCover() {
     const auto = loadSlot(STORY_AUTO);
     pickSlot("어느 게임을 불러올까요?", n => {
       const v = loadSlot(n); if (!v) return;
-      loadGame(n); resume();
+      confirmStoryLoad(n, () => { loadGame(n); resume(); });
     }, auto ? `<button class="slot" data-slot="${STORY_AUTO}"><b>↻</b><span>${esc(auto.name || "")} · 스토리 모드 자동 저장<small>${monthLabel(auto.day, auto)} · 명성 ${auto.rep}</small></span></button>` : "");
   });
   const slotThen = go => pickSlot("어느 슬롯에서 시작할까요?", n => {
@@ -25990,6 +25990,17 @@ function storySaveTo(n) {
   storyResCopy(SLOT, n);
 }
 // 불러오기: 스토리 모드 기록은 자동 저장 칸으로 옮겨 놓고 거기서 이어 간다. 불러온 칸은 그대로 남는다
+// 스토리 모드 칸을 불러오면 자동 저장 칸이 그 기록으로 바뀐다. 자동 저장에 다른 진행이 있으면 먼저 묻는다
+function confirmStoryLoad(n, go) {
+  const v = loadSlot(n), a = loadSlot(STORY_AUTO);
+  if (!v || v.mode !== "story" || n === STORY_AUTO || !a || JSON.stringify(a) === JSON.stringify(v)) return go();
+  const ov = document.createElement("div"); ov.className = "staff-pop"; ov.style.zIndex = 60;
+  ov.innerHTML = `<div class="sp-card"><div class="sp-name">불러올까요?</div><div class="sp-row">지금 진행 중인 기록(자동 저장)이 ${n}번 칸의 기록으로 바뀝니다. 저장하지 않은 진행은 사라집니다.</div>
+    <div class="row2"><button class="btn primary" data-k="yes">불러오기</button><button class="btn" data-k="no">취소</button></div></div>`;
+  document.body.appendChild(ov);
+  ov.querySelector('[data-k="yes"]').onclick = () => { ov.remove(); go(); };
+  ov.querySelector('[data-k="no"]').onclick = () => ov.remove();
+}
 function loadGame(n) {
   const v = loadSlot(n); if (!v) return null;
   if (v.mode === "story" && n !== STORY_AUTO) {
