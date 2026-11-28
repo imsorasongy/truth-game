@@ -29119,7 +29119,7 @@ const susOf = s => /(이|아니|로|의|기)다$/.test(s) ? String(s).slice(0, -
 const josaEun = w => hasJong(w) ? "은" : "는";
 // 진술 요지는 고용 변호사가 물어본 질문 수만큼. 거짓 의뢰인의 거짓말과 보고서가 짚은 말은 항상 들어간다
 function opsSaidIdx(r) {
-  const c = BY_ID[r.id], must = c.truth === "liar" ? [c.lieIndex] : [];
+  const c = BY_ID[r.id], must = c.truth === "liar" ? [c.lieIndex] : c.truth === "hiding" && c.mirror != null ? [c.mirror] : [];
   if (r.verdict === "liar" && r.pickI != null && !must.includes(r.pickI)) must.push(r.pickI);
   const rest = c.lies.map((_, i) => i).filter(i => !must.includes(i)).sort((a, b) => hash(r.id + a) - hash(r.id + b));
   return must.concat(rest).slice(0, Math.max((r.qs || []).length, must.length)).sort((a, b) => a - b);
@@ -29184,7 +29184,7 @@ function opsReportLines(r) {
   if (r.verdict === "honest") L.push(a.trait === "sloppy" ? "그 증거 내용이 의뢰인 진술과 맞습니다." : `${nm(best)} 내용이 의뢰인 진술과 맞습니다.`,
     g.drop ? `${nm(g.drop)}${josaEun(g.drop.e.name)} 이 사건과 관계없다고 봤습니다.` : g.skip ? `${nm(g.skip)}${josaEun(g.skip.e.name)} 열어 보지 못했습니다.` : "숨기거나 사실과 다르게 말한 부분은 없어 보입니다.");
   else if (r.verdict === "hiding") L.push(`${nm(g.base)}${josaEul(g.base.e.name)} 보면 의뢰인이 말하지 않은 사실이 있습니다. ${susOf(c.suspicions[r.pickI])}입니다.`, ...(opsRecBack(r) ? [] : ["재판에서는 이 점을 조심하겠습니다."]));
-  else L.push(`의뢰인 진술 중 "${saidOf(c.lies[r.pickI]).replace(/\.$/, "")}"는 부분은 ${nm(g.base)}${josaGwa(g.base.e.name)} 맞지 않습니다.`, ...(opsRecBack(r) ? [] : ["그 부분과 관련된 증거는 빼고 가겠습니다."]));
+  else L.push(`의뢰인 진술 중 "${saidOf(c.lies[r.pickI]).replace(/\.$/, "")}"는 부분은 ${nm(g.base)}${josaGwa(g.base.e.name)} 맞지 않습니다.`, ...(opsRecBack(r) ? [] : ["그 부분은 의뢰인이 사실대로 인정하게 하고, 그 위에서 다투겠습니다."]));
   return L;
 }
 // 숨긴 사실·거짓말의 단서가 있는 증거: 들이밀면 털어놓는 증거(deny.proof), 없으면 가장 불리한 증거
@@ -29294,6 +29294,7 @@ function opsReport(i) {
   const r = S.reports[i];
   if (!opsRepValid(r)) { save(); return opsReports(); }
   const c = BY_ID[r.id], a = myAssoc(r.who) || opsAssoc(r.who) || ASSOC_POOL[0];
+  if (r.status === "pending" && !r.seen) { r.seen = true; save(); }
   const said = opsSaidIdx(r).map(k => formal(saidOf(c.lies[k])) + ".").concat(r.joint ? [`(동석 상담) ${r.joint}`] : []);
   const lines = opsReportLines(r);
   // 증거 목록에서 근거로 든 증거에 표시한다(돌려보낸 뒤 등 판단이 없는 보고서는 표시하지 않는다)
@@ -29322,7 +29323,7 @@ function opsReport(i) {
     const rows = S.reports.map((x, j) => ({ x, j })).filter(({ x }) => opsRepValid(x)).map(({ x, j }) => { const cc = BY_ID[x.id]; return `<button class="pc-rrow ${j === i ? "on" : ""} ${x.status !== "pending" ? "done" : ""}" data-rp="${j}"><img src="${opsFace(x.who)}" alt=""><span class="m">${esc(cc.client.name)} · ${esc(cc.category)}<small>${esc(opsName(x.who))} 변호사</small></span><span class="st">${j === i && !done ? "검토 중" : REP_ST[x.status] || ""}</span></button>`; }).join("");
     show(`<button class="pc-back" id="rpHub">← 본부로</button><div class="eyebrow">이번 달 보고서 ${S.reports.filter(x => opsRepValid(x)).length}건</div><div class="pc-rlist">${rows}</div>
       <div class="eyebrow">의뢰인</div><div class="pc-client"><div class="portrait">${portrait(c)}</div><div><b>${esc(c.client.name)}</b> <span>${c.client.age ? c.client.age + "세 · " : ""}${esc(c.client.job || "")}</span><p>"${esc(c.opening)}"</p></div></div>${hint}`, acts);
-    pcStage(`<div class="pcs-doc k-doc">${docInner}</div><div class="pcs-bubble">"${esc(lines[1] || lines[0])}"</div>
+    pcStage(`<div class="pcs-doc k-doc">${docInner}</div><div class="pcs-bubble">"${esc((lines[1] || lines[0]).replace(/^그 증거 /, (b => `${b.n}번 「${b.e.name}」 `)(opsBestEv(r))))}"</div>
       <div class="pcs-assoc"><img src="${a.face}" alt=""><div class="plate"><b>${esc(a.name)}</b><span>${TRAIT[a.trait]}${a.field ? " " + a.field : ""} · ${a.lvl}단계 · 이번 달 ${S.list.filter(x => x.who === a.id).length}건 · ${opsAccTxt(myAssoc(r.who))}</span></div></div>`, "ops-rep");
     on("[data-rp]", e => opsReport(+e.currentTarget.dataset.rp));
     on("#rpHub", opsHub);
@@ -29420,7 +29421,8 @@ function opsWhy(i) {
   };
   const answer = (kind, k) => {
     const ok = kind === c.truth && (kind === "honest" || k === (c.truth === "hiding" ? c.hiddenIndex : c.lieIndex))
-      || (c.truth === "liar" && kind === "hiding" && k === c.touchIndex);
+      || (c.truth === "liar" && kind === "hiding" && k === c.touchIndex)
+      || (c.truth === "hiding" && kind === "liar" && c.mirror != null && k === c.mirror);
     const apply = () => {
       if (ok) {
         r.verdict = c.truth; r.pickI = c.truth === "hiding" ? c.hiddenIndex : c.truth === "liar" ? c.lieIndex : null; r.fixed = true; r.over = false;
@@ -29487,10 +29489,13 @@ function trialScore(c, sub, argId, knows) {
 function bestPlay(c, knows) {
   // knows: 진실을 아는가. 알면 위험 증거 빼고 털어놓은 사실 카드까지, 모르면 다 내고 겉보기 좋은 주장
   if (!knows) { const sub = new Set(c.evidence.map(e => e.id)); const arg = c.arguments.slice().sort((a, b) => b.value - a.value)[0].id; return { sub, arg }; }
-  const sub = new Set(c.evidence.filter(e => e.value >= 0).map(e => e.id)); if (c.confessionCard) sub.add("k");
+  // 주장마다, 털어놓은 사실 카드와 함께 내면 불리하지 않은 증거(withK)까지 넣어 가장 좋은 조합을 고른다
   let best = null;
-  c.arguments.forEach(a => { const v = trialScore(c, sub, a.id); if (!best || v > best.v) best = { arg: a.id, v }; });
-  return { sub, arg: best.arg };
+  c.arguments.forEach(a => {
+    const sub = new Set(c.evidence.filter(e => e.value >= 0 || (c.confessionCard && (kVal(e, a.id) ?? -1) >= 0)).map(e => e.id)); if (c.confessionCard) sub.add("k");
+    const v = trialScore(c, sub, a.id); if (!best || v > best.v) best = { sub, arg: a.id, v };
+  });
+  return { sub: best.sub, arg: best.arg };
 }
 const noise = () => { const r = Math.random(); return r < 0.2 ? -1 : r > 0.8 ? 1 : 0; };
 const resOf = (sc, c) => c.doomed ? "lose" : sc >= 3 ? "win" : sc >= 1 ? "partial" : "lose";
@@ -29500,7 +29505,7 @@ function opsRun(watch) {
   S.opsJob = null;
   // 상담 안 한 손님은 떠남, 계약만 하고 준비 안 한 손님은 기본으로 준비
   S.today.forEach(t => { if (t.status === "wait" || t.status === "deal") { t.status = "out"; S.mon.out++; } });
-  S.reports.forEach(r => { if (!opsRepValid(r)) return; if (r.status === "pending") { if (opsRecBack(r)) { r.status = "out"; S.mon.out++; } else r.status = "ok"; } });
+  S.reports.forEach(r => { if (!opsRepValid(r)) return; if (r.status === "pending") { if (!r.seen) r.seen = false; if (opsRecBack(r)) { r.status = "out"; S.mon.out++; } else r.status = "ok"; } });
   // 보고서 적중 기록(변호사별)과 대표의 보고서 검토 정확도: 확정된 보고서마다 한 번씩 센다
   S.rv = S.rv || { n: 0, ok: 0 };
   S.reports.forEach(r => {
@@ -29510,6 +29515,8 @@ function opsRun(watch) {
     const a = myAssoc(r.who), r0 = r.right0 != null ? r.right0 : r.right;
     if (a) { a.rpt = a.rpt || { n: 0, ok: 0 }; a.rpt.n++; if (r0) a.rpt.ok++; }
     // 맞게 처리: 지는 사건을 돌려보냈거나, 이길 수 있는 사건을 진실을 알고 맡았을 때
+    // 대표가 열어 보지 않고 넘긴 보고서는 검토 정확도에 넣지 않는다(예전 저장은 본 것으로)
+    if (r.seen === false) return;
     r.finOk = r.status === "out" ? !!c.doomed : !c.doomed && r.verdict === c.truth && !!(r.right || r.fixed);
     S.rv.n++; if (r.finOk) S.rv.ok++;
   });
@@ -29658,10 +29665,10 @@ function opsResults() {
   const outs = (S.reports || []).filter(r => r.status === "out" && BY_ID[r.id]);
   const outRows = outs.map(r => { const c = BY_ID[r.id]; return `<div class="mk-res"><img src="${opsFace(r.who)}" alt=""><div><div class="vn">${esc(c.client.name)} · ${esc(c.category)}</div>
       <div class="vm k-fb">${c.doomed ? "○ 이길 수 없는 사건이었습니다" : "✕ 이길 수 있는 사건이었습니다"}</div></div><div class="tag p">돌려보냄</div></div>`; }).join("");
-  const fin = (S.reports || []).filter(r => r.cnt && r.finOk != null);
+  const fin = (S.reports || []).filter(r => r.cnt && r.finOk != null), unseen = (S.reports || []).filter(r => r.cnt && r.seen === false).length;
   show(`<h2>${monthLabel(S.day)} 사건 결과</h2><div class="visitors">${rows || `<div class="note">이번 달 재판이 없었습니다.</div>`}</div>
     ${outRows ? `<div class="k-sec" style="margin-top:10px">돌려보낸 사건</div><div class="visitors">${outRows}</div>` : ""}
-    ${fin.length ? `<div class="pn">이번 달 보고서 ${fin.length}건 가운데 ${fin.filter(r => r.finOk).length}건을 맞게 처리했습니다.${S.rv && S.rv.n ? ` 지금까지 검토 정확도 ${Math.round(S.rv.ok / S.rv.n * 100)}%` : ""}</div>` : ""}
+    ${fin.length || unseen ? `<div class="pn">${fin.length ? `이번 달 검토한 보고서 ${fin.length}건 가운데 ${fin.filter(r => r.finOk).length}건을 맞게 처리했습니다.` : ""}${unseen ? ` 열어 보지 않고 넘긴 보고서 ${unseen}건은 검토 정확도에 넣지 않았습니다.` : ""}${S.rv && S.rv.n ? ` 지금까지 검토 정확도 ${Math.round(S.rv.ok / S.rv.n * 100)}%` : ""}</div>` : ""}
     ${(S.mon.up || []).length ? `<div class="pn">${S.mon.up.map(esc).join(", ")} 변호사가 한 단계 성장했습니다.</div>` : ""}`,
     `<button class="btn primary" id="toSettle">이번 달 정산</button>`);
   on("#toSettle", opsSettle);
