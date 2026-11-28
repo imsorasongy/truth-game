@@ -475,6 +475,20 @@ html[data-scene^="end"] #backdrop::after { background: linear-gradient(180deg, #
 .ofc-tile { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left; font: inherit; color: inherit; cursor: pointer; }
 .ofc-tile .pn-name { font-size: calc(17px * var(--pcf)); }
 .sp-row.need { color: #e8a37a; }
+.mv-card { width: min(100%, 420px) !important; align-items: stretch !important; text-align: left; }
+.mv-card .sp-name { text-align: center; }
+.mv-h { font-weight: 700; color: #e7c56a; margin-top: 4px; font-size: calc(15px * var(--pcf)); }
+.mv-h small { color: var(--muted); font-weight: 400; margin-left: 6px; }
+.mv-g { display: grid; grid-template-columns: 1.3em 1fr auto; gap: 3px 8px; font-size: calc(14px * var(--pcf)); color: #e6dac6; }
+.mv-t { display: grid; grid-template-columns: 1fr auto auto; gap: 3px 16px; font-size: calc(14px * var(--pcf)); color: #e6dac6; border-top: 1px solid #c9a24a55; padding-top: 5px; }
+.mv-t .r { text-align: right; } .mv-m { color: var(--muted); } .mv-ok { color: #8fd49a; } .mv-no { color: #ff9a86; }
+.mv-n { font-size: calc(13.5px * var(--pcf)); color: var(--muted); line-height: 1.6; }
+html.pc .mv-card { width: min(100%, 580px) !important; gap: 5px !important; padding: 16px 26px !important; }
+.mv-card { max-height: 94vh; overflow-y: auto; gap: 5px !important; }
+html.pc .mv-g, html.pc .mv-t { font-size: calc(16px * var(--pcf)); gap: 2px 16px; } html.pc .mv-h { font-size: calc(17px * var(--pcf)); } html.pc .mv-n { font-size: calc(15px * var(--pcf)); }
+.k-doc .k-concl { background: #e8dcc0; border: 1px solid #b8964e; border-radius: 8px; padding: 2px 12px 10px; margin: 10px 0 4px; }
+.k-doc .k-concl .k-sec { margin-top: 8px; }
+.k-doc .k-said0 { margin-top: 6px; padding-left: 10px; border-left: 3px solid #c9a24a88; color: #4a3a2a; }
 .term { border-bottom: 1.5px dotted var(--brass); cursor: help; }
 .term.seen { border-bottom-color: #c9a24a66; }
 .gl-pop .sp-card { align-items: stretch; text-align: left; gap: 0; padding: 16px 18px 14px; background: #241a12; border: 1px solid var(--brass); box-shadow: inset 0 0 0 4px #241a12, inset 0 0 0 5px #c9a24a55; }
@@ -584,6 +598,9 @@ details.howto .note { margin-top: 6px; }
 .k-pick i { width:30px; height:30px; border-radius:50%; overflow:hidden; border:2px solid #c9a24a33; opacity:.45; display:flex; align-items:center; justify-content:center; font-style:normal; font-size: calc(15px * var(--pcf)); color:var(--muted); background:#1a120d; cursor:pointer; }
 .k-pick i img { width:100%; height:100%; object-fit:cover; object-position:50% 12%; pointer-events:none; }
 .k-pick i.on { opacity:1; border-color:var(--brass); box-shadow:0 0 0 2px #c9a24a44; }
+.k-pk { display:flex; flex-direction:column; align-items:center; gap:2px; min-width:38px; }
+.k-pk em { font-style:normal; font-size: calc(11px * var(--pcf)); color:var(--muted); line-height:1.1; white-space:nowrap; }
+html.pc #app .k-pk { min-width:54px; } html.pc #app .k-pk em { font-size: calc(13px * var(--pcf)); }
 .k-menu { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
 .k-mb { position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; height:104px; border-radius:14px; background:#241912e6; border:1px solid #c9a24a55; font:inherit; font-size: calc(14.5px * var(--pcf)); font-weight:600; color:var(--text); text-align:center; line-height:1.3; padding:0 6px; cursor:pointer; }
 .k-mb svg { width:28px; height:28px; stroke:var(--brass); fill:none; stroke-width:1.6; }
@@ -633,7 +650,8 @@ details.howto .note { margin-top: 6px; }
 .k-big .d { font-size: calc(13.5px * var(--pcf)); color:var(--win); }
 .k-big .d.neg { color:var(--lose); }
 .k-due { display:flex; justify-content:space-between; align-items:center; gap:10px; font-size: calc(14px * var(--pcf)); padding:4px 0; }
-.k-act { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin:4px 0 8px; }
+.k-act { display:grid !important; grid-auto-flow:column; grid-auto-columns:1fr; gap:6px; margin:4px 0 8px; }
+html body .k-act .mini { width:100%; height:40px; border-radius:8px; padding:0 6px; font-size: calc(15px * var(--pcf)); }
 .k-toast { position:fixed; left:50%; bottom:110px; transform:translateX(-50%); background:#241912f2; border:1px solid var(--brass); color:var(--text); padding:9px 14px; border-radius:10px; z-index:60; font-size: calc(14px * var(--pcf)); max-width:86vw; text-align:center; }
 /* 보고서는 종이 문서처럼 */
 .k-doc { background:#f3ecdc; color:#2a1d14; border-radius:6px; padding:14px 14px 12px; box-shadow:0 4px 16px #0006; }
@@ -650,6 +668,7 @@ details.howto .note { margin-top: 6px; }
 .k-evr.on { background:#e8dcc0; }
 .k-evd { font-size: calc(13.5px * var(--pcf)); line-height:1.55; color:#3a2a1c; background:#e8dcc0; padding:4px 10px 8px 18px; }
 .k-acts { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+.k-acts:has(> .btn:nth-child(3):last-child) { grid-template-columns:1fr 1fr 1fr; }
 .k-acts .btn { width:100%; height:46px; margin:0; padding:0 6px; text-align:center; font-size: calc(15px * var(--pcf)) !important; white-space:nowrap; display:flex; align-items:center; justify-content:center; gap:5px; }
 .k-acts .btn small { opacity:.75; font-size: calc(12px * var(--pcf)); }
 .k-why { width:320px; text-align:left; gap:8px; }
@@ -659,7 +678,7 @@ details.howto .note { margin-top: 6px; }
 .k-ask b { display:block; color:var(--brass); font-size: calc(13px * var(--pcf)); font-weight:600; }
 .k-nw { font-size: calc(14px * var(--pcf)); line-height:1.5; padding:4px 0 4px 12px; position:relative; }
 .k-nw::before { content:""; position:absolute; left:0; top:12px; width:5px; height:5px; border-radius:50%; background:var(--brass); }
-.mk-tiles { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.mk-tiles { display:grid; grid-template-columns:1fr 1fr; gap:8px; grid-auto-rows:1fr; }
 .mk-tiles .pn { position:relative; padding:9px 26px 9px 11px; cursor:pointer; border:1px solid #c9a24a55; }
 .mk-tiles .pn::after { content:"›"; position:absolute; right:10px; top:50%; transform:translateY(-50%); font-size: calc(24px * var(--pcf)); color:var(--brass); }
 .mk-seats { position:absolute; left:6px; right:6px; bottom:5px; z-index:1; display:grid; grid-template-columns:repeat(6,1fr); gap:3px; }
@@ -668,9 +687,9 @@ details.howto .note { margin-top: 6px; }
 .mk-more b { width:100%; max-width:40px; aspect-ratio:1; border-radius:50%; border:2px solid var(--brass); background:#1a120dcc; color:var(--brass); display:flex; align-items:center; justify-content:center; font-size: calc(15px * var(--pcf)); }
 .mk-fold { display:grid; grid-template-columns:repeat(6,1fr); gap:6px 3px; background:#241912; border:1px solid #c9a24a55; border-top:none; border-radius:0 0 10px 10px; margin:-6px 0 8px; padding:12px 6px 8px; }
 .mk-fold .ofc-seat img { max-width:40px; }
-.mk-res { display:grid; grid-template-columns:44px 1fr auto; gap:10px; align-items:center; background:var(--wood-2); border-radius:10px; padding:8px 12px; }
+.mk-res { display:grid; grid-template-columns:44px 1fr; gap:10px; align-items:center; background:var(--wood-2); border-radius:10px; padding:8px 12px; }
 .mk-res img { width:44px; height:44px; border-radius:50%; object-fit:cover; object-position:50% 12%; border:2px solid #c9a24a99; }
-.mk-res .tag { font-family:var(--f-display); font-size: calc(15px * var(--pcf)); }
+.mk-res .tag { font-family:var(--f-display); font-size: calc(14px * var(--pcf)); font-weight:400; display:inline-block; padding:1px 8px; border-radius:6px; border:1px solid currentColor; margin-right:4px; vertical-align:1px; }
 .mk-res .tag.w { color:var(--win); } .mk-res .tag.l { color:var(--lose); } .mk-res .tag.p { color:var(--brass); }
 .mk-ads { display:flex; flex-direction:column; gap:6px; }
 .mk-ad { display:grid; grid-template-columns:1fr auto; gap:2px 10px; align-items:center; background:var(--wood-2); border-radius:10px; padding:9px 12px; border:none; cursor:pointer; }
@@ -719,7 +738,7 @@ body.has-dock #app:not(.vn) { padding-bottom: 96px; }
 .title-box .hidden-story { position: absolute; left: 50%; top: 72%; transform: translateX(-50%); width: 56%; z-index: 2; box-shadow: 0 0 18px #c9a24a88; }
 
 /* 아래 탭 */
-#tabs { position: fixed; left: 0; right: 0; bottom: 0; margin: 0 auto; max-width: 480px; z-index: 8; display: grid; grid-template-columns: repeat(5, 1fr); height: calc(62px + env(safe-area-inset-bottom, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); background: #0d0806f5; border-top: 1px solid #c9a24a44; }
+#tabs { position: fixed; left: 0; right: 0; bottom: 0; margin: 0 auto; max-width: 480px; z-index: 8; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; height: calc(62px + env(safe-area-inset-bottom, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); background: #0d0806f5; border-top: 1px solid #c9a24a44; }
 #tabs .tab { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: calc(11px * var(--pcf)); color: var(--muted); background: none; border: none; }
 #tabs .tab svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 #tabs .tab.on { color: var(--brass); }
@@ -1357,6 +1376,7 @@ html.pc .pc-client b { font-family: var(--f-display); font-weight: 400; font-siz
 html.pc .pc-client span { font-size: calc(14px * var(--pcf)); color: var(--muted); }
 html.pc .pc-client p { margin: 6px 0 0; font-size: calc(16px * var(--pcf)); line-height: 1.55; color: var(--text); }
 html.pc .k-acts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+html.pc .k-acts:has(> .btn:nth-child(3):last-child) { grid-template-columns: 1fr 1fr 1fr; }
 html.pc body .k-acts .btn { height: auto; min-height: 78px; padding: 12px; font-size: calc(20px * var(--pcf)) !important; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; white-space: normal; }
 html.pc .k-acts .btn small, html.pc .k-acts small.pco { display: block; font-size: calc(13px * var(--pcf)); color: var(--muted); }
 html.pc .k-acts #rpOk { background: var(--brass); color: #2a1d10; border-color: var(--brass); }
@@ -17879,7 +17899,7 @@ window.CASES.push(
     { q: "지금 생활은 어떻게 하세요?", a: "일은 끊겼고, 동생이 반찬 갖다줘요." }
   ],
   evidence: [
-    { id: "e1", name: "1심 판결문", desc: "장애정도 심사 결과에 재량권 일탈·남용이 없다", detail: "판결 이유가 심사 당일 진단서 한 장만 인용했다. 6개월 치 재활 기록은 나오지 않는다.", value: 2 },
+    { id: "e1", name: "1심 판결문", desc: "장애정도 심사 결과가 위법하지 않다", detail: "판결 이유가 심사 당일 진단서 한 장만 인용했다. 6개월 치 재활 기록은 나오지 않는다.", value: 2 },
     { id: "e2", name: "재활병원 기록", desc: "6개월 치 재활 경과", detail: "'보행 보조기 없이 10m 이상 보행 불가', '우측 손 쥐기 불가'가 매달 적혀 있다.", value: 1 },
     { id: "e3", name: "주치의 소견서", desc: "\"우측 편마비, 일상생활 대부분 도움 필요\"", detail: "재활의학과 전문의가 썼다.", value: 1 },
     { id: "e4", name: "주차표지 사진", desc: "예전 장애인 주차표지", detail: "기한이 지난 표지다.", value: 0 }
@@ -24575,9 +24595,9 @@ window.CASE_NOTES = {
   note: "사실혼은 혼인신고만 하지 않았을 뿐 서로 혼인할 의사를 가지고 실제로 부부로 함께 사는 관계를 말합니다. 주민등록이 따로였더라도, 9년 동안 관리비를 내며 한집에서 살았고 병원에서 배우자로서 보호자 역할을 했다면 부부 공동생활의 실체가 있다고 봅니다. 한쪽이 사망한 뒤에도 유족연금처럼 그 관계로 생기는 권리가 있으면 과거의 사실혼관계 존재확인을 청구할 수 있습니다."
 },
 "t13": {
-  sum: "뇌출혈로 오른쪽 몸을 쓰지 못하게 된 구판석 씨는 장애정도 심사에서 '심하지 않은 장애' 결정을 받았고, 1심도 심사에 재량권 일탈이나 남용이 없다고 했습니다. 피고는 전문 심사기관의 의학적 판단은 존중돼야 하고, 재활을 계속하면 나아질 수 있다고 했습니다. 심사 당일 10분 진찰만 보고 '보조기 없이 10m 이상 보행 불가'가 매달 적힌 6개월 재활 기록을 고려하지 않은 결정은 위법하다는 점을 주장해 처분을 취소받았습니다.",
-  laws: ["행정소송법 제4조 제1호: 취소소송은 행정청의 위법한 처분을 취소하거나 변경하는 소송입니다.", "행정소송법 제27조(재량처분의 취소): 행정청의 재량에 속하는 처분이라도 재량권의 한계를 넘거나 남용했다면 법원은 이를 취소할 수 있습니다."],
-  note: "행정청이 처분을 할 때 고려해야 할 중요한 사실을 빠뜨리고 판단했다면, 그 처분은 재량권을 일탈하거나 남용한 것으로 위법합니다. 장애 정도는 하루의 상태가 아니라 지속되는 상태로 판단해야 하는데, 심사는 컨디션이 좋은 하루의 진찰만 보고 6개월 재활 기록과 주치의 소견을 반영하지 않았습니다. 그래서 장애정도 결정 처분이 취소됐습니다."
+  sum: "뇌출혈로 오른쪽 몸을 쓰지 못하게 된 구판석 씨는 장애정도 심사에서 '심하지 않은 장애' 결정을 받았고, 1심도 심사 결과가 위법하지 않다고 했습니다. 피고는 전문 심사기관의 의학적 판단은 존중돼야 하고, 재활을 계속하면 나아질 수 있다고 했습니다. 심사 당일 10분 진찰만 보고 '보조기 없이 10m 이상 보행 불가'가 매달 적힌 6개월 재활 기록을 고려하지 않은 결정은 위법하다는 점을 주장해 처분을 취소받았습니다.",
+  laws: ["행정소송법 제4조 제1호: 취소소송은 행정청의 위법한 처분을 취소하거나 변경하는 소송입니다."],
+  note: "장애정도 결정은 신청인의 실제 장애 상태를 바탕으로 해야 하므로, 행정청이 장애 상태를 판단하는 데 꼭 필요한 자료를 빠뜨려 실제보다 가볍게 결정했다면 그 처분은 위법합니다. 장애 정도는 하루의 상태가 아니라 지속되는 상태로 판단해야 하는데, 심사는 컨디션이 좋은 하루의 진찰만 보고 6개월 재활 기록과 주치의 소견을 반영하지 않았습니다. 그래서 장애정도 결정 처분이 취소됐습니다."
 },
 "t14": {
   sum: "서울에 사는 구자명 씨는 고향 논을 직접 경작하지 않는다는 이유로 군청에서 1년 안에 농지를 처분하라는 통지를 받았고, 1심도 통지가 적법하다고 했습니다. 구자명 씨는 주말마다 내려가 직접 농사를 짓는다고 했지만, 군청은 현장 조사서와 이웃 진술로 논을 이웃에게 빌려주고 쌀을 받아 왔다고 맞섰습니다. 군청의 사전통지서가 옛 주소로 보내져 '수취인 불명'으로 반송되었고 의견을 낼 기회도 없었다는 절차상 위법을 주장해 통지를 취소받았습니다.",
@@ -25325,9 +25345,11 @@ function renderHud() {
   on("#hudTap", () => { hudOpen = !hudOpen; renderHud(); });
 }
 function setDock(html) {
-  if (!html) { dock.hidden = true; dockInner.innerHTML = ""; document.body.classList.remove("has-dock"); return; }
+  if (!html) { dock.hidden = true; dockInner.innerHTML = ""; document.body.classList.remove("has-dock"); app.style.paddingBottom = ""; return; }
   dock.hidden = false; dockInner.innerHTML = html;
   document.body.classList.add("has-dock");
+  // 컴퓨터: 버튼 줄이 높아(버튼 여러 줄) 오른쪽 칸 끝을 덮으면, 덮는 만큼 오른쪽 칸 아래 여백을 늘려 끝까지 스크롤되게 한다
+  if (isPC()) requestAnimationFrame(() => { app.style.paddingBottom = ""; const over = app.getBoundingClientRect().bottom - dock.getBoundingClientRect().top; if (over > 0) app.style.paddingBottom = (24 + over) + "px"; });
 }
 
 /* ---------- 음악 (예전 게임 배경음악) ---------- */
@@ -26073,8 +26095,8 @@ const OPENING = [
   { scene: "office", step: "증거", img: "assets/op/s3.webp", body: () => "승소의 열쇠는 의뢰인의 말이 아니라 증거 속에 있다. 오늘도 나는 승소의 열쇠를 찾아 증거를 뒤진다. 대한민국 최고의 변호사가 되는 그 날까지." }
 ];
 const OPS_OPENING = [
-  { scene: "office", step: "설립", img: h => `assets/op/o1-${h}-blank.webp`, sign: h => h === "f" ? [[386, 100], [627, 40], [628, 100], [388, 148]] : [[324, 100], [638, 52], [638, 115], [324, 151]], body: f => { const n = /법무법인/.test(f) ? f : "법무법인 " + f; return `동기 두 명과 함께 ${n}${josaEul(n)} 설립했다. 이제 새로운 시작이라는 생각에 다들 열정이 넘쳤었지.`; } },
-  { scene: "office", step: "설립", img: h => `assets/op/o2-${h}.webp`, body: () => "하지만 동기들은 각자 다른 일로 바빠 사건을 거의 맡지 않는다. 법인 일은 사실상 내 몫이 됐다." },
+  { scene: "office", step: "설립", img: h => `assets/op/o1-${h}-blank.webp`, sign: h => h === "f" ? [[386, 100], [627, 40], [628, 100], [388, 148]] : [[324, 100], [638, 52], [638, 115], [324, 151]], body: f => { const n = /법무법인/.test(f) ? f : "법무법인 " + f; return `긴 어쏘 시절을 지나, 동기 두 명과 함께 ${n}${josaEul(n)} 설립했다. 이제 새로운 시작이라는 생각에 다들 열정이 넘쳤었지.`; } },
+  { scene: "office", step: "설립", img: h => `assets/op/o2-${h}.webp`, body: () => "하지만 동기들은 어느 순간 법조계에 관심이 없어졌는지 이름만 걸어놨을 뿐 출근도 안 한다." },
   { scene: "office", step: "설립", img: "assets/op/o3.webp", body: () => "내가 혼자 이 법인을 살려 내야 한다. 아니, 3년 안에 한빛, 정의, 우리들을 넘어서 우리 법인을 한국 최고의 로펌으로 만들겠다." }
 ];
 // 게임 방법: 항목을 누르면 펼쳐진다
@@ -28443,7 +28465,7 @@ function rivalPerCase(r) {
   if (RIVAL_PC[key] == null) { const l = CASES.filter(c => t.includes(c.tier)); RIVAL_PC[key] = l.reduce((a, c) => a + marketFee(c) + marketBonus(c) * 0.6, 0) / Math.max(1, l.length); }
   return RIVAL_PC[key] * feeMult(r.rep) * ({ ad: 1.15, cheap: 0.8, field: 1 }[r.style] || 1);
 }
-const whyOf = (r, c) => r.style === "ad" ? "광고 보고" : r.style === "cheap" ? "수임료가 싸서" : isCrim(c) ? `${RIVAL_FIELD} 전문이라` : "소개로";
+const whyOf = (r, c) => r.style === "ad" ? "광고를 보고" : r.style === "cheap" ? "수임료가 싸서" : isCrim(c) ? `${RIVAL_FIELD} 전문이라` : "소개를 받고";
 // 달 말: 경쟁 법인 쪽 한 달 — 우리가 못 맡은 손님의 행방과 결과, 명성, 순위, 움직임
 function opsRivalMonth() {
   const lost = [];
@@ -28494,10 +28516,11 @@ function opsMakeNews() {
   const news = [], rv = S.rivals || [];
   if (!rv.length || S.day <= 1) return news;
   const th = (S.lostThink || []).find(t => t.firm);
-  if (th) news.push(`생각해 보고 오겠다던 ${th.name} 씨가 ${fq(th.firm, "과", "와")} 계약했다(${th.why.replace(/ 보고$|이라$|로$/, "")})`);
-  else if ((S.flow || []).length) news.push(`못 맡은 손님 ${S.flow.reduce((a, f) => a + f.n, 0)}명 → ${S.flow.map(f => `${shortFirm(f.name)} ${f.n}(${f.why.replace(/ 보고$|이라$|로$/, "")})`).join(" · ")}`);
+  if (th) news.push(`생각해 보고 오겠다던 ${th.name} 씨는 ${th.why} ${fq(th.firm, "과", "와")} 계약했다`);
+  else if ((S.flow || []).length) { const tot = S.flow.reduce((a, f) => a + f.n, 0);
+    news.push(S.flow.length === 1 ? `우리가 못 맡은 손님 ${tot}명은 ${S.flow[0].why} ${fro(S.flow[0].name)} 갔다` : `우리가 못 맡은 손님 ${tot}명 가운데 ${S.flow.map(f => `${f.n}명은 ${f.why} ${fro(f.name)}`).join(" 갔고, ")} 갔다`); }
   const s = S.story;
-  if (s) news.push(s.doomed ? `우리가 돌려보낸 ${s.name} 씨 사건, ${fq(s.firm, "이", "가")} 맡아 패소했다` : `우리가 못 맡은 ${s.name} 씨 사건, ${fq(s.firm, "이", "가")} 맡아 이겼다`);
+  if (s) news.push(s.doomed ? `우리가 돌려보낸 ${s.name} 씨 사건을 ${fq(s.firm, "이", "가")} 맡았다가 졌다` : `우리가 못 맡은 ${s.name} 씨 사건을 ${fq(s.firm, "이", "가")} 맡아 이겼다`);
   if (S.leftNews) news.push(S.leftNews);
   else if (S.move) news.push(S.move);
   else { const r = rv[(S.day * 7) % rv.length], list = RIVAL_NEWS[r.style] || RIVAL_NEWS.ad;
@@ -28523,9 +28546,9 @@ function opsScoutCheck() {
   if (!next && crewOf("inv").length) { S.scout = { kind: "warn", id: a.id, rival, raise: raise(0.15) }; return; }
   if (a.trait === "nice" || Math.random() < 0.5) { S.scout = { kind: "ask", id: a.id, rival, raise: raise(0.3) }; return; }
   // 말없이 떠남
+  S.bye = { ...a, rival, kind: "silent" };
   S.assocs = S.assocs.filter(x => x.id !== a.id);
   const r = S.rivals.find(x => x.name === rival); if (r) r.rep = Math.min(100, r.rep + 2);
-  S.leftNews = `${a.name} 변호사가 사직서를 두고 ${fro(rival)} 옮겼다`;
 }
 // 달 시작 화면에 붙는 스카우트 장면. 고르면 true 를 돌려주며 다시 그린다
 function opsScoutBlock() {
@@ -28540,7 +28563,20 @@ function opsScoutBlock() {
   }
   return { html: `<div class="sec staff-say"><div class="sf"><img src="${a.face}" alt=""></div><div><div class="who">${esc(a.name)}</div>"${esc(voiceOf(a, "scout", { firm, amt: won(sc.raise) }) || `대표님, ${firm}에서 연락이 왔습니다. 월급을 ${won(sc.raise)} 올려 주시면 남겠습니다.`)}"</div></div>`,
     btns: [["올려 준다", () => { a.pay += sc.raise; a.slights = 0; S.scout = null; }],
-           ["보낸다", () => { S.assocs = S.assocs.filter(x => x.id !== a.id); if (S.mon && S.mon.costs) delete S.mon.costs["a:" + a.id]; const r = S.rivals.find(x => x.name === sc.rival); if (r) r.rep = Math.min(100, r.rep + 2); S.scout = null; toast(`${a.name} 변호사가 ${fro(sc.rival)} 옮겼습니다.`); }]] };
+           ["보낸다", () => { S.bye = { ...a, rival: sc.rival, kind: "sent" }; S.assocs = S.assocs.filter(x => x.id !== a.id); if (S.mon && S.mon.costs) delete S.mon.costs["a:" + a.id]; const r = S.rivals.find(x => x.name === sc.rival); if (r) r.rep = Math.min(100, r.rep + 2); S.scout = null; }]] };
+}
+// 작별 장면: 변호사가 다른 법인으로 옮길 때. 얼굴 · 옮겨 가는 법인 · 우리 법인에서 한 일 · 인사(말없이 떠났으면 직원이 알림)
+function opsByeBlock() {
+  const a = S.bye; if (!a) return null;
+  const firm = `「${shortFirm(a.rival)}」`;
+  const months = a.since != null ? Math.max(1, S.day - a.since) : null;
+  const rec = [months ? `우리 법인에서 ${months}개월` : "", `승소 ${a.wins || 0}건`, opsAccTxt(a)].filter(Boolean).join(" · ");
+  const head = `<div class="k-ev-face"><div class="portrait"><img src="${a.face}" alt="" style="width:100%;height:100%;object-fit:cover;object-position:50% 12%"></div></div>
+    <h3>${esc(a.name)} 변호사가 ${esc(fro(a.rival))} 옮겼습니다</h3><div class="sub" style="text-align:center">${esc(rec)}</div>`;
+  if (a.kind === "sent") return head + `<div class="k-nw" style="margin-top:10px">"${esc(voiceOf(a, "bye", { firm }) || "그동안 감사했습니다. 맡은 사건 기록은 정리해 두었습니다.")}"</div>`;
+  const k = ["mgr", "sec", "inv"].find(r => crewOf(r).length);
+  if (k) return head + staffSayP(pickPerson(k, crewOf(k)[0]), `대표님, 아침에 와 보니 ${a.name} 변호사 책상에 사직서가 놓여 있었습니다. ${fro(a.rival)} 옮긴다고 합니다.`);
+  return head + `<div class="sec staff-say"><div class="sf"><img src="${heroOf().img}" alt=""></div><div><div class="who">${esc(S.name || heroOf().name)}</div>"아침에 출근해 보니 ${a.name} 변호사 책상에 사직서가 놓여 있었다. ${fro(a.rival)} 옮긴다고 한다."</div></div>`;
 }
 // 월급 면담: 단계가 오른 다음 달에 묻는다. 거절하면 서운함(slights)이 쌓여 스카우트에 흔들린다
 function opsRaiseBlock() {
@@ -28709,6 +28745,12 @@ function opsMonthPops() {
     d.querySelector("#nwOk").onclick = () => { S.news = []; save(); d.remove(); opsMonthPops(); };
     return;
   }
+  const by = opsByeBlock();
+  if (by) {
+    const d = opsPop(`<div class="k-pop" style="text-align:left">${by}<button class="btn primary" id="byOk" style="text-align:center">확인</button></div>`);
+    d.querySelector("#byOk").onclick = () => { S.bye = null; save(); d.remove(); opsMonthPops(); };
+    return;
+  }
   const sc = opsScoutBlock();
   if (sc) {
     const d = opsPop(`<div class="k-pop" style="text-align:left">${sc.html}${sc.btns.map((b, i) => `<button class="btn" data-sc="${i}" style="text-align:center">${esc(b[0])}</button>`).join("")}</div>`);
@@ -28735,10 +28777,10 @@ function opsDebtPops(done) {
   // 지급명령 신청과 강제집행 비용. 조현태 사무장이 있으면 절반
   const suitCost = crewOf("mgr").includes("jo") ? 25 : 50;
   // 3년 결산 직전에는 지급명령 결과가 나올 달이 없으므로 신청할 수 없다
-  const last = S.day >= OPS_MONTHS, suitBtn = id => last ? "" : `<button class="mini gold" ${id}>지급명령 신청 ${won(suitCost)}</button>`;
-  const d = opsPop(`<div class="k-pop"><div class="k-ev-face"><div class="portrait">${portrait(c)}</div></div><h3>${esc(x.name)} 씨 · ${won(x.amt)}</h3><div>"${esc(DEBT_EXCUSE[hash(x.id + S.day) % DEBT_EXCUSE.length])}"</div>${hint}
+  const last = S.day >= OPS_MONTHS, suitBtn = id => last ? "" : `<button class="mini" ${id}>지급명령</button>`;
+  const d = opsPop(`<div class="k-pop"><div class="k-ev-face"><div class="portrait">${portrait(c)}</div></div><h3>${esc(x.name)} 씨 · ${won(x.amt)}</h3><div class="sub">${esc(c.category)} 사건 성공보수 ${won(x.amt)}을 아직 주지 않았습니다.</div><div>"${esc(DEBT_EXCUSE[hash(x.id + S.day) % DEBT_EXCUSE.length])}"</div>${hint}
     <div class="k-act"><button class="mini" data-a="dun">독촉</button>${suitBtn('data-a="suit"')}<button class="mini" data-a="drop">포기</button></div>
-    <div class="sub">${last ? "결산 직전이라 지급명령은 신청할 수 없습니다." : "지급명령 신청 비용은 신청과 강제집행 비용을 합친 금액입니다."}</div></div>`);
+    <div class="sub">${last ? "결산 직전이라 지급명령은 신청할 수 없습니다." : `지급명령을 신청하면 신청과 강제집행 비용 ${won(suitCost)}이 듭니다.`}</div></div>`);
   const next = () => { x.popDay = S.day; save(); renderHud(); d.remove(); opsDebtPops(done); };
   const suit = () => { if (S.money < suitCost) return toast("돈이 모자랍니다."); S.money -= suitCost; x.state = "suit"; x.due = S.day + 1; next(); };
   const drop = () => { x.state = "lost"; next(); };
@@ -28884,17 +28926,17 @@ function opsEventPop() {
   });
 }
 function opsAssign() {
-  if (!S.intro) return opsIntro();
+  if (!S.intro) { S.intro = true; save(); }
   const people = ["me"].concat(S.assocs.map(a => a.id));
   const capOf = p => p === "me" ? opsMeCap() : assocCap(myAssoc(p));
   const usedOf = p => S.list.filter(x => x.who === p).length;
   // 얼굴 옆에 성격·분야를 적어 배정하면서 알 수 있게
-  const tagOf = p => { if (p === "me") return "대표"; const a = myAssoc(p); return a ? `${TRAIT[a.trait]}${a.field ? " " + a.field : ""}` : ""; };
-  const capHtml = () => people.map(p => `<span><img src="${opsFace(p)}" alt=""><b>${usedOf(p)}</b>/${capOf(p)} <small class="note">${esc(tagOf(p))}</small></span>`).join("");
+  const tagOf = p => { if (p === "me") return "대표"; const a = myAssoc(p); return a ? a.name : ""; };
+  const capHtml = () => people.map(p => `<span><img src="${opsFace(p)}" alt="">${esc(tagOf(p))} <b>${usedOf(p)}</b>/${capOf(p)}</span>`).join("");
   const card = (x, i) => {
     const c = BY_ID[x.id];
-    const picks = people.map(p => `<i class="${x.who === p ? "on" : ""}" data-as="${i}" data-p="${p}"><img src="${opsFace(p)}" alt=""></i>`).join("")
-      + `<i class="${x.who === "out" ? "on" : ""}" data-as="${i}" data-p="out">✕</i>`;
+    const picks = people.map(p => `<span class="k-pk"><i class="${x.who === p ? "on" : ""}" data-as="${i}" data-p="${p}"><img src="${opsFace(p)}" alt=""></i><em>${esc(tagOf(p))}</em></span>`).join("")
+      + `<span class="k-pk"><i class="${x.who === "out" ? "on" : ""}" data-as="${i}" data-p="out">✕</i><em>안 맡음</em></span>`;
     return `<div class="k-card"><div class="portrait">${portrait(c)}</div><div style="min-width:0"><div class="nm">${esc(c.client.name)}${x.back ? ` <small class="note">다시 옴</small>` : ""}<span class="ct"><b class="k-tier">${"★".repeat(c.tier)}</b> ${kindLabel(c)} · ${esc(c.category)}</span></div><div class="k-open">${esc(c.opening)}</div><div class="k-pick">${picks}</div></div></div>`;
   };
   function autoAssign() {
@@ -28913,9 +28955,14 @@ function opsAssign() {
   }
   // 그달 배정 화면을 처음 열면 자동 배정을 먼저 해 둔다(바꾸고 싶으면 칸을 눌러 고친다)
   if (S.autoDay !== S.day) { S.autoDay = S.day; autoAssign(); save(); }
-  show(`<div class="k-head"><h2>${monthLabel(S.day)} 의뢰인 ${S.list.length}명</h2><div class="k-cap">${capHtml()}</div></div>
+  // 달 시작 인사: 직원이 있으면 직원이, 없으면 대표 혼잣말
+  const ik = ["mgr", "sec", "inv"].find(r => crewOf(r).length), iw = ik ? pickPerson(ik, crewOf(ik)[0]) : null;
+  const hello = iw ? staffSayP(iw, `대표님, 이번 달에는 ${kCount(S.list.length)}의 손님이 찾아왔습니다. 누구에게 사건을 맡기시겠습니까?`)
+    : `<div class="sec staff-say"><div class="sf"><img src="${heroOf().img}" alt=""></div><div><div class="who">${esc(S.name || heroOf().name)}</div>"이번 달에는 ${kCount(S.list.length)}의 손님이 왔다. 사건들을 맡을지 결정해 보자."</div></div>`;
+  show(`${hello}<div class="k-head"><h2>${monthLabel(S.day)} 의뢰인 ${S.list.length}명</h2><div class="k-cap">${capHtml()}</div></div>
     <div class="k-list">${S.list.map(card).join("")}</div>`,
     `<div class="row2"><button class="btn" id="asAuto">자동 배정</button><button class="btn primary" id="asDone">이대로 맡기기</button></div>`);
+  opsMonthPops();
   opsGuide("assign", "사건마다 얼굴 칸을 누르면 그 사람에게 맡기고, ✕를 누르면 돌려보낸다." + (S.assocs.length ? "" : ` 지금은 변호사가 나 혼자라 이번 달에는 ${opsMeCap()}건까지만 맡을 수 있다.` + (S.list.length > opsMeCap() ? " 맡을 사람이 없는 사건은 돌려보낼 수밖에 없다." : "")));
   // 자동 배정: 아직 안 정한 사건만. 분야 맞는 사건은 그 변호사에게, 큰 사건 두 건은 대표, 나머지는 고용 변호사 → 남으면 대표
   on("#asAuto", () => {
@@ -29129,39 +29176,39 @@ const opsBestEv = r => { const c = BY_ID[r.id]; return c.evidence.map((e, n) => 
 // 고용 변호사마다 말투. first: 보고서 첫 줄 [모두 봤을 때, 하나를 안 봤을 때] 또는 분야통은 [자기 분야, 다른 분야]
 //  {seen} 본 증거 번호, {best} 위주로 본 증거, {lvl} 단계, {amt} 올려 달라는 월급, {firm} 옮겨 갈 법인. end: 엔딩 한마디 [잘된 판, 안된 판]
 const ASSOC_VOICE = {
-  seo: { first: ["증거 {seen}번 다 봤습니다.", "증거 {seen}번 봤습니다."], push: "다릅니다.",
+  seo: { first: ["증거 {seen}번 다 봤습니다.", "증거 {seen}번 봤습니다."], push: "다릅니다.", bye: "그동안 감사했습니다. 맡은 사건 기록은 정리해서 책상에 두었습니다.",
     raise: "{lvl}단계가 됐습니다. 월급을 {amt} 올려 주십시오.", scout: "{firm}에서 연락이 왔습니다. 월급을 {amt} 올려 주시면 남겠습니다." },
-  osj: { first: ["증거 {seen}번을 두 번씩 확인했습니다.", "증거 {seen}번을 확인했습니다."], push: "죄송한데, 제 생각은 좀 다릅니다.",
+  osj: { first: ["증거 {seen}번을 두 번씩 확인했습니다.", "증거 {seen}번을 확인했습니다."], push: "죄송한데, 제 생각은 좀 다릅니다.", bye: "대표님, 죄송합니다. 여기서 정말 많이 배웠습니다. 맡은 사건 기록은 다 정리해 두었습니다.",
     raise: "대표님, 저 {lvl}단계가 됐습니다. 혹시 월급을 {amt} 올려 주실 수 있을까요?",
     scout: "대표님, {firm}에서 오라고 연락이 왔습니다. 저는 여기 있고 싶은데, 월급을 {amt} 올려 주실 수 있을까요?",
     end: ["처음엔 증거 하나 보는 데도 한참 걸렸는데, 이제는 혼자서도 봅니다. 감사합니다.", "제가 더 빨리 늘었어야 했는데 죄송합니다. 그래도 여기서 일을 배웠습니다."] },
-  lim: { first: ["증거 {seen}번을 모두 대조했습니다.", "증거 {seen}번을 대조했습니다."], push: "그건 아닙니다.",
+  lim: { first: ["증거 {seen}번을 모두 대조했습니다.", "증거 {seen}번을 대조했습니다."], push: "그건 아닙니다.", bye: "조건이 더 좋은 곳으로 가겠습니다. 맡은 사건 기록은 빠짐없이 정리해 두었습니다.",
     raise: "{lvl}단계가 됐으니 월급도 {amt} 올려 주셨으면 합니다.",
     scout: "{firm}에서 제안이 왔습니다. 월급을 {amt} 올려 주시면 남고, 아니면 옮기겠습니다.",
     end: ["보고서에 빨간 줄 그으신 거, 다 맞는 말씀이었습니다.", "제가 더 깐깐하게 봤어야 했습니다. 그건 제 몫입니다."] },
-  kwon: { first: "증거는 {best} 하나면 충분합니다.", push: "아니요, 제가 맞습니다.",
+  kwon: { first: "증거는 {best} 하나면 충분합니다.", push: "아니요, 제가 맞습니다.", bye: "대표님, 그동안 신세 많이 졌습니다. 사건 기록은 책상 위에 있는 그대로 보시면 됩니다.",
     raise: "대표님, 저 {lvl}단계 됐습니다. 월급 {amt}만 올려 주시죠.",
     scout: "대표님, {firm}에서 저를 데려가겠답니다. 월급 {amt} 올려 주시면 남겠습니다." },
-  go: { first: "시간이 없어서 {best} 위주로 봤습니다.", push: "제가 본 건 다릅니다.",
+  go: { first: "시간이 없어서 {best} 위주로 봤습니다.", push: "제가 본 건 다릅니다.", bye: "대표님, 갑자기 가게 돼서 죄송합니다. 기록 정리는 다 못 했습니다.",
     raise: "대표님, {lvl}단계가 됐습니다. 월급을 {amt} 올려 주시면 더 열심히 하겠습니다.",
     scout: "{firm}에서 연락이 왔습니다. 거기는 월급이 더 많대요. {amt} 올려 주시면 남겠습니다.",
     end: ["마감에 쫓기면서도 여기서 버틴 3년 동안 제일 많이 배웠습니다.", "늘 급하게 올려서 죄송했습니다. 다음엔 천천히 보겠습니다."] },
-  jin: { first: "의뢰인이 상담하다 우셨습니다.", push: "저는 생각이 좀 달라요.",
+  jin: { first: "의뢰인이 상담하다 우셨습니다.", push: "저는 생각이 좀 달라요.", bye: "대표님, 고민 많이 했어요. 그동안 정말 감사했어요. 맡았던 의뢰인분들께는 제가 따로 인사드렸어요.",
     raise: "대표님, 저 {lvl}단계가 됐어요. 월급을 {amt} 올려 주실 수 있을까요?",
     scout: "대표님, {firm}에서 연락이 왔어요. 저도 고민이 돼서요. 월급을 {amt} 올려 주시면 남을게요." },
-  nam: { first: "의뢰인은 나쁜 분이 아닙니다.", push: "제가 보기엔 아닙니다.",
+  nam: { first: "의뢰인은 나쁜 분이 아닙니다.", push: "제가 보기엔 아닙니다.", bye: "그동안 감사했습니다. 맡았던 의뢰인분들께는 제가 직접 연락드려 인사했습니다.",
     raise: "{lvl}단계가 됐습니다. 월급은 {amt}쯤 올려 주시면 좋겠습니다.",
     scout: "{firm}에서 연락이 왔습니다. 월급을 {amt} 올려 주시면 남겠습니다.",
     end: ["의뢰인 얘기를 끝까지 들어도 되는 사무실에서 일했습니다. 감사합니다.", "결과가 아쉽습니다. 그래도 사람 대하는 건 여기서 제대로 배웠습니다."] },
-  baek: { first: ["형사 사건이라 수사 기록부터 봤습니다.", "형사 사건은 아니지만 쟁점은 확인했습니다."], push: "기록을 보면 다릅니다.",
+  baek: { first: ["형사 사건이라 수사 기록부터 봤습니다.", "형사 사건은 아니지만 쟁점은 확인했습니다."], push: "기록을 보면 다릅니다.", bye: "{firm} 형사팀을 맡기로 했습니다. 그동안 형사 사건을 믿고 맡겨 주셔서 감사했습니다.",
     raise: "{lvl}단계가 됐습니다. 월급을 {amt} 올려 주셨으면 합니다.",
     scout: "{firm}에서 형사팀을 맡아 달라고 연락이 왔습니다. 월급을 {amt} 올려 주시면 남겠습니다.",
     end: ["형사 사건을 믿고 맡겨 주셔서 감사합니다. 무죄 받은 사건들은 잊지 못할 겁니다.", "맡겨 주신 형사 사건들, 끝까지 제 일처럼 했습니다."] },
-  yeo: { first: ["노동 사건이라 회사가 어떻게 나올지 압니다.", "노동 사건은 아니지만 쟁점은 확인했습니다."], push: "제 판단은 다릅니다.",
+  yeo: { first: ["노동 사건이라 회사가 어떻게 나올지 압니다.", "노동 사건은 아니지만 쟁점은 확인했습니다."], push: "제 판단은 다릅니다.", bye: "{firm} 노동팀으로 가게 됐습니다. 그동안 감사했습니다.",
     raise: "{lvl}단계가 됐습니다. 월급을 {amt} 올려 주십시오.",
     scout: "{firm}에서 노동팀 자리를 제안받았습니다. 월급을 {amt} 올려 주시면 남겠습니다.",
     end: ["노동 사건을 제대로 해 볼 수 있었습니다. 감사합니다.", "맡겨 주신 노동 사건들, 끝까지 제 일처럼 했습니다."] },
-  cha: { first: ["가사 사건이라 쟁점은 금방 보였습니다.", "가사 사건은 아니지만 쟁점은 확인했습니다."], push: "제 판단이 맞습니다.",
+  cha: { first: ["가사 사건이라 쟁점은 금방 보였습니다.", "가사 사건은 아니지만 쟁점은 확인했습니다."], push: "제 판단이 맞습니다.", bye: "{firm} 가사팀 팀장으로 가게 됐습니다. 그동안 감사했습니다.",
     raise: "{lvl}단계가 됐습니다. 월급을 {amt} 올려 주십시오.",
     scout: "{firm}에서 가사팀 팀장 자리를 제안받았습니다. 월급을 {amt} 올려 주시면 남겠습니다.",
     end: ["가사 사건은 앞으로도 저한테 보내 주세요. 감사했습니다.", "맡겨 주신 가사 사건들, 끝까지 제 일처럼 했습니다."] }
@@ -29310,20 +29357,20 @@ function opsReport(i) {
     : `${r.over ? "재판이 쉽지 않을 수 있다고 설명하고 수임료를 낮춰 " : ""}착수금 ${won(r.fee)}, 성공보수 ${won(r.bonus)}으로 계약하겠습니다.`;
   const docInner = `
       <div class="k-dh"><img src="${a.face}" alt=""><div><div class="eyebrow">사건 검토 보고서 · 담당 ${esc(a.name)} 변호사</div><h2>${esc(c.client.name)} · ${esc(c.category)}</h2></div></div>
-      <div class="k-sec">사건 개요</div><p class="k-p">${esc(opsSummary(c))}</p>
-      <div class="k-sec">상담 기록</div><div class="k-qa">${qa || `<div>기록이 없습니다.</div>`}</div>
+      <div class="k-concl"><div class="k-sec">검토 결론 <span class="k-vtag ${r.verdict}">${VD_TXT[r.verdict]}</span></div><p class="k-p">${esc(lines.join(" "))} ${esc(opinion)}</p></div>
+      <div class="k-sec">사건 개요</div><p class="k-p">${esc(opsSummary(c))}</p><p class="k-p k-said0">${esc(c.client.name)} 씨가 처음 한 말: "${esc(c.opening)}"</p>
       <div class="k-sec">진술 요지</div><ol class="k-ol">${said.map(s => `<li>${esc(s)}</li>`).join("")}</ol>
       <div class="k-sec">증거 목록</div><div class="k-evl">${c.evidence.map((e, n) => `<button class="k-evr" data-evd="${e.id}"><b>${n + 1}. ${esc(e.name)}</b>${e.id === r.skipEv ? ` <i class="k-skip">(검토 안 함)</i>` : e.id === gid ? ` <i class="k-base">(근거)</i>` : ""} <span>${esc(e.desc)}</span></button><div class="k-evd" id="evd-${e.id}" hidden>${esc(e.detail || "")}</div>`).join("")}</div>
-      <div class="k-sec">검토 의견 <span class="k-vtag ${r.verdict}">${VD_TXT[r.verdict]}</span></div><p class="k-p">${esc(lines.join(" "))} ${esc(opinion)}</p>`;
-  const invBtn = crewOf("inv").length ? `<button class="btn" id="rpInv">조사 의뢰<small>${r.inv ? "끝" : `${Math.max(0, opsInvLeft())}건 남음`}</small></button>` : "";
+      <div class="k-sec">상담 기록</div><div class="k-qa">${qa || `<div>기록이 없습니다.</div>`}</div>`;
+  const invBtn = crewOf("inv").length ? `<button class="btn" id="rpInv">조사<small>${r.inv ? "끝" : `${Math.max(0, opsInvLeft())}건 남음`}</small></button>` : "";
   const acts = done ? `<button class="btn primary" id="${isPC() ? "rpHub" : "rpBack"}">${isPC() ? "본부로" : "목록으로"}</button>`
-    : `<div class="k-acts"><button class="btn" id="rpOk">승인<small class="pco">보고서대로 진행</small></button><button class="btn" id="rpBad" ${r.argued ? "disabled" : ""}>잘못됐다<small class="pco">${r.argued ? "이미 의견을 들음" : "틀린 판단 바로잡기"}</small></button><button class="btn" id="rpJoint">동석 상담<small>${S.joint}회 남음</small></button><button class="btn" id="rpOut">돌려보내기<small class="pco">사건을 맡지 않음</small></button>${invBtn}</div>`;
+    : `<div class="k-acts"><button class="btn" id="rpOk">승인<small class="pco">보고서대로 진행</small></button><button class="btn" id="rpFix">수정<small class="pco">판단 바로잡기 · 돌려보내기</small></button><button class="btn" id="rpJoint">동석 상담<small>${S.joint}회 남음</small></button>${invBtn}</div>`;
   if (isPC()) {
     // 컴퓨터: 보고서는 왼쪽 장면에 큰 서류로, 담당 변호사는 그 옆에 크게. 오른쪽 패널은 이번 달 보고서 목록과 의뢰인
     const rows = S.reports.map((x, j) => ({ x, j })).filter(({ x }) => opsRepValid(x)).map(({ x, j }) => { const cc = BY_ID[x.id]; return `<button class="pc-rrow ${j === i ? "on" : ""} ${x.status !== "pending" ? "done" : ""}" data-rp="${j}"><img src="${opsFace(x.who)}" alt=""><span class="m">${esc(cc.client.name)} · ${esc(cc.category)}<small>${esc(opsName(x.who))} 변호사</small></span><span class="st">${j === i && !done ? "검토 중" : REP_ST[x.status] || ""}</span></button>`; }).join("");
     show(`<button class="pc-back" id="rpHub">← 본부로</button><div class="eyebrow">이번 달 보고서 ${S.reports.filter(x => opsRepValid(x)).length}건</div><div class="pc-rlist">${rows}</div>
-      <div class="eyebrow">의뢰인</div><div class="pc-client"><div class="portrait">${portrait(c)}</div><div><b>${esc(c.client.name)}</b> <span>${c.client.age ? c.client.age + "세 · " : ""}${esc(c.client.job || "")}</span><p>"${esc(c.opening)}"</p></div></div>${hint}`, acts);
-    pcStage(`<div class="pcs-doc k-doc">${docInner}</div><div class="pcs-bubble">"${esc((lines[1] || lines[0]).replace(/^그 증거 /, (b => `${b.n}번 「${b.e.name}」 `)(opsBestEv(r))))}"</div>
+      ${hint ? `<div class="eyebrow">직원 의견</div>${hint}` : ""}`, acts);
+    pcStage(`<div class="pcs-doc k-doc">${docInner}</div>
       <div class="pcs-assoc"><img src="${a.face}" alt=""><div class="plate"><b>${esc(a.name)}</b><span>${TRAIT[a.trait]}${a.field ? " " + a.field : ""} · ${a.lvl}단계 · 이번 달 ${S.list.filter(x => x.who === a.id).length}건 · ${opsAccTxt(myAssoc(r.who))}</span></div></div>`, "ops-rep");
     on("[data-rp]", e => opsReport(+e.currentTarget.dataset.rp));
     on("#rpHub", opsHub);
@@ -29335,8 +29382,20 @@ function opsReport(i) {
   on("#rpBack", opsReports);
   // 승인: 돌려보내자는 보고서면 돌려보냄
   on("#rpOk", () => { if (opsRecBack(r)) { r.status = "out"; S.mon.out++; } else r.status = "ok"; save(); opsReports(); });
-  on("#rpOut", () => { r.status = "out"; S.mon.out++; save(); opsReports(); });
-  on("#rpBad", () => { if (!r.argued) opsWhy(i); });
+  // 수정: 변호사 판단을 바로잡을지, 의뢰인을 돌려보낼지 고른다
+  on("#rpFix", () => {
+    const d = document.createElement("div"); d.className = "k-dim";
+    d.innerHTML = `<div class="k-pop k-why"><div class="k-ask"><div><b>무엇을 고치시겠습니까?</b></div></div>
+      <button class="btn" data-f="bad" ${r.argued ? "disabled" : ""}>변호사 판단을 바로잡는다</button>${r.argued ? `<div class="note" style="text-align:center">이 보고서는 이미 변호사 의견을 들었습니다.</div>` : ""}
+      <button class="btn" data-f="out">사건을 맡지 않는다</button>
+      <button class="btn ghost" data-f="x">취소</button></div>`;
+    document.body.appendChild(d);
+    d.querySelectorAll("[data-f]").forEach(b => b.onclick = () => {
+      const f = b.dataset.f; d.remove();
+      if (f === "bad" && !r.argued) opsWhy(i);
+      if (f === "out") { r.status = "out"; S.mon.out++; save(); opsReports(); }
+    });
+  });
   on("#rpJoint", () => {
     if (S.joint <= 0) return toast("이번 달 동석 상담을 다 썼습니다.");
     if (r.extra != null || !opsJointLeft(r).length) return toast("이 의뢰인은 이미 만났습니다.");
@@ -29645,29 +29704,28 @@ function opsVerdict(score) {
   on("#vNext", () => { C = null; save(); if (nx) nx(); else opsResults(); });
 }
 // 보고서가 틀린 이유(결과 화면)
-const ERR_TXT = { kind: "숨김·거짓 여부를 잘못 봄", target: "숨긴 사실이나 거짓말을 잘못 짚음", skip: "검토하지 않은 증거에 단서가 있었음", over: "진실한 의뢰인을 의심함" };
+const ERR_TXT = { kind: "숨김·거짓 여부를 잘못 봤습니다.", target: "숨긴 사실이나 거짓말을 잘못 짚었습니다.", skip: "검토하지 않은 증거에 단서가 있었습니다.", over: "진실한 의뢰인을 의심했습니다." };
 function opsResults() {
   S.phase = "results"; save();
   const fb = x => {
     if (!x.rpt) return "";
-    const fix = x.rpt.fix ? ` · 대표 수정 ${x.rpt.fix === "ok" ? "○" : "✕"}` : "";
-    const why = !x.rpt.orig && x.rpt.fix !== "ok" && ERR_TXT[x.rpt.err] ? ` · ${ERR_TXT[x.rpt.err]}` : "";
-    return `<div class="vm k-fb">보고서 판단 ${x.rpt.orig ? "○" : "✕"}${fix}${why}</div>`;
+    const fix = x.rpt.fix ? (x.rpt.fix === "ok" ? " 대표님이 맞게 고쳤습니다." : " 대표님이 고친 판단도 틀렸습니다.") : "";
+    const why = !x.rpt.orig && x.rpt.fix !== "ok" && ERR_TXT[x.rpt.err] ? ` ${ERR_TXT[x.rpt.err]}` : "";
+    return `<div class="vm k-fb">보고서 판단이 ${x.rpt.orig ? "맞았습니다." : "틀렸습니다."}${fix}${why}</div>`;
   };
   const rows = S.mon.results.map(x => {
     const c = BY_ID[x.id]; if (!c) return "";
     const lab = resultLabel(c, x.res);
-    return `<div class="mk-res"><img src="${opsFace(x.who)}" alt=""><div><div class="vn">${esc(c.client.name)} · ${esc(c.category)}</div>
-      <div class="vm">${esc(opsName(x.who))} · 착수금 ${won(x.fee)}${x.bonus ? ` · 성공보수 ${won(x.bonus)}(다음 달 입금)` : ""}${x.refund ? ` · 항의로 착수금 ${won(x.refund)} 돌려줌` : ""}${x.slip ? " · 업무 실수" : ""}${x.vs ? ` · <b class="k-vs">vs ${esc(shortFirm(x.vs))}</b>` : ""}</div>${fb(x)}${x.why ? `<div class="vm k-fb">${esc(x.why)}</div>` : ""}</div>
-      <div class="tag ${x.res === "win" ? "w" : x.res === "lose" ? "l" : "p"}">${lab}</div></div>`;
+    return `<div class="mk-res"><img src="${opsFace(x.who)}" alt=""><div><div class="vn"><b class="tag ${x.res === "win" ? "w" : x.res === "lose" ? "l" : "p"}">${lab}</b> ${esc(c.client.name)} · ${esc(c.category)}</div>
+      <div class="vm">${esc(opsName(x.who))} · 착수금 ${won(x.fee)}${x.bonus ? ` · 성공보수 ${won(x.bonus)}은 다음 달 입금` : ""}${x.refund ? ` · 항의로 착수금 ${won(x.refund)} 돌려줌` : ""}${x.slip ? " · 업무 실수" : ""}${x.vs ? ` · <b class="k-vs">vs ${esc(shortFirm(x.vs))}</b>` : ""}</div>${fb(x)}${x.why ? `<div class="vm k-fb">${esc(x.why)}</div>` : ""}</div></div>`;
   }).join("");
   // 돌려보낸 보고서 사건: 돌려보낸 판단이 맞았는지
   const outs = (S.reports || []).filter(r => r.status === "out" && BY_ID[r.id]);
-  const outRows = outs.map(r => { const c = BY_ID[r.id]; return `<div class="mk-res"><img src="${opsFace(r.who)}" alt=""><div><div class="vn">${esc(c.client.name)} · ${esc(c.category)}</div>
-      <div class="vm k-fb">${c.doomed ? "○ 이길 수 없는 사건이었습니다" : "✕ 이길 수 있는 사건이었습니다"}</div></div><div class="tag p">돌려보냄</div></div>`; }).join("");
+  const outRows = outs.map(r => { const c = BY_ID[r.id]; return `<div class="mk-res"><img src="${opsFace(r.who)}" alt=""><div><div class="vn"><b class="tag p">맡지 않음</b> ${esc(c.client.name)} · ${esc(c.category)}</div>
+      <div class="vm k-fb">${c.doomed ? "이길 수 없는 사건이었습니다. 맡지 않은 판단이 맞았습니다." : "이길 수 있는 사건이었습니다."}</div></div></div>`; }).join("");
   const fin = (S.reports || []).filter(r => r.cnt && r.finOk != null), unseen = (S.reports || []).filter(r => r.cnt && r.seen === false).length;
   show(`<h2>${monthLabel(S.day)} 사건 결과</h2><div class="visitors">${rows || `<div class="note">이번 달 재판이 없었습니다.</div>`}</div>
-    ${outRows ? `<div class="k-sec" style="margin-top:10px">돌려보낸 사건</div><div class="visitors">${outRows}</div>` : ""}
+    ${outRows ? `<div class="k-sec" style="margin-top:10px">맡지 않은 사건</div><div class="visitors">${outRows}</div>` : ""}
     ${fin.length || unseen ? `<div class="pn">${fin.length ? `이번 달 검토한 보고서 ${fin.length}건 가운데 ${fin.filter(r => r.finOk).length}건을 맞게 처리했습니다.` : ""}${unseen ? ` 열어 보지 않고 넘긴 보고서 ${unseen}건은 검토 정확도에 넣지 않았습니다.` : ""}${S.rv && S.rv.n ? ` 지금까지 검토 정확도 ${Math.round(S.rv.ok / S.rv.n * 100)}%` : ""}</div>` : ""}
     ${(S.mon.up || []).length ? `<div class="pn">${S.mon.up.map(esc).join(", ")} 변호사가 한 단계 성장했습니다.</div>` : ""}`,
     `<button class="btn primary" id="toSettle">이번 달 정산</button>`);
@@ -29716,14 +29774,14 @@ function opsSettle() {
   const adLine = S.mon.adN ? `이번 달 손님 ${(S.share && S.share.me) || 0}명 가운데 광고 보고 온 손님은 약 ${S.mon.adN}명입니다${adKs.length ? ` (${adKs.map(k => `${(ADS.find(a => a.k === k) || { name: k }).name.split("·")[0]} ${adBy[k]}`).join(" · ")})` : ""}.`
     : ADS.some(a => S.ads[a.k]) ? "이번 달 손님 가운데 광고로 늘어난 손님은 없었습니다(광고 효과는 켠 다음 달부터)." : "";
   show(`<div class="eyebrow">${monthLabel(S.day)}</div><h2>이번 달 정산</h2>
-    <div class="pn k-big"><div class="l">매출</div><div class="v">${won(rev)}</div><div class="d ${net < 0 ? "neg" : ""}">남은 돈 ${net >= 0 ? "+" : "−"}${won(Math.abs(net))}</div></div>
-    <div class="ledger"><span>착수금${S.mon.refund ? ` <span class="note">(항의로 돌려준 ${won(S.mon.refund)} 뺌)</span>` : ""}</span><span class="r">${won(S.mon.fee)}</span><span>성공보수${S.mon.late ? ` <span class="note">(독촉으로 받은 ${won(S.mon.late)} 포함)</span>` : ""}</span><span class="r">${won(S.mon.bonus)}</span>
-      <span>고정비 <span class="note">(월급·임대료·광고)</span></span><span class="r neg">−${won(S.mon.cost)}</span><span>세금</span><span class="r ${S.mon.tax ? "neg" : ""}">${S.mon.tax ? "−" : ""}${won(S.mon.tax)}</span></div>
+    <div class="pn k-big"><div class="l">매출</div><div class="v">${won(rev)}</div><div class="d ${net < 0 ? "neg" : ""}">이번 달 손익 ${net >= 0 ? "+" : "−"}${won(Math.abs(net))}</div></div>
+    <div class="ledger"><span>착수금${S.mon.refund ? ` <span class="note">항의로 돌려준 ${won(S.mon.refund)}을 뺀 금액</span>` : ""}</span><span class="r">${won(S.mon.fee)}</span><span>성공보수${S.mon.late ? ` <span class="note">독촉으로 받은 ${won(S.mon.late)}을 더한 금액</span>` : ""}</span><span class="r">${won(S.mon.bonus)}</span>
+      <span>고정비 <span class="note">월급·임대료·광고</span></span><span class="r neg">−${won(S.mon.cost)}</span><span>세금</span><span class="r ${S.mon.tax ? "neg" : ""}">${S.mon.tax ? "−" : ""}${won(S.mon.tax)}</span></div>
+    ${due.length ? `<div class="pn"><div class="k-due"><span>아직 받지 못한 성공보수</span><span>${won(due.reduce((a, x) => a + x.amt, 0))}</span></div><div class="note">다음 달부터 들어옵니다. 주지 않는 의뢰인은 달 시작에 독촉할 수 있습니다.</div></div>` : ""}
     ${costRows ? `<details class="pn k-cost"><summary>고정비 내역 보기</summary><div class="ledger">${costRows}</div><div class="note">달 중간에 끈 광고나 내보낸 사람도 그달 비용은 냅니다.</div></details>` : ""}
     ${adLine ? `<div class="pn">${esc(adLine)}</div>` : ""}
-    ${S.low ? `<div class="pn warn">정산 뒤 현금이 다음 달 고정비 ${won(opsCost())}보다 적습니다. 이런 달이 석 달 이어지면 폐업합니다 (${S.low}/3)</div>` : ""}
-    ${opsStandings()}
-    ${due.length ? `<div class="pn"><div class="k-due"><span>받을 돈</span><span>${won(due.reduce((a, x) => a + x.amt, 0))}</span></div></div>` : ""}`,
+    ${S.low ? `<div class="pn warn">정산 뒤 현금이 다음 달 고정비 ${won(opsCost())}보다 적습니다. 이런 달이 석 달 이어지면 폐업합니다. 지금 ${S.low}달째입니다.</div>` : ""}
+    ${opsStandings()}`,
     `<button class="btn primary" id="nextM">${S.day >= OPS_MONTHS ? "결산" : "다음 달"}</button>`);
   on("#nextM", () => {
     if (S.day % 12 === 0 && S.yrShown !== S.day) return opsYearAward(opsAfterYear);
@@ -29917,10 +29975,10 @@ function opsOffice() {
     <div class="mk-tiles">
       ${tile("oAds", "광고", ads || "광고 안 함", `월 ${won(ADS.filter(a => S.ads[a.k]).reduce((x, a) => x + a.cost, 0))}`)}
       ${tile("oPrice", "수임료 기준", priceTile(), "보고서 사건에 적용")}
-      ${tile("oAssoc", "고용 변호사", `${S.assocs.length} / ${ASSOC_CAP[S.office || 0]}명`)}
-      ${tile("oCrew", "직원", `${crewCount()} / ${CREW_CAP[S.office || 0]}명`)}
-      ${tile("oInt", "인테리어", S.interior >= 2 ? "2단계(최고)" : `${S.interior || 0}단계`, S.interior < 2 ? `다음 ${won(intCost)}` : "")}
-      ${tile("oMove", "사무실 이전", nx ? esc(nx.name.split(" ")[0]) : "최고", nx && mv ? `명성 ${nx.need} · ${won(mv.cost)}` : "")}
+      ${tile("oAssoc", "고용 변호사", `${S.assocs.length} / ${ASSOC_CAP[S.office || 0]}명`, `월급 합계 ${won(S.assocs.reduce((x, a) => x + a.pay, 0))}`)}
+      ${tile("oCrew", "직원", `${crewCount()} / ${CREW_CAP[S.office || 0]}명`, `월급 합계 ${won(["mgr", "sec", "inv"].reduce((x, k) => x + crewOf(k).reduce((y, id) => y + ((pickPerson(k, id) || {}).pay || 0), 0), 0))}`)}
+      ${tile("oInt", "인테리어", S.interior >= 2 ? "2단계(최고)" : `${S.interior || 0}단계`, S.interior < 2 ? `다음 ${won(intCost)}` : "더 올릴 수 없음")}
+      ${tile("oMove", "사무실 이전", nx ? esc(nx.name.split(" ")[0]) : "최고", nx && mv ? (cn => cn.every(x => x.ok) ? "지금 이전 가능" : `조건 ${cn.filter(x => x.ok).length} / ${cn.length}`)(opsMoveConds((S.office || 0) + 1)) : "가장 큰 사무실")}
     </div>`, `<button class="btn primary" id="oBack">돌아가기</button>`);
   on("#oBack", () => { const b = officeBack || opsHub; officeBack = null; b(); });
   on("#oAds", opsAds);
@@ -29934,23 +29992,36 @@ function opsOffice() {
   });
   on("#oMove", () => { if (nx && mv) opsMovePop(); });
 }
-// 사무실 이전: 정보와 조건을 보여 주고 확인을 받는다
+// 사무실 이전 조건: [{ t, ok, now }]. 고용 변호사 조건이 0명이면 늘 채워지므로 넣지 않는다
+function opsMoveConds(i) {
+  const o = OFFICES[i], mv = OPS_MOVE[i]; if (!o || !mv) return [];
+  const lawN = (S.assocs || []).length;
+  return [
+    { t: `명성 ${o.need} 이상`, ok: S.rep >= o.need, now: `지금 ${S.rep}` },
+    { t: `${Math.ceil(mv.day / 12)}년 차부터`, ok: S.day >= mv.day, now: `지금 ${opsYear()}년 차` },
+    ...(mv.law ? [{ t: `고용 변호사 ${mv.law}명 이상`, ok: lawN >= mv.law, now: `지금 ${lawN}명` }] : []),
+    { t: `이전 비용 ${won(mv.cost)}`, ok: S.money >= mv.cost, now: `가진 돈 ${won(S.money)}` }
+  ];
+}
+// 사무실 이전: 조건(✓/✗), 지금과 이전 후 비교, 알아 둘 것을 보여 주고 확인을 받는다
 function opsMovePop() {
   const i = (S.office || 0) + 1, o = OFFICES[i], mv = OPS_MOVE[i], cur = office(); if (!o || !mv) return;
-  const lawN = (S.assocs || []).length, need = [];
-  if (S.rep < o.need) need.push(`명성 ${o.need} 필요 (지금 ${S.rep})`);
-  if (S.day < mv.day) need.push(`${Math.ceil(mv.day / 12)}년 차부터 이전할 수 있음`);
-  if (lawN < mv.law) need.push(`고용 변호사 ${mv.law}명 이상 필요 (지금 ${lawN}명)`);
-  if (S.money < mv.cost) need.push(`이전 비용 ${won(mv.cost)} 필요`);
+  const conds = opsMoveConds(i), need = conds.filter(x => !x.ok), j = i - 1;
+  const ro = n => n + (hasJong(n) && !rieul(n) ? "으로" : "로");
+  const pct = u => u ? `+${Math.round(u * 100)}%` : "기본";
+  const rows = [["월세", won(cur.rent), won(o.rent)], ["생활비", won(cur.live), won(o.live)], ["고용 변호사 정원", ASSOC_CAP[j] + "명", ASSOC_CAP[i] + "명"], ["직원 정원", CREW_CAP[j] + "명", CREW_CAP[i] + "명"],
+    ["대표 직접 상담", `월 ${[5, 4, 3, 2][j]}건`, `월 ${[5, 4, 3, 2][i]}건`], ["사건 규모", tierTxt(cur.tiers), tierTxt(o.tiers)], ["명성 상한", cur.repCap, o.repCap], ["수임료", pct(cur.up), pct(o.up)]];
+  const notes = [OPS_OFFICE_FX[i] ? `이전하면 ${OPS_OFFICE_FX[i].replace(/줄어듦$/, "줄어듭니다.").replace(/찾아옴$/, "찾아옵니다.")}` : "",
+    S.interior ? `인테리어가 0단계가 됩니다(지금 ${S.interior}단계).` : "인테리어는 0단계부터 다시 합니다.",
+    "3년 결산 때 이전 비용의 절반을 시설 가치로 순자산에 넣습니다."].filter(Boolean);
   const ov = document.createElement("div"); ov.className = "staff-pop";
-  ov.innerHTML = `<div class="sp-card"><div class="sp-name">${esc(o.name)} <small>다음 단계</small></div>
-    <div class="sp-row">이전 비용 ${won(mv.cost)} <span class="note">(3년 결산 때 이 돈의 절반을 시설 가치로 순자산에 넣음)</span></div>
-    <div class="sp-row">월세 ${won(cur.rent)} → ${won(o.rent)} · 생활비 ${won(cur.live)} → ${won(o.live)}</div>
-    <div class="sp-row">고용 변호사 정원 ${ASSOC_CAP[i]}명 · 직원 정원 ${CREW_CAP[i]}명 · 대표 직접 상담 한 달 ${[5, 4, 3, 2][i]}건</div>
-    <div class="sp-row">사건 규모 ${tierTxt(o.tiers)} · 명성 상한 ${o.repCap}${o.up ? ` · 수임료 +${Math.round(o.up * 100)}%(보고서 사건 포함)` : ""}</div>
-    ${OPS_OFFICE_FX[i] ? `<div class="sp-row">${OPS_OFFICE_FX[i]}</div>` : ""}
-    ${S.interior ? `<div class="sp-row need">이전하면 인테리어는 0단계가 됩니다 (지금 ${S.interior}단계)</div>` : `<div class="sp-row">이전하면 인테리어는 0단계부터 다시 합니다</div>`}
-    ${need.map(t => `<div class="sp-row need">${esc(t)}</div>`).join("")}
+  ov.innerHTML = `<div class="sp-card mv-card"><div class="sp-name">${esc(ro(o.name))} 이전</div>
+    <div class="mv-h">이전 조건<small>${conds.length - need.length} / ${conds.length}</small></div>
+    <div class="mv-g">${conds.map(x => `<span class="${x.ok ? "mv-ok" : "mv-no"}">${x.ok ? "✓" : "✗"}</span><span>${esc(x.t)}</span><span class="${x.ok ? "mv-m" : "mv-no"}">${esc(x.now)}</span>`).join("")}</div>
+    <div class="mv-h">바뀌는 것</div>
+    <div class="mv-t"><span></span><span class="r mv-m">지금</span><span class="r mv-m">이전 후</span>${rows.map(r => `<span>${r[0]}</span><span class="r">${r[1]}</span><span class="r">${r[2]}</span>`).join("")}</div>
+    <div class="mv-h">알아 둘 것</div>
+    <div class="mv-n">${notes.map(esc).join("<br>")}</div>
     <div class="row2">${need.length ? "" : `<button class="btn primary" id="mvOk">${won(mv.cost)} 내고 이전</button>`}<button class="btn ghost" id="mvNo">닫기</button></div></div>`;
   document.body.appendChild(ov);
   const close = () => ov.remove();
@@ -30012,7 +30083,7 @@ function opsAssocScr(pickMode) {
   on("[data-hire]", e => {
     if (S.assocs.length >= cap) return toast("고용 변호사 자리가 없습니다.");
     const a = ASSOC_POOL.find(x => x.id === e.currentTarget.dataset.hire); if (!a || myAssoc(a.id)) return;
-    S.assocs.push({ ...a, wins: 0, prog: 0 }); opsCostTouch(); save(); opsAssocScr();
+    S.assocs.push({ ...a, wins: 0, prog: 0, since: S.day }); opsCostTouch(); save(); opsAssocScr();
   });
   on("[data-fire]", e => {
     const id = e.currentTarget.dataset.fire;
@@ -30140,7 +30211,7 @@ function renderHud() {
 }
 function renderTabs() {
   const hasEv = !!app.querySelector(".ev-drawer"), hasTalk = !!app.querySelector(".log-drawer");
-  const items = [["ev", "증거", hasEv], ["log", "대화 기록", hasTalk], ["arc", "갤러리", !C], ["ofc", "사무실", !C && !!S], ["hint", "힌트 " + hintLeft(), true]].concat(isPC() ? [["save", "저장", !!S], ["load", "불러오기", true], ["set", "설정", true]] : []);
+  const items = (S && isOps() && !C && !hasEv && !hasTalk ? [] : [["ev", "증거", hasEv], ["log", "대화 기록", hasTalk]]).concat([["arc", "갤러리", !C], ["ofc", "사무실", !C && !!S], ["hint", "힌트 " + hintLeft(), true]]).concat(isPC() ? [["save", "저장", !!S], ["load", "불러오기", true], ["set", "설정", true]] : []);
   tabsEl.innerHTML = items.map(([k, l, ok]) => `<button title="${l}" class="tab ${ok ? "" : "off"} ${(k === "ev" && showEv) || (k === "log" && showLog) ? "on" : ""}" data-tab="${k}" ${ok ? "" : "disabled"}>${TAB_ICON[k]}<span>${l}</span></button>`).join("");
   tabsEl.querySelectorAll("[data-tab]").forEach(b => b.addEventListener("click", () => {
     const k = b.dataset.tab;
